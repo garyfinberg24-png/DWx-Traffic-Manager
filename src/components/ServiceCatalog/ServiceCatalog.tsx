@@ -4,10 +4,12 @@
  */
 
 import React, { useState, useEffect, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Text,
   Spinner,
   SearchBox,
+  Button,
   makeStyles,
   shorthands,
   MessageBar,
@@ -18,6 +20,7 @@ import {
   SearchRegular,
   FilterRegular,
   GridRegular,
+  ArrowLeft24Regular,
 } from '@fluentui/react-icons';
 import { DWService, ServiceCategory } from '../../types/ServiceRequest';
 import { serviceCatalogService } from '../../services/ServiceCatalogService';
@@ -35,6 +38,11 @@ const useStyles = makeStyles({
   },
   header: {
     display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+  },
+  headerContent: {
+    display: 'flex',
     flexDirection: 'column',
     gap: '8px',
   },
@@ -46,6 +54,9 @@ const useStyles = makeStyles({
   subtitle: {
     fontSize: '14px',
     color: '#616161',
+  },
+  backButton: {
+    minWidth: 'auto',
   },
   toolbar: {
     display: 'flex',
@@ -152,6 +163,7 @@ interface ServiceCatalogProps {
 
 export const ServiceCatalog: React.FC<ServiceCatalogProps> = ({ onRequestService }) => {
   const styles = useStyles();
+  const navigate = useNavigate();
 
   const [services, setServices] = useState<DWService[]>([]);
   const [loading, setLoading] = useState(true);
@@ -217,6 +229,9 @@ export const ServiceCatalog: React.FC<ServiceCatalogProps> = ({ onRequestService
     setIsDetailsOpen(false);
     if (onRequestService) {
       onRequestService(service);
+    } else {
+      // Navigate to the service request form with the selected service
+      navigate('/request', { state: { preSelectedService: service } });
     }
   };
 
@@ -239,10 +254,20 @@ export const ServiceCatalog: React.FC<ServiceCatalogProps> = ({ onRequestService
     <div className={styles.container}>
       {/* Header */}
       <div className={styles.header}>
-        <Text className={styles.title}>Service Catalog</Text>
-        <Text className={styles.subtitle}>
-          Explore Digital Workplace's range of Microsoft 365 services and request pre-sales consultations
-        </Text>
+        <div className={styles.headerContent}>
+          <Text className={styles.title}>Service Catalog</Text>
+          <Text className={styles.subtitle}>
+            Explore Digital Workplace's range of Microsoft 365 services and request pre-sales consultations
+          </Text>
+        </div>
+        <Button
+          appearance="secondary"
+          icon={<ArrowLeft24Regular />}
+          onClick={() => navigate('/')}
+          className={styles.backButton}
+        >
+          Back to Home
+        </Button>
       </div>
 
       {/* Error Message */}

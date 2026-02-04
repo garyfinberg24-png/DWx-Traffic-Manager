@@ -1,6 +1,7 @@
 /**
  * DWx Traffic Manager - Service Details Modal
  * Full service information with prerequisites and action buttons
+ * Updated design with colored header
  */
 
 import React from 'react';
@@ -8,14 +9,11 @@ import {
   Dialog,
   DialogSurface,
   DialogBody,
-  DialogTitle,
-  DialogContent,
   Text,
   Button,
-  Divider,
   makeStyles,
 } from '@fluentui/react-components';
-import { Dismiss16Regular } from '@fluentui/react-icons';
+import { Dismiss24Regular } from '@fluentui/react-icons';
 import {
   FlashRegular,
   CodeRegular,
@@ -24,84 +22,107 @@ import {
   BotRegular,
   PeopleTeamRegular,
   ClockRegular,
-  MoneyRegular,
   CheckmarkCircleRegular,
   PersonRegular,
   InfoRegular,
 } from '@fluentui/react-icons';
-import { DWService, ServiceCategory, ServiceComplexity } from '../../types/ServiceRequest';
+import { DWService, ServiceComplexity } from '../../types/ServiceRequest';
 
 const useStyles = makeStyles({
   dialogSurface: {
-    maxWidth: '600px',
+    maxWidth: '560px',
     width: '90vw',
     padding: '0',
-    borderRadius: '12px',
-    boxShadow: '0 8px 32px rgba(0,0,0,0.2)',
+    borderRadius: '8px',
+    boxShadow: '0 8px 32px rgba(0,0,0,0.25)',
+    overflow: 'hidden',
   },
   header: {
-    padding: '20px 24px',
+    padding: '16px 20px',
     display: 'flex',
-    alignItems: 'flex-start',
+    alignItems: 'center',
     gap: '16px',
-    backgroundColor: '#fafafa',
-    borderBottom: '1px solid #e1e1e1',
+    backgroundColor: '#1a5a8a',
+    color: 'white',
   },
   iconContainer: {
-    width: '56px',
-    height: '56px',
-    borderRadius: '12px',
+    width: '48px',
+    height: '48px',
+    borderRadius: '8px',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
     flexShrink: 0,
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
   },
   headerContent: {
     flex: 1,
     minWidth: 0,
   },
   title: {
-    fontSize: '20px',
+    fontSize: '18px',
     fontWeight: '600',
-    color: '#242424',
-    marginBottom: '4px',
+    color: 'white',
+    marginBottom: '2px',
   },
-  category: {
-    fontSize: '14px',
-    color: '#616161',
+  subtitle: {
+    fontSize: '13px',
+    color: 'rgba(255, 255, 255, 0.8)',
   },
-  closeButton: {
-    position: 'absolute' as const,
-    top: '16px',
-    right: '16px',
-    minWidth: '28px',
-    padding: '4px',
-    backgroundColor: 'transparent',
-    border: 'none',
-    cursor: 'pointer',
-    borderRadius: '4px',
-    ':hover': {
-      backgroundColor: '#e1e1e1',
-    },
-  },
-  content: {
-    padding: '24px',
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '20px',
-  },
-  section: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '8px',
-  },
-  sectionTitle: {
-    fontSize: '14px',
-    fontWeight: '600',
-    color: '#242424',
+  headerActions: {
     display: 'flex',
     alignItems: 'center',
     gap: '8px',
+    flexShrink: 0,
+  },
+  closeButton: {
+    minWidth: '36px',
+    height: '36px',
+    padding: '0',
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    border: '1px solid rgba(255, 255, 255, 0.2)',
+    borderRadius: '6px',
+    color: 'white',
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    ':hover': {
+      backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    },
+  },
+  requestButton: {
+    backgroundColor: 'white',
+    color: '#1a5a8a',
+    fontWeight: '600',
+    padding: '8px 16px',
+    borderRadius: '6px',
+    ':hover': {
+      backgroundColor: '#f0f0f0',
+    },
+  },
+  content: {
+    padding: '0',
+    maxHeight: '60vh',
+    overflowY: 'auto',
+  },
+  section: {
+    padding: '20px 24px',
+    borderBottom: '1px solid #e8e8e8',
+  },
+  sectionLast: {
+    padding: '20px 24px',
+    borderBottom: 'none',
+  },
+  sectionHeader: {
+    fontSize: '11px',
+    fontWeight: '600',
+    color: '#1a5a8a',
+    textTransform: 'uppercase',
+    letterSpacing: '0.5px',
+    marginBottom: '12px',
+    borderLeft: '3px solid #1a5a8a',
+    paddingLeft: '10px',
   },
   description: {
     fontSize: '14px',
@@ -119,7 +140,7 @@ const useStyles = makeStyles({
     gap: '4px',
   },
   metaLabel: {
-    fontSize: '12px',
+    fontSize: '11px',
     color: '#616161',
     textTransform: 'uppercase',
     letterSpacing: '0.3px',
@@ -136,7 +157,6 @@ const useStyles = makeStyles({
     fontSize: '14px',
     color: '#424242',
     lineHeight: '1.6',
-    paddingLeft: '8px',
   },
   rolesList: {
     display: 'flex',
@@ -147,12 +167,13 @@ const useStyles = makeStyles({
     display: 'inline-flex',
     alignItems: 'center',
     gap: '4px',
-    padding: '6px 10px',
-    backgroundColor: '#f0f4f8',
+    padding: '6px 12px',
+    backgroundColor: '#e8f4fc',
     borderRadius: '6px',
     fontSize: '13px',
     fontWeight: '500',
-    color: '#1e6b7b',
+    color: '#1a5a8a',
+    border: '1px solid #cce4f0',
   },
   complexityBadge: {
     display: 'inline-flex',
@@ -186,18 +207,22 @@ const useStyles = makeStyles({
     justifyContent: 'flex-end',
     gap: '12px',
   },
-  requestButton: {
-    backgroundColor: '#1e6b7b',
+  cancelButton: {
+    minWidth: '80px',
+  },
+  submitButton: {
+    backgroundColor: '#1a5a8a',
     color: 'white',
     fontWeight: '600',
+    minWidth: '140px',
     ':hover': {
-      backgroundColor: '#165a68',
+      backgroundColor: '#145a7a',
     },
   },
   priceDisplay: {
     fontSize: '14px',
     fontWeight: '600',
-    color: '#107c10',
+    color: '#1a5a8a',
   },
 });
 
@@ -209,16 +234,6 @@ const iconMap: Record<string, React.ElementType> = {
   ShieldCheckmark: ShieldCheckmarkRegular,
   Bot: BotRegular,
   PeopleTeam: PeopleTeamRegular,
-};
-
-// Category colors
-const categoryColors: Record<ServiceCategory, string> = {
-  'Power Platform': '#742774',
-  'SPFx Development': '#0078d4',
-  'SharePoint Migration': '#00a4ef',
-  'M365 Assessment': '#107c10',
-  'Copilot Agents': '#6264a7',
-  'MS Viva': '#e5559a',
 };
 
 interface ServiceDetailsProps {
@@ -265,94 +280,98 @@ export const ServiceDetails: React.FC<ServiceDetailsProps> = ({
   const styles = useStyles();
 
   const IconComponent = iconMap[service.IconName || ''] || FlashRegular;
-  const categoryColor = categoryColors[service.Category] || '#1e6b7b';
 
   return (
     <Dialog open={isOpen} onOpenChange={(_, data) => !data.open && onClose()}>
       <DialogSurface className={styles.dialogSurface}>
         <DialogBody style={{ padding: 0 }}>
+          {/* Header with colored background */}
           <div className={styles.header}>
-            <div
-              className={styles.iconContainer}
-              style={{ backgroundColor: `${categoryColor}15`, color: categoryColor }}
-            >
-              <IconComponent style={{ width: '28px', height: '28px' }} />
+            <div className={styles.iconContainer}>
+              <IconComponent style={{ width: '24px', height: '24px', color: 'white' }} />
             </div>
             <div className={styles.headerContent}>
-              <DialogTitle className={styles.title}>{service.Title}</DialogTitle>
-              <Text className={styles.category}>{service.Category}</Text>
+              <Text className={styles.title}>{service.Title}</Text>
+              <Text className={styles.subtitle}>{service.Category}</Text>
             </div>
-            <Button
-              className={styles.closeButton}
-              appearance="subtle"
-              icon={<Dismiss16Regular />}
-              onClick={onClose}
-              title="Close"
-            />
+            <div className={styles.headerActions}>
+              <button
+                className={styles.closeButton}
+                onClick={onClose}
+                title="Close"
+              >
+                <Dismiss24Regular />
+              </button>
+              <Button
+                className={styles.requestButton}
+                appearance="primary"
+                onClick={() => onRequestService(service)}
+              >
+                Request This Service
+              </Button>
+            </div>
           </div>
 
-          <DialogContent className={styles.content}>
-            {/* Description */}
+          {/* Content */}
+          <div className={styles.content}>
+            {/* About Section */}
             <div className={styles.section}>
-              <Text className={styles.sectionTitle}>
-                <InfoRegular style={{ width: '16px', height: '16px' }} />
+              <div className={styles.sectionHeader}>
+                <InfoRegular style={{ width: '14px', height: '14px', marginRight: '6px' }} />
                 About this Service
-              </Text>
+              </div>
               <Text className={styles.description}>{service.Description}</Text>
             </div>
 
-            <Divider />
-
-            {/* Meta Information Grid */}
-            <div className={styles.metaGrid}>
-              <div className={styles.metaItem}>
-                <span className={styles.metaLabel}>Typical Duration</span>
-                <span className={styles.metaValue}>
-                  <ClockRegular style={{ width: '16px', height: '16px', color: '#616161' }} />
-                  {service.TypicalDuration}
-                </span>
-              </div>
-              <div className={styles.metaItem}>
-                <span className={styles.metaLabel}>Complexity</span>
-                <span className={`${styles.complexityBadge} ${getComplexityStyle(service.ComplexityLevel, styles)}`}>
-                  {service.ComplexityLevel}
-                </span>
-              </div>
-              <div className={styles.metaItem}>
-                <span className={styles.metaLabel}>Pricing Model</span>
-                <span className={styles.metaValue}>
-                  <MoneyRegular style={{ width: '16px', height: '16px', color: '#616161' }} />
-                  {service.PricingModel}
-                </span>
-              </div>
-              <div className={styles.metaItem}>
-                <span className={styles.metaLabel}>Starting From</span>
-                <span className={styles.priceDisplay}>
-                  {formatPrice(service.BasePrice)}
-                </span>
+            {/* Service Details Grid */}
+            <div className={styles.section}>
+              <div className={styles.metaGrid}>
+                <div className={styles.metaItem}>
+                  <span className={styles.metaLabel}>Typical Duration</span>
+                  <span className={styles.metaValue}>
+                    <ClockRegular style={{ width: '16px', height: '16px', color: '#616161' }} />
+                    {service.TypicalDuration}
+                  </span>
+                </div>
+                <div className={styles.metaItem}>
+                  <span className={styles.metaLabel}>Complexity</span>
+                  <span className={`${styles.complexityBadge} ${getComplexityStyle(service.ComplexityLevel, styles)}`}>
+                    {service.ComplexityLevel}
+                  </span>
+                </div>
+                <div className={styles.metaItem}>
+                  <span className={styles.metaLabel}>Pricing Model</span>
+                  <span className={styles.metaValue}>
+                    {service.PricingModel}
+                  </span>
+                </div>
+                <div className={styles.metaItem}>
+                  <span className={styles.metaLabel}>Starting From</span>
+                  <span className={styles.priceDisplay}>
+                    {formatPrice(service.BasePrice)}
+                  </span>
+                </div>
               </div>
             </div>
-
-            <Divider />
 
             {/* Prerequisites */}
             {service.Prerequisites && (
               <div className={styles.section}>
-                <Text className={styles.sectionTitle}>
-                  <CheckmarkCircleRegular style={{ width: '16px', height: '16px' }} />
+                <div className={styles.sectionHeader}>
+                  <CheckmarkCircleRegular style={{ width: '14px', height: '14px', marginRight: '6px' }} />
                   Prerequisites
-                </Text>
+                </div>
                 <Text className={styles.prerequisitesList}>{service.Prerequisites}</Text>
               </div>
             )}
 
             {/* Required Roles */}
             {service.RequiredRoles && service.RequiredRoles.length > 0 && (
-              <div className={styles.section}>
-                <Text className={styles.sectionTitle}>
-                  <PersonRegular style={{ width: '16px', height: '16px' }} />
+              <div className={styles.sectionLast}>
+                <div className={styles.sectionHeader}>
+                  <PersonRegular style={{ width: '14px', height: '14px', marginRight: '6px' }} />
                   Specialist Roles Required
-                </Text>
+                </div>
                 <div className={styles.rolesList}>
                   {service.RequiredRoles.map((role, index) => (
                     <span key={index} className={styles.roleBadge}>
@@ -363,14 +382,19 @@ export const ServiceDetails: React.FC<ServiceDetailsProps> = ({
                 </div>
               </div>
             )}
-          </DialogContent>
+          </div>
 
+          {/* Footer */}
           <div className={styles.footer}>
-            <Button appearance="secondary" onClick={onClose}>
-              Close
+            <Button
+              appearance="secondary"
+              onClick={onClose}
+              className={styles.cancelButton}
+            >
+              Cancel
             </Button>
             <Button
-              className={styles.requestButton}
+              className={styles.submitButton}
               appearance="primary"
               onClick={() => onRequestService(service)}
             >

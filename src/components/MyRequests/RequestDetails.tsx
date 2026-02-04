@@ -1,6 +1,7 @@
 /**
  * DWx Traffic Manager - Request Details Modal
  * Full service request details with stage actions and history
+ * Updated design with colored header
  */
 
 import React, { useState } from 'react';
@@ -8,16 +9,14 @@ import {
   Dialog,
   DialogSurface,
   DialogBody,
-  DialogTitle,
   DialogContent,
   Text,
   Button,
-  Divider,
   makeStyles,
   Spinner,
 } from '@fluentui/react-components';
 import {
-  Dismiss16Regular,
+  Dismiss24Regular,
   CalendarLtr24Regular,
   PersonRegular,
   MoneyRegular,
@@ -28,6 +27,8 @@ import {
   CheckmarkRegular,
   DismissRegular,
   ClockRegular,
+  DocumentRegular,
+  ChatRegular,
 } from '@fluentui/react-icons';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
@@ -42,52 +43,66 @@ import { format } from 'date-fns';
 
 const useStyles = makeStyles({
   dialogSurface: {
-    maxWidth: '700px',
+    maxWidth: '640px',
     width: '90vw',
     maxHeight: '90vh',
     padding: '0',
-    borderRadius: '12px',
-    boxShadow: '0 8px 32px rgba(0,0,0,0.2)',
+    borderRadius: '8px',
+    boxShadow: '0 8px 32px rgba(0,0,0,0.25)',
+    overflow: 'hidden',
   },
   header: {
-    padding: '20px 24px',
+    padding: '16px 20px',
     display: 'flex',
-    flexDirection: 'column',
+    alignItems: 'center',
     gap: '16px',
-    backgroundColor: '#fafafa',
-    borderBottom: '1px solid #e1e1e1',
-    position: 'relative',
+    backgroundColor: '#1a5a8a',
+    color: 'white',
   },
-  headerTop: {
+  iconContainer: {
+    width: '48px',
+    height: '48px',
+    borderRadius: '8px',
     display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
   },
   headerContent: {
     flex: 1,
+    minWidth: 0,
   },
   title: {
-    fontSize: '22px',
+    fontSize: '18px',
     fontWeight: '600',
-    color: '#242424',
-    marginBottom: '4px',
+    color: 'white',
+    marginBottom: '2px',
   },
   subtitle: {
-    fontSize: '14px',
-    color: '#616161',
+    fontSize: '13px',
+    color: 'rgba(255, 255, 255, 0.8)',
+  },
+  headerActions: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    flexShrink: 0,
   },
   closeButton: {
-    position: 'absolute',
-    top: '16px',
-    right: '16px',
-    minWidth: '28px',
-    padding: '4px',
-    backgroundColor: 'transparent',
-    border: 'none',
+    minWidth: '36px',
+    height: '36px',
+    padding: '0',
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    border: '1px solid rgba(255, 255, 255, 0.2)',
+    borderRadius: '6px',
+    color: 'white',
     cursor: 'pointer',
-    borderRadius: '4px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
     ':hover': {
-      backgroundColor: '#e1e1e1',
+      backgroundColor: 'rgba(255, 255, 255, 0.2)',
     },
   },
   stageBadge: {
@@ -96,29 +111,41 @@ const useStyles = makeStyles({
     gap: '6px',
     padding: '6px 12px',
     borderRadius: '6px',
-    fontSize: '14px',
+    fontSize: '12px',
     fontWeight: '600',
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    color: 'white',
+  },
+  progressSection: {
+    padding: '16px 24px',
+    backgroundColor: '#f5f5f5',
+    borderBottom: '1px solid #e1e1e1',
   },
   content: {
-    padding: '24px',
+    padding: '0',
     overflowY: 'auto',
-    maxHeight: '60vh',
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '24px',
+    maxHeight: '55vh',
   },
   section: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '12px',
+    padding: '20px 24px',
+    borderBottom: '1px solid #e8e8e8',
   },
-  sectionTitle: {
-    fontSize: '14px',
+  sectionLast: {
+    padding: '20px 24px',
+    borderBottom: 'none',
+  },
+  sectionHeader: {
+    fontSize: '11px',
     fontWeight: '600',
-    color: '#242424',
+    color: '#1a5a8a',
+    textTransform: 'uppercase',
+    letterSpacing: '0.5px',
+    marginBottom: '12px',
+    borderLeft: '3px solid #1a5a8a',
+    paddingLeft: '10px',
     display: 'flex',
     alignItems: 'center',
-    gap: '8px',
+    gap: '6px',
   },
   grid: {
     display: 'grid',
@@ -151,17 +178,17 @@ const useStyles = makeStyles({
     padding: '12px',
     backgroundColor: '#f9f9f9',
     borderRadius: '8px',
+    whiteSpace: 'pre-wrap',
   },
   stageActions: {
     display: 'flex',
     flexWrap: 'wrap',
     gap: '8px',
-    marginTop: '8px',
   },
   advanceButton: {
-    backgroundColor: '#1e6b7b',
+    backgroundColor: '#1a5a8a',
     ':hover': {
-      backgroundColor: '#165a68',
+      backgroundColor: '#145a7a',
     },
   },
   regressButton: {
@@ -208,14 +235,15 @@ const useStyles = makeStyles({
     alignItems: 'center',
     gap: '12px',
     padding: '12px',
-    backgroundColor: '#e8f4f6',
+    backgroundColor: '#e8f4fc',
     borderRadius: '8px',
+    border: '1px solid #cce4f0',
   },
   specialistIcon: {
     width: '40px',
     height: '40px',
     borderRadius: '50%',
-    backgroundColor: '#1e6b7b',
+    backgroundColor: '#1a5a8a',
     color: 'white',
     display: 'flex',
     alignItems: 'center',
@@ -259,18 +287,19 @@ const useStyles = makeStyles({
     backgroundColor: '#dff6dd',
     border: '1px solid #107c10',
   },
+  cancelButton: {
+    minWidth: '80px',
+  },
+  submitButton: {
+    backgroundColor: '#1a5a8a',
+    color: 'white',
+    fontWeight: '600',
+    minWidth: '100px',
+    ':hover': {
+      backgroundColor: '#145a7a',
+    },
+  },
 });
-
-// Stage colors
-const stageColors: Record<FunnelStage, { bg: string; text: string }> = {
-  Lead: { bg: 'rgba(107, 114, 128, 0.15)', text: '#4B5563' },
-  Qualified: { bg: 'rgba(59, 130, 246, 0.15)', text: '#2563EB' },
-  Discovery: { bg: 'rgba(139, 92, 246, 0.15)', text: '#7C3AED' },
-  Proposal: { bg: 'rgba(245, 158, 11, 0.15)', text: '#B45309' },
-  Negotiation: { bg: 'rgba(236, 72, 153, 0.15)', text: '#DB2777' },
-  Won: { bg: 'rgba(16, 185, 129, 0.15)', text: '#059669' },
-  Lost: { bg: 'rgba(239, 68, 68, 0.15)', text: '#DC2626' },
-};
 
 interface RequestDetailsProps {
   request: ServiceRequest;
@@ -291,7 +320,6 @@ export const RequestDetails: React.FC<RequestDetailsProps> = ({
 
   const [updating, setUpdating] = useState(false);
 
-  const stageColor = stageColors[request.FunnelStage];
   const availableTransitions = STAGE_TRANSITIONS[request.FunnelStage] || [];
 
   const formatCurrency = (value?: number): string => {
@@ -406,28 +434,30 @@ export const RequestDetails: React.FC<RequestDetailsProps> = ({
     <Dialog open={isOpen} onOpenChange={(_, data) => !data.open && onClose()}>
       <DialogSurface className={styles.dialogSurface}>
         <DialogBody style={{ padding: 0 }}>
-          {/* Header */}
+          {/* Header with colored background */}
           <div className={styles.header}>
-            <div className={styles.headerTop}>
-              <div className={styles.headerContent}>
-                <DialogTitle className={styles.title}>{request.ClientName}</DialogTitle>
-                <Text className={styles.subtitle}>{request.ServiceName}</Text>
-              </div>
-              <span
-                className={styles.stageBadge}
-                style={{ backgroundColor: stageColor.bg, color: stageColor.text }}
-              >
-                {request.FunnelStage}
-              </span>
+            <div className={styles.iconContainer}>
+              <DocumentRegular style={{ width: '24px', height: '24px', color: 'white' }} />
             </div>
+            <div className={styles.headerContent}>
+              <Text className={styles.title}>{request.ClientName}</Text>
+              <Text className={styles.subtitle}>{request.ServiceName}</Text>
+            </div>
+            <div className={styles.headerActions}>
+              <span className={styles.stageBadge}>{request.FunnelStage}</span>
+              <button
+                className={styles.closeButton}
+                onClick={onClose}
+                title="Close"
+              >
+                <Dismiss24Regular />
+              </button>
+            </div>
+          </div>
+
+          {/* Progress Bar */}
+          <div className={styles.progressSection}>
             <StageProgressBar currentStage={request.FunnelStage} showLabels />
-            <Button
-              className={styles.closeButton}
-              appearance="subtle"
-              icon={<Dismiss16Regular />}
-              onClick={onClose}
-              title="Close"
-            />
           </div>
 
           {/* Content */}
@@ -435,10 +465,10 @@ export const RequestDetails: React.FC<RequestDetailsProps> = ({
             {/* Stage Actions */}
             {availableTransitions.length > 0 && (
               <div className={styles.section}>
-                <Text className={styles.sectionTitle}>
-                  <ArrowRightRegular style={{ width: '16px', height: '16px' }} />
+                <div className={styles.sectionHeader}>
+                  <ArrowRightRegular style={{ width: '14px', height: '14px' }} />
                   Stage Actions
-                </Text>
+                </div>
                 <div className={styles.stageActions}>
                   {updating && <Spinner size="tiny" />}
                   {availableTransitions.map((stage) => getTransitionButton(stage))}
@@ -446,14 +476,12 @@ export const RequestDetails: React.FC<RequestDetailsProps> = ({
               </div>
             )}
 
-            <Divider />
-
             {/* Contact Information */}
             <div className={styles.section}>
-              <Text className={styles.sectionTitle}>
-                <PersonRegular style={{ width: '16px', height: '16px' }} />
+              <div className={styles.sectionHeader}>
+                <PersonRegular style={{ width: '14px', height: '14px' }} />
                 Contact Information
-              </Text>
+              </div>
               <div className={styles.grid}>
                 <div className={styles.gridItem}>
                   <span className={styles.gridLabel}>Contact Name</span>
@@ -490,14 +518,12 @@ export const RequestDetails: React.FC<RequestDetailsProps> = ({
               </div>
             </div>
 
-            <Divider />
-
             {/* Deal Information */}
             <div className={styles.section}>
-              <Text className={styles.sectionTitle}>
-                <MoneyRegular style={{ width: '16px', height: '16px' }} />
+              <div className={styles.sectionHeader}>
+                <MoneyRegular style={{ width: '14px', height: '14px' }} />
                 Deal Information
-              </Text>
+              </div>
               <div className={styles.grid}>
                 <div className={styles.gridItem}>
                   <span className={styles.gridLabel}>Interest Level</span>
@@ -557,14 +583,12 @@ export const RequestDetails: React.FC<RequestDetailsProps> = ({
               </div>
             </div>
 
-            <Divider />
-
             {/* Assigned Specialist */}
             <div className={styles.section}>
-              <Text className={styles.sectionTitle}>
-                <PersonRegular style={{ width: '16px', height: '16px' }} />
+              <div className={styles.sectionHeader}>
+                <PersonRegular style={{ width: '14px', height: '14px' }} />
                 Assigned Specialist
-              </Text>
+              </div>
               {request.AssignedSpecialistName ? (
                 <div className={styles.specialistCard}>
                   <div className={styles.specialistIcon}>
@@ -582,14 +606,12 @@ export const RequestDetails: React.FC<RequestDetailsProps> = ({
               )}
             </div>
 
-            <Divider />
-
             {/* Time Slots */}
             <div className={styles.section}>
-              <Text className={styles.sectionTitle}>
-                <CalendarLtr24Regular style={{ width: '16px', height: '16px' }} />
+              <div className={styles.sectionHeader}>
+                <CalendarLtr24Regular style={{ width: '14px', height: '14px' }} />
                 Meeting Schedule
-              </Text>
+              </div>
               <div className={styles.timeSlotsList}>
                 {request.ConfirmedDateTime ? (
                   <div className={`${styles.timeSlot} ${styles.confirmedSlot}`}>
@@ -621,37 +643,34 @@ export const RequestDetails: React.FC<RequestDetailsProps> = ({
 
             {/* Requirements */}
             {request.Requirements && (
-              <>
-                <Divider />
-                <div className={styles.section}>
-                  <Text className={styles.sectionTitle}>Requirements</Text>
-                  <div className={styles.textBlock}>{request.Requirements}</div>
+              <div className={styles.section}>
+                <div className={styles.sectionHeader}>
+                  <DocumentRegular style={{ width: '14px', height: '14px' }} />
+                  Requirements
                 </div>
-              </>
+                <div className={styles.textBlock}>{request.Requirements}</div>
+              </div>
             )}
 
             {/* Comments */}
             {request.Comments && (
-              <>
-                <Divider />
-                <div className={styles.section}>
-                  <Text className={styles.sectionTitle}>Additional Comments</Text>
-                  <div className={styles.textBlock}>{request.Comments}</div>
+              <div className={styles.section}>
+                <div className={styles.sectionHeader}>
+                  <ChatRegular style={{ width: '14px', height: '14px' }} />
+                  Additional Comments
                 </div>
-              </>
+                <div className={styles.textBlock}>{request.Comments}</div>
+              </div>
             )}
 
             {/* Win/Loss Reason */}
             {request.WinLossReason && (
-              <>
-                <Divider />
-                <div className={styles.section}>
-                  <Text className={styles.sectionTitle}>
-                    {request.FunnelStage === 'Won' ? 'Win Reason' : 'Loss Reason'}
-                  </Text>
-                  <div className={styles.textBlock}>{request.WinLossReason}</div>
+              <div className={styles.sectionLast}>
+                <div className={styles.sectionHeader}>
+                  {request.FunnelStage === 'Won' ? 'Win Reason' : 'Loss Reason'}
                 </div>
-              </>
+                <div className={styles.textBlock}>{request.WinLossReason}</div>
+              </div>
             )}
           </DialogContent>
 
@@ -661,9 +680,22 @@ export const RequestDetails: React.FC<RequestDetailsProps> = ({
               Created {format(new Date(request.Created), 'MMM d, yyyy')} by{' '}
               {request.AccountManagerName}
             </span>
-            <Button appearance="secondary" onClick={onClose}>
-              Close
-            </Button>
+            <div style={{ display: 'flex', gap: '12px' }}>
+              <Button
+                appearance="secondary"
+                onClick={onClose}
+                className={styles.cancelButton}
+              >
+                Cancel
+              </Button>
+              <Button
+                className={styles.submitButton}
+                appearance="primary"
+                onClick={onClose}
+              >
+                Done
+              </Button>
+            </div>
           </div>
         </DialogBody>
       </DialogSurface>
