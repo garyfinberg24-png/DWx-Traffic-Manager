@@ -1,19 +1,38 @@
+/**
+ * DWx Traffic Manager - Environment Configuration
+ */
 export const config = {
+  // SharePoint Lists Configuration
   sharepoint: {
     siteUrl: import.meta.env.VITE_SHAREPOINT_SITE_URL || '',
-    listName: import.meta.env.VITE_LIST_NAME || 'LPDemoScheduler',
-    documentLibrary: import.meta.env.VITE_DOCUMENT_LIBRARY || 'LPSupportingDocuments',
+    // Service Requests list (main entity)
+    listName: import.meta.env.VITE_LIST_NAME || 'DWxServiceRequests',
+    // Service Catalog list
+    servicesListName: import.meta.env.VITE_SERVICES_LIST || 'DWxServices',
+    // Clients list
+    clientsListName: import.meta.env.VITE_CLIENTS_LIST || 'DWxClients',
+    // Specialists list
+    specialistsListName: import.meta.env.VITE_SPECIALISTS_LIST || 'DWxSpecialists',
+    // Document library for uploads
+    documentLibrary: import.meta.env.VITE_DOCUMENT_LIBRARY || 'DWxSupportingDocuments',
   },
+  // Power Automate (optional - for Teams notifications)
   powerAutomate: {
     flowUrl: import.meta.env.VITE_POWER_AUTOMATE_URL || '',
   },
+  // Calendar Configuration
   calendar: {
-    demoEmail: import.meta.env.VITE_DEMO_CALENDAR_EMAIL || '',
+    // Pre-sales calendar for discovery meetings
+    presalesEmail: import.meta.env.VITE_PRESALES_CALENDAR_EMAIL || '',
+    // Legacy alias for compatibility
+    demoEmail: import.meta.env.VITE_PRESALES_CALENDAR_EMAIL || import.meta.env.VITE_DEMO_CALENDAR_EMAIL || '',
   },
+  // Azure AD Configuration
   azure: {
     clientId: import.meta.env.VITE_CLIENT_ID || '',
     tenantId: import.meta.env.VITE_TENANT_ID || '',
   },
+  // Notification Settings
   notifications: {
     // Manager emails for notifications (comma-separated list in env var)
     managerEmails: (import.meta.env.VITE_MANAGER_EMAILS || '')
@@ -21,7 +40,9 @@ export const config = {
       .map((email: string) => email.trim())
       .filter((email: string) => email.length > 0),
   },
+  // Application Settings
   app: {
+    name: import.meta.env.VITE_APP_NAME || 'DWx Traffic Manager',
     environment: import.meta.env.VITE_ENV || 'development',
     isDevelopment: import.meta.env.VITE_ENV === 'development',
   },
