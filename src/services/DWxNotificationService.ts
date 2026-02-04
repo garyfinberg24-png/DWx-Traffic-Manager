@@ -37,7 +37,12 @@ class DWxNotificationService {
     ccRecipients?: string[]
   ): Promise<NotificationResult> {
     try {
-      await graphService.sendEmail(toRecipients, subject, htmlBody, ccRecipients);
+      await graphService.sendEmail({
+        to: toRecipients,
+        subject: subject,
+        body: htmlBody,
+        cc: ccRecipients,
+      });
       console.log(`[DWxNotificationService] Email sent: ${subject}`);
       return { success: true };
     } catch (error) {

@@ -6,6 +6,7 @@ export { ClientForm } from './ClientForm';
 export { AccountManagerManagement } from './AccountManagerManagement';
 export { EntraUserPicker } from './EntraUserPicker';
 export { SharePointProvisioning } from './SharePointProvisioning';
+export { DWxSharePointProvisioning } from './DWxSharePointProvisioning';
 export { ManagerSettings } from './ManagerSettings';
 export { GuestInvitations } from './GuestInvitations';
 export { ChecklistManagement } from './ChecklistManagement';
