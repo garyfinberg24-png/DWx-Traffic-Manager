@@ -6,6 +6,7 @@
 import { config } from '../config/environmentConfig';
 import { getGraphService } from './serviceFactory';
 import { auditService } from './AuditService';
+import { dwxNotificationService } from './DWxNotificationService';
 import {
   ServiceRequest,
   CreateServiceRequestInput,
@@ -84,20 +85,16 @@ class ServiceRequestService {
         dealValue: data.DealValue,
       });
 
-      // Send notification to AM (confirmation)
+      // Send DW-branded notifications
       try {
-        await this.sendRequestCreatedNotification(request, userEmail);
+        const notifResults = await dwxNotificationService.sendRequestCreatedNotifications(request);
+        const failures = notifResults.filter(r => !r.success);
+        if (failures.length > 0) {
+          warnings.push(`${failures.length} notification(s) failed to send`);
+        }
       } catch (notifError) {
-        console.error('Failed to send creation notification:', notifError);
-        warnings.push('Request created but notification failed to send');
-      }
-
-      // Notify managers about new lead
-      try {
-        await this.notifyManagersNewLead(request);
-      } catch (notifError) {
-        console.error('Failed to notify managers:', notifError);
-        warnings.push('Managers were not notified about new lead');
+        console.error('Failed to send notifications:', notifError);
+        warnings.push('Request created but notifications failed to send');
       }
 
       return {
@@ -235,11 +232,16 @@ class ServiceRequestService {
         { specialist: specialist.Title, assignedBy: userName }
       );
 
-      // Notify specialist
+      // Send DW-branded assignment notifications
       try {
-        await this.notifySpecialistAssignment(request, specialist);
+        await dwxNotificationService.sendSpecialistAssignedNotifications(
+          request,
+          specialist.Title,
+          specialist.Email,
+          specialist.Role
+        );
       } catch (notifError) {
-        console.error('Failed to notify specialist:', notifError);
+        console.error('Failed to send assignment notifications:', notifError);
       }
 
       return {
@@ -308,6 +310,14 @@ class ServiceRequestService {
         { stage: request.FunnelStage },
         { stage: 'Discovery', confirmedSlot, confirmedBy: userName }
       );
+
+      // Send DW-branded discovery confirmed notifications
+      try {
+        await dwxNotificationService.notifyDiscoveryConfirmed(updatedRequest, confirmedSlot);
+      } catch (notifError) {
+        console.error('Failed to send discovery confirmation notifications:', notifError);
+        warnings.push('Meeting confirmed but notifications failed to send');
+      }
 
       return {
         success: true,
@@ -441,9 +451,16 @@ class ServiceRequestService {
     newStage: FunnelStage,
     userEmail: string
   ): Promise<void> {
-    // Notify AM of stage change
+    // Send DW-branded stage change notification
     try {
-      await this.sendStageChangeNotification(request, previousStage, newStage);
+      // For Won/Lost, send special notifications
+      if (newStage === 'Won') {
+        await dwxNotificationService.notifyDealWon(request);
+      } else if (newStage === 'Lost') {
+        await dwxNotificationService.notifyDealLost(request);
+      } else {
+        await dwxNotificationService.notifyStageChanged(request, previousStage, newStage, userName);
+      }
     } catch (error) {
       console.error('Failed to send stage change notification:', error);
     }
