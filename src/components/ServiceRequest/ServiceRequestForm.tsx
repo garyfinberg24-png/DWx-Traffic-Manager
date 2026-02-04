@@ -37,6 +37,7 @@ import {
   CalendarRegular,
   MoneyRegular,
   SendRegular,
+  ClipboardTaskListLtr24Regular,
 } from '@fluentui/react-icons';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
@@ -46,10 +47,13 @@ import {
   InterestLevel,
   ClientIndustry,
   CompanySize,
+  ServiceCategory,
 } from '../../types/ServiceRequest';
 import { serviceCatalogService } from '../../services/ServiceCatalogService';
 import { serviceRequestService } from '../../services/ServiceRequestService';
 import { ServiceCard } from '../ServiceCatalog/ServiceCard';
+import { ServiceRequirementsStep } from './ServiceRequirementsStep';
+import { getServiceRequirements, validateRequirements } from '../../types/ServiceRequirements';
 import { addHours, format, setHours, setMinutes } from 'date-fns';
 
 const useStyles = makeStyles({
@@ -245,6 +249,7 @@ interface ServiceRequestFormData {
   // Service
   serviceId?: number;
   serviceName: string;
+  serviceCategory?: ServiceCategory;
 
   // Client
   clientName: string;
@@ -253,6 +258,9 @@ interface ServiceRequestFormData {
   contactPhone?: string;
   industry?: ClientIndustry;
   companySize?: CompanySize;
+
+  // Service-Specific Requirements (dynamic based on service category)
+  serviceRequirements: Record<string, unknown>;
 
   // Deal
   interestLevel: InterestLevel;
@@ -277,9 +285,10 @@ interface ServiceRequestFormData {
 const STEPS = [
   { id: 1, label: 'Service', icon: DocumentRegular },
   { id: 2, label: 'Client', icon: PersonRegular },
-  { id: 3, label: 'Requirements', icon: MoneyRegular },
-  { id: 4, label: 'Schedule', icon: CalendarRegular },
-  { id: 5, label: 'Review', icon: CheckmarkRegular },
+  { id: 3, label: 'Discovery', icon: ClipboardTaskListLtr24Regular },
+  { id: 4, label: 'Deal Info', icon: MoneyRegular },
+  { id: 5, label: 'Schedule', icon: CalendarRegular },
+  { id: 6, label: 'Review', icon: CheckmarkRegular },
 ];
 
 const INTEREST_LEVELS: InterestLevel[] = ['Hot', 'Warm', 'Cold'];
@@ -327,6 +336,9 @@ export const ServiceRequestForm: React.FC<ServiceRequestFormProps> = ({
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Service requirements state (separate from react-hook-form for flexibility)
+  const [serviceRequirements, setServiceRequirements] = useState<Record<string, unknown>>({});
+
   const {
     control,
     handleSubmit,
@@ -337,6 +349,8 @@ export const ServiceRequestForm: React.FC<ServiceRequestFormProps> = ({
     defaultValues: {
       serviceName: preSelectedService?.Title || '',
       serviceId: preSelectedService?.Id,
+      serviceCategory: preSelectedService?.Category,
+      serviceRequirements: {},
       interestLevel: 'Warm',
       dealProbability: 50,
     },
@@ -364,10 +378,20 @@ export const ServiceRequestForm: React.FC<ServiceRequestFormProps> = ({
     setSelectedService(service);
     setValue('serviceId', service.Id);
     setValue('serviceName', service.Title);
+    setValue('serviceCategory', service.Category);
+    // Reset service requirements when service changes
+    setServiceRequirements({});
+  };
+
+  const handleServiceRequirementChange = (questionId: string, value: unknown) => {
+    setServiceRequirements(prev => ({
+      ...prev,
+      [questionId]: value,
+    }));
   };
 
   const handleNext = () => {
-    if (currentStep < 5) {
+    if (currentStep < 6) {
       setCurrentStep(currentStep + 1);
     }
   };
@@ -383,6 +407,59 @@ export const ServiceRequestForm: React.FC<ServiceRequestFormProps> = ({
     const [hours, minutes] = time.split(':').map(Number);
     const combined = setMinutes(setHours(date, hours), minutes);
     return combined.toISOString();
+  };
+
+  const formatServiceRequirements = (
+    category: ServiceCategory | undefined,
+    requirements: Record<string, unknown>,
+    additionalNotes?: string
+  ): string => {
+    if (!category) return additionalNotes || '';
+
+    const config = getServiceRequirements(category);
+    const lines: string[] = [];
+
+    // Add header
+    lines.push(`=== ${config.title} ===\n`);
+
+    // Format each section
+    config.sections.forEach(section => {
+      const sectionAnswers = section.questions
+        .filter(q => requirements[q.id] !== undefined && requirements[q.id] !== '')
+        .map(q => {
+          const answer = requirements[q.id];
+          let formattedAnswer: string;
+
+          if (Array.isArray(answer)) {
+            // For multiselect, find the labels
+            const labels = answer.map(v => {
+              const option = q.options?.find(o => o.value === v);
+              return option?.label || v;
+            });
+            formattedAnswer = labels.join(', ');
+          } else if (q.options) {
+            // For single select, find the label
+            const option = q.options.find(o => o.value === answer);
+            formattedAnswer = option?.label || String(answer);
+          } else {
+            formattedAnswer = String(answer);
+          }
+
+          return `• ${q.question}\n  ${formattedAnswer}`;
+        });
+
+      if (sectionAnswers.length > 0) {
+        lines.push(`\n${section.title}:`);
+        lines.push(sectionAnswers.join('\n'));
+      }
+    });
+
+    // Add additional notes if provided
+    if (additionalNotes) {
+      lines.push(`\n\nAdditional Notes:\n${additionalNotes}`);
+    }
+
+    return lines.join('\n');
   };
 
   const onSubmit = async (data: ServiceRequestFormData) => {
@@ -407,7 +484,8 @@ export const ServiceRequestForm: React.FC<ServiceRequestFormProps> = ({
         ExpectedCloseDate: data.expectedCloseDate?.toISOString(),
         Budget: data.budget,
         Timeline: data.timeline,
-        Requirements: data.requirements,
+        // Combine general requirements with service-specific requirements
+        Requirements: formatServiceRequirements(selectedService.Category, serviceRequirements, data.requirements),
         ServiceHistory: data.serviceHistory,
         Comments: data.comments,
         ProposedSlot1: combineDateTime(data.proposedDate1, data.proposedTime1) || new Date().toISOString(),
@@ -446,10 +524,17 @@ export const ServiceRequestForm: React.FC<ServiceRequestFormProps> = ({
       case 2:
         return !!(watchedValues.clientName && watchedValues.contactName && watchedValues.contactEmail);
       case 3:
-        return true; // Optional fields
+        // Validate service-specific requirements
+        if (selectedService?.Category) {
+          const validation = validateRequirements(selectedService.Category, serviceRequirements);
+          return validation.valid;
+        }
+        return true;
       case 4:
-        return !!(watchedValues.proposedDate1 && watchedValues.proposedTime1);
+        return true; // Deal info is optional
       case 5:
+        return !!(watchedValues.proposedDate1 && watchedValues.proposedTime1);
+      case 6:
         return true;
       default:
         return false;
@@ -478,10 +563,12 @@ export const ServiceRequestForm: React.FC<ServiceRequestFormProps> = ({
       case 2:
         return renderClientStep();
       case 3:
-        return renderRequirementsStep();
+        return renderServiceRequirementsStep();
       case 4:
-        return renderScheduleStep();
+        return renderDealInfoStep();
       case 5:
+        return renderScheduleStep();
+      case 6:
         return renderPreviewStep();
       default:
         return null;
@@ -638,11 +725,31 @@ export const ServiceRequestForm: React.FC<ServiceRequestFormProps> = ({
     </div>
   );
 
-  const renderRequirementsStep = () => (
+  const renderServiceRequirementsStep = () => {
+    if (!selectedService?.Category) {
+      return (
+        <div className={styles.form}>
+          <Text>Please select a service first.</Text>
+        </div>
+      );
+    }
+
+    const requirementsConfig = getServiceRequirements(selectedService.Category);
+
+    return (
+      <ServiceRequirementsStep
+        config={requirementsConfig}
+        values={serviceRequirements}
+        onChange={handleServiceRequirementChange}
+      />
+    );
+  };
+
+  const renderDealInfoStep = () => (
     <div className={styles.form}>
-      <Text className={styles.sectionTitle}>Requirements & Deal Information</Text>
+      <Text className={styles.sectionTitle}>Deal Information</Text>
       <Text className={styles.sectionHint}>
-        Provide details about the client's requirements and the potential deal.
+        Provide details about the potential deal and engagement history.
       </Text>
 
       <div className={styles.row}>
@@ -1045,7 +1152,7 @@ export const ServiceRequestForm: React.FC<ServiceRequestFormProps> = ({
               );
             })}
           </div>
-          <ProgressBar value={(currentStep - 1) / 4} />
+          <ProgressBar value={(currentStep - 1) / 5} />
         </div>
 
         {/* Error Message */}
@@ -1083,7 +1190,7 @@ export const ServiceRequestForm: React.FC<ServiceRequestFormProps> = ({
           </div>
 
           <div style={{ display: 'flex', gap: '12px' }}>
-            {currentStep < 5 ? (
+            {currentStep < 6 ? (
               <Button
                 className={styles.primaryButton}
                 appearance="primary"

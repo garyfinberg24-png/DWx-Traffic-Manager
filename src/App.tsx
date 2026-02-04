@@ -20,6 +20,7 @@ import { LandingPage } from './components/LandingPage';
 import { ProductCatalog } from './components/ProductCatalog';
 import { ServiceCatalog } from './components/ServiceCatalog';
 import { ServiceRequestForm } from './components/ServiceRequest';
+import { ProductRequestForm } from './components/ProductRequest';
 import { MyRequests } from './components/MyRequests';
 import { SalesFunnelDashboard } from './components/SalesFunnel';
 import { LoginPage } from './components/LoginPage';
@@ -101,6 +102,7 @@ const AppRoutes: React.FC = () => {
           <Route path="/services" element={<ServiceCatalog />} />
           <Route path="/products" element={<ProductCatalog />} />
           <Route path="/request" element={<ServiceRequestForm />} />
+          <Route path="/product-request" element={<ProductRequestForm />} />
           <Route path="/requests" element={<MyRequests />} />
           <Route
             path="/pipeline"

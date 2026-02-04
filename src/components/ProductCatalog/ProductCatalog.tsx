@@ -296,7 +296,7 @@ export const ProductCatalog: React.FC = () => {
 
   const handleRequestDemo = (product: Product) => {
     // Navigate to request form with product pre-selected
-    navigate('/request', { state: { productRequest: product } });
+    navigate('/product-request', { state: { productRequest: product } });
   };
 
   const getGradientClass = (gradient: string): string => {

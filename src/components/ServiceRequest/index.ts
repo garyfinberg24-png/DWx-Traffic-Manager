@@ -3,3 +3,4 @@
  */
 
 export { ServiceRequestForm } from './ServiceRequestForm';
+export { ServiceRequirementsStep } from './ServiceRequirementsStep';
