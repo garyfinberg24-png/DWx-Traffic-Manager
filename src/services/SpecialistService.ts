@@ -24,7 +24,10 @@ class SpecialistService {
       const graphService = getGraphService();
       const filter = activeOnly ? "IsActive eq 1" : undefined;
 
-      const items = await graphService.getListItems(this.listName, filter, "Title");
+      const items = await graphService.getListItems(this.listName, {
+        filter,
+        orderBy: "fields/Title",
+      }) as Record<string, unknown>[];
 
       return items.map(this.mapToSpecialist);
     } catch (error) {
@@ -39,7 +42,7 @@ class SpecialistService {
   async getSpecialistById(id: number): Promise<Specialist | null> {
     try {
       const graphService = getGraphService();
-      const item = await graphService.getListItemById(this.listName, id);
+      const item = await graphService.getListItemById(this.listName, id) as Record<string, unknown> | null;
 
       if (!item) return null;
 
@@ -58,7 +61,9 @@ class SpecialistService {
       const graphService = getGraphService();
       const filter = `Email eq '${email}'`;
 
-      const items = await graphService.getListItems(this.listName, filter);
+      const items = await graphService.getListItems(this.listName, {
+        filter,
+      }) as Record<string, unknown>[];
 
       if (items.length === 0) return null;
 
@@ -75,9 +80,11 @@ class SpecialistService {
   async getSpecialistsByRole(role: SpecialistRole): Promise<Specialist[]> {
     try {
       const graphService = getGraphService();
-      const filter = `Role eq '${role}' and IsActive eq 1`;
+      const filter = `fields/Role eq '${role}' and fields/IsActive eq true`;
 
-      const items = await graphService.getListItems(this.listName, filter);
+      const items = await graphService.getListItems(this.listName, {
+        filter,
+      }) as Record<string, unknown>[];
 
       return items.map(this.mapToSpecialist);
     } catch (error) {
@@ -131,21 +138,17 @@ class SpecialistService {
 
       const graphService = getGraphService();
 
-      // Check calendar for conflicts
-      const calendarEmail = specialist.CalendarEmail || specialist.Email;
-      let conflicts: { start: string; end: string; subject: string }[] = [];
+      // Check calendar for conflicts using user schedule API
       let isAvailable = true;
 
       try {
-        const conflictResult = await graphService.checkCalendarConflicts(
-          startTime.toISOString(),
-          endTime.toISOString(),
-          undefined,
-          calendarEmail
+        const conflictResult = await graphService.checkUserCalendarConflicts(
+          specialist.CalendarEmail || specialist.Email,
+          startTime,
+          endTime
         );
 
         isAvailable = !conflictResult.hasConflict;
-        conflicts = conflictResult.conflicts || [];
       } catch (calError) {
         console.warn('Could not check calendar availability:', calError);
         // Default to available if calendar check fails
@@ -159,7 +162,6 @@ class SpecialistService {
         specialist,
         isAvailable,
         hasCapacity,
-        conflicts: isAvailable ? undefined : conflicts,
       };
     } catch (error) {
       console.error('Error checking specialist availability:', error);

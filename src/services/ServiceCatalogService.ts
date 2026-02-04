@@ -10,6 +10,7 @@ import {
   DWServiceInput,
   ServiceCategory,
   DEFAULT_SERVICES,
+  SpecialistRole,
 } from '../types/ServiceRequest';
 
 class ServiceCatalogService {
@@ -21,10 +22,12 @@ class ServiceCatalogService {
   async getServices(activeOnly: boolean = true): Promise<DWService[]> {
     try {
       const graphService = getGraphService();
-      const filter = activeOnly ? "IsActive eq 1" : undefined;
-      const orderBy = "SortOrder";
+      const filter = activeOnly ? "fields/IsActive eq true" : undefined;
 
-      const items = await graphService.getListItems(this.listName, filter, orderBy);
+      const items = await graphService.getListItems(this.listName, {
+        filter,
+        orderBy: "fields/SortOrder",
+      }) as Record<string, unknown>[];
 
       return items.map(this.mapToService);
     } catch (error) {
@@ -40,7 +43,7 @@ class ServiceCatalogService {
   async getServiceById(id: number): Promise<DWService | null> {
     try {
       const graphService = getGraphService();
-      const item = await graphService.getListItemById(this.listName, id);
+      const item = await graphService.getListItemById(this.listName, id) as Record<string, unknown> | null;
 
       if (!item) return null;
 
@@ -57,9 +60,11 @@ class ServiceCatalogService {
   async getServicesByCategory(category: ServiceCategory): Promise<DWService[]> {
     try {
       const graphService = getGraphService();
-      const filter = `Category eq '${category}' and IsActive eq 1`;
+      const filter = `fields/Category eq '${category}' and fields/IsActive eq true`;
 
-      const items = await graphService.getListItems(this.listName, filter);
+      const items = await graphService.getListItems(this.listName, {
+        filter,
+      }) as Record<string, unknown>[];
 
       return items.map(this.mapToService);
     } catch (error) {
@@ -191,11 +196,11 @@ class ServiceCatalogService {
    * Map SharePoint list item to DWService
    */
   private mapToService(item: Record<string, unknown>): DWService {
-    let requiredRoles: string[] = [];
+    let requiredRoles: SpecialistRole[] = [];
     try {
-      const rolesField = item.RequiredRoles as string;
+      const rolesField = this.getFieldValue(item, 'RequiredRoles', '');
       if (rolesField) {
-        requiredRoles = JSON.parse(rolesField);
+        requiredRoles = JSON.parse(rolesField as string) as SpecialistRole[];
       }
     } catch {
       requiredRoles = [];

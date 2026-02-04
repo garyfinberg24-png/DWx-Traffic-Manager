@@ -110,7 +110,6 @@ class PipelineService {
     );
 
     const wonDeals = closedDeals.filter(r => r.FunnelStage === 'Won');
-    const lostDeals = closedDeals.filter(r => r.FunnelStage === 'Lost');
 
     // Overall win rate
     const overall = closedDeals.length > 0

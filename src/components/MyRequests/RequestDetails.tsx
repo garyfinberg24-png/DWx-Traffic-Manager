@@ -14,7 +14,6 @@ import {
   Button,
   Divider,
   makeStyles,
-  Tooltip,
   Spinner,
 } from '@fluentui/react-components';
 import {
@@ -28,7 +27,6 @@ import {
   ArrowRightRegular,
   CheckmarkRegular,
   DismissRegular,
-  EditRegular,
   ClockRegular,
 } from '@fluentui/react-icons';
 import { useAuth } from '../../contexts/AuthContext';
@@ -36,7 +34,6 @@ import { useToast } from '../../contexts/ToastContext';
 import {
   ServiceRequest,
   FunnelStage,
-  STAGE_METADATA,
   STAGE_TRANSITIONS,
 } from '../../types/ServiceRequest';
 import { serviceRequestService } from '../../services/ServiceRequestService';

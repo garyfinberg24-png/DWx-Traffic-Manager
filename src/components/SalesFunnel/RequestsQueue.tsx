@@ -8,16 +8,12 @@ import {
   Text,
   Button,
   makeStyles,
-  Tooltip,
   Spinner,
   Dropdown,
   Option,
-  Badge,
 } from '@fluentui/react-components';
 import {
-  CheckmarkRegular,
   PersonRegular,
-  CalendarLtr24Regular,
   MoneyRegular,
   ArrowRightRegular,
 } from '@fluentui/react-icons';
@@ -27,7 +23,6 @@ import {
   ServiceRequest,
   FunnelStage,
   Specialist,
-  STAGE_METADATA,
 } from '../../types/ServiceRequest';
 import { serviceRequestService } from '../../services/ServiceRequestService';
 import { specialistService } from '../../services/SpecialistService';
@@ -404,7 +399,7 @@ export const RequestsQueue: React.FC<RequestsQueueProps> = ({
                             disabled={loadingSpecialists}
                           >
                             {specialists.map((s) => (
-                              <Option key={s.Email} value={s.Email}>
+                              <Option key={s.Email} value={s.Email} text={`${s.Title} (${s.Role})`}>
                                 {s.Title} ({s.Role})
                               </Option>
                             ))}
@@ -428,16 +423,16 @@ export const RequestsQueue: React.FC<RequestsQueueProps> = ({
                             handleConfirmMeeting(request, data.optionValue as string)
                           }
                         >
-                          <Option value={request.ProposedSlot1}>
+                          <Option value={request.ProposedSlot1} text={format(new Date(request.ProposedSlot1), 'MMM d @ h:mm a')}>
                             {format(new Date(request.ProposedSlot1), 'MMM d @ h:mm a')}
                           </Option>
                           {request.ProposedSlot2 && (
-                            <Option value={request.ProposedSlot2}>
+                            <Option value={request.ProposedSlot2} text={format(new Date(request.ProposedSlot2), 'MMM d @ h:mm a')}>
                               {format(new Date(request.ProposedSlot2), 'MMM d @ h:mm a')}
                             </Option>
                           )}
                           {request.ProposedSlot3 && (
-                            <Option value={request.ProposedSlot3}>
+                            <Option value={request.ProposedSlot3} text={format(new Date(request.ProposedSlot3), 'MMM d @ h:mm a')}>
                               {format(new Date(request.ProposedSlot3), 'MMM d @ h:mm a')}
                             </Option>
                           )}

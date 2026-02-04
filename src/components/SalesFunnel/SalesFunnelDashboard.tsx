@@ -18,7 +18,6 @@ import {
   ChartMultipleRegular,
   PeopleQueueRegular,
   TargetRegular,
-  CalendarLtr24Regular,
 } from '@fluentui/react-icons';
 import { useAuth } from '../../contexts/AuthContext';
 import {
@@ -109,11 +108,6 @@ const useStyles = makeStyles({
     padding: '60px',
     flexDirection: 'column',
     gap: '12px',
-  },
-  '@media (max-width: 900px)': {
-    grid: {
-      gridTemplateColumns: '1fr',
-    },
   },
 });
 
@@ -248,7 +242,6 @@ export const SalesFunnelDashboard: React.FC<SalesFunnelDashboardProps> = ({
                 <div className={styles.cardContent}>
                   <FunnelChart
                     breakdown={stageBreakdown}
-                    totalRequests={metrics.totalRequests}
                     onStageClick={onStageClick}
                   />
                 </div>
@@ -313,7 +306,6 @@ export const SalesFunnelDashboard: React.FC<SalesFunnelDashboardProps> = ({
               <div className={styles.cardContent}>
                 <FunnelChart
                   breakdown={stageBreakdown}
-                  totalRequests={metrics.totalRequests}
                   onStageClick={onStageClick}
                 />
               </div>

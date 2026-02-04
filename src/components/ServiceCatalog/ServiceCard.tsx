@@ -7,12 +7,10 @@ import React from 'react';
 import {
   Card,
   Text,
-  Badge,
   makeStyles,
-  tokens,
 } from '@fluentui/react-components';
 import {
-  LightningBoltRegular,
+  FlashRegular,
   CodeRegular,
   CloudArrowUpRegular,
   ShieldCheckmarkRegular,
@@ -132,7 +130,7 @@ const useStyles = makeStyles({
 
 // Map icon names to components
 const iconMap: Record<string, React.ElementType> = {
-  LightningBolt: LightningBoltRegular,
+  LightningBolt: FlashRegular,
   Code: CodeRegular,
   CloudArrowUp: CloudArrowUpRegular,
   ShieldCheckmark: ShieldCheckmarkRegular,
@@ -176,7 +174,7 @@ const getComplexityStyle = (
 export const ServiceCard: React.FC<ServiceCardProps> = ({ service, onClick }) => {
   const styles = useStyles();
 
-  const IconComponent = iconMap[service.IconName || ''] || LightningBoltRegular;
+  const IconComponent = iconMap[service.IconName || ''] || FlashRegular;
   const categoryColor = categoryColors[service.Category] || '#1e6b7b';
 
   return (

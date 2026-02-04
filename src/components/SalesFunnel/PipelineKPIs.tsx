@@ -10,7 +10,6 @@ import {
   ArrowTrendingRegular,
   TargetRegular,
   PeopleRegular,
-  ClockRegular,
   CheckmarkCircleRegular,
 } from '@fluentui/react-icons';
 import { PipelineMetrics, WinRateData } from '../../types/ServiceRequest';

@@ -12,17 +12,16 @@ import {
   Option,
   Button,
   makeStyles,
+  shorthands,
   MessageBar,
   MessageBarBody,
   MessageBarTitle,
-  ToggleButton,
 } from '@fluentui/react-components';
 import {
   SearchRegular,
   AddRegular,
   FilterRegular,
   GridRegular,
-  ArrowSortRegular,
 } from '@fluentui/react-icons';
 import { useAuth } from '../../contexts/AuthContext';
 import {
@@ -67,9 +66,6 @@ const useStyles = makeStyles({
   },
   newRequestBtn: {
     backgroundColor: '#1e6b7b',
-    ':hover': {
-      backgroundColor: '#165a68',
-    },
   },
   filterSection: {
     display: 'flex',
@@ -97,7 +93,7 @@ const useStyles = makeStyles({
   stageChipActive: {
     backgroundColor: '#1e6b7b',
     color: 'white',
-    borderColor: '#1e6b7b',
+    ...shorthands.borderColor('#1e6b7b'),
   },
   stageCount: {
     fontSize: '11px',
@@ -469,7 +465,7 @@ export const MyRequests: React.FC<MyRequestsProps> = ({ onNewRequest }) => {
           }
         >
           {INTEREST_OPTIONS.map((interest) => (
-            <Option key={interest} value={interest}>
+            <Option key={interest} value={interest} text={interest === 'All' ? 'All Interest Levels' : interest}>
               {interest === 'All' ? 'All Interest Levels' : interest}
             </Option>
           ))}
@@ -482,7 +478,7 @@ export const MyRequests: React.FC<MyRequestsProps> = ({ onNewRequest }) => {
           onOptionSelect={(_, data) => setSortBy(data.optionValue as string)}
         >
           {SORT_OPTIONS.map((option) => (
-            <Option key={option.value} value={option.value}>
+            <Option key={option.value} value={option.value} text={option.label}>
               {option.label}
             </Option>
           ))}

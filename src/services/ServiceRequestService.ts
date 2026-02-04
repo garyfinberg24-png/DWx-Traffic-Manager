@@ -14,8 +14,8 @@ import {
   StageTransitionResult,
   FunnelStage,
   STAGE_TRANSITIONS,
-  Specialist,
   ServiceRequestFilterCriteria,
+  Specialist,
 } from '../types/ServiceRequest';
 
 class ServiceRequestService {
@@ -126,7 +126,7 @@ class ServiceRequestService {
       const graphService = getGraphService();
 
       // Get current request
-      const currentItem = await graphService.getListItemById(this.listName, requestId);
+      const currentItem = await graphService.getListItemById(this.listName, requestId) as Record<string, unknown> | null;
       if (!currentItem) {
         return {
           success: false,
@@ -208,7 +208,7 @@ class ServiceRequestService {
   async assignSpecialist(
     requestId: number,
     specialist: Specialist,
-    userEmail: string,
+    _userEmail: string,
     userName: string
   ): Promise<ServiceRequestResult> {
     try {
@@ -263,7 +263,7 @@ class ServiceRequestService {
   async confirmDiscovery(
     requestId: number,
     confirmedSlot: string,
-    userEmail: string,
+    _userEmail: string,
     userName: string
   ): Promise<ServiceRequestResult> {
     const warnings: string[] = [];
@@ -272,7 +272,7 @@ class ServiceRequestService {
       const graphService = getGraphService();
 
       // Get current request
-      const currentItem = await graphService.getListItemById(this.listName, requestId);
+      const currentItem = await graphService.getListItemById(this.listName, requestId) as Record<string, unknown> | null;
       if (!currentItem) {
         return { success: false, error: 'Request not found' };
       }
@@ -398,7 +398,10 @@ class ServiceRequestService {
       }
 
       const filter = filterParts.length > 0 ? filterParts.join(' and ') : undefined;
-      const items = await graphService.getListItems(this.listName, filter, 'Created desc');
+      const items = await graphService.getListItems(this.listName, {
+        filter,
+        orderBy: 'fields/Created desc',
+      }) as Record<string, unknown>[];
 
       return items.map(this.mapToServiceRequest);
     } catch (error) {
@@ -427,7 +430,7 @@ class ServiceRequestService {
   async getRequestById(id: number): Promise<ServiceRequest | null> {
     try {
       const graphService = getGraphService();
-      const item = await graphService.getListItemById(this.listName, id);
+      const item = await graphService.getListItemById(this.listName, id) as Record<string, unknown> | null;
 
       if (!item) return null;
 
@@ -459,7 +462,7 @@ class ServiceRequestService {
       } else if (newStage === 'Lost') {
         await dwxNotificationService.notifyDealLost(request);
       } else {
-        await dwxNotificationService.notifyStageChanged(request, previousStage, newStage, userName);
+        await dwxNotificationService.notifyStageChanged(request, previousStage, newStage, userEmail);
       }
     } catch (error) {
       console.error('Failed to send stage change notification:', error);
@@ -510,141 +513,15 @@ class ServiceRequestService {
       ${request.Requirements ? `<hr/><h3>Requirements</h3><p>${request.Requirements}</p>` : ''}
     `;
 
-    // Try shared calendar first, fallback to personal
-    const calendarEmail = config.calendar.presalesEmail;
-
-    try {
-      if (calendarEmail) {
-        return await graphService.createCalendarEvent(
-          `Discovery: ${request.ClientName} - ${request.ServiceName}`,
-          startTime.toISOString(),
-          endTime.toISOString(),
-          body,
-          'Microsoft Teams Meeting',
-          attendees,
-          calendarEmail
-        );
-      }
-    } catch (error) {
-      console.warn('Shared calendar unavailable, using personal calendar');
-    }
-
-    // Fallback to personal calendar
-    return await graphService.createMyCalendarEvent(
-      `Discovery: ${request.ClientName} - ${request.ServiceName}`,
-      startTime.toISOString(),
-      endTime.toISOString(),
+    // Use the current user's calendar for creating events
+    return await graphService.createMyCalendarEvent({
+      subject: `Discovery: ${request.ClientName} - ${request.ServiceName}`,
+      start: startTime,
+      end: endTime,
       body,
-      'Microsoft Teams Meeting',
-      attendees
-    );
-  }
-
-  /**
-   * Send notification when request is created
-   */
-  private async sendRequestCreatedNotification(
-    request: ServiceRequest,
-    recipientEmail: string
-  ): Promise<void> {
-    const graphService = getGraphService();
-
-    const subject = `New Service Request Created: ${request.ClientName} - ${request.ServiceName}`;
-    const body = `
-      <h2>Service Request Created</h2>
-      <p>Your service request has been submitted successfully.</p>
-      <table>
-        <tr><td><strong>Client:</strong></td><td>${request.ClientName}</td></tr>
-        <tr><td><strong>Service:</strong></td><td>${request.ServiceName}</td></tr>
-        <tr><td><strong>Interest Level:</strong></td><td>${request.InterestLevel}</td></tr>
-        <tr><td><strong>Status:</strong></td><td>${request.FunnelStage}</td></tr>
-      </table>
-      <p>A manager will review and assign a specialist shortly.</p>
-    `;
-
-    await graphService.sendMail(recipientEmail, subject, body);
-  }
-
-  /**
-   * Notify managers about new lead
-   */
-  private async notifyManagersNewLead(request: ServiceRequest): Promise<void> {
-    const graphService = getGraphService();
-    const managerEmails = config.notifications.managerEmails;
-
-    if (managerEmails.length === 0) return;
-
-    const subject = `[New Lead] ${request.ClientName} - ${request.ServiceName}`;
-    const body = `
-      <h2>New Lead Submitted</h2>
-      <table>
-        <tr><td><strong>Client:</strong></td><td>${request.ClientName}</td></tr>
-        <tr><td><strong>Service:</strong></td><td>${request.ServiceName}</td></tr>
-        <tr><td><strong>Contact:</strong></td><td>${request.ContactName} (${request.ContactEmail})</td></tr>
-        <tr><td><strong>Interest Level:</strong></td><td>${request.InterestLevel}</td></tr>
-        <tr><td><strong>AM:</strong></td><td>${request.AccountManagerName}</td></tr>
-        ${request.DealValue ? `<tr><td><strong>Deal Value:</strong></td><td>R${request.DealValue.toLocaleString()}</td></tr>` : ''}
-      </table>
-      <p>Please review and assign a specialist.</p>
-    `;
-
-    for (const email of managerEmails) {
-      try {
-        await graphService.sendMail(email, subject, body);
-      } catch (error) {
-        console.error(`Failed to notify manager ${email}:`, error);
-      }
-    }
-  }
-
-  /**
-   * Notify specialist of assignment
-   */
-  private async notifySpecialistAssignment(
-    request: ServiceRequest,
-    specialist: Specialist
-  ): Promise<void> {
-    const graphService = getGraphService();
-
-    const subject = `You've been assigned: ${request.ClientName} - ${request.ServiceName}`;
-    const body = `
-      <h2>New Assignment</h2>
-      <p>You have been assigned to a discovery opportunity.</p>
-      <table>
-        <tr><td><strong>Client:</strong></td><td>${request.ClientName}</td></tr>
-        <tr><td><strong>Service:</strong></td><td>${request.ServiceName}</td></tr>
-        <tr><td><strong>Contact:</strong></td><td>${request.ContactName} (${request.ContactEmail})</td></tr>
-        <tr><td><strong>Interest Level:</strong></td><td>${request.InterestLevel}</td></tr>
-        <tr><td><strong>AM:</strong></td><td>${request.AccountManagerName}</td></tr>
-      </table>
-      ${request.Requirements ? `<h3>Requirements</h3><p>${request.Requirements}</p>` : ''}
-    `;
-
-    await graphService.sendMail(specialist.Email, subject, body);
-  }
-
-  /**
-   * Send stage change notification
-   */
-  private async sendStageChangeNotification(
-    request: ServiceRequest,
-    previousStage: FunnelStage,
-    newStage: FunnelStage
-  ): Promise<void> {
-    const graphService = getGraphService();
-
-    const subject = `[${newStage}] ${request.ClientName} - ${request.ServiceName}`;
-    const body = `
-      <h2>Stage Updated</h2>
-      <p>The following request has moved from <strong>${previousStage}</strong> to <strong>${newStage}</strong>.</p>
-      <table>
-        <tr><td><strong>Client:</strong></td><td>${request.ClientName}</td></tr>
-        <tr><td><strong>Service:</strong></td><td>${request.ServiceName}</td></tr>
-        <tr><td><strong>New Stage:</strong></td><td>${newStage}</td></tr>
-      </table>
-    `;
-
-    await graphService.sendMail(request.AccountManagerEmail, subject, body);
+      location: 'Microsoft Teams Meeting',
+      attendees,
+    });
   }
 
   /**
@@ -658,10 +535,10 @@ class ServiceRequestService {
       const clientsListName = config.sharepoint.clientsListName;
 
       // Get current client
-      const client = await graphService.getListItemById(clientsListName, request.ClientId);
+      const client = await graphService.getListItemById(clientsListName, request.ClientId) as Record<string, unknown> | null;
       if (!client) return;
 
-      const fields = client.fields as Record<string, unknown> || client;
+      const fields = (client.fields as Record<string, unknown>) || client;
       const currentRevenue = (fields.TotalRevenue as number) || 0;
       const currentEngagements = (fields.EngagementCount as number) || 0;
 

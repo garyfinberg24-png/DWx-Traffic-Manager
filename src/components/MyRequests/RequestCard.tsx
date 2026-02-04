@@ -7,12 +7,11 @@ import React from 'react';
 import { Card, Text, makeStyles, Button } from '@fluentui/react-components';
 import {
   CalendarLtr24Regular,
-  Star24Filled,
   MoneyRegular,
   PersonRegular,
   ArrowRightRegular,
 } from '@fluentui/react-icons';
-import { ServiceRequest, FunnelStage, STAGE_METADATA, InterestLevel } from '../../types/ServiceRequest';
+import { ServiceRequest, FunnelStage, InterestLevel } from '../../types/ServiceRequest';
 import { StageProgressBar } from './StageProgressBar';
 import { format } from 'date-fns';
 

@@ -13,7 +13,6 @@ import {
   Divider,
 } from '@fluentui/react-components';
 import {
-  CalendarLtr24Regular,
   SignOut24Regular,
   Person24Regular,
   DataUsage24Regular,

@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { Text, makeStyles, Tooltip } from '@fluentui/react-components';
-import { FunnelStage, STAGE_METADATA, StageBreakdown } from '../../types/ServiceRequest';
+import { FunnelStage, StageBreakdown } from '../../types/ServiceRequest';
 
 const useStyles = makeStyles({
   container: {
@@ -105,7 +105,6 @@ const FUNNEL_STAGES: FunnelStage[] = ['Lead', 'Qualified', 'Discovery', 'Proposa
 
 interface FunnelChartProps {
   breakdown: StageBreakdown[];
-  totalRequests: number;
   onStageClick?: (stage: FunnelStage) => void;
 }
 
@@ -121,7 +120,6 @@ const formatCurrency = (value: number): string => {
 
 export const FunnelChart: React.FC<FunnelChartProps> = ({
   breakdown,
-  totalRequests,
   onStageClick,
 }) => {
   const styles = useStyles();
@@ -141,7 +139,7 @@ export const FunnelChart: React.FC<FunnelChartProps> = ({
   return (
     <div className={styles.container}>
       {/* Main funnel stages */}
-      {FUNNEL_STAGES.map((stage, index) => {
+      {FUNNEL_STAGES.map((stage) => {
         const data = getStageData(stage);
         const widthPercent = Math.max((data.count / maxCount) * 100, 5);
 

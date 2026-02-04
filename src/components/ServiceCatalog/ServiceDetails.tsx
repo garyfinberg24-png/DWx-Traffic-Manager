@@ -17,7 +17,7 @@ import {
 } from '@fluentui/react-components';
 import { Dismiss16Regular } from '@fluentui/react-icons';
 import {
-  LightningBoltRegular,
+  FlashRegular,
   CodeRegular,
   CloudArrowUpRegular,
   ShieldCheckmarkRegular,
@@ -203,7 +203,7 @@ const useStyles = makeStyles({
 
 // Map icon names to components
 const iconMap: Record<string, React.ElementType> = {
-  LightningBolt: LightningBoltRegular,
+  LightningBolt: FlashRegular,
   Code: CodeRegular,
   CloudArrowUp: CloudArrowUpRegular,
   ShieldCheckmark: ShieldCheckmarkRegular,
@@ -264,7 +264,7 @@ export const ServiceDetails: React.FC<ServiceDetailsProps> = ({
 }) => {
   const styles = useStyles();
 
-  const IconComponent = iconMap[service.IconName || ''] || LightningBoltRegular;
+  const IconComponent = iconMap[service.IconName || ''] || FlashRegular;
   const categoryColor = categoryColors[service.Category] || '#1e6b7b';
 
   return (
