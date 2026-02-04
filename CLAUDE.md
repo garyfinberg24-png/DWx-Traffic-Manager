@@ -204,24 +204,29 @@ const STAGE_TRANSITIONS = {
 DWx-Traffic-Manager/
 ├── src/
 │   ├── components/
-│   │   ├── ServiceCatalog/          # NEW - Service browsing
+│   │   ├── LandingPage/             # NEW - Main entry point
+│   │   │   ├── LandingPage.tsx      # Services/Products entry cards
+│   │   │   └── index.ts
+│   │   ├── ProductCatalog/          # NEW - DWx Product browsing
+│   │   │   ├── ProductCatalog.tsx   # Tabbed view (Apps/WebParts/Cards)
+│   │   │   └── index.ts
+│   │   ├── ServiceCatalog/          # Service browsing
 │   │   │   ├── ServiceCatalog.tsx   # Grid view of services
 │   │   │   ├── ServiceCard.tsx      # Service display card
 │   │   │   └── ServiceDetails.tsx   # Service modal
-│   │   ├── ServiceRequest/          # NEW - Request creation (adapted from BookingForm)
+│   │   ├── ServiceRequest/          # Request creation (adapted from BookingForm)
 │   │   │   └── ServiceRequestForm.tsx # Multi-step wizard
-│   │   ├── MyRequests/              # NEW - Request list (adapted from MyBookings)
+│   │   ├── MyRequests/              # Request list (adapted from MyBookings)
 │   │   │   ├── MyRequests.tsx       # List with stage filtering
 │   │   │   ├── RequestCard.tsx      # Request card with stage badge
 │   │   │   └── RequestDetails.tsx   # Full request modal
-│   │   ├── Pipeline/                # NEW - Sales funnel dashboard
+│   │   ├── SalesFunnel/             # Sales funnel dashboard
 │   │   │   ├── SalesFunnelDashboard.tsx
-│   │   │   ├── FunnelVisualization.tsx
+│   │   │   ├── FunnelChart.tsx
 │   │   │   ├── PipelineKPIs.tsx
-│   │   │   └── StageBoard.tsx       # Kanban view
+│   │   │   └── ConversionRatesCard.tsx
 │   │   ├── Admin/                   # EXTENDED from LP Booking
-│   │   │   ├── ServiceManagement.tsx    # NEW
-│   │   │   ├── SpecialistManagement.tsx # NEW
+│   │   │   ├── SharePointProvisioning.tsx # DWx list provisioning
 │   │   │   └── ... (reused admin components)
 │   │   ├── Common/                  # REUSED from LP Booking
 │   │   └── LoginPage/               # REUSED from LP Booking
@@ -242,7 +247,8 @@ DWx-Traffic-Manager/
 │   │   ├── ServiceRequestContext.tsx    # NEW
 │   │   └── ... (other reused contexts)
 │   ├── types/
-│   │   ├── ServiceRequest.ts            # NEW - Core DWx types
+│   │   ├── ServiceRequest.ts            # Core DWx types
+│   │   ├── Product.ts                   # NEW - Product catalog types (29 products)
 │   │   └── ... (reused types)
 │   ├── config/
 │   │   ├── environmentConfig.ts         # UPDATED for DWx
@@ -314,6 +320,8 @@ VITE_ENV=development
 - [x] PipelineService.ts - Dashboard metrics, win rates, conversion rates, forecasting
 
 ### Phase 3: UI Components - COMPLETE
+- [x] LandingPage - Main entry point with Services/Products options
+- [x] ProductCatalog - Tabbed view of DWx Apps (15), Web Parts (8), Adaptive Cards (6)
 - [x] ServiceCatalog components (ServiceCatalog.tsx, ServiceCard.tsx, ServiceDetails.tsx)
 - [x] ServiceRequestForm.tsx - 5-step wizard (Service → Client → Requirements → Schedule → Review)
 - [x] MyRequests components (MyRequests.tsx, RequestCard.tsx, RequestDetails.tsx, StageProgressBar.tsx)
@@ -321,17 +329,18 @@ VITE_ENV=development
 - [ ] Admin components (ServiceManagement, SpecialistManagement) - PENDING
 
 ### Phase 4: Integration - COMPLETE
-- [x] Update App.tsx with new routes (/services, /request, /requests, /pipeline)
+- [x] Update App.tsx with new routes (/, /services, /products, /request, /requests, /pipeline)
 - [x] Update Header with new navigation (Services, New Request, My Requests, Pipeline)
+- [x] SharePoint list provisioning UI for DWx lists (Admin → SharePoint Provisioning)
 - [ ] Test mode configuration for E2E testing - PENDING
 - [ ] Email notification templates (DW branding) - PENDING
 
-### Phase 5: Deployment - PENDING
-- [ ] Azure AD app registration
-- [ ] SharePoint site and list provisioning
-- [ ] Azure Static Web Apps deployment
-- [ ] Teams app manifest and package
-- [ ] Production deployment
+### Phase 5: Deployment - IN PROGRESS
+- [x] Azure Static Web Apps deployment configured
+- [x] GitHub Actions CI/CD pipeline
+- [ ] Azure AD app registration - PENDING
+- [ ] SharePoint site and list provisioning in production - PENDING
+- [ ] Teams app manifest and package - PENDING
 
 ## Key Type Definitions
 
@@ -382,17 +391,21 @@ The app supports Account Managers from an external partner tenant:
 | File | Purpose |
 |------|---------|
 | `src/types/ServiceRequest.ts` | Core type definitions for all DWx entities |
+| `src/types/Product.ts` | Product catalog types and data (29 products) |
 | `src/services/ServiceCatalogService.ts` | Service catalog CRUD operations |
 | `src/services/ServiceRequestService.ts` | Funnel workflow orchestration |
 | `src/services/SpecialistService.ts` | Specialist management and availability |
 | `src/services/PipelineService.ts` | Dashboard metrics and analytics |
 | `src/config/environmentConfig.ts` | Environment configuration with DWx lists |
 | `src/App.tsx` | Main app with DWx routes |
+| `src/components/LandingPage/` | Main entry with Services/Products cards |
+| `src/components/ProductCatalog/` | Tabbed product catalog (Apps, WebParts, Cards) |
 | `src/components/ServiceCatalog/` | Service catalog UI (ServiceCatalog, ServiceCard, ServiceDetails) |
 | `src/components/ServiceRequest/` | Request wizard (ServiceRequestForm) |
 | `src/components/MyRequests/` | Request list (MyRequests, RequestCard, RequestDetails, StageProgressBar) |
 | `src/components/SalesFunnel/` | Dashboard (SalesFunnelDashboard, FunnelChart, PipelineKPIs, ConversionRatesCard, RequestsQueue) |
 | `src/components/Common/Header.tsx` | Navigation header with DWx branding |
+| `mockups/` | HTML mockups for design reference |
 
 ## Confirmed Design Decisions
 
@@ -431,14 +444,82 @@ DWxSupportingDocuments/
 | Lead → Qualified | Qualified Count / Lead Count × 100 |
 | Hot Leads | COUNT where InterestLevel = Hot |
 
-## Application Routes (Planned)
+## Application Routes
 
 | Route | Component | Access |
 |-------|-----------|--------|
+| `/` | LandingPage | All users |
 | `/services` | ServiceCatalog | All users |
+| `/products` | ProductCatalog | All users |
 | `/request` | ServiceRequestForm | All users |
 | `/requests` | MyRequests | All users (own only) |
 | `/pipeline` | SalesFunnelDashboard | Managers only |
 | `/admin` | AdminPage | Managers only |
 | `/admin/services` | ServiceManagement | Managers only |
 | `/admin/specialists` | SpecialistManagement | Managers only |
+
+## Product Catalog
+
+The Product Catalog displays DWx offerings in three categories with tabbed navigation:
+
+### DWx Apps (15 Products)
+
+| Product | Category | Description |
+|---------|----------|-------------|
+| Asset Dashboard | Operations & IT | IT Asset Tracking & Management |
+| Building Access | Operations & IT | Access Control & Building Management |
+| Contract Manager | Document & Content | Contract Lifecycle Management |
+| Employee Directory | HR & People | Staff Directory & Org Chart |
+| Employee Onboarding | HR & People | New Hire Onboarding Portal |
+| Feedback Hub | Learning & Engagement | Employee Feedback & Surveys |
+| Incident Reporter | Operations & IT | Incident Reporting & Tracking |
+| Knowledge Base | Document & Content | Enterprise Knowledge Management |
+| Leave Manager | HR & People | Leave Requests & Tracking |
+| License Pulse | Operations & IT | Software License Management |
+| News Hub | Document & Content | Company News & Announcements |
+| Org Chart | HR & People | Interactive Org Chart |
+| Performance Hub | Learning & Engagement | Performance Reviews & Goals |
+| Policy Manager | Document & Content | Policy Governance & Compliance |
+| Training Portal | Learning & Engagement | Training & Certifications |
+
+### SharePoint Web Parts (8 Products)
+
+| Product | Category | Description |
+|---------|----------|-------------|
+| News Carousel | Intranet | News Slider & Announcements |
+| Quick Links Grid | Navigation | Custom Quick Links Navigation |
+| People Directory | HR & People | Employee Search & Profiles |
+| Events Calendar | Intranet | Company Events & Holidays |
+| Document Gallery | Intranet | Document Library Display |
+| Announcements Banner | Intranet | Full-width Announcement Bar |
+| Org Chart Web Part | HR & People | Interactive Org Chart Display |
+| FAQ Accordion | Utilities | Collapsible FAQ Sections |
+
+### Adaptive Cards (6 Products)
+
+| Product | Category | Description |
+|---------|----------|-------------|
+| Leave Request | HR & People | Submit Leave in Teams |
+| Approval Card | Workflows | Approval Actions in Chat |
+| Incident Alert | Operations & IT | Incident Notifications |
+| News Digest | Productivity | Daily News Summary |
+| Training Reminder | Learning & Engagement | Training Due Notifications |
+| Task Assignment | Workflows | Assign & Track Tasks |
+
+### Product Type System
+
+```typescript
+type ProductType = 'app' | 'webpart' | 'adaptive-card';
+
+interface Product {
+  id: string;
+  name: string;
+  subtitle: string;
+  type: ProductType;
+  category: string;
+  version: string;
+  brand: string;
+  icon: string;
+  gradient: string;  // CSS gradient name
+}
+```
