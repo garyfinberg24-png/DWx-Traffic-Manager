@@ -124,11 +124,11 @@ export const Header: React.FC = () => {
           <>
             <Button
               appearance="subtle"
-              className={`${styles.navButton} ${isActive('/pipeline') ? styles.navButtonActive : ''}`}
-              onClick={() => navigate('/pipeline')}
+              className={`${styles.navButton} ${isActive('/dashboard') ? styles.navButtonActive : ''}`}
+              onClick={() => navigate('/dashboard')}
               icon={<DataUsage24Regular />}
             >
-              Pipeline
+              Dashboard
             </Button>
             <Button
               appearance="subtle"

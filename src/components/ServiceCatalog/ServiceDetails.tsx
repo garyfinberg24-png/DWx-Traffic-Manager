@@ -8,7 +8,6 @@ import React from 'react';
 import {
   Dialog,
   DialogSurface,
-  DialogBody,
   Text,
   Button,
   makeStyles,
@@ -284,9 +283,8 @@ export const ServiceDetails: React.FC<ServiceDetailsProps> = ({
   return (
     <Dialog open={isOpen} onOpenChange={(_, data) => !data.open && onClose()}>
       <DialogSurface className={styles.dialogSurface}>
-        <DialogBody style={{ padding: 0 }}>
-          {/* Header with colored background */}
-          <div className={styles.header}>
+        {/* Header with colored background */}
+        <div className={styles.header}>
             <div className={styles.iconContainer}>
               <IconComponent style={{ width: '24px', height: '24px', color: 'white' }} />
             </div>
@@ -384,24 +382,23 @@ export const ServiceDetails: React.FC<ServiceDetailsProps> = ({
             )}
           </div>
 
-          {/* Footer */}
-          <div className={styles.footer}>
-            <Button
-              appearance="secondary"
-              onClick={onClose}
-              className={styles.cancelButton}
-            >
-              Cancel
-            </Button>
-            <Button
-              className={styles.submitButton}
-              appearance="primary"
-              onClick={() => onRequestService(service)}
-            >
-              Request This Service
-            </Button>
-          </div>
-        </DialogBody>
+        {/* Footer */}
+        <div className={styles.footer}>
+          <Button
+            appearance="secondary"
+            onClick={onClose}
+            className={styles.cancelButton}
+          >
+            Cancel
+          </Button>
+          <Button
+            className={styles.submitButton}
+            appearance="primary"
+            onClick={() => onRequestService(service)}
+          >
+            Request This Service
+          </Button>
+        </div>
       </DialogSurface>
     </Dialog>
   );
