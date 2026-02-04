@@ -1,0 +1,1243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DWx Traffic Manager - Landing Page Mockup</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background-color: #f5f5f5;
+            min-height: 100vh;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #1a5a8a 0%, #0d3a5c 100%);
+            padding: 12px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo {
+            width: 40px;
+            height: 40px;
+            background: white;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            color: #1a5a8a;
+            font-size: 12px;
+            flex-direction: column;
+            line-height: 1;
+        }
+
+        .logo .dw {
+            font-size: 14px;
+            font-weight: 800;
+            color: #1a5a8a;
+        }
+
+        .logo .x {
+            font-size: 10px;
+            font-weight: 700;
+            color: #2d7ab8;
+        }
+
+        .app-title {
+            color: white;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: white;
+        }
+
+        .avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+
+        /* Main Container */
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: calc(100vh - 60px);
+            padding: 40px 20px;
+        }
+
+        /* Welcome Section */
+        .welcome-section {
+            text-align: center;
+            margin-bottom: 48px;
+        }
+
+        .welcome-title {
+            font-size: 36px;
+            font-weight: 700;
+            color: #1a5a8a;
+            margin-bottom: 12px;
+        }
+
+        .welcome-subtitle {
+            font-size: 18px;
+            color: #6c757d;
+            max-width: 600px;
+            line-height: 1.5;
+        }
+
+        /* Cards Container */
+        .cards-container {
+            display: flex;
+            gap: 32px;
+            flex-wrap: wrap;
+            justify-content: center;
+            max-width: 900px;
+        }
+
+        /* Card Styles */
+        .card {
+            width: 400px;
+            background: white;
+            border-radius: 16px;
+            padding: 32px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            border: 2px solid transparent;
+        }
+
+        .card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 40px rgba(26, 90, 138, 0.15);
+        }
+
+        .card.services:hover {
+            border-color: #1a5a8a;
+        }
+
+        .card.products:hover {
+            border-color: #0d3a5c;
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .icon-container {
+            width: 64px;
+            height: 64px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+        }
+
+        .services .icon-container {
+            background: linear-gradient(135deg, #e8f4fc 0%, #d4e9f7 100%);
+            color: #1a5a8a;
+        }
+
+        .products .icon-container {
+            background: linear-gradient(135deg, #e8f0f7 0%, #d4dff0 100%);
+            color: #0d3a5c;
+        }
+
+        .card-title {
+            font-size: 26px;
+            font-weight: 700;
+            color: #333333;
+        }
+
+        .card-description {
+            font-size: 15px;
+            color: #6c757d;
+            line-height: 1.6;
+            margin-bottom: 24px;
+        }
+
+        .card-features {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 24px;
+        }
+
+        .feature {
+            font-size: 14px;
+            color: #333333;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .feature-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .services .feature-dot {
+            background: #1a5a8a;
+        }
+
+        .products .feature-dot {
+            background: #0d3a5c;
+        }
+
+        .card-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-top: 20px;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .explore-text {
+            font-size: 15px;
+            font-weight: 600;
+        }
+
+        .services .explore-text {
+            color: #1a5a8a;
+        }
+
+        .products .explore-text {
+            color: #0d3a5c;
+        }
+
+        .arrow {
+            font-size: 20px;
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover .arrow {
+            transform: translateX(4px);
+        }
+
+        .services .arrow {
+            color: #1a5a8a;
+        }
+
+        .products .arrow {
+            color: #0d3a5c;
+        }
+
+        /* Services Catalog Page */
+        .page {
+            display: none;
+            width: 100%;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        .page-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 24px;
+        }
+
+        .page-title-section h1 {
+            font-size: 28px;
+            font-weight: 700;
+            color: #333333;
+            margin-bottom: 8px;
+        }
+
+        .page-title-section p {
+            font-size: 14px;
+            color: #6c757d;
+        }
+
+        .back-btn {
+            padding: 8px 16px;
+            background: #f5f5f5;
+            border: 1px solid #d0d0d0;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .back-btn:hover {
+            background: #e8e8e8;
+        }
+
+        /* Category Chips */
+        .category-section {
+            margin-bottom: 24px;
+        }
+
+        .category-label {
+            font-size: 13px;
+            font-weight: 500;
+            color: #6c757d;
+            margin-bottom: 12px;
+        }
+
+        .category-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .category-chip {
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid #d0d0d0;
+            background: white;
+            color: #333333;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .category-chip:hover {
+            border-color: #1a5a8a;
+            color: #1a5a8a;
+        }
+
+        .category-chip.active {
+            background: #1a5a8a;
+            color: white;
+            border-color: #1a5a8a;
+        }
+
+        /* Services Grid */
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 20px;
+        }
+
+        .service-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid #e0e0e0;
+        }
+
+        .service-card:hover {
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+            border-color: #1a5a8a;
+        }
+
+        .service-card-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .service-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #e8f4fc 0%, #d4e9f7 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        .service-card-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333333;
+            margin-bottom: 4px;
+        }
+
+        .service-category-tag {
+            display: inline-block;
+            font-size: 11px;
+            padding: 2px 8px;
+            background: #f0f0f0;
+            border-radius: 10px;
+            color: #6c757d;
+        }
+
+        .service-description {
+            font-size: 13px;
+            color: #6c757d;
+            line-height: 1.5;
+            margin-bottom: 12px;
+        }
+
+        .service-meta {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .meta-badge {
+            font-size: 11px;
+            padding: 4px 10px;
+            border-radius: 12px;
+            background: #f5f5f5;
+            color: #333333;
+        }
+
+        /* Products Grid */
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 24px;
+        }
+
+        .product-card {
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid #e0e0e0;
+        }
+
+        .product-card:hover {
+            box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+            border-color: #1a5a8a;
+            transform: translateY(-4px);
+        }
+
+        .product-image {
+            height: 180px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Different gradients for each app */
+        .product-image.slate { background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%); }
+        .product-image.corporate-blue { background: linear-gradient(135deg, #1a5a8a 0%, #0d3a5c 100%); }
+        .product-image.charcoal { background: linear-gradient(135deg, #374151 0%, #1f2937 100%); }
+        .product-image.ocean-depth { background: linear-gradient(135deg, #0369a1 0%, #075985 100%); }
+        .product-image.royal-purple { background: linear-gradient(135deg, #7c3aed 0%, #5b21b6 100%); }
+        .product-image.forest-teal { background: linear-gradient(135deg, #0d9488 0%, #0f766e 100%); }
+        .product-image.coral { background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); }
+        .product-image.rose { background: linear-gradient(135deg, #e11d48 0%, #be123c 100%); }
+        .product-image.indigo { background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); }
+        .product-image.emerald { background: linear-gradient(135deg, #10b981 0%, #059669 100%); }
+        .product-image.amber { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); }
+        .product-image.sky { background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%); }
+        .product-image.violet { background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); }
+        .product-image.cyan { background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%); }
+        .product-image.pink { background: linear-gradient(135deg, #ec4899 0%, #db2777 100%); }
+
+        .product-splash {
+            text-align: center;
+            color: white;
+            padding: 20px;
+        }
+
+        .product-splash .brand {
+            font-size: 10px;
+            letter-spacing: 2px;
+            opacity: 0.8;
+            margin-bottom: 4px;
+        }
+
+        .product-splash .dwx {
+            font-size: 24px;
+            font-weight: 800;
+            margin-bottom: 8px;
+        }
+
+        .product-splash .dwx span {
+            color: rgba(255,255,255,0.7);
+        }
+
+        .product-splash-icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+        }
+
+        .product-version {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: rgba(255,255,255,0.2);
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            color: white;
+            font-weight: 500;
+        }
+
+        .product-content {
+            padding: 20px;
+        }
+
+        .product-type-tag {
+            display: inline-block;
+            font-size: 11px;
+            padding: 3px 10px;
+            background: #e8f4fc;
+            border-radius: 10px;
+            color: #1a5a8a;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .product-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #333333;
+            margin-bottom: 4px;
+        }
+
+        .product-subtitle {
+            font-size: 13px;
+            color: #6c757d;
+            margin-bottom: 12px;
+        }
+
+        .product-description {
+            font-size: 13px;
+            color: #6c757d;
+            line-height: 1.5;
+            margin-bottom: 16px;
+        }
+
+        .product-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 12px;
+            border-top: 1px solid #f0f0f0;
+        }
+
+        .product-price {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1a5a8a;
+        }
+
+        .request-btn {
+            padding: 8px 16px;
+            background: #1a5a8a;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: 'Inter', sans-serif;
+            font-weight: 500;
+        }
+
+        .request-btn:hover {
+            background: #0d3a5c;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .cards-container {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .card {
+                width: 100%;
+                max-width: 400px;
+            }
+
+            .welcome-title {
+                font-size: 28px;
+            }
+
+            .products-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <div class="header-left">
+            <div class="logo">
+                <span class="dw">DW</span>
+                <span class="x">x</span>
+            </div>
+            <span class="app-title">DWx Traffic Manager</span>
+        </div>
+        <div class="header-right">
+            <div class="user-info">
+                <div class="avatar">GF</div>
+                <span>Gary Finberg</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Landing Page -->
+    <div id="landing-page" class="page active">
+        <div class="container">
+            <div class="welcome-section">
+                <h1 class="welcome-title">Welcome to DWx Traffic Manager</h1>
+                <p class="welcome-subtitle">Your gateway to Digital Workplace services and products. Choose where you'd like to start.</p>
+            </div>
+
+            <div class="cards-container">
+                <!-- Services Card -->
+                <div class="card services" onclick="showPage('services-page')">
+                    <div class="card-header">
+                        <div class="icon-container">🔧</div>
+                        <h2 class="card-title">Services</h2>
+                    </div>
+                    <p class="card-description">
+                        Browse our comprehensive service catalog including consulting, development,
+                        migrations, and pre-sales support for Microsoft 365 and Power Platform.
+                    </p>
+                    <div class="card-features">
+                        <div class="feature"><span class="feature-dot"></span>Power Apps, Power Automate, Power BI, Copilot Studio, Power Pages</div>
+                        <div class="feature"><span class="feature-dot"></span>SPFx & SharePoint Solutions</div>
+                        <div class="feature"><span class="feature-dot"></span>Microsoft 365 Migrations & Assessments</div>
+                        <div class="feature"><span class="feature-dot"></span>Copilot Agents & AI Solutions</div>
+                        <div class="feature"><span class="feature-dot"></span>Pre-Sales Discovery, Tenders & Proposals</div>
+                    </div>
+                    <div class="card-footer">
+                        <span class="explore-text">Explore Services</span>
+                        <span class="arrow">→</span>
+                    </div>
+                </div>
+
+                <!-- Products Card -->
+                <div class="card products" onclick="showPage('products-page')">
+                    <div class="card-header">
+                        <div class="icon-container">📦</div>
+                        <h2 class="card-title">Products</h2>
+                    </div>
+                    <p class="card-description">
+                        Discover our portfolio of 15 ready-to-deploy DWx applications, web parts,
+                        and adaptive cards that accelerate your digital workplace transformation.
+                    </p>
+                    <div class="card-features">
+                        <div class="feature"><span class="feature-dot"></span>15 DWx Business Applications</div>
+                        <div class="feature"><span class="feature-dot"></span>Contract, Policy & Document Management</div>
+                        <div class="feature"><span class="feature-dot"></span>HR & Recruitment Solutions</div>
+                        <div class="feature"><span class="feature-dot"></span>Training, Surveys & Quiz Builder</div>
+                        <div class="feature"><span class="feature-dot"></span>Asset, License & Procurement Management</div>
+                    </div>
+                    <div class="card-footer">
+                        <span class="explore-text">Explore Products</span>
+                        <span class="arrow">→</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Services Catalog Page -->
+    <div id="services-page" class="page">
+        <div class="page-container">
+            <div class="page-header">
+                <div class="page-title-section">
+                    <h1>Service Catalog</h1>
+                    <p>Browse and request services from Digital Workplace</p>
+                </div>
+                <button class="back-btn" onclick="showPage('landing-page')">← Back to Home</button>
+            </div>
+
+            <div class="category-section">
+                <div class="category-label">Filter by category</div>
+                <div class="category-chips">
+                    <div class="category-chip active">All Services</div>
+                    <div class="category-chip">Power Apps</div>
+                    <div class="category-chip">Power Automate</div>
+                    <div class="category-chip">Power BI</div>
+                    <div class="category-chip">Copilot Studio</div>
+                    <div class="category-chip">Power Pages</div>
+                    <div class="category-chip">SPFx Development</div>
+                    <div class="category-chip">SharePoint Migration</div>
+                    <div class="category-chip">M365 Assessment</div>
+                    <div class="category-chip">Copilot Agents</div>
+                    <div class="category-chip">MS Viva</div>
+                    <div class="category-chip">Tenders</div>
+                    <div class="category-chip">Proposals</div>
+                    <div class="category-chip">Pre-Sales</div>
+                    <div class="category-chip">Ad-Hoc Support</div>
+                </div>
+            </div>
+
+            <div class="services-grid">
+                <!-- Power Apps -->
+                <div class="service-card">
+                    <div class="service-card-header">
+                        <div class="service-icon">⚡</div>
+                        <div>
+                            <div class="service-card-title">Power Apps Development</div>
+                            <span class="service-category-tag">Power Apps</span>
+                        </div>
+                    </div>
+                    <p class="service-description">Custom canvas and model-driven apps tailored to your business processes and workflows.</p>
+                    <div class="service-meta">
+                        <span class="meta-badge">📅 2hr Discovery</span>
+                        <span class="meta-badge">📊 Medium</span>
+                        <span class="meta-badge">💰 From R25,000</span>
+                    </div>
+                </div>
+
+                <!-- Power Automate -->
+                <div class="service-card">
+                    <div class="service-card-header">
+                        <div class="service-icon">🔄</div>
+                        <div>
+                            <div class="service-card-title">Power Automate Flows</div>
+                            <span class="service-category-tag">Power Automate</span>
+                        </div>
+                    </div>
+                    <p class="service-description">Automated workflows connecting your business applications and processes seamlessly.</p>
+                    <div class="service-meta">
+                        <span class="meta-badge">📅 1hr Discovery</span>
+                        <span class="meta-badge">📊 Medium</span>
+                        <span class="meta-badge">💰 From R15,000</span>
+                    </div>
+                </div>
+
+                <!-- Power BI -->
+                <div class="service-card">
+                    <div class="service-card-header">
+                        <div class="service-icon">📊</div>
+                        <div>
+                            <div class="service-card-title">Power BI Dashboards</div>
+                            <span class="service-category-tag">Power BI</span>
+                        </div>
+                    </div>
+                    <p class="service-description">Interactive dashboards and reports transforming your data into actionable insights.</p>
+                    <div class="service-meta">
+                        <span class="meta-badge">📅 2hr Discovery</span>
+                        <span class="meta-badge">📊 Medium</span>
+                        <span class="meta-badge">💰 From R20,000</span>
+                    </div>
+                </div>
+
+                <!-- Copilot Studio -->
+                <div class="service-card">
+                    <div class="service-card-header">
+                        <div class="service-icon">🤖</div>
+                        <div>
+                            <div class="service-card-title">Copilot Studio Solutions</div>
+                            <span class="service-category-tag">Copilot Studio</span>
+                        </div>
+                    </div>
+                    <p class="service-description">Custom AI-powered chatbots and virtual agents for employee and customer engagement.</p>
+                    <div class="service-meta">
+                        <span class="meta-badge">📅 2hr Discovery</span>
+                        <span class="meta-badge">📊 High</span>
+                        <span class="meta-badge">💰 From R45,000</span>
+                    </div>
+                </div>
+
+                <!-- Power Pages -->
+                <div class="service-card">
+                    <div class="service-card-header">
+                        <div class="service-icon">🌐</div>
+                        <div>
+                            <div class="service-card-title">Power Pages Portals</div>
+                            <span class="service-category-tag">Power Pages</span>
+                        </div>
+                    </div>
+                    <p class="service-description">External-facing websites and portals integrated with your Microsoft 365 data.</p>
+                    <div class="service-meta">
+                        <span class="meta-badge">📅 Half-day</span>
+                        <span class="meta-badge">📊 High</span>
+                        <span class="meta-badge">💰 From R50,000</span>
+                    </div>
+                </div>
+
+                <!-- SPFx -->
+                <div class="service-card">
+                    <div class="service-card-header">
+                        <div class="service-icon">💻</div>
+                        <div>
+                            <div class="service-card-title">SPFx Development</div>
+                            <span class="service-category-tag">SPFx Development</span>
+                        </div>
+                    </div>
+                    <p class="service-description">Custom SharePoint Framework web parts, extensions, and Teams integrations.</p>
+                    <div class="service-meta">
+                        <span class="meta-badge">📅 2hr Discovery</span>
+                        <span class="meta-badge">📊 High</span>
+                        <span class="meta-badge">💰 From R35,000</span>
+                    </div>
+                </div>
+
+                <!-- Migration -->
+                <div class="service-card">
+                    <div class="service-card-header">
+                        <div class="service-icon">☁️</div>
+                        <div>
+                            <div class="service-card-title">SharePoint Migration</div>
+                            <span class="service-category-tag">SharePoint Migration</span>
+                        </div>
+                    </div>
+                    <p class="service-description">End-to-end migration from on-premises or other platforms to SharePoint Online.</p>
+                    <div class="service-meta">
+                        <span class="meta-badge">📅 Half-day</span>
+                        <span class="meta-badge">📊 High</span>
+                        <span class="meta-badge">💰 From R50,000</span>
+                    </div>
+                </div>
+
+                <!-- Pre-Sales Discovery -->
+                <div class="service-card">
+                    <div class="service-card-header">
+                        <div class="service-icon">🔍</div>
+                        <div>
+                            <div class="service-card-title">Pre-Sales Discovery</div>
+                            <span class="service-category-tag">Pre-Sales</span>
+                        </div>
+                    </div>
+                    <p class="service-description">Initial discovery sessions to understand your needs and recommend solutions.</p>
+                    <div class="service-meta">
+                        <span class="meta-badge">📅 2hr Session</span>
+                        <span class="meta-badge">📊 Low</span>
+                        <span class="meta-badge">💰 From R5,000</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Products Catalog Page -->
+    <div id="products-page" class="page">
+        <div class="page-container">
+            <div class="page-header">
+                <div class="page-title-section">
+                    <h1>Product Catalog</h1>
+                    <p>15 Ready-to-deploy DWx applications for your digital workplace</p>
+                </div>
+                <button class="back-btn" onclick="showPage('landing-page')">← Back to Home</button>
+            </div>
+
+            <div class="category-section">
+                <div class="category-label">Filter by product category</div>
+                <div class="category-chips">
+                    <div class="category-chip active">All Products</div>
+                    <div class="category-chip">Document & Content</div>
+                    <div class="category-chip">HR & People</div>
+                    <div class="category-chip">Operations & IT</div>
+                    <div class="category-chip">Learning & Engagement</div>
+                </div>
+            </div>
+
+            <div class="products-grid">
+                <!-- 1. Asset Dashboard -->
+                <div class="product-card">
+                    <div class="product-image corporate-blue">
+                        <span class="product-version">v2.1.0</span>
+                        <div class="product-splash">
+                            <div class="brand">FIRST DIGITAL</div>
+                            <div class="dwx">DW<span>x</span></div>
+                            <div class="product-splash-icon">📊</div>
+                        </div>
+                    </div>
+                    <div class="product-content">
+                        <span class="product-type-tag">Operations & IT</span>
+                        <div class="product-title">Asset Dashboard</div>
+                        <div class="product-subtitle">IT Asset Tracking & Management</div>
+                        <p class="product-description">Comprehensive IT asset tracking with lifecycle management, depreciation, and reporting.</p>
+                        <div class="product-footer">
+                            <span class="product-price">Contact for pricing</span>
+                            <button class="request-btn">Request Demo</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. CV Management -->
+                <div class="product-card">
+                    <div class="product-image coral">
+                        <span class="product-version">v1.8.0</span>
+                        <div class="product-splash">
+                            <div class="brand">FIRST DIGITAL</div>
+                            <div class="dwx">DW<span>x</span></div>
+                            <div class="product-splash-icon">📄</div>
+                        </div>
+                    </div>
+                    <div class="product-content">
+                        <span class="product-type-tag">HR & People</span>
+                        <div class="product-title">CV Management</div>
+                        <div class="product-subtitle">Candidate Resume Repository</div>
+                        <p class="product-description">Centralized resume management system with search, tagging, and candidate tracking.</p>
+                        <div class="product-footer">
+                            <span class="product-price">Contact for pricing</span>
+                            <button class="request-btn">Request Demo</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. Document Hub -->
+                <div class="product-card">
+                    <div class="product-image rose">
+                        <span class="product-version">v3.0.0</span>
+                        <div class="product-splash">
+                            <div class="brand">FIRST DIGITAL</div>
+                            <div class="dwx">DW<span>x</span></div>
+                            <div class="product-splash-icon">📁</div>
+                        </div>
+                    </div>
+                    <div class="product-content">
+                        <span class="product-type-tag">Document & Content</span>
+                        <div class="product-title">Document Hub</div>
+                        <div class="product-subtitle">Enterprise Document Management</div>
+                        <p class="product-description">Centralized document management with versioning, workflows, and secure sharing.</p>
+                        <div class="product-footer">
+                            <span class="product-price">Contact for pricing</span>
+                            <button class="request-btn">Request Demo</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4. External Sharing Hub -->
+                <div class="product-card">
+                    <div class="product-image ocean-depth">
+                        <span class="product-version">v1.5.0</span>
+                        <div class="product-splash">
+                            <div class="brand">FIRST DIGITAL</div>
+                            <div class="dwx">DW<span>x</span></div>
+                            <div class="product-splash-icon">🔗</div>
+                        </div>
+                    </div>
+                    <div class="product-content">
+                        <span class="product-type-tag">Document & Content</span>
+                        <div class="product-title">External Sharing Hub</div>
+                        <div class="product-subtitle">Secure External Collaboration</div>
+                        <p class="product-description">Secure file sharing with external partners including access controls and audit trails.</p>
+                        <div class="product-footer">
+                            <span class="product-price">Contact for pricing</span>
+                            <button class="request-btn">Request Demo</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 5. Gamification -->
+                <div class="product-card">
+                    <div class="product-image royal-purple">
+                        <span class="product-version">v2.0.0</span>
+                        <div class="product-splash">
+                            <div class="brand">FIRST DIGITAL</div>
+                            <div class="dwx">DW<span>x</span></div>
+                            <div class="product-splash-icon">🏆</div>
+                        </div>
+                    </div>
+                    <div class="product-content">
+                        <span class="product-type-tag">Learning & Engagement</span>
+                        <div class="product-title">Gamification</div>
+                        <div class="product-subtitle">Rewards & Recognition Platform</div>
+                        <p class="product-description">Employee engagement through points, badges, leaderboards, and rewards programs.</p>
+                        <div class="product-footer">
+                            <span class="product-price">Contact for pricing</span>
+                            <button class="request-btn">Request Demo</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 6. Integration Hub -->
+                <div class="product-card">
+                    <div class="product-image indigo">
+                        <span class="product-version">v2.5.0</span>
+                        <div class="product-splash">
+                            <div class="brand">FIRST DIGITAL</div>
+                            <div class="dwx">DW<span>x</span></div>
+                            <div class="product-splash-icon">🔌</div>
+                        </div>
+                    </div>
+                    <div class="product-content">
+                        <span class="product-type-tag">Operations & IT</span>
+                        <div class="product-title">Integration Hub</div>
+                        <div class="product-subtitle">Connect Your Enterprise Systems</div>
+                        <p class="product-description">Centralized integration platform connecting your business applications seamlessly.</p>
+                        <div class="product-footer">
+                            <span class="product-price">Contact for pricing</span>
+                            <button class="request-btn">Request Demo</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 7. License Management -->
+                <div class="product-card">
+                    <div class="product-image forest-teal">
+                        <span class="product-version">v1.9.0</span>
+                        <div class="product-splash">
+                            <div class="brand">FIRST DIGITAL</div>
+                            <div class="dwx">DW<span>x</span></div>
+                            <div class="product-splash-icon">🔑</div>
+                        </div>
+                    </div>
+                    <div class="product-content">
+                        <span class="product-type-tag">Operations & IT</span>
+                        <div class="product-title">License Management</div>
+                        <div class="product-subtitle">Software License Tracking</div>
+                        <p class="product-description">Track software licenses, renewals, compliance, and optimize license spending.</p>
+                        <div class="product-footer">
+                            <span class="product-price">Contact for pricing</span>
+                            <button class="request-btn">Request Demo</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 8. Procurement Manager -->
+                <div class="product-card">
+                    <div class="product-image emerald">
+                        <span class="product-version">v2.2.0</span>
+                        <div class="product-splash">
+                            <div class="brand">FIRST DIGITAL</div>
+                            <div class="dwx">DW<span>x</span></div>
+                            <div class="product-splash-icon">🛒</div>
+                        </div>
+                    </div>
+                    <div class="product-content">
+                        <span class="product-type-tag">Operations & IT</span>
+                        <div class="product-title">Procurement Manager</div>
+                        <div class="product-subtitle">Purchase Order Workflows</div>
+                        <p class="product-description">End-to-end procurement with requisitions, approvals, POs, and vendor management.</p>
+                        <div class="product-footer">
+                            <span class="product-price">Contact for pricing</span>
+                            <button class="request-btn">Request Demo</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 9. Quiz Builder -->
+                <div class="product-card">
+                    <div class="product-image amber">
+                        <span class="product-version">v1.6.0</span>
+                        <div class="product-splash">
+                            <div class="brand">FIRST DIGITAL</div>
+                            <div class="dwx">DW<span>x</span></div>
+                            <div class="product-splash-icon">❓</div>
+                        </div>
+                    </div>
+                    <div class="product-content">
+                        <span class="product-type-tag">Learning & Engagement</span>
+                        <div class="product-title">Quiz Builder</div>
+                        <div class="product-subtitle">Create Engaging Assessments</div>
+                        <p class="product-description">Build interactive quizzes and assessments with scoring, analytics, and certificates.</p>
+                        <div class="product-footer">
+                            <span class="product-price">Contact for pricing</span>
+                            <button class="request-btn">Request Demo</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 10. Reports Builder -->
+                <div class="product-card">
+                    <div class="product-image sky">
+                        <span class="product-version">v2.8.0</span>
+                        <div class="product-splash">
+                            <div class="brand">FIRST DIGITAL</div>
+                            <div class="dwx">DW<span>x</span></div>
+                            <div class="product-splash-icon">📈</div>
+                        </div>
+                    </div>
+                    <div class="product-content">
+                        <span class="product-type-tag">Operations & IT</span>
+                        <div class="product-title">Reports Builder</div>
+                        <div class="product-subtitle">Dynamic Report Generation</div>
+                        <p class="product-description">Create custom reports with drag-and-drop builder, scheduling, and distribution.</p>
+                        <div class="product-footer">
+                            <span class="product-price">Contact for pricing</span>
+                            <button class="request-btn">Request Demo</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 11. Survey Management -->
+                <div class="product-card">
+                    <div class="product-image violet">
+                        <span class="product-version">v1.7.0</span>
+                        <div class="product-splash">
+                            <div class="brand">FIRST DIGITAL</div>
+                            <div class="dwx">DW<span>x</span></div>
+                            <div class="product-splash-icon">📋</div>
+                        </div>
+                    </div>
+                    <div class="product-content">
+                        <span class="product-type-tag">Learning & Engagement</span>
+                        <div class="product-title">Survey Management</div>
+                        <div class="product-subtitle">Employee Feedback Platform</div>
+                        <p class="product-description">Create and distribute surveys with analytics, anonymous options, and reporting.</p>
+                        <div class="product-footer">
+                            <span class="product-price">Contact for pricing</span>
+                            <button class="request-btn">Request Demo</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 12. Recruitment Manager -->
+                <div class="product-card">
+                    <div class="product-image pink">
+                        <span class="product-version">v2.3.0</span>
+                        <div class="product-splash">
+                            <div class="brand">FIRST DIGITAL</div>
+                            <div class="dwx">DW<span>x</span></div>
+                            <div class="product-splash-icon">👥</div>
+                        </div>
+                    </div>
+                    <div class="product-content">
+                        <span class="product-type-tag">HR & People</span>
+                        <div class="product-title">Recruitment Manager</div>
+                        <div class="product-subtitle">Talent Acquisition Platform</div>
+                        <p class="product-description">End-to-end recruitment with job postings, applicant tracking, and interview scheduling.</p>
+                        <div class="product-footer">
+                            <span class="product-price">Contact for pricing</span>
+                            <button class="request-btn">Request Demo</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 13. Training & Skills Builder -->
+                <div class="product-card">
+                    <div class="product-image cyan">
+                        <span class="product-version">v1.4.0</span>
+                        <div class="product-splash">
+                            <div class="brand">FIRST DIGITAL</div>
+                            <div class="dwx">DW<span>x</span></div>
+                            <div class="product-splash-icon">🎓</div>
+                        </div>
+                    </div>
+                    <div class="product-content">
+                        <span class="product-type-tag">Learning & Engagement</span>
+                        <div class="product-title">Training & Skills</div>
+                        <div class="product-subtitle">Learning Management System</div>
+                        <p class="product-description">Comprehensive LMS with courses, certifications, skills tracking, and learning paths.</p>
+                        <div class="product-footer">
+                            <span class="product-price">Contact for pricing</span>
+                            <button class="request-btn">Request Demo</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 14. Contract Manager -->
+                <div class="product-card">
+                    <div class="product-image slate">
+                        <span class="product-version">v2.0.0</span>
+                        <div class="product-splash">
+                            <div class="brand">FIRST DIGITAL</div>
+                            <div class="dwx">DW<span>x</span></div>
+                            <div class="product-splash-icon">📝</div>
+                        </div>
+                    </div>
+                    <div class="product-content">
+                        <span class="product-type-tag">Document & Content</span>
+                        <div class="product-title">Contract Manager</div>
+                        <div class="product-subtitle">Contract Lifecycle Management</div>
+                        <p class="product-description">Full contract lifecycle from creation to renewal with templates, approvals, and alerts.</p>
+                        <div class="product-footer">
+                            <span class="product-price">Contact for pricing</span>
+                            <button class="request-btn">Request Demo</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 15. Policy Manager -->
+                <div class="product-card">
+                    <div class="product-image charcoal">
+                        <span class="product-version">v1.2.0</span>
+                        <div class="product-splash">
+                            <div class="brand">FIRST DIGITAL</div>
+                            <div class="dwx">DW<span>x</span></div>
+                            <div class="product-splash-icon">📜</div>
+                        </div>
+                    </div>
+                    <div class="product-content">
+                        <span class="product-type-tag">Document & Content</span>
+                        <div class="product-title">Policy Manager</div>
+                        <div class="product-subtitle">Policy Governance & Compliance</div>
+                        <p class="product-description">Centralized policy management with acknowledgments, versioning, and compliance tracking.</p>
+                        <div class="product-footer">
+                            <span class="product-price">Contact for pricing</span>
+                            <button class="request-btn">Request Demo</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showPage(pageId) {
+            // Hide all pages
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+            // Show selected page
+            document.getElementById(pageId).classList.add('active');
+            // Scroll to top
+            window.scrollTo(0, 0);
+        }
+
+        // Category chip click handling
+        document.querySelectorAll('.category-chip').forEach(chip => {
+            chip.addEventListener('click', function() {
+                // Remove active from siblings
+                this.parentElement.querySelectorAll('.category-chip').forEach(c => {
+                    c.classList.remove('active');
+                });
+                // Add active to clicked
+                this.classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>

@@ -16,6 +16,8 @@ import { AdminPage, AccountManagerManagement } from './components/Admin';
 import { ChecklistPage } from './components/Checklist';
 import { Header, ErrorBoundary, LoadingSpinner, UserGuide } from './components/Common';
 // DWx Traffic Manager - New Components
+import { LandingPage } from './components/LandingPage';
+import { ProductCatalog } from './components/ProductCatalog';
 import { ServiceCatalog } from './components/ServiceCatalog';
 import { ServiceRequestForm } from './components/ServiceRequest';
 import { MyRequests } from './components/MyRequests';
@@ -95,8 +97,9 @@ const AppRoutes: React.FC = () => {
       <main className={styles.main}>
         <Routes>
           {/* DWx Traffic Manager - Primary Routes */}
-          <Route path="/" element={<Navigate to="/services" replace />} />
+          <Route path="/" element={<LandingPage />} />
           <Route path="/services" element={<ServiceCatalog />} />
+          <Route path="/products" element={<ProductCatalog />} />
           <Route path="/request" element={<ServiceRequestForm />} />
           <Route path="/requests" element={<MyRequests />} />
           <Route
@@ -136,7 +139,7 @@ const AppRoutes: React.FC = () => {
               </ManagerRoute>
             }
           />
-          <Route path="*" element={<Navigate to="/services" replace />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>
     </div>
