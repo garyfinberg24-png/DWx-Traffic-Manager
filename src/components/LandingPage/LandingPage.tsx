@@ -1,6 +1,7 @@
 /**
  * DWx Traffic Manager - Landing Page
  * Main entry point with Services and Products options
+ * Includes Manager section for users with manager role
  */
 
 import React from 'react';
@@ -10,12 +11,17 @@ import {
   Card,
   makeStyles,
   shorthands,
+  Divider,
 } from '@fluentui/react-components';
 import {
   Wrench24Regular,
   Apps24Regular,
   ArrowRight24Regular,
+  DataUsage24Regular,
+  Settings24Regular,
+  PeopleTeam24Regular,
 } from '@fluentui/react-icons';
+import { useAuth } from '../../contexts/AuthContext';
 
 const useStyles = makeStyles({
   container: {
@@ -145,6 +151,81 @@ const useStyles = makeStyles({
     width: '20px',
     height: '20px',
   },
+  // Manager Section Styles
+  managerSection: {
+    marginTop: '48px',
+    width: '100%',
+    maxWidth: '900px',
+  },
+  managerDivider: {
+    marginBottom: '32px',
+  },
+  managerHeader: {
+    textAlign: 'center',
+    marginBottom: '24px',
+  },
+  managerTitle: {
+    fontSize: '24px',
+    fontWeight: '600',
+    color: '#1e6b7b',
+    marginBottom: '8px',
+  },
+  managerSubtitle: {
+    fontSize: '14px',
+    color: '#616161',
+  },
+  managerCardsContainer: {
+    display: 'flex',
+    gap: '24px',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+  },
+  managerCard: {
+    width: '280px',
+    ...shorthands.padding('24px'),
+    cursor: 'pointer',
+    transitionProperty: 'transform, box-shadow',
+    transitionDuration: '0.2s',
+    transitionTimingFunction: 'ease',
+    ...shorthands.borderRadius('12px'),
+    backgroundColor: 'white',
+    ...shorthands.border('1px', 'solid', '#e0e0e0'),
+    ':hover': {
+      transform: 'translateY(-4px)',
+      boxShadow: '0 8px 24px rgba(30, 107, 123, 0.15)',
+      ...shorthands.borderColor('#1e6b7b'),
+    },
+  },
+  managerCardHeader: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '12px',
+    marginBottom: '12px',
+  },
+  managerIconContainer: {
+    width: '48px',
+    height: '48px',
+    ...shorthands.borderRadius('12px'),
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#e8f4f6',
+  },
+  managerIcon: {
+    width: '24px',
+    height: '24px',
+    color: '#1e6b7b',
+  },
+  managerCardTitle: {
+    fontSize: '18px',
+    fontWeight: '600',
+    color: '#242424',
+  },
+  managerCardDescription: {
+    fontSize: '13px',
+    color: '#616161',
+    lineHeight: '1.5',
+  },
 });
 
 const SERVICE_FEATURES = [
@@ -166,6 +247,7 @@ const PRODUCT_FEATURES = [
 export const LandingPage: React.FC = () => {
   const styles = useStyles();
   const navigate = useNavigate();
+  const { isManager } = useAuth();
 
   const handleServicesClick = () => {
     navigate('/services');
@@ -173,6 +255,18 @@ export const LandingPage: React.FC = () => {
 
   const handleProductsClick = () => {
     navigate('/products');
+  };
+
+  const handlePipelineClick = () => {
+    navigate('/pipeline');
+  };
+
+  const handleAdminClick = () => {
+    navigate('/admin');
+  };
+
+  const handleTeamClick = () => {
+    navigate('/admin/account-managers');
   };
 
   return (
@@ -243,6 +337,61 @@ export const LandingPage: React.FC = () => {
           </div>
         </Card>
       </div>
+
+      {/* Manager Section - Only visible to managers */}
+      {isManager && (
+        <div className={styles.managerSection}>
+          <Divider className={styles.managerDivider} />
+          <div className={styles.managerHeader}>
+            <Text className={styles.managerTitle} block>
+              Manager Tools
+            </Text>
+            <Text className={styles.managerSubtitle} block>
+              Access pipeline analytics, team management, and administrative functions
+            </Text>
+          </div>
+          <div className={styles.managerCardsContainer}>
+            {/* Pipeline Card */}
+            <Card className={styles.managerCard} onClick={handlePipelineClick}>
+              <div className={styles.managerCardHeader}>
+                <div className={styles.managerIconContainer}>
+                  <DataUsage24Regular className={styles.managerIcon} />
+                </div>
+                <Text className={styles.managerCardTitle}>Pipeline</Text>
+              </div>
+              <Text className={styles.managerCardDescription} block>
+                View sales funnel, track request progress, and monitor conversion rates across all stages.
+              </Text>
+            </Card>
+
+            {/* Team Management Card */}
+            <Card className={styles.managerCard} onClick={handleTeamClick}>
+              <div className={styles.managerCardHeader}>
+                <div className={styles.managerIconContainer}>
+                  <PeopleTeam24Regular className={styles.managerIcon} />
+                </div>
+                <Text className={styles.managerCardTitle}>Team</Text>
+              </div>
+              <Text className={styles.managerCardDescription} block>
+                Manage account managers, assign regions, and configure team member access.
+              </Text>
+            </Card>
+
+            {/* Admin Card */}
+            <Card className={styles.managerCard} onClick={handleAdminClick}>
+              <div className={styles.managerCardHeader}>
+                <div className={styles.managerIconContainer}>
+                  <Settings24Regular className={styles.managerIcon} />
+                </div>
+                <Text className={styles.managerCardTitle}>Admin</Text>
+              </div>
+              <Text className={styles.managerCardDescription} block>
+                Configure services, manage specialists, and access system settings.
+              </Text>
+            </Card>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
