@@ -142,6 +142,13 @@ const LIST_DESCRIPTIONS: Record<string, string> = {
   AuditLog: 'Tracks all changes and actions in the system',
 };
 
+const DWX_LIST_DESCRIPTIONS: Record<string, string> = {
+  DWxServices: 'Service catalog for Digital Workplace offerings',
+  DWxServiceRequests: 'Service requests and sales funnel tracking',
+  DWxClients: 'Client master data and engagement history',
+  DWxSpecialists: 'Pre-sales specialists and availability',
+};
+
 export const SharePointProvisioning: React.FC = () => {
   const styles = useStyles();
   const [listStatuses, setListStatuses] = useState<ListStatus[]>([]);
@@ -156,6 +163,14 @@ export const SharePointProvisioning: React.FC = () => {
   const [lpDemoResults, setLpDemoResults] = useState<Array<{ item: string; success: boolean; message: string }> | null>(null);
   const [isDiagnosing, setIsDiagnosing] = useState(false);
   const [listFields, setListFields] = useState<Array<{ internalName: string; title: string; typeAsString: string }> | null>(null);
+
+  // DWx state
+  const [dwxListStatuses, setDwxListStatuses] = useState<ListStatus[]>([]);
+  const [isCheckingDwx, setIsCheckingDwx] = useState(false);
+  const [isProvisioningDwx, setIsProvisioningDwx] = useState(false);
+  const [dwxProvisionResults, setDwxProvisionResults] = useState<ProvisionResult[] | null>(null);
+  const [isSeedingDwx, setIsSeedingDwx] = useState(false);
+  const [dwxSeedResult, setDwxSeedResult] = useState<{ success: boolean; message: string; count: number } | null>(null);
 
   const checkListStatus = async () => {
     setIsChecking(true);
@@ -307,8 +322,101 @@ export const SharePointProvisioning: React.FC = () => {
     }
   };
 
+  // DWx functions
+  const checkDwxListStatus = async () => {
+    setIsCheckingDwx(true);
+    setError(null);
+    try {
+      const statuses = await sharePointProvisioningService.checkDWxListsStatus();
+      setDwxListStatuses(statuses);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to check DWx list status');
+    } finally {
+      setIsCheckingDwx(false);
+    }
+  };
+
+  const provisionAllDwxLists = async () => {
+    setIsProvisioningDwx(true);
+    setError(null);
+    setDwxProvisionResults(null);
+    try {
+      const { results } = await sharePointProvisioningService.provisionAllDWxLists();
+      setDwxProvisionResults(results);
+      await checkDwxListStatus();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to provision DWx lists');
+    } finally {
+      setIsProvisioningDwx(false);
+    }
+  };
+
+  const provisionSingleDwxList = async (listName: string) => {
+    setIsProvisioningDwx(true);
+    setError(null);
+    try {
+      let result: { success: boolean; message: string };
+      switch (listName) {
+        case 'DWxServices':
+          result = await sharePointProvisioningService.provisionDWxServicesList();
+          break;
+        case 'DWxServiceRequests':
+          result = await sharePointProvisioningService.provisionDWxServiceRequestsList();
+          break;
+        case 'DWxClients':
+          result = await sharePointProvisioningService.provisionDWxClientsList();
+          break;
+        case 'DWxSpecialists':
+          result = await sharePointProvisioningService.provisionDWxSpecialistsList();
+          break;
+        default:
+          throw new Error(`Unknown DWx list: ${listName}`);
+      }
+      setDwxProvisionResults([{ list: listName, ...result }]);
+      await checkDwxListStatus();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : `Failed to provision ${listName}`);
+    } finally {
+      setIsProvisioningDwx(false);
+    }
+  };
+
+  const seedDwxServices = async () => {
+    setIsSeedingDwx(true);
+    setError(null);
+    setDwxSeedResult(null);
+    try {
+      const result = await sharePointProvisioningService.seedDWxServicesData();
+      setDwxSeedResult(result);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to seed DWx services');
+    } finally {
+      setIsSeedingDwx(false);
+    }
+  };
+
+  const setupDwxTrafficManager = async () => {
+    setIsProvisioningDwx(true);
+    setIsSeedingDwx(true);
+    setError(null);
+    setDwxProvisionResults(null);
+    setDwxSeedResult(null);
+    try {
+      const { lists, seed } = await sharePointProvisioningService.setupDWxTrafficManager();
+      setDwxProvisionResults(lists.results);
+      setDwxSeedResult(seed);
+      await checkDwxListStatus();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to setup DWx Traffic Manager');
+    } finally {
+      setIsProvisioningDwx(false);
+      setIsSeedingDwx(false);
+    }
+  };
+
   useEffect(() => {
     checkListStatus();
+    checkDwxListStatus();
   }, []);
 
   const getStatusForList = (listName: string): boolean | null => {
@@ -316,8 +424,16 @@ export const SharePointProvisioning: React.FC = () => {
     return status?.exists ?? null;
   };
 
+  const getDwxStatusForList = (listName: string): boolean | null => {
+    const status = dwxListStatuses.find((s) => s.list === listName);
+    return status?.exists ?? null;
+  };
+
   const allListsExist = listStatuses.length > 0 && listStatuses.every((s) => s.exists);
   const missingLists = listStatuses.filter((s) => !s.exists);
+
+  const allDwxListsExist = dwxListStatuses.length > 0 && dwxListStatuses.every((s) => s.exists);
+  const missingDwxLists = dwxListStatuses.filter((s) => !s.exists);
 
   return (
     <div className={styles.container}>
@@ -332,6 +448,178 @@ export const SharePointProvisioning: React.FC = () => {
           </Text>
         </div>
       </div>
+
+      {/* DWx Traffic Manager Lists Section */}
+      <div className={styles.lpDemoSection}>
+        <div className={styles.sectionHeader}>
+          <Database24Regular className={styles.sectionIcon} />
+          <Text size={400} weight="semibold">
+            DWx Traffic Manager Lists
+          </Text>
+        </div>
+        <Text className={styles.description}>
+          Core SharePoint lists for the DWx Traffic Manager application
+        </Text>
+
+        <div className={styles.listGrid}>
+          {['DWxServices', 'DWxServiceRequests', 'DWxClients', 'DWxSpecialists'].map((listName) => {
+            const exists = getDwxStatusForList(listName);
+            return (
+              <Card key={listName} className={styles.listCard}>
+                <div className={styles.listCardHeader}>
+                  <Text className={styles.listName}>{listName}</Text>
+                  {isCheckingDwx ? (
+                    <Spinner size="tiny" />
+                  ) : exists === null ? (
+                    <Badge appearance="outline" color="informative">
+                      Unknown
+                    </Badge>
+                  ) : exists ? (
+                    <Badge
+                      appearance="filled"
+                      color="success"
+                      icon={<Checkmark24Regular />}
+                      className={styles.statusBadge}
+                    >
+                      Exists
+                    </Badge>
+                  ) : (
+                    <Badge
+                      appearance="filled"
+                      color="warning"
+                      icon={<Dismiss24Regular />}
+                      className={styles.statusBadge}
+                    >
+                      Missing
+                    </Badge>
+                  )}
+                </div>
+                <Text className={styles.listDescription}>
+                  {DWX_LIST_DESCRIPTIONS[listName]}
+                </Text>
+                {exists === false && (
+                  <Button
+                    size="small"
+                    appearance="outline"
+                    icon={<Add24Regular />}
+                    onClick={() => provisionSingleDwxList(listName)}
+                    disabled={isProvisioningDwx}
+                  >
+                    Create List
+                  </Button>
+                )}
+              </Card>
+            );
+          })}
+        </div>
+
+        <div className={styles.lpDemoActions}>
+          <Button
+            appearance="secondary"
+            icon={<ArrowSync24Regular />}
+            onClick={checkDwxListStatus}
+            disabled={isCheckingDwx || isProvisioningDwx}
+          >
+            {isCheckingDwx ? 'Checking...' : 'Refresh DWx Status'}
+          </Button>
+
+          {!allDwxListsExist && missingDwxLists.length > 0 && (
+            <Button
+              appearance="outline"
+              icon={<Database24Regular />}
+              onClick={provisionAllDwxLists}
+              disabled={isProvisioningDwx || isCheckingDwx}
+            >
+              {isProvisioningDwx ? (
+                <>
+                  <Spinner size="tiny" style={{ marginRight: '8px' }} />
+                  Provisioning...
+                </>
+              ) : (
+                `Create All DWx Lists (${missingDwxLists.length})`
+              )}
+            </Button>
+          )}
+
+          <Button
+            appearance="outline"
+            icon={<Add24Regular />}
+            onClick={seedDwxServices}
+            disabled={isSeedingDwx || isProvisioningDwx}
+          >
+            {isSeedingDwx ? (
+              <>
+                <Spinner size="tiny" style={{ marginRight: '8px' }} />
+                Seeding...
+              </>
+            ) : (
+              'Seed Service Catalog'
+            )}
+          </Button>
+
+          <Button
+            appearance="primary"
+            icon={<Settings24Regular />}
+            onClick={setupDwxTrafficManager}
+            disabled={isProvisioningDwx || isSeedingDwx}
+          >
+            {(isProvisioningDwx || isSeedingDwx) ? (
+              <>
+                <Spinner size="tiny" style={{ marginRight: '8px' }} />
+                Setting Up...
+              </>
+            ) : (
+              'Full DWx Setup (Lists + Seed Data)'
+            )}
+          </Button>
+
+          {allDwxListsExist && (
+            <Badge appearance="filled" color="success" size="large">
+              All DWx lists provisioned
+            </Badge>
+          )}
+        </div>
+
+        {dwxProvisionResults && dwxProvisionResults.length > 0 && (
+          <div className={styles.resultsContainer}>
+            <Text weight="semibold" block style={{ marginBottom: '8px' }}>
+              DWx Provisioning Results
+            </Text>
+            {dwxProvisionResults.map((result) => (
+              <div key={result.list} className={styles.resultItem}>
+                {result.success ? (
+                  <Checkmark24Regular className={styles.successIcon} />
+                ) : (
+                  <Dismiss24Regular className={styles.errorIcon} />
+                )}
+                <Text>
+                  <strong>{result.list}:</strong> {result.message}
+                </Text>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {dwxSeedResult && (
+          <div className={styles.resultsContainer}>
+            <Text weight="semibold" block style={{ marginBottom: '8px' }}>
+              Seed Data Results
+            </Text>
+            <div className={styles.resultItem}>
+              {dwxSeedResult.success ? (
+                <Checkmark24Regular className={styles.successIcon} />
+              ) : (
+                <Dismiss24Regular className={styles.errorIcon} />
+              )}
+              <Text>
+                {dwxSeedResult.message} {dwxSeedResult.count > 0 && `(${dwxSeedResult.count} items)`}
+              </Text>
+            </div>
+          </div>
+        )}
+      </div>
+
+      <Divider />
 
       {error && (
         <Card style={{ backgroundColor: tokens.colorPaletteRedBackground1 }}>

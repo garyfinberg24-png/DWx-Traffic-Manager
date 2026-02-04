@@ -855,6 +855,218 @@ class SharePointProvisioningService {
     };
   }
 
+  // ==================== DWX LIST DEFINITIONS ====================
+
+  /**
+   * DWxServices - Service Catalog list definition
+   */
+  private get dwxServicesListDefinition(): ListDefinition {
+    return {
+      title: 'DWxServices',
+      description: 'Digital Workplace Service Catalog for pre-sales offerings',
+      fields: [
+        { internalName: 'Description', displayName: 'Description', type: 'Note', required: true },
+        { internalName: 'ShortDescription', displayName: 'Short Description', type: 'Text', required: true },
+        {
+          internalName: 'Category',
+          displayName: 'Category',
+          type: 'Choice',
+          required: true,
+          choices: ['Power Platform', 'SPFx Development', 'SharePoint Migration', 'M365 Assessment', 'Copilot Agents', 'MS Viva'],
+        },
+        {
+          internalName: 'TypicalDuration',
+          displayName: 'Typical Duration',
+          type: 'Choice',
+          choices: ['30min', '1hr', '2hr', 'Half-day', 'Full-day', 'Multi-day'],
+        },
+        {
+          internalName: 'ComplexityLevel',
+          displayName: 'Complexity Level',
+          type: 'Choice',
+          choices: ['Low', 'Medium', 'High', 'Enterprise'],
+        },
+        {
+          internalName: 'PricingModel',
+          displayName: 'Pricing Model',
+          type: 'Choice',
+          choices: ['Fixed', 'Hourly', 'Project-based', 'TBD'],
+        },
+        { internalName: 'BasePrice', displayName: 'Base Price (ZAR)', type: 'Number' },
+        { internalName: 'RequiredRoles', displayName: 'Required Roles', type: 'Note' }, // JSON array
+        { internalName: 'Prerequisites', displayName: 'Prerequisites', type: 'Note' },
+        { internalName: 'IsActive', displayName: 'Is Active', type: 'Boolean', defaultValue: '1' },
+        { internalName: 'SortOrder', displayName: 'Sort Order', type: 'Number' },
+        { internalName: 'IconName', displayName: 'Icon Name', type: 'Text' },
+      ],
+    };
+  }
+
+  /**
+   * DWxServiceRequests - Main service requests / sales funnel list definition
+   */
+  private get dwxServiceRequestsListDefinition(): ListDefinition {
+    return {
+      title: 'DWxServiceRequests',
+      description: 'Service requests and sales funnel tracking for Digital Workplace',
+      fields: [
+        // Service Reference
+        { internalName: 'ServiceId', displayName: 'Service ID', type: 'Number' },
+        { internalName: 'ServiceName', displayName: 'Service Name', type: 'Text', required: true },
+
+        // Account Manager
+        { internalName: 'AccountManagerName', displayName: 'Account Manager Name', type: 'Text', required: true },
+        { internalName: 'AccountManagerEmail', displayName: 'Account Manager Email', type: 'Text', required: true },
+        {
+          internalName: 'AccountManagerTenant',
+          displayName: 'Account Manager Tenant',
+          type: 'Choice',
+          choices: ['Internal', 'External'],
+          defaultValue: 'Internal',
+        },
+
+        // Client Information
+        { internalName: 'ClientName', displayName: 'Client Name', type: 'Text', required: true },
+        { internalName: 'ClientId', displayName: 'Client ID', type: 'Number' },
+        { internalName: 'ContactName', displayName: 'Contact Name', type: 'Text', required: true },
+        { internalName: 'ContactEmail', displayName: 'Contact Email', type: 'Text', required: true },
+        { internalName: 'ContactPhone', displayName: 'Contact Phone', type: 'Text' },
+        {
+          internalName: 'Industry',
+          displayName: 'Industry',
+          type: 'Choice',
+          choices: ['Technology', 'Finance', 'Healthcare', 'Retail', 'Manufacturing', 'Government', 'Education', 'Legal', 'Non-Profit', 'Other'],
+        },
+        {
+          internalName: 'CompanySize',
+          displayName: 'Company Size',
+          type: 'Choice',
+          choices: ['SMB', 'Medium', 'Large', 'Enterprise'],
+        },
+
+        // Funnel State
+        {
+          internalName: 'FunnelStage',
+          displayName: 'Funnel Stage',
+          type: 'Choice',
+          required: true,
+          choices: ['Lead', 'Qualified', 'Discovery', 'Proposal', 'Negotiation', 'Won', 'Lost'],
+          defaultValue: 'Lead',
+        },
+        {
+          internalName: 'InterestLevel',
+          displayName: 'Interest Level',
+          type: 'Choice',
+          choices: ['Hot', 'Warm', 'Cold'],
+          defaultValue: 'Warm',
+        },
+
+        // Deal Information
+        { internalName: 'DealValue', displayName: 'Deal Value (ZAR)', type: 'Number' },
+        { internalName: 'DealProbability', displayName: 'Deal Probability (%)', type: 'Number' },
+        { internalName: 'ExpectedCloseDate', displayName: 'Expected Close Date', type: 'DateTime' },
+        { internalName: 'Budget', displayName: 'Budget', type: 'Text' },
+        { internalName: 'Timeline', displayName: 'Timeline', type: 'Text' },
+
+        // Scheduling
+        { internalName: 'ProposedSlot1', displayName: 'Proposed Slot 1', type: 'DateTime', required: true },
+        { internalName: 'ProposedSlot2', displayName: 'Proposed Slot 2', type: 'DateTime' },
+        { internalName: 'ProposedSlot3', displayName: 'Proposed Slot 3', type: 'DateTime' },
+        { internalName: 'ConfirmedDateTime', displayName: 'Confirmed Date/Time', type: 'DateTime' },
+        { internalName: 'CalendarEventId', displayName: 'Calendar Event ID', type: 'Text' },
+
+        // Assignment
+        { internalName: 'AssignedSpecialistName', displayName: 'Assigned Specialist Name', type: 'Text' },
+        { internalName: 'AssignedSpecialistEmail', displayName: 'Assigned Specialist Email', type: 'Text' },
+        {
+          internalName: 'AssignedSpecialistRole',
+          displayName: 'Assigned Specialist Role',
+          type: 'Choice',
+          choices: ['Solution Architect', 'Technical Specialist', 'Consultant'],
+        },
+
+        // Additional Info
+        { internalName: 'Requirements', displayName: 'Requirements', type: 'Note' },
+        { internalName: 'ServiceHistory', displayName: 'Service History', type: 'Note' },
+        { internalName: 'WinLossReason', displayName: 'Win/Loss Reason', type: 'Text' },
+        { internalName: 'NextSteps', displayName: 'Next Steps', type: 'Note' },
+        { internalName: 'Comments', displayName: 'Comments', type: 'Note' },
+        { internalName: 'DocumentIds', displayName: 'Document IDs', type: 'Note' }, // JSON array
+      ],
+    };
+  }
+
+  /**
+   * DWxClients - Client master data list definition
+   */
+  private get dwxClientsListDefinition(): ListDefinition {
+    return {
+      title: 'DWxClients',
+      description: 'Client master data for Digital Workplace',
+      fields: [
+        { internalName: 'PrimaryContactName', displayName: 'Primary Contact Name', type: 'Text', required: true },
+        { internalName: 'PrimaryContactEmail', displayName: 'Primary Contact Email', type: 'Text', required: true },
+        { internalName: 'DecisionMakerName', displayName: 'Decision Maker Name', type: 'Text' },
+        { internalName: 'DecisionMakerEmail', displayName: 'Decision Maker Email', type: 'Text' },
+        { internalName: 'Phone', displayName: 'Phone', type: 'Text' },
+        {
+          internalName: 'Industry',
+          displayName: 'Industry',
+          type: 'Choice',
+          choices: ['Technology', 'Finance', 'Healthcare', 'Retail', 'Manufacturing', 'Government', 'Education', 'Legal', 'Non-Profit', 'Other'],
+        },
+        {
+          internalName: 'CompanySize',
+          displayName: 'Company Size',
+          type: 'Choice',
+          choices: ['SMB', 'Medium', 'Large', 'Enterprise'],
+        },
+        { internalName: 'Address', displayName: 'Address', type: 'Note' },
+        { internalName: 'Website', displayName: 'Website', type: 'Text' },
+        { internalName: 'TenantId', displayName: 'M365 Tenant ID', type: 'Text' },
+        { internalName: 'IsPremium', displayName: 'Premium Client', type: 'Boolean', defaultValue: '0' },
+        { internalName: 'AccountManagerEmail', displayName: 'Account Manager Email', type: 'Text' },
+        { internalName: 'EngagementCount', displayName: 'Engagement Count', type: 'Number' },
+        { internalName: 'TotalRevenue', displayName: 'Total Revenue (ZAR)', type: 'Number' },
+        { internalName: 'LastEngagementDate', displayName: 'Last Engagement Date', type: 'DateTime' },
+        {
+          internalName: 'ContractStatus',
+          displayName: 'Contract Status',
+          type: 'Choice',
+          choices: ['Prospect', 'Active', 'Churned'],
+          defaultValue: 'Prospect',
+        },
+        { internalName: 'Notes', displayName: 'Notes', type: 'Note' },
+      ],
+    };
+  }
+
+  /**
+   * DWxSpecialists - Pre-sales specialists list definition
+   */
+  private get dwxSpecialistsListDefinition(): ListDefinition {
+    return {
+      title: 'DWxSpecialists',
+      description: 'Pre-sales specialists for Digital Workplace',
+      fields: [
+        { internalName: 'Email', displayName: 'Email', type: 'Text', required: true },
+        {
+          internalName: 'Role',
+          displayName: 'Role',
+          type: 'Choice',
+          required: true,
+          choices: ['Solution Architect', 'Technical Specialist', 'Consultant'],
+        },
+        { internalName: 'Specializations', displayName: 'Specializations', type: 'Note' }, // JSON array of categories
+        { internalName: 'MaxConcurrentDeals', displayName: 'Max Concurrent Deals', type: 'Number' },
+        { internalName: 'CurrentDealCount', displayName: 'Current Deal Count', type: 'Number' },
+        { internalName: 'IsActive', displayName: 'Is Active', type: 'Boolean', defaultValue: '1' },
+        { internalName: 'CalendarEmail', displayName: 'Calendar Email', type: 'Text' },
+        { internalName: 'Phone', displayName: 'Phone', type: 'Text' },
+      ],
+    };
+  }
+
   // ==================== LIST DEFINITIONS ====================
 
   private get accountManagersListDefinition(): ListDefinition {
@@ -1098,6 +1310,247 @@ class SharePointProvisioningService {
     }
 
     return results;
+  }
+
+  // ==================== DWX PROVISIONING METHODS ====================
+
+  /**
+   * Provision the DWxServices list (Service Catalog)
+   */
+  async provisionDWxServicesList(): Promise<{ success: boolean; message: string }> {
+    return this.provisionList(this.dwxServicesListDefinition);
+  }
+
+  /**
+   * Provision the DWxServiceRequests list (Sales Funnel)
+   */
+  async provisionDWxServiceRequestsList(): Promise<{ success: boolean; message: string }> {
+    return this.provisionList(this.dwxServiceRequestsListDefinition);
+  }
+
+  /**
+   * Provision the DWxClients list
+   */
+  async provisionDWxClientsList(): Promise<{ success: boolean; message: string }> {
+    return this.provisionList(this.dwxClientsListDefinition);
+  }
+
+  /**
+   * Provision the DWxSpecialists list
+   */
+  async provisionDWxSpecialistsList(): Promise<{ success: boolean; message: string }> {
+    return this.provisionList(this.dwxSpecialistsListDefinition);
+  }
+
+  /**
+   * Provision all DWx lists for the Traffic Manager application
+   */
+  async provisionAllDWxLists(): Promise<{ results: Array<{ list: string; success: boolean; message: string }> }> {
+    const results: Array<{ list: string; success: boolean; message: string }> = [];
+
+    const lists = [
+      { name: 'DWxServices', provision: () => this.provisionDWxServicesList() },
+      { name: 'DWxServiceRequests', provision: () => this.provisionDWxServiceRequestsList() },
+      { name: 'DWxClients', provision: () => this.provisionDWxClientsList() },
+      { name: 'DWxSpecialists', provision: () => this.provisionDWxSpecialistsList() },
+    ];
+
+    for (const list of lists) {
+      const result = await list.provision();
+      results.push({ list: list.name, ...result });
+    }
+
+    return { results };
+  }
+
+  /**
+   * Check which DWx lists exist
+   */
+  async checkDWxListsStatus(): Promise<Array<{ list: string; exists: boolean }>> {
+    const listNames = ['DWxServices', 'DWxServiceRequests', 'DWxClients', 'DWxSpecialists'];
+    const results: Array<{ list: string; exists: boolean }> = [];
+
+    for (const name of listNames) {
+      const exists = await this.listExists(name);
+      results.push({ list: name, exists });
+    }
+
+    return results;
+  }
+
+  /**
+   * Seed the DWxServices list with default service catalog data
+   */
+  async seedDWxServicesData(): Promise<{ success: boolean; message: string; count: number }> {
+    try {
+      const token = await authService.getGraphToken();
+      const digest = await this.getRequestDigest();
+      const listName = 'DWxServices';
+
+      // Check if list exists
+      const exists = await this.listExists(listName);
+      if (!exists) {
+        return { success: false, message: 'DWxServices list does not exist. Please provision it first.', count: 0 };
+      }
+
+      // Check if list already has items
+      const checkResponse = await fetch(
+        `${this.siteUrl}/_api/web/lists/getbytitle('${listName}')/items?$top=1`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            Accept: 'application/json;odata=verbose',
+          },
+        }
+      );
+
+      if (checkResponse.ok) {
+        const checkData = await checkResponse.json();
+        if (checkData.d.results.length > 0) {
+          return { success: true, message: 'DWxServices list already has data. Skipping seed.', count: 0 };
+        }
+      }
+
+      // Seed data
+      const seedData = [
+        {
+          Title: 'Power Platform Development',
+          Description: 'Custom Power Apps, Power Automate flows, Power BI dashboards, and Power Pages solutions tailored to your business needs.',
+          ShortDescription: 'Custom Power Apps & Automation',
+          Category: 'Power Platform',
+          TypicalDuration: '2hr',
+          ComplexityLevel: 'Medium',
+          PricingModel: 'Project-based',
+          BasePrice: 25000,
+          RequiredRoles: JSON.stringify(['Solution Architect', 'Technical Specialist']),
+          Prerequisites: 'M365 license with Power Platform access',
+          IsActive: true,
+          SortOrder: 1,
+          IconName: 'LightningBolt',
+        },
+        {
+          Title: 'SPFx Development',
+          Description: 'Custom SharePoint Framework solutions including web parts, extensions, adaptive cards, and Teams apps integrated with SharePoint.',
+          ShortDescription: 'Custom SharePoint & Teams Apps',
+          Category: 'SPFx Development',
+          TypicalDuration: '2hr',
+          ComplexityLevel: 'High',
+          PricingModel: 'Project-based',
+          BasePrice: 35000,
+          RequiredRoles: JSON.stringify(['Technical Specialist']),
+          Prerequisites: 'SharePoint Online tenant with App Catalog',
+          IsActive: true,
+          SortOrder: 2,
+          IconName: 'Code',
+        },
+        {
+          Title: 'SharePoint Migration',
+          Description: 'End-to-end migration services from on-premises SharePoint, file shares, or other platforms to SharePoint Online and OneDrive.',
+          ShortDescription: 'Cloud Migration Services',
+          Category: 'SharePoint Migration',
+          TypicalDuration: 'Half-day',
+          ComplexityLevel: 'High',
+          PricingModel: 'Project-based',
+          BasePrice: 50000,
+          RequiredRoles: JSON.stringify(['Solution Architect', 'Technical Specialist']),
+          Prerequisites: 'Source environment access, target M365 tenant',
+          IsActive: true,
+          SortOrder: 3,
+          IconName: 'CloudArrowUp',
+        },
+        {
+          Title: 'M365 Tenant Assessment',
+          Description: 'Comprehensive assessment of your Microsoft 365 environment including security, compliance, governance, and adoption recommendations.',
+          ShortDescription: 'Environment Health Check',
+          Category: 'M365 Assessment',
+          TypicalDuration: 'Full-day',
+          ComplexityLevel: 'Medium',
+          PricingModel: 'Fixed',
+          BasePrice: 15000,
+          RequiredRoles: JSON.stringify(['Solution Architect']),
+          Prerequisites: 'Global Admin or Reports Reader access',
+          IsActive: true,
+          SortOrder: 4,
+          IconName: 'ShieldCheckmark',
+        },
+        {
+          Title: 'Enterprise Copilot Agents',
+          Description: 'Design and implementation of Microsoft Copilot agents for enterprise scenarios including custom plugins, knowledge bases, and workflow automation.',
+          ShortDescription: 'AI-Powered Copilot Solutions',
+          Category: 'Copilot Agents',
+          TypicalDuration: '2hr',
+          ComplexityLevel: 'Enterprise',
+          PricingModel: 'Project-based',
+          BasePrice: 75000,
+          RequiredRoles: JSON.stringify(['Solution Architect', 'Technical Specialist']),
+          Prerequisites: 'Copilot license, Azure subscription for custom plugins',
+          IsActive: true,
+          SortOrder: 5,
+          IconName: 'Bot',
+        },
+        {
+          Title: 'Microsoft Viva Suite',
+          Description: 'Implementation of Microsoft Viva modules including Viva Connections, Viva Engage, Viva Learning, Viva Insights, and Viva Goals for employee experience.',
+          ShortDescription: 'Employee Experience Platform',
+          Category: 'MS Viva',
+          TypicalDuration: 'Half-day',
+          ComplexityLevel: 'Medium',
+          PricingModel: 'Project-based',
+          BasePrice: 40000,
+          RequiredRoles: JSON.stringify(['Solution Architect', 'Consultant']),
+          Prerequisites: 'Viva license, SharePoint home site configured',
+          IsActive: true,
+          SortOrder: 6,
+          IconName: 'PeopleTeam',
+        },
+      ];
+
+      let createdCount = 0;
+      for (const item of seedData) {
+        const response = await fetch(
+          `${this.siteUrl}/_api/web/lists/getbytitle('${listName}')/items`,
+          {
+            method: 'POST',
+            headers: {
+              Authorization: `Bearer ${token}`,
+              Accept: 'application/json;odata=verbose',
+              'Content-Type': 'application/json;odata=verbose',
+              'X-RequestDigest': digest,
+            },
+            body: JSON.stringify({
+              __metadata: { type: 'SP.Data.DWxServicesListItem' },
+              ...item,
+            }),
+          }
+        );
+
+        if (response.ok) {
+          createdCount++;
+        } else {
+          console.error(`[Provisioning] Failed to create service: ${item.Title}`, await response.text());
+        }
+      }
+
+      return { success: true, message: `Seeded ${createdCount} services to DWxServices`, count: createdCount };
+    } catch (error) {
+      return {
+        success: false,
+        message: error instanceof Error ? error.message : 'Failed to seed DWxServices',
+        count: 0,
+      };
+    }
+  }
+
+  /**
+   * Complete DWx setup: provision lists and seed initial data
+   */
+  async setupDWxTrafficManager(): Promise<{
+    lists: { results: Array<{ list: string; success: boolean; message: string }> };
+    seed: { success: boolean; message: string; count: number };
+  }> {
+    const lists = await this.provisionAllDWxLists();
+    const seed = await this.seedDWxServicesData();
+    return { lists, seed };
   }
 
   // ==================== LPDEMOSCHEDULER FORMATTING ====================
