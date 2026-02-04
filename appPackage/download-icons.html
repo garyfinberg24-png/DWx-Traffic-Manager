@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LP Booking - Download Icons</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+            background: #f0f4f8;
+            text-align: center;
+        }
+        h1 { color: #0078D4; }
+        .preview-container {
+            display: flex;
+            justify-content: center;
+            gap: 60px;
+            margin: 40px 0;
+        }
+        .preview-box {
+            background: white;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        .preview-box h3 { margin-top: 0; color: #333; }
+        .outline-bg {
+            background: #333;
+            padding: 15px;
+            border-radius: 8px;
+            display: inline-block;
+        }
+        button {
+            background: #0078D4;
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            margin: 10px;
+            transition: all 0.2s;
+        }
+        button:hover {
+            background: #005A9E;
+            transform: translateY(-2px);
+        }
+        .success {
+            background: #d4edda;
+            border: 1px solid #28a745;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            display: none;
+        }
+        .instructions {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 30px;
+            text-align: left;
+        }
+        code {
+            background: #e9ecef;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Consolas', monospace;
+        }
+    </style>
+</head>
+<body>
+    <h1>🗓️ LP Booking - Classic Blue with Calendar</h1>
+    <p>Your selected icon design - click to download</p>
+
+    <div class="preview-container">
+        <div class="preview-box">
+            <h3>Color Icon (192×192)</h3>
+            <canvas id="colorCanvas" width="192" height="192"></canvas>
+            <br><br>
+            <button onclick="download('color')">⬇️ Download color.png</button>
+        </div>
+        <div class="preview-box">
+            <h3>Outline Icon (32×32)</h3>
+            <div class="outline-bg">
+                <canvas id="outlineCanvas" width="32" height="32"></canvas>
+            </div>
+            <p style="color:#666; font-size:12px;">Shown on dark background</p>
+            <button onclick="download('outline')">⬇️ Download outline.png</button>
+        </div>
+    </div>
+
+    <div class="success" id="success">
+        ✅ Icon downloaded! Save it to <code>LP_Booking_App/appPackage/</code>
+    </div>
+
+    <div class="instructions">
+        <h3>📋 Next Steps</h3>
+        <ol>
+            <li>Download both <code>color.png</code> and <code>outline.png</code></li>
+            <li>Save them to the <code>appPackage</code> folder</li>
+            <li>Run this PowerShell command to create the Teams package:
+                <pre style="background:#1e1e1e; color:#d4d4d4; padding:10px; border-radius:6px; overflow-x:auto;">cd LP_Booking_App/appPackage
+Compress-Archive -Path manifest.json, color.png, outline.png -DestinationPath ../LPBookingApp.zip -Force</pre>
+            </li>
+        </ol>
+    </div>
+
+    <script>
+        // Draw Color Icon (192x192) - Classic Blue with Calendar
+        function drawColorIcon() {
+            const canvas = document.getElementById('colorCanvas');
+            const ctx = canvas.getContext('2d');
+            const size = 192;
+
+            // Clear
+            ctx.clearRect(0, 0, size, size);
+
+            // Rounded rectangle background
+            const radius = 32;
+            ctx.beginPath();
+            ctx.moveTo(radius, 0);
+            ctx.lineTo(size - radius, 0);
+            ctx.quadraticCurveTo(size, 0, size, radius);
+            ctx.lineTo(size, size - radius);
+            ctx.quadraticCurveTo(size, size, size - radius, size);
+            ctx.lineTo(radius, size);
+            ctx.quadraticCurveTo(0, size, 0, size - radius);
+            ctx.lineTo(0, radius);
+            ctx.quadraticCurveTo(0, 0, radius, 0);
+            ctx.closePath();
+
+            // Gradient background
+            const gradient = ctx.createLinearGradient(0, 0, size, size);
+            gradient.addColorStop(0, '#0078D4');
+            gradient.addColorStop(1, '#005A9E');
+            ctx.fillStyle = gradient;
+            ctx.fill();
+
+            // Calendar top bar (header)
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.25)';
+            roundRect(ctx, 20, 12, size - 40, 28, 6);
+            ctx.fill();
+
+            // Calendar rings/hooks
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+            ctx.fillRect(45, 6, 8, 16);
+            ctx.fillRect(size - 53, 6, 8, 16);
+
+            // Calendar body outline
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+            ctx.lineWidth = 2;
+            roundRect(ctx, 20, 40, size - 40, size - 60, 8);
+            ctx.stroke();
+
+            // Calendar grid dots (representing dates)
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.15)';
+            const gridStartX = 35;
+            const gridStartY = 125;
+            const dotSpacing = 28;
+            const dotSize = 6;
+
+            for (let row = 0; row < 2; row++) {
+                for (let col = 0; col < 5; col++) {
+                    ctx.beginPath();
+                    ctx.arc(gridStartX + col * dotSpacing, gridStartY + row * 22, dotSize, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+
+            // Highlighted date (checkmark/selected)
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.35)';
+            ctx.beginPath();
+            ctx.arc(gridStartX + 3 * dotSpacing, gridStartY, 10, 0, Math.PI * 2);
+            ctx.fill();
+
+            // "LP" text
+            ctx.fillStyle = '#FFFFFF';
+            ctx.font = 'bold 72px Segoe UI, Arial, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('LP', size / 2, size / 2 - 8);
+
+            // "Booking" text
+            ctx.font = '600 20px Segoe UI, Arial, sans-serif';
+            ctx.fillText('Booking', size / 2, size / 2 + 45);
+        }
+
+        // Draw Outline Icon (32x32) - With calendar element
+        function drawOutlineIcon() {
+            const canvas = document.getElementById('outlineCanvas');
+            const ctx = canvas.getContext('2d');
+            const size = 32;
+
+            ctx.clearRect(0, 0, size, size);
+
+            // Outer rounded rectangle
+            ctx.strokeStyle = '#FFFFFF';
+            ctx.lineWidth = 1.5;
+            roundRect(ctx, 1, 1, size - 2, size - 2, 4);
+            ctx.stroke();
+
+            // Calendar top bar
+            ctx.fillStyle = '#FFFFFF';
+            ctx.fillRect(4, 3, size - 8, 4);
+
+            // Calendar hooks
+            ctx.fillRect(8, 1, 2, 4);
+            ctx.fillRect(size - 10, 1, 2, 4);
+
+            // "LP" text
+            ctx.font = 'bold 12px Segoe UI, Arial, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('LP', size / 2, size / 2 + 3);
+        }
+
+        // Helper: Rounded rectangle
+        function roundRect(ctx, x, y, width, height, radius) {
+            ctx.beginPath();
+            ctx.moveTo(x + radius, y);
+            ctx.lineTo(x + width - radius, y);
+            ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+            ctx.lineTo(x + width, y + height - radius);
+            ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+            ctx.lineTo(x + radius, y + height);
+            ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+            ctx.lineTo(x, y + radius);
+            ctx.quadraticCurveTo(x, y, x + radius, y);
+            ctx.closePath();
+        }
+
+        // Download function
+        function download(type) {
+            const canvas = document.getElementById(type + 'Canvas');
+            const link = document.createElement('a');
+            link.download = type + '.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+
+            document.getElementById('success').style.display = 'block';
+            setTimeout(() => {
+                document.getElementById('success').style.display = 'none';
+            }, 3000);
+        }
+
+        // Initialize
+        drawColorIcon();
+        drawOutlineIcon();
+    </script>
+</body>
+</html>

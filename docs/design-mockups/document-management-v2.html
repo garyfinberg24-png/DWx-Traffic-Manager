@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document Management - Variation 2 (Table-Based with Checkboxes)</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: #f5f5f5;
+      padding: 24px;
+      color: #242424;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+
+    .header-info h1 {
+      font-size: 18px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 4px;
+    }
+
+    .header-info p {
+      font-size: 13px;
+      color: #616161;
+    }
+
+    .btn {
+      padding: 8px 16px;
+      border-radius: 4px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border: none;
+      transition: all 0.15s ease;
+    }
+
+    .btn-primary {
+      background: #1e6b7b;
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: #154f5c;
+    }
+
+    .btn-secondary {
+      background: white;
+      color: #242424;
+      border: 1px solid #d1d1d1;
+    }
+
+    .btn-secondary:hover {
+      background: #f5f5f5;
+    }
+
+    .btn-sm {
+      padding: 4px 8px;
+      font-size: 12px;
+    }
+
+    .btn-danger {
+      color: #d13438;
+    }
+
+    .btn-danger:hover {
+      background: #fde7e9;
+    }
+
+    /* Tabs */
+    .tabs {
+      display: flex;
+      border-bottom: 1px solid #e1e1e1;
+      margin-bottom: 20px;
+      background: white;
+      border-radius: 8px 8px 0 0;
+      overflow: hidden;
+    }
+
+    .tab {
+      padding: 12px 20px;
+      font-size: 14px;
+      font-weight: 500;
+      color: #616161;
+      cursor: pointer;
+      border: none;
+      background: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      position: relative;
+      transition: all 0.15s ease;
+    }
+
+    .tab:hover {
+      color: #242424;
+      background: #f5f5f5;
+    }
+
+    .tab.active {
+      color: #1e6b7b;
+    }
+
+    .tab.active::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: #1e6b7b;
+    }
+
+    .tab-badge {
+      background: #e1e1e1;
+      color: #616161;
+      font-size: 11px;
+      padding: 2px 6px;
+      border-radius: 10px;
+    }
+
+    .tab.active .tab-badge {
+      background: #e8f4f6;
+      color: #1e6b7b;
+    }
+
+    /* Content Panel */
+    .panel {
+      background: white;
+      border-radius: 0 0 8px 8px;
+      border: 1px solid #e1e1e1;
+      border-top: none;
+    }
+
+    /* Table */
+    .table-container {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th, td {
+      padding: 12px 16px;
+      text-align: left;
+      border-bottom: 1px solid #e1e1e1;
+    }
+
+    th {
+      background: #fafafa;
+      font-size: 12px;
+      font-weight: 600;
+      color: #616161;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    td {
+      font-size: 14px;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    tr:hover td {
+      background: #fafafa;
+    }
+
+    .document-cell {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .document-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .document-icon.pdf {
+      background: #fde7e9;
+      color: #d13438;
+    }
+
+    .document-icon.docx {
+      background: #e6f2fb;
+      color: #0078d4;
+    }
+
+    .document-details {
+      min-width: 0;
+    }
+
+    .document-name {
+      font-weight: 500;
+      margin-bottom: 2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 300px;
+    }
+
+    .document-meta {
+      font-size: 12px;
+      color: #616161;
+    }
+
+    /* Custom Checkbox */
+    .checkbox-cell {
+      text-align: center;
+      width: 100px;
+    }
+
+    .custom-checkbox {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    .custom-checkbox input {
+      display: none;
+    }
+
+    .checkbox-box {
+      width: 20px;
+      height: 20px;
+      border: 2px solid #d1d1d1;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s ease;
+    }
+
+    .custom-checkbox:hover .checkbox-box {
+      border-color: #1e6b7b;
+    }
+
+    .custom-checkbox input:checked + .checkbox-box {
+      background: #1e6b7b;
+      border-color: #1e6b7b;
+    }
+
+    .checkbox-box svg {
+      width: 14px;
+      height: 14px;
+      color: white;
+      opacity: 0;
+      transform: scale(0.5);
+      transition: all 0.15s ease;
+    }
+
+    .custom-checkbox input:checked + .checkbox-box svg {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    /* Column Headers with Icons */
+    .column-header {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .column-header.demo {
+      color: #e65100;
+    }
+
+    .column-header.deployment {
+      color: #2e7d32;
+    }
+
+    /* Actions */
+    .actions-cell {
+      width: 100px;
+      text-align: right;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 4px;
+      justify-content: flex-end;
+    }
+
+    /* Upload Section */
+    .upload-section {
+      padding: 20px;
+      border-top: 1px solid #e1e1e1;
+    }
+
+    .upload-zone {
+      border: 2px dashed #d1d1d1;
+      border-radius: 8px;
+      padding: 24px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      background: #fafafa;
+    }
+
+    .upload-zone:hover {
+      border-color: #1e6b7b;
+      background: #e8f4f6;
+    }
+
+    .upload-content {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+    }
+
+    .upload-icon {
+      width: 40px;
+      height: 40px;
+      color: #616161;
+    }
+
+    .upload-text {
+      text-align: left;
+    }
+
+    .upload-text strong {
+      font-size: 14px;
+      display: block;
+      margin-bottom: 2px;
+    }
+
+    .upload-text span {
+      font-size: 12px;
+      color: #616161;
+    }
+
+    /* Summary Footer */
+    .summary-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 20px;
+      background: #fafafa;
+      border-top: 1px solid #e1e1e1;
+      border-radius: 0 0 8px 8px;
+    }
+
+    .summary-stats {
+      display: flex;
+      gap: 24px;
+    }
+
+    .stat {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+    }
+
+    .stat-icon {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+
+    .stat-icon.demo {
+      background: #e65100;
+    }
+
+    .stat-icon.deployment {
+      background: #2e7d32;
+    }
+
+    .stat-value {
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="header-info">
+        <h1>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+          </svg>
+          Document Management
+        </h1>
+        <p>Configure which documents are attached to booking confirmation emails</p>
+      </div>
+    </div>
+
+    <div class="tabs">
+      <button class="tab active">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+          <polyline points="14 2 14 8 20 8"/>
+        </svg>
+        All Documents
+        <span class="tab-badge">3</span>
+      </button>
+      <button class="tab">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polygon points="5 3 19 12 5 21 5 3"/>
+        </svg>
+        Demo Attachments
+        <span class="tab-badge">2</span>
+      </button>
+      <button class="tab">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M22 12l-4-4v3H3v2h15v3l4-4z"/>
+        </svg>
+        Deployment Attachments
+        <span class="tab-badge">2</span>
+      </button>
+    </div>
+
+    <div class="panel">
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Document</th>
+              <th class="checkbox-cell">
+                <div class="column-header demo">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                    <polygon points="5 3 19 12 5 21 5 3"/>
+                  </svg>
+                  Demo
+                </div>
+              </th>
+              <th class="checkbox-cell">
+                <div class="column-header deployment">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M22 12l-4-4v3H3v2h15v3l4-4z"/>
+                  </svg>
+                  Deployment
+                </div>
+              </th>
+              <th class="actions-cell">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <div class="document-cell">
+                  <div class="document-icon pdf">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z"/>
+                    </svg>
+                  </div>
+                  <div class="document-details">
+                    <div class="document-name">License Pulse v2.0 Product Explainer.pdf</div>
+                    <div class="document-meta">2.4 MB • Updated Jan 15, 2026</div>
+                  </div>
+                </div>
+              </td>
+              <td class="checkbox-cell">
+                <label class="custom-checkbox">
+                  <input type="checkbox" checked>
+                  <span class="checkbox-box">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                      <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                  </span>
+                </label>
+              </td>
+              <td class="checkbox-cell">
+                <label class="custom-checkbox">
+                  <input type="checkbox">
+                  <span class="checkbox-box">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                      <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                  </span>
+                </label>
+              </td>
+              <td class="actions-cell">
+                <div class="action-buttons">
+                  <button class="btn btn-sm btn-secondary" title="Download">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                      <polyline points="7 10 12 15 17 10"/>
+                      <line x1="12" y1="15" x2="12" y2="3"/>
+                    </svg>
+                  </button>
+                  <button class="btn btn-sm btn-secondary btn-danger" title="Remove">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <polyline points="3 6 5 6 21 6"/>
+                      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                    </svg>
+                  </button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <div class="document-cell">
+                  <div class="document-icon docx">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z"/>
+                    </svg>
+                  </div>
+                  <div class="document-details">
+                    <div class="document-name">First Digital - License Pulse Setup Requirements v2.0.docx</div>
+                    <div class="document-meta">856 KB • Updated Jan 10, 2026</div>
+                  </div>
+                </div>
+              </td>
+              <td class="checkbox-cell">
+                <label class="custom-checkbox">
+                  <input type="checkbox">
+                  <span class="checkbox-box">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                      <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                  </span>
+                </label>
+              </td>
+              <td class="checkbox-cell">
+                <label class="custom-checkbox">
+                  <input type="checkbox" checked>
+                  <span class="checkbox-box">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                      <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                  </span>
+                </label>
+              </td>
+              <td class="actions-cell">
+                <div class="action-buttons">
+                  <button class="btn btn-sm btn-secondary" title="Download">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                      <polyline points="7 10 12 15 17 10"/>
+                      <line x1="12" y1="15" x2="12" y2="3"/>
+                    </svg>
+                  </button>
+                  <button class="btn btn-sm btn-secondary btn-danger" title="Remove">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <polyline points="3 6 5 6 21 6"/>
+                      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                    </svg>
+                  </button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <div class="document-cell">
+                  <div class="document-icon pdf">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z"/>
+                    </svg>
+                  </div>
+                  <div class="document-details">
+                    <div class="document-name">License Pulse Pricing Guide 2026.pdf</div>
+                    <div class="document-meta">1.2 MB • Updated Jan 5, 2026</div>
+                  </div>
+                </div>
+              </td>
+              <td class="checkbox-cell">
+                <label class="custom-checkbox">
+                  <input type="checkbox" checked>
+                  <span class="checkbox-box">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                      <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                  </span>
+                </label>
+              </td>
+              <td class="checkbox-cell">
+                <label class="custom-checkbox">
+                  <input type="checkbox" checked>
+                  <span class="checkbox-box">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                      <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                  </span>
+                </label>
+              </td>
+              <td class="actions-cell">
+                <div class="action-buttons">
+                  <button class="btn btn-sm btn-secondary" title="Download">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                      <polyline points="7 10 12 15 17 10"/>
+                      <line x1="12" y1="15" x2="12" y2="3"/>
+                    </svg>
+                  </button>
+                  <button class="btn btn-sm btn-secondary btn-danger" title="Remove">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <polyline points="3 6 5 6 21 6"/>
+                      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                    </svg>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="upload-section">
+        <div class="upload-zone">
+          <div class="upload-content">
+            <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="17 8 12 3 7 8"/>
+              <line x1="12" y1="3" x2="12" y2="15"/>
+            </svg>
+            <div class="upload-text">
+              <strong>Upload a new document</strong>
+              <span>Drag and drop or click to browse • PDF, DOCX up to 10MB</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="summary-footer">
+        <div class="summary-stats">
+          <div class="stat">
+            <span class="stat-icon demo"></span>
+            <span><span class="stat-value">2</span> Demo attachments</span>
+          </div>
+          <div class="stat">
+            <span class="stat-icon deployment"></span>
+            <span><span class="stat-value">2</span> Deployment attachments</span>
+          </div>
+        </div>
+        <button class="btn btn-primary">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+            <polyline points="17 21 17 13 7 13 7 21"/>
+            <polyline points="7 3 7 8 15 8"/>
+          </svg>
+          Save Changes
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Tab switching
+    document.querySelectorAll('.tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,16 @@
+{
+  "navigationFallback": {
+    "rewrite": "/index.html",
+    "exclude": ["/assets/*", "/*.svg", "/*.png", "/*.ico"]
+  },
+  "globalHeaders": {
+    "X-Content-Type-Options": "nosniff",
+    "X-Frame-Options": "SAMEORIGIN",
+    "Content-Security-Policy": "frame-ancestors 'self' https://teams.microsoft.com https://*.teams.microsoft.com https://*.sharepoint.com"
+  },
+  "mimeTypes": {
+    ".json": "application/json",
+    ".js": "application/javascript",
+    ".css": "text/css"
+  }
+}

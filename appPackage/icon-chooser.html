@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LP Booking App - Choose Your Icon</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        h1 {
+            color: white;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            color: rgba(255,255,255,0.8);
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+        .icon-card {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            transition: transform 0.3s, box-shadow 0.3s;
+            cursor: pointer;
+        }
+        .icon-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 50px rgba(0,0,0,0.3);
+        }
+        .icon-card.selected {
+            outline: 4px solid #00C853;
+            transform: scale(1.02);
+        }
+        .icon-card h3 {
+            margin: 0 0 5px 0;
+            color: #333;
+        }
+        .icon-card p {
+            margin: 0 0 15px 0;
+            color: #666;
+            font-size: 13px;
+        }
+        .icon-preview {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            margin: 15px 0;
+        }
+        .preview-box {
+            text-align: center;
+        }
+        .preview-box span {
+            font-size: 11px;
+            color: #999;
+        }
+        canvas {
+            border-radius: 8px;
+        }
+        .outline-bg {
+            background: #333;
+            padding: 8px;
+            border-radius: 8px;
+            display: inline-block;
+        }
+        button {
+            background: #0078D4;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            margin-top: 10px;
+            transition: background 0.2s;
+        }
+        button:hover {
+            background: #005A9E;
+        }
+        .download-section {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            margin-top: 30px;
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        .download-section h2 {
+            margin-top: 0;
+            color: #333;
+        }
+        .download-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .download-buttons button {
+            background: #00C853;
+        }
+        .download-buttons button:hover {
+            background: #00A844;
+        }
+        #selectedName {
+            color: #0078D4;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎨 LP Booking App Icons</h1>
+    <p class="subtitle">Click on an icon design to select it, then download</p>
+
+    <div class="grid" id="iconGrid"></div>
+
+    <div class="download-section">
+        <h2>Selected: <span id="selectedName">None</span></h2>
+        <p>Click on an icon above to select it, then download both files.</p>
+        <div class="download-buttons">
+            <button onclick="downloadSelected('color')" id="downloadColor" disabled>⬇️ Download color.png (192x192)</button>
+            <button onclick="downloadSelected('outline')" id="downloadOutline" disabled>⬇️ Download outline.png (32x32)</button>
+        </div>
+    </div>
+
+    <script>
+        let selectedDesign = null;
+
+        // Icon designs configuration
+        const designs = [
+            {
+                id: 1,
+                name: "Classic Blue",
+                desc: "Simple gradient with LP text",
+                colors: { primary: '#0078D4', secondary: '#005A9E' },
+                style: 'simple'
+            },
+            {
+                id: 2,
+                name: "Purple Pulse",
+                desc: "Purple gradient - modern feel",
+                colors: { primary: '#6B4EBF', secondary: '#4A3090' },
+                style: 'simple'
+            },
+            {
+                id: 3,
+                name: "Teal Professional",
+                desc: "Teal/cyan professional look",
+                colors: { primary: '#00897B', secondary: '#00695C' },
+                style: 'simple'
+            },
+            {
+                id: 4,
+                name: "Calendar Style",
+                desc: "With calendar icon element",
+                colors: { primary: '#0078D4', secondary: '#005A9E' },
+                style: 'calendar'
+            },
+            {
+                id: 5,
+                name: "Bold Orange",
+                desc: "Energetic orange gradient",
+                colors: { primary: '#FF6B35', secondary: '#E54B1B' },
+                style: 'simple'
+            },
+            {
+                id: 6,
+                name: "Navy Executive",
+                desc: "Dark navy professional",
+                colors: { primary: '#1A365D', secondary: '#0D2137' },
+                style: 'simple'
+            },
+            {
+                id: 7,
+                name: "Green Success",
+                desc: "Green for growth/success",
+                colors: { primary: '#2E7D32', secondary: '#1B5E20' },
+                style: 'simple'
+            },
+            {
+                id: 8,
+                name: "Booking Badge",
+                desc: "With checkmark badge",
+                colors: { primary: '#0078D4', secondary: '#005A9E' },
+                style: 'badge'
+            },
+            {
+                id: 9,
+                name: "Minimal Flat",
+                desc: "Flat design, no gradient",
+                colors: { primary: '#0078D4', secondary: '#0078D4' },
+                style: 'flat'
+            },
+            {
+                id: 10,
+                name: "Sunrise Gradient",
+                desc: "Warm gradient purple to blue",
+                colors: { primary: '#667eea', secondary: '#764ba2' },
+                style: 'simple'
+            }
+        ];
+
+        // Draw color icon
+        function drawColorIcon(canvas, design) {
+            const ctx = canvas.getContext('2d');
+            const size = 96; // Preview size
+            canvas.width = size;
+            canvas.height = size;
+
+            ctx.clearRect(0, 0, size, size);
+
+            // Rounded rectangle background
+            const radius = 16;
+            ctx.beginPath();
+            ctx.moveTo(radius, 0);
+            ctx.lineTo(size - radius, 0);
+            ctx.quadraticCurveTo(size, 0, size, radius);
+            ctx.lineTo(size, size - radius);
+            ctx.quadraticCurveTo(size, size, size - radius, size);
+            ctx.lineTo(radius, size);
+            ctx.quadraticCurveTo(0, size, 0, size - radius);
+            ctx.lineTo(0, radius);
+            ctx.quadraticCurveTo(0, 0, radius, 0);
+            ctx.closePath();
+
+            // Gradient or flat
+            if (design.style === 'flat') {
+                ctx.fillStyle = design.colors.primary;
+            } else {
+                const gradient = ctx.createLinearGradient(0, 0, size, size);
+                gradient.addColorStop(0, design.colors.primary);
+                gradient.addColorStop(1, design.colors.secondary);
+                ctx.fillStyle = gradient;
+            }
+            ctx.fill();
+
+            // Style-specific elements
+            if (design.style === 'calendar') {
+                // Calendar header bar
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+                ctx.fillRect(10, 8, size - 20, 12);
+
+                // Calendar dots
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.15)';
+                for (let i = 0; i < 3; i++) {
+                    for (let j = 0; j < 3; j++) {
+                        ctx.beginPath();
+                        ctx.arc(25 + i * 23, 70 + j * 10, 3, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                }
+            }
+
+            if (design.style === 'badge') {
+                // Checkmark badge
+                ctx.fillStyle = '#00C853';
+                ctx.beginPath();
+                ctx.arc(size - 18, size - 18, 14, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.strokeStyle = 'white';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(size - 24, size - 18);
+                ctx.lineTo(size - 18, size - 12);
+                ctx.lineTo(size - 10, size - 24);
+                ctx.stroke();
+            }
+
+            // "LP" text
+            ctx.fillStyle = '#FFFFFF';
+            ctx.font = 'bold 40px Segoe UI, Arial, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('LP', size / 2, size / 2 - 5);
+
+            // "Booking" text
+            ctx.font = '600 11px Segoe UI, Arial, sans-serif';
+            ctx.fillText('Booking', size / 2, size / 2 + 25);
+        }
+
+        // Draw outline icon
+        function drawOutlineIcon(canvas, design) {
+            const ctx = canvas.getContext('2d');
+            const size = 32;
+            canvas.width = size;
+            canvas.height = size;
+
+            ctx.clearRect(0, 0, size, size);
+
+            // Rounded rectangle outline
+            const radius = 4;
+            const lineWidth = 2;
+            const offset = lineWidth / 2;
+
+            ctx.strokeStyle = '#FFFFFF';
+            ctx.lineWidth = lineWidth;
+
+            ctx.beginPath();
+            ctx.moveTo(radius + offset, offset);
+            ctx.lineTo(size - radius - offset, offset);
+            ctx.quadraticCurveTo(size - offset, offset, size - offset, radius + offset);
+            ctx.lineTo(size - offset, size - radius - offset);
+            ctx.quadraticCurveTo(size - offset, size - offset, size - radius - offset, size - offset);
+            ctx.lineTo(radius + offset, size - offset);
+            ctx.quadraticCurveTo(offset, size - offset, offset, size - radius - offset);
+            ctx.lineTo(offset, radius + offset);
+            ctx.quadraticCurveTo(offset, offset, radius + offset, offset);
+            ctx.closePath();
+            ctx.stroke();
+
+            // "LP" text
+            ctx.fillStyle = '#FFFFFF';
+            ctx.font = 'bold 13px Segoe UI, Arial, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('LP', size / 2, size / 2 + 1);
+        }
+
+        // Draw full-size icons for download
+        function drawFullColorIcon(canvas, design) {
+            const ctx = canvas.getContext('2d');
+            const size = 192;
+            canvas.width = size;
+            canvas.height = size;
+
+            ctx.clearRect(0, 0, size, size);
+
+            const radius = 32;
+            ctx.beginPath();
+            ctx.moveTo(radius, 0);
+            ctx.lineTo(size - radius, 0);
+            ctx.quadraticCurveTo(size, 0, size, radius);
+            ctx.lineTo(size, size - radius);
+            ctx.quadraticCurveTo(size, size, size - radius, size);
+            ctx.lineTo(radius, size);
+            ctx.quadraticCurveTo(0, size, 0, size - radius);
+            ctx.lineTo(0, radius);
+            ctx.quadraticCurveTo(0, 0, radius, 0);
+            ctx.closePath();
+
+            if (design.style === 'flat') {
+                ctx.fillStyle = design.colors.primary;
+            } else {
+                const gradient = ctx.createLinearGradient(0, 0, size, size);
+                gradient.addColorStop(0, design.colors.primary);
+                gradient.addColorStop(1, design.colors.secondary);
+                ctx.fillStyle = gradient;
+            }
+            ctx.fill();
+
+            if (design.style === 'calendar') {
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+                ctx.fillRect(20, 16, size - 40, 24);
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.15)';
+                for (let i = 0; i < 4; i++) {
+                    for (let j = 0; j < 3; j++) {
+                        ctx.beginPath();
+                        ctx.arc(45 + i * 36, 135 + j * 20, 6, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                }
+            }
+
+            if (design.style === 'badge') {
+                ctx.fillStyle = '#00C853';
+                ctx.beginPath();
+                ctx.arc(size - 36, size - 36, 28, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.strokeStyle = 'white';
+                ctx.lineWidth = 4;
+                ctx.beginPath();
+                ctx.moveTo(size - 48, size - 36);
+                ctx.lineTo(size - 36, size - 24);
+                ctx.lineTo(size - 20, size - 48);
+                ctx.stroke();
+            }
+
+            ctx.fillStyle = '#FFFFFF';
+            ctx.font = 'bold 80px Segoe UI, Arial, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('LP', size / 2, size / 2 - 15);
+
+            ctx.font = '600 22px Segoe UI, Arial, sans-serif';
+            ctx.fillText('Booking', size / 2, size / 2 + 50);
+        }
+
+        // Create icon cards
+        function createIconCards() {
+            const grid = document.getElementById('iconGrid');
+
+            designs.forEach(design => {
+                const card = document.createElement('div');
+                card.className = 'icon-card';
+                card.id = `card-${design.id}`;
+                card.onclick = () => selectDesign(design);
+
+                card.innerHTML = `
+                    <h3>${design.name}</h3>
+                    <p>${design.desc}</p>
+                    <div class="icon-preview">
+                        <div class="preview-box">
+                            <canvas id="color-${design.id}"></canvas>
+                            <br><span>Color</span>
+                        </div>
+                        <div class="preview-box">
+                            <div class="outline-bg">
+                                <canvas id="outline-${design.id}"></canvas>
+                            </div>
+                            <br><span>Outline</span>
+                        </div>
+                    </div>
+                `;
+
+                grid.appendChild(card);
+
+                // Draw the icons
+                setTimeout(() => {
+                    drawColorIcon(document.getElementById(`color-${design.id}`), design);
+                    drawOutlineIcon(document.getElementById(`outline-${design.id}`), design);
+                }, 0);
+            });
+        }
+
+        // Select a design
+        function selectDesign(design) {
+            // Remove previous selection
+            document.querySelectorAll('.icon-card').forEach(c => c.classList.remove('selected'));
+
+            // Select new
+            document.getElementById(`card-${design.id}`).classList.add('selected');
+            selectedDesign = design;
+
+            document.getElementById('selectedName').textContent = design.name;
+            document.getElementById('downloadColor').disabled = false;
+            document.getElementById('downloadOutline').disabled = false;
+        }
+
+        // Download selected icon
+        function downloadSelected(type) {
+            if (!selectedDesign) return;
+
+            const canvas = document.createElement('canvas');
+
+            if (type === 'color') {
+                drawFullColorIcon(canvas, selectedDesign);
+            } else {
+                canvas.width = 32;
+                canvas.height = 32;
+                drawOutlineIcon(canvas, selectedDesign);
+            }
+
+            const link = document.createElement('a');
+            link.download = type + '.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+
+        // Initialize
+        createIconCards();
+    </script>
+</body>
+</html>

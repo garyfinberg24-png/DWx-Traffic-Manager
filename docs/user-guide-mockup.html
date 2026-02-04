@@ -1,0 +1,1069 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Guide Modal - Mockup</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: rgba(0, 0, 0, 0.4);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal {
+            background: white;
+            border-radius: 8px;
+            max-width: 800px;
+            width: 100%;
+            max-height: 90vh;
+            overflow: hidden;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding: 24px 24px 16px 24px;
+            border-bottom: 1px solid #e5e5e5;
+        }
+
+        .header-content {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .welcome-badge {
+            display: inline-block;
+            background-color: #0078d4;
+            color: white;
+            padding: 2px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            width: fit-content;
+        }
+
+        .modal-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #0078d4;
+            margin: 0;
+        }
+
+        .modal-subtitle {
+            color: #616161;
+            font-size: 14px;
+            margin-top: 4px;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            padding: 8px;
+            cursor: pointer;
+            color: #616161;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+
+        .close-btn:hover {
+            background-color: #f5f5f5;
+        }
+
+        .modal-content {
+            padding: 24px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .section {
+            margin-bottom: 24px;
+        }
+
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            color: #242424;
+            margin-bottom: 16px;
+        }
+
+        .section-icon {
+            color: #0078d4;
+            width: 24px;
+            height: 24px;
+        }
+
+        .divider {
+            height: 1px;
+            background-color: #e5e5e5;
+            margin: 24px 0;
+        }
+
+        /* Quick Start Steps */
+        .steps-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .step {
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+            padding: 8px 0;
+        }
+
+        .step-number {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background-color: #0078d4;
+            color: white;
+            font-weight: 600;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+
+        .step-content {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .step-title {
+            font-weight: 600;
+            font-size: 14px;
+            color: #242424;
+        }
+
+        .step-description {
+            color: #616161;
+            font-size: 13px;
+            line-height: 1.4;
+        }
+
+        /* Feature Grid */
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        .feature-card {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            padding: 16px;
+            background-color: #fafafa;
+            border-radius: 8px;
+            border: 1px solid #e5e5e5;
+            transition: all 0.2s ease;
+        }
+
+        .feature-card:hover {
+            background-color: #f0f6ff;
+            border-color: #0078d4;
+        }
+
+        .feature-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .feature-icon {
+            color: #0078d4;
+            width: 20px;
+            height: 20px;
+        }
+
+        .feature-title {
+            font-weight: 600;
+            font-size: 14px;
+            color: #242424;
+        }
+
+        .feature-description {
+            color: #616161;
+            font-size: 12px;
+            line-height: 1.4;
+        }
+
+        /* Status Legend */
+        .status-legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            padding: 16px;
+            background-color: #fafafa;
+            border-radius: 8px;
+        }
+
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        .status-pending { background-color: #ffc107; }
+        .status-confirmed { background-color: #28a745; }
+        .status-rescheduling { background-color: #0078d4; }
+        .status-cancelled { background-color: #dc3545; }
+        .status-awaiting { background-color: #17a2b8; }
+
+        .status-text {
+            font-size: 12px;
+            color: #242424;
+        }
+
+        .status-text strong {
+            font-weight: 600;
+        }
+
+        /* Pro Tip */
+        .tip-box {
+            display: flex;
+            gap: 16px;
+            padding: 16px;
+            background-color: #fff8e6;
+            border-radius: 8px;
+            border: 1px solid #ffc107;
+        }
+
+        .tip-icon {
+            color: #856404;
+            width: 24px;
+            height: 24px;
+            flex-shrink: 0;
+        }
+
+        .tip-content {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .tip-title {
+            font-weight: 600;
+            color: #856404;
+            font-size: 14px;
+        }
+
+        .tip-text {
+            font-size: 13px;
+            color: #242424;
+            line-height: 1.4;
+        }
+
+        /* Info Box */
+        .info-box {
+            display: flex;
+            gap: 16px;
+            padding: 16px;
+            background-color: #e6f2fb;
+            border-radius: 8px;
+            border: 1px solid #b3d7f2;
+            margin-top: 16px;
+        }
+
+        .info-icon {
+            color: #0078d4;
+            width: 24px;
+            height: 24px;
+            flex-shrink: 0;
+        }
+
+        .info-content {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .info-title {
+            font-weight: 600;
+            color: #0078d4;
+            font-size: 14px;
+        }
+
+        .info-text {
+            font-size: 13px;
+            color: #242424;
+            line-height: 1.5;
+        }
+
+        /* Warning Box */
+        .warning-box {
+            display: flex;
+            gap: 16px;
+            padding: 16px;
+            background-color: #fff3cd;
+            border-radius: 8px;
+            border: 1px solid #ffc107;
+            margin-top: 12px;
+        }
+
+        .warning-icon {
+            color: #856404;
+            width: 24px;
+            height: 24px;
+            flex-shrink: 0;
+        }
+
+        .warning-content {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .warning-title {
+            font-weight: 600;
+            color: #856404;
+            font-size: 14px;
+        }
+
+        .warning-text {
+            font-size: 13px;
+            color: #242424;
+            line-height: 1.5;
+        }
+
+        /* Detailed Steps List */
+        .detailed-steps {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .detailed-steps li {
+            position: relative;
+            padding-left: 24px;
+            margin-bottom: 12px;
+            font-size: 13px;
+            line-height: 1.5;
+            color: #424242;
+        }
+
+        .detailed-steps li::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 6px;
+            width: 8px;
+            height: 8px;
+            background-color: #0078d4;
+            border-radius: 50%;
+        }
+
+        .detailed-steps li strong {
+            color: #242424;
+        }
+
+        /* Subsection */
+        .subsection {
+            margin-top: 20px;
+            padding: 16px;
+            background-color: #fafafa;
+            border-radius: 8px;
+            border: 1px solid #e5e5e5;
+        }
+
+        .subsection-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #242424;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .subsection-icon {
+            color: #0078d4;
+            width: 18px;
+            height: 18px;
+        }
+
+        /* Checklist Preview */
+        .checklist-preview {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .checklist-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            background-color: white;
+            border-radius: 6px;
+            border: 1px solid #e5e5e5;
+            font-size: 13px;
+        }
+
+        .checklist-checkbox {
+            width: 18px;
+            height: 18px;
+            border: 2px solid #0078d4;
+            border-radius: 4px;
+            flex-shrink: 0;
+        }
+
+        .checklist-checkbox.checked {
+            background-color: #0078d4;
+            position: relative;
+        }
+
+        .checklist-checkbox.checked::after {
+            content: '';
+            position: absolute;
+            left: 5px;
+            top: 2px;
+            width: 5px;
+            height: 9px;
+            border: solid white;
+            border-width: 0 2px 2px 0;
+            transform: rotate(45deg);
+        }
+
+        /* Calendar Preview */
+        .calendar-preview {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 2px;
+            margin-top: 12px;
+            padding: 12px;
+            background-color: white;
+            border-radius: 8px;
+            border: 1px solid #e5e5e5;
+        }
+
+        .calendar-day {
+            text-align: center;
+            padding: 8px 4px;
+            font-size: 11px;
+            border-radius: 4px;
+        }
+
+        .calendar-day.header {
+            font-weight: 600;
+            color: #616161;
+        }
+
+        .calendar-day.today {
+            background-color: #0078d4;
+            color: white;
+            font-weight: 600;
+        }
+
+        .calendar-day.has-booking {
+            background-color: #e6f2fb;
+            color: #0078d4;
+            font-weight: 500;
+        }
+
+        /* Footer */
+        .modal-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 24px;
+            border-top: 1px solid #e5e5e5;
+            background-color: #fafafa;
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            font-size: 13px;
+            color: #616161;
+        }
+
+        .checkbox-label input {
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background-color: #0078d4;
+            color: white;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .btn-primary:hover {
+            background-color: #106ebe;
+        }
+
+        /* SVG Icons */
+        svg {
+            width: 24px;
+            height: 24px;
+            fill: currentColor;
+        }
+
+        .feature-icon svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        /* Table of Contents */
+        .toc {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .toc-item {
+            padding: 6px 12px;
+            background-color: #f0f6ff;
+            border: 1px solid #b3d7f2;
+            border-radius: 16px;
+            font-size: 12px;
+            color: #0078d4;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+
+        .toc-item:hover {
+            background-color: #0078d4;
+            color: white;
+        }
+
+        @media (max-width: 600px) {
+            .feature-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .status-legend {
+                flex-direction: column;
+                gap: 12px;
+            }
+
+            .calendar-preview {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="modal">
+        <div class="modal-header">
+            <div class="header-content">
+                <span class="welcome-badge">Welcome</span>
+                <h1 class="modal-title">Hello, Gary!</h1>
+                <p class="modal-subtitle">Your complete guide to the LP Demo Scheduler</p>
+            </div>
+            <button class="close-btn">
+                <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" fill="currentColor"/>
+                </svg>
+            </button>
+        </div>
+
+        <div class="modal-content">
+            <!-- Table of Contents -->
+            <div class="toc">
+                <a href="#quick-start" class="toc-item">Quick Start</a>
+                <a href="#features" class="toc-item">Features</a>
+                <a href="#cancellations" class="toc-item">Cancellations</a>
+                <a href="#rescheduling" class="toc-item">Rescheduling</a>
+                <a href="#checklists" class="toc-item">Checklists</a>
+                <a href="#calendar" class="toc-item">Calendar View</a>
+                <a href="#timeline" class="toc-item">Timeline View</a>
+                <a href="#status" class="toc-item">Status Guide</a>
+            </div>
+
+            <!-- Quick Start Section -->
+            <div class="section" id="quick-start">
+                <div class="section-title">
+                    <svg class="section-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8-8-8z" fill="currentColor"/>
+                    </svg>
+                    Quick Start Guide
+                </div>
+                <div class="steps-list">
+                    <div class="step">
+                        <div class="step-number">1</div>
+                        <div class="step-content">
+                            <span class="step-title">Create a New Booking</span>
+                            <span class="step-description">Click "New Booking" and fill in client details, booking type (Demo or Deployment), license count, and propose up to 3 preferred time slots. Premium clients receive priority scheduling.</span>
+                        </div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">2</div>
+                        <div class="step-content">
+                            <span class="step-title">Submit for Approval</span>
+                            <span class="step-description">Review your booking details in the preview pane and submit. A manager will review and confirm one of your proposed time slots based on specialist availability.</span>
+                        </div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">3</div>
+                        <div class="step-content">
+                            <span class="step-title">Track Your Bookings</span>
+                            <span class="step-description">View all your bookings in "My Bookings". Use filters to find specific bookings by status, date, or client. Click any booking to see full details.</span>
+                        </div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">4</div>
+                        <div class="step-content">
+                            <span class="step-title">Receive Confirmation</span>
+                            <span class="step-description">When approved, you'll receive an email notification with the confirmed date/time, assigned specialist details, and calendar invite. Relevant documents are automatically attached.</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- Features Section -->
+            <div class="section" id="features">
+                <div class="section-title">
+                    <svg class="section-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11zM9 11H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2zm-8 4H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2z" fill="currentColor"/>
+                    </svg>
+                    Key Features
+                </div>
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <div class="feature-header">
+                            <svg class="feature-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" fill="currentColor"/>
+                            </svg>
+                            <span class="feature-title">New Booking</span>
+                        </div>
+                        <span class="feature-description">Create demo or deployment requests with client info, license count, comments, and up to 3 preferred time slots.</span>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-header">
+                            <svg class="feature-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z" fill="currentColor"/>
+                            </svg>
+                            <span class="feature-title">My Bookings</span>
+                        </div>
+                        <span class="feature-description">View, filter, search, and manage all your booking requests in one organized place.</span>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-header">
+                            <svg class="feature-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" fill="currentColor"/>
+                            </svg>
+                            <span class="feature-title">Reschedule</span>
+                        </div>
+                        <span class="feature-description">Need to change the time? Submit new proposed slots and await manager re-approval.</span>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-header">
+                            <svg class="feature-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z" fill="currentColor"/>
+                            </svg>
+                            <span class="feature-title">Clone & Templates</span>
+                        </div>
+                        <span class="feature-description">Save time by cloning existing bookings or creating reusable templates for frequent clients.</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- Cancellations Section -->
+            <div class="section" id="cancellations">
+                <div class="section-title">
+                    <svg class="section-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 2C6.47 2 2 6.47 2 12s4.47 10 10 10 10-4.47 10-10S17.53 2 12 2zm5 13.59L15.59 17 12 13.41 8.41 17 7 15.59 10.59 12 7 8.41 8.41 7 12 10.59 15.59 7 17 8.41 13.41 12 17 15.59z" fill="currentColor"/>
+                    </svg>
+                    Cancelling Bookings
+                </div>
+                <p style="color: #616161; font-size: 13px; line-height: 1.5; margin-bottom: 16px;">
+                    As an Account Manager, you can cancel your own bookings at any time. Cancelling a booking will remove it from the schedule and notify all relevant parties.
+                </p>
+
+                <div class="subsection">
+                    <div class="subsection-title">
+                        <svg class="subsection-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8-8-8z" fill="currentColor"/>
+                        </svg>
+                        How to Cancel a Booking
+                    </div>
+                    <ul class="detailed-steps">
+                        <li>Navigate to <strong>"My Bookings"</strong> from the main menu</li>
+                        <li>Find the booking you want to cancel and click on it to open the <strong>Booking Details</strong> panel</li>
+                        <li>Click the red <strong>"Cancel Booking"</strong> button at the bottom of the details panel</li>
+                        <li>Enter a <strong>cancellation reason</strong> (required) - this helps managers understand why bookings are cancelled</li>
+                        <li>Click <strong>"Confirm Cancellation"</strong> to proceed</li>
+                    </ul>
+                </div>
+
+                <div class="warning-box">
+                    <svg class="warning-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z" fill="currentColor"/>
+                    </svg>
+                    <div class="warning-content">
+                        <span class="warning-title">Important: Cancelling Confirmed Bookings</span>
+                        <span class="warning-text">If you cancel a <strong>confirmed booking</strong>, the calendar event will be automatically deleted, and the assigned specialist, client, and managers will all receive notification emails. Please only cancel confirmed bookings when absolutely necessary.</span>
+                    </div>
+                </div>
+
+                <div class="info-box">
+                    <svg class="info-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none"/>
+                        <path d="M12 16v-4M12 8h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                    <div class="info-content">
+                        <span class="info-title">What Gets Cancelled</span>
+                        <span class="info-text">
+                            When you cancel a booking:
+                            <br>- The booking status changes to "Cancelled"
+                            <br>- Calendar events are deleted (if confirmed)
+                            <br>- Email notifications are sent to all parties
+                            <br>- The cancellation reason is logged for audit purposes
+                            <br>- The booking remains visible in your history (filtered by default)
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- Rescheduling Section -->
+            <div class="section" id="rescheduling">
+                <div class="section-title">
+                    <svg class="section-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z" fill="currentColor"/>
+                    </svg>
+                    Rescheduling Bookings
+                </div>
+                <p style="color: #616161; font-size: 13px; line-height: 1.5; margin-bottom: 16px;">
+                    If your client's availability changes or you need to adjust the timing, you can request a reschedule. This submits new proposed time slots for manager approval.
+                </p>
+
+                <div class="subsection">
+                    <div class="subsection-title">
+                        <svg class="subsection-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8-8-8z" fill="currentColor"/>
+                        </svg>
+                        How to Reschedule
+                    </div>
+                    <ul class="detailed-steps">
+                        <li>Open the booking from <strong>"My Bookings"</strong></li>
+                        <li>In the <strong>Booking Details</strong> panel, click <strong>"Reschedule"</strong> in the footer actions</li>
+                        <li>The reschedule dialog will show the <strong>current confirmed date/time</strong> for reference</li>
+                        <li>Select <strong>up to 3 new proposed time slots</strong> using the date/time pickers (displayed vertically for easy selection)</li>
+                        <li>Add an optional <strong>reschedule reason</strong> to explain why the change is needed</li>
+                        <li>Click <strong>"Submit Reschedule Request"</strong></li>
+                    </ul>
+                </div>
+
+                <div class="info-box">
+                    <svg class="info-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none"/>
+                        <path d="M12 16v-4M12 8h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                    <div class="info-content">
+                        <span class="info-title">Reschedule Workflow</span>
+                        <span class="info-text">
+                            <strong>1. Status Change:</strong> The booking status changes to "Rescheduling Required"<br>
+                            <strong>2. Manager Review:</strong> A manager reviews and selects from your new proposed slots<br>
+                            <strong>3. Calendar Update:</strong> The original calendar event is updated with the new date/time<br>
+                            <strong>4. Notification:</strong> All parties receive updated calendar invites and email notifications<br>
+                            <strong>5. Confirmed:</strong> Status returns to "Confirmed" once approved
+                        </span>
+                    </div>
+                </div>
+
+                <div class="tip-box" style="margin-top: 16px;">
+                    <svg class="tip-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M9 21c0 .55.45 1 1 1h4c.55 0 1-.45 1-1v-1H9v1zm3-19C8.14 2 5 5.14 5 9c0 2.38 1.19 4.47 3 5.74V17c0 .55.45 1 1 1h6c.55 0 1-.45 1-1v-2.26c1.81-1.27 3-3.36 3-5.74 0-3.86-3.14-7-7-7z" fill="currentColor"/>
+                    </svg>
+                    <div class="tip-content">
+                        <span class="tip-title">Pro Tip: Provide Diverse Slots</span>
+                        <span class="tip-text">When rescheduling, try to propose time slots across different days or times to give managers more flexibility in finding an available specialist.</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- Checklists Section -->
+            <div class="section" id="checklists">
+                <div class="section-title">
+                    <svg class="section-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" fill="currentColor"/>
+                    </svg>
+                    Demo Preparation Checklists
+                </div>
+                <p style="color: #616161; font-size: 13px; line-height: 1.5; margin-bottom: 16px;">
+                    Checklists help ensure you're fully prepared before each demo or deployment session. They guide you through essential preparation steps so nothing is forgotten.
+                </p>
+
+                <div class="subsection">
+                    <div class="subsection-title">
+                        <svg class="subsection-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M19 3h-4.18C14.4 1.84 13.3 1 12 1c-1.3 0-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1z" fill="currentColor"/>
+                        </svg>
+                        How to Use Checklists
+                    </div>
+                    <ul class="detailed-steps">
+                        <li>Navigate to <strong>"Checklists"</strong> from the main navigation menu</li>
+                        <li>Select the appropriate checklist type: <strong>Demo Preparation</strong> or <strong>Deployment Preparation</strong></li>
+                        <li>Work through each item, clicking the <strong>checkbox</strong> to mark items as complete</li>
+                        <li>Your progress is <strong>automatically saved</strong> so you can return and continue later</li>
+                        <li>View the <strong>progress indicator</strong> to see how many items remain</li>
+                    </ul>
+
+                    <div class="checklist-preview">
+                        <div class="checklist-item">
+                            <div class="checklist-checkbox checked"></div>
+                            <span>Verify client contact details and attendees</span>
+                        </div>
+                        <div class="checklist-item">
+                            <div class="checklist-checkbox checked"></div>
+                            <span>Review client's current software environment</span>
+                        </div>
+                        <div class="checklist-item">
+                            <div class="checklist-checkbox"></div>
+                            <span>Prepare demo environment with sample data</span>
+                        </div>
+                        <div class="checklist-item">
+                            <div class="checklist-checkbox"></div>
+                            <span>Test screen sharing and audio setup</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="info-box">
+                    <svg class="info-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none"/>
+                        <path d="M12 16v-4M12 8h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                    <div class="info-content">
+                        <span class="info-title">Checklist Types</span>
+                        <span class="info-text">
+                            <strong>Demo Checklists:</strong> Cover presentation setup, demo environment preparation, client research, and technical readiness checks.<br><br>
+                            <strong>Deployment Checklists:</strong> Include pre-deployment verification, environment requirements, data migration steps, and post-deployment validation tasks.<br><br>
+                            Administrators can customize checklists via <strong>Admin > Checklists</strong> to add, edit, or remove items as processes evolve.
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- Calendar View Section -->
+            <div class="section" id="calendar">
+                <div class="section-title">
+                    <svg class="section-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11zM9 11H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2z" fill="currentColor"/>
+                    </svg>
+                    Calendar View
+                </div>
+                <p style="color: #616161; font-size: 13px; line-height: 1.5; margin-bottom: 16px;">
+                    The Calendar View provides a visual representation of all scheduled bookings, making it easy to see availability and plan ahead.
+                </p>
+
+                <div class="subsection">
+                    <div class="subsection-title">
+                        <svg class="subsection-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" stroke-width="2" fill="none"/>
+                        </svg>
+                        Calendar Features
+                    </div>
+                    <ul class="detailed-steps">
+                        <li><strong>Multiple Views:</strong> Switch between Month, Week, Day, and Agenda views using the toolbar buttons</li>
+                        <li><strong>Color-Coded Status:</strong> Bookings are color-coded by status - green for confirmed, yellow for pending, blue for rescheduling, red for cancelled</li>
+                        <li><strong>Premium Indicators:</strong> Premium client bookings are highlighted with a gold/amber border for easy identification</li>
+                        <li><strong>Click for Details:</strong> Click any booking in the calendar to open the full Booking Details panel</li>
+                        <li><strong>Navigation:</strong> Use the arrow buttons to move between months/weeks, or click "Today" to jump to the current date</li>
+                        <li><strong>Status Legend:</strong> A legend at the bottom explains the color coding for quick reference</li>
+                    </ul>
+
+                    <div class="calendar-preview">
+                        <div class="calendar-day header">Sun</div>
+                        <div class="calendar-day header">Mon</div>
+                        <div class="calendar-day header">Tue</div>
+                        <div class="calendar-day header">Wed</div>
+                        <div class="calendar-day header">Thu</div>
+                        <div class="calendar-day header">Fri</div>
+                        <div class="calendar-day header">Sat</div>
+                        <div class="calendar-day">26</div>
+                        <div class="calendar-day today">27</div>
+                        <div class="calendar-day has-booking">28</div>
+                        <div class="calendar-day">29</div>
+                        <div class="calendar-day has-booking">30</div>
+                        <div class="calendar-day">31</div>
+                        <div class="calendar-day">1</div>
+                    </div>
+                </div>
+
+                <div class="info-box">
+                    <svg class="info-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none"/>
+                        <path d="M12 16v-4M12 8h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                    <div class="info-content">
+                        <span class="info-title">Accessing Calendar View</span>
+                        <span class="info-text">The Calendar View is available to all users directly from the <strong>"My Bookings"</strong> page. Click the <strong>"Calendar"</strong> button in the view toggle (next to Cards and List) to switch to calendar view. Your bookings will be displayed filtered to show only your own bookings, making it easy to visualize your schedule.</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- Timeline View Section -->
+            <div class="section" id="timeline">
+                <div class="section-title">
+                    <svg class="section-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M3 3v18h18v-2H5V3H3zm15.73 5.27l-4.24 4.24 3.54 3.54 1.41-1.41-2.12-2.12 2.83-2.83-1.42-1.42zm-7.46 0L8.44 11.1l-2.12-2.12-1.41 1.41 3.54 3.54 4.24-4.24-1.42-1.42z" fill="currentColor"/>
+                    </svg>
+                    Timeline View
+                </div>
+                <p style="color: #616161; font-size: 13px; line-height: 1.5; margin-bottom: 16px;">
+                    The Timeline View shows bookings in a chronological list, grouped by date, perfect for reviewing upcoming appointments and recent activity.
+                </p>
+
+                <div class="subsection">
+                    <div class="subsection-title">
+                        <svg class="subsection-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" stroke-width="2" fill="none"/>
+                        </svg>
+                        Timeline Features
+                    </div>
+                    <ul class="detailed-steps">
+                        <li><strong>Chronological Order:</strong> Bookings are displayed in order from earliest to latest, grouped by date</li>
+                        <li><strong>Smart Date Labels:</strong> Dates show friendly labels like "Today", "Tomorrow", or "Yesterday" for quick reference</li>
+                        <li><strong>Date Grouping:</strong> Clear date headers separate bookings, showing the day of week and full date</li>
+                        <li><strong>Booking Cards:</strong> Each booking shows client name, booking type, time, status badge, and assigned specialist</li>
+                        <li><strong>Status Badges:</strong> Color-coded status badges help you quickly identify pending, confirmed, or rescheduled bookings</li>
+                        <li><strong>Quick Actions:</strong> Click any booking to open details where you can reschedule, clone, or cancel</li>
+                    </ul>
+                </div>
+
+                <div class="info-box">
+                    <svg class="info-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none"/>
+                        <path d="M12 16v-4M12 8h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                    <div class="info-content">
+                        <span class="info-title">Accessing Timeline View</span>
+                        <span class="info-text">The Timeline View is available to all users directly from the <strong>"My Bookings"</strong> page. Click the <strong>"Timeline"</strong> button in the view toggle (next to Cards, List, and Calendar) to switch to timeline view. Your bookings will be displayed chronologically, filtered to show only your own bookings.</span>
+                    </div>
+                </div>
+
+                <div class="tip-box" style="margin-top: 16px;">
+                    <svg class="tip-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M9 21c0 .55.45 1 1 1h4c.55 0 1-.45 1-1v-1H9v1zm3-19C8.14 2 5 5.14 5 9c0 2.38 1.19 4.47 3 5.74V17c0 .55.45 1 1 1h6c.55 0 1-.45 1-1v-2.26c1.81-1.27 3-3.36 3-5.74 0-3.86-3.14-7-7-7z" fill="currentColor"/>
+                    </svg>
+                    <div class="tip-content">
+                        <span class="tip-title">Calendar vs Timeline</span>
+                        <span class="tip-text">Use <strong>Calendar View</strong> when you need to see availability across weeks/months or find open slots. Use <strong>Timeline View</strong> when reviewing a sequence of upcoming bookings or checking what's scheduled for the near future.</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- Status Legend -->
+            <div class="section" id="status">
+                <div class="section-title">
+                    <svg class="section-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z" fill="currentColor"/>
+                    </svg>
+                    Booking Status Guide
+                </div>
+                <div class="status-legend">
+                    <div class="status-item">
+                        <div class="status-dot status-pending"></div>
+                        <span class="status-text"><strong>Pending Review</strong> - Submitted, awaiting manager approval</span>
+                    </div>
+                    <div class="status-item">
+                        <div class="status-dot status-awaiting"></div>
+                        <span class="status-text"><strong>Awaiting Approval</strong> - Under manager review</span>
+                    </div>
+                    <div class="status-item">
+                        <div class="status-dot status-confirmed"></div>
+                        <span class="status-text"><strong>Confirmed</strong> - Approved, calendar event created</span>
+                    </div>
+                    <div class="status-item">
+                        <div class="status-dot status-rescheduling"></div>
+                        <span class="status-text"><strong>Rescheduling</strong> - New time slots pending approval</span>
+                    </div>
+                    <div class="status-item">
+                        <div class="status-dot status-cancelled"></div>
+                        <span class="status-text"><strong>Cancelled</strong> - Booking was cancelled</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pro Tip -->
+            <div class="tip-box" style="margin-top: 24px;">
+                <svg class="tip-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M9 21c0 .55.45 1 1 1h4c.55 0 1-.45 1-1v-1H9v1zm3-19C8.14 2 5 5.14 5 9c0 2.38 1.19 4.47 3 5.74V17c0 .55.45 1 1 1h6c.55 0 1-.45 1-1v-2.26c1.81-1.27 3-3.36 3-5.74 0-3.86-3.14-7-7-7zm2.85 11.1l-.85.6V16h-4v-2.3l-.85-.6C7.8 12.16 7 10.63 7 9c0-2.76 2.24-5 5-5s5 2.24 5 5c0 1.63-.8 3.16-2.15 4.1z" fill="currentColor"/>
+                </svg>
+                <div class="tip-content">
+                    <span class="tip-title">Pro Tip: Premium Clients</span>
+                    <span class="tip-text">Mark clients as "Premium" when creating bookings to ensure they receive priority scheduling and attention from our team. Premium bookings are visually highlighted throughout the app with a gold star indicator.</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-footer">
+            <label class="checkbox-label">
+                <input type="checkbox">
+                Don't show this again
+            </label>
+            <button class="btn-primary">Get Started</button>
+        </div>
+    </div>
+</body>
+</html>

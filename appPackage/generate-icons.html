@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LP Booking App - Icon Generator</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        h1 {
+            color: #0078D4;
+        }
+        .icon-container {
+            display: flex;
+            gap: 40px;
+            margin: 30px 0;
+        }
+        .icon-box {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .icon-box h3 {
+            margin-top: 0;
+        }
+        canvas {
+            border: 1px dashed #ccc;
+            margin: 10px 0;
+        }
+        .outline-preview {
+            background: #333;
+            padding: 20px;
+            border-radius: 8px;
+        }
+        button {
+            background: #0078D4;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+        button:hover {
+            background: #106EBE;
+        }
+        .instructions {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 30px;
+        }
+        .success {
+            background: #d4edda;
+            border: 1px solid #28a745;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎨 LP Booking App - Icon Generator</h1>
+    <p>Click the download buttons to save the icons for your Teams app package.</p>
+
+    <div class="icon-container">
+        <div class="icon-box">
+            <h3>Color Icon (192x192)</h3>
+            <canvas id="colorCanvas" width="192" height="192"></canvas>
+            <br>
+            <button onclick="downloadIcon('colorCanvas', 'color.png')">⬇️ Download color.png</button>
+        </div>
+
+        <div class="icon-box">
+            <h3>Outline Icon (32x32)</h3>
+            <div class="outline-preview">
+                <canvas id="outlineCanvas" width="32" height="32"></canvas>
+            </div>
+            <p style="font-size: 12px; color: #666;">Shown on dark background for visibility</p>
+            <button onclick="downloadIcon('outlineCanvas', 'outline.png')">⬇️ Download outline.png</button>
+        </div>
+    </div>
+
+    <div class="instructions" id="instructions">
+        <strong>📋 Instructions:</strong>
+        <ol>
+            <li>Click both download buttons above</li>
+            <li>Save the files to: <code>LP_Booking_App/appPackage/</code></li>
+            <li>Then run: <code>cd appPackage && Compress-Archive -Path manifest.json, color.png, outline.png -DestinationPath ../LPBookingApp.zip -Force</code></li>
+        </ol>
+    </div>
+
+    <script>
+        // Generate Color Icon (192x192)
+        function drawColorIcon() {
+            const canvas = document.getElementById('colorCanvas');
+            const ctx = canvas.getContext('2d');
+            const size = 192;
+
+            // Clear canvas
+            ctx.clearRect(0, 0, size, size);
+
+            // Background with rounded corners
+            const radius = 32;
+            ctx.beginPath();
+            ctx.moveTo(radius, 0);
+            ctx.lineTo(size - radius, 0);
+            ctx.quadraticCurveTo(size, 0, size, radius);
+            ctx.lineTo(size, size - radius);
+            ctx.quadraticCurveTo(size, size, size - radius, size);
+            ctx.lineTo(radius, size);
+            ctx.quadraticCurveTo(0, size, 0, size - radius);
+            ctx.lineTo(0, radius);
+            ctx.quadraticCurveTo(0, 0, radius, 0);
+            ctx.closePath();
+
+            // Gradient background (License Pulse blue)
+            const gradient = ctx.createLinearGradient(0, 0, size, size);
+            gradient.addColorStop(0, '#0078D4');
+            gradient.addColorStop(1, '#005A9E');
+            ctx.fillStyle = gradient;
+            ctx.fill();
+
+            // Calendar icon suggestion (subtle)
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
+            ctx.fillRect(30, 120, 132, 50);
+
+            // "LP" text
+            ctx.fillStyle = '#FFFFFF';
+            ctx.font = 'bold 80px Segoe UI, Arial, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('LP', size / 2, size / 2 - 15);
+
+            // "Booking" text (smaller)
+            ctx.font = '600 22px Segoe UI, Arial, sans-serif';
+            ctx.fillText('Booking', size / 2, size / 2 + 50);
+        }
+
+        // Generate Outline Icon (32x32)
+        function drawOutlineIcon() {
+            const canvas = document.getElementById('outlineCanvas');
+            const ctx = canvas.getContext('2d');
+            const size = 32;
+
+            // Clear canvas (transparent)
+            ctx.clearRect(0, 0, size, size);
+
+            // White rounded rectangle outline
+            const radius = 4;
+            const lineWidth = 2;
+            const offset = lineWidth / 2;
+
+            ctx.strokeStyle = '#FFFFFF';
+            ctx.lineWidth = lineWidth;
+
+            ctx.beginPath();
+            ctx.moveTo(radius + offset, offset);
+            ctx.lineTo(size - radius - offset, offset);
+            ctx.quadraticCurveTo(size - offset, offset, size - offset, radius + offset);
+            ctx.lineTo(size - offset, size - radius - offset);
+            ctx.quadraticCurveTo(size - offset, size - offset, size - radius - offset, size - offset);
+            ctx.lineTo(radius + offset, size - offset);
+            ctx.quadraticCurveTo(offset, size - offset, offset, size - radius - offset);
+            ctx.lineTo(offset, radius + offset);
+            ctx.quadraticCurveTo(offset, offset, radius + offset, offset);
+            ctx.closePath();
+            ctx.stroke();
+
+            // "LP" text
+            ctx.fillStyle = '#FFFFFF';
+            ctx.font = 'bold 13px Segoe UI, Arial, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('LP', size / 2, size / 2 + 1);
+        }
+
+        // Download function
+        function downloadIcon(canvasId, filename) {
+            const canvas = document.getElementById(canvasId);
+            const link = document.createElement('a');
+            link.download = filename;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+
+            // Update instructions
+            document.getElementById('instructions').innerHTML = `
+                <strong>✅ Downloaded: ${filename}</strong>
+                <p>Save it to: <code>LP_Booking_App/appPackage/${filename}</code></p>
+            `;
+            document.getElementById('instructions').className = 'instructions success';
+        }
+
+        // Draw icons on page load
+        drawColorIcon();
+        drawOutlineIcon();
+    </script>
+</body>
+</html>

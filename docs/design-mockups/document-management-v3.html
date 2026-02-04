@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document Management - Variation 3 (Split Panel with Preview)</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: #f5f5f5;
+      padding: 24px;
+      color: #242424;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+
+    .header-info h1 {
+      font-size: 18px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 4px;
+    }
+
+    .header-info p {
+      font-size: 13px;
+      color: #616161;
+    }
+
+    .btn {
+      padding: 8px 16px;
+      border-radius: 4px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border: none;
+      transition: all 0.15s ease;
+    }
+
+    .btn-primary {
+      background: #1e6b7b;
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: #154f5c;
+    }
+
+    .btn-secondary {
+      background: white;
+      color: #242424;
+      border: 1px solid #d1d1d1;
+    }
+
+    .btn-secondary:hover {
+      background: #f5f5f5;
+    }
+
+    .btn-sm {
+      padding: 6px 12px;
+      font-size: 13px;
+    }
+
+    /* Split Layout */
+    .split-layout {
+      display: grid;
+      grid-template-columns: 1fr 380px;
+      gap: 20px;
+    }
+
+    @media (max-width: 1000px) {
+      .split-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Main Panel */
+    .main-panel {
+      background: white;
+      border-radius: 8px;
+      border: 1px solid #e1e1e1;
+      overflow: hidden;
+    }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 20px;
+      border-bottom: 1px solid #e1e1e1;
+      background: #fafafa;
+    }
+
+    .panel-title {
+      font-size: 15px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .document-list {
+      max-height: 500px;
+      overflow-y: auto;
+    }
+
+    .document-item {
+      display: flex;
+      align-items: center;
+      padding: 16px 20px;
+      border-bottom: 1px solid #f0f0f0;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .document-item:hover {
+      background: #f8f9fa;
+    }
+
+    .document-item.selected {
+      background: #e8f4f6;
+      border-left: 3px solid #1e6b7b;
+      padding-left: 17px;
+    }
+
+    .document-item:last-child {
+      border-bottom: none;
+    }
+
+    .document-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-right: 14px;
+    }
+
+    .document-icon.pdf {
+      background: #fde7e9;
+      color: #d13438;
+    }
+
+    .document-icon.docx {
+      background: #e6f2fb;
+      color: #0078d4;
+    }
+
+    .document-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .document-name {
+      font-size: 14px;
+      font-weight: 500;
+      margin-bottom: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .document-meta {
+      font-size: 12px;
+      color: #616161;
+    }
+
+    .document-badges {
+      display: flex;
+      gap: 6px;
+      margin-left: 12px;
+    }
+
+    .badge {
+      padding: 4px 8px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 500;
+    }
+
+    .badge-demo {
+      background: #fff3e0;
+      color: #e65100;
+    }
+
+    .badge-deployment {
+      background: #e8f5e9;
+      color: #2e7d32;
+    }
+
+    /* Upload Zone in Main Panel */
+    .upload-inline {
+      padding: 20px;
+      border-top: 1px solid #e1e1e1;
+    }
+
+    .upload-zone {
+      border: 2px dashed #d1d1d1;
+      border-radius: 8px;
+      padding: 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      background: #fafafa;
+    }
+
+    .upload-zone:hover {
+      border-color: #1e6b7b;
+      background: #e8f4f6;
+    }
+
+    .upload-zone-content {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+    }
+
+    .upload-icon {
+      width: 32px;
+      height: 32px;
+      color: #616161;
+    }
+
+    .upload-text strong {
+      font-size: 14px;
+      display: block;
+    }
+
+    .upload-text span {
+      font-size: 12px;
+      color: #616161;
+    }
+
+    /* Side Panel - Settings */
+    .side-panel {
+      background: white;
+      border-radius: 8px;
+      border: 1px solid #e1e1e1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .side-panel-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid #e1e1e1;
+      background: linear-gradient(135deg, #1e6b7b 0%, #2a8a9d 100%);
+      color: white;
+      border-radius: 8px 8px 0 0;
+    }
+
+    .side-panel-title {
+      font-size: 15px;
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+
+    .side-panel-subtitle {
+      font-size: 12px;
+      opacity: 0.9;
+    }
+
+    .side-panel-body {
+      padding: 20px;
+      flex: 1;
+    }
+
+    .settings-section {
+      margin-bottom: 24px;
+    }
+
+    .settings-section:last-child {
+      margin-bottom: 0;
+    }
+
+    .settings-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: #616161;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 12px;
+    }
+
+    /* Toggle Switch */
+    .toggle-option {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      background: #fafafa;
+      border-radius: 8px;
+      margin-bottom: 8px;
+      border: 1px solid #e1e1e1;
+      transition: all 0.15s ease;
+    }
+
+    .toggle-option:hover {
+      border-color: #c1c1c1;
+    }
+
+    .toggle-option.active {
+      background: #e8f4f6;
+      border-color: #1e6b7b;
+    }
+
+    .toggle-label {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .toggle-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .toggle-icon.demo {
+      background: #fff3e0;
+      color: #e65100;
+    }
+
+    .toggle-icon.deployment {
+      background: #e8f5e9;
+      color: #2e7d32;
+    }
+
+    .toggle-text {
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .toggle-description {
+      font-size: 12px;
+      color: #616161;
+    }
+
+    /* Custom Toggle Switch */
+    .toggle-switch {
+      position: relative;
+      width: 48px;
+      height: 26px;
+      cursor: pointer;
+    }
+
+    .toggle-switch input {
+      display: none;
+    }
+
+    .toggle-slider {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: #d1d1d1;
+      border-radius: 26px;
+      transition: all 0.2s ease;
+    }
+
+    .toggle-slider::before {
+      content: '';
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      left: 3px;
+      bottom: 3px;
+      background: white;
+      border-radius: 50%;
+      transition: all 0.2s ease;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    }
+
+    .toggle-switch input:checked + .toggle-slider {
+      background: #1e6b7b;
+    }
+
+    .toggle-switch input:checked + .toggle-slider::before {
+      transform: translateX(22px);
+    }
+
+    /* Preview Section */
+    .preview-section {
+      background: #f8f9fa;
+      border-radius: 8px;
+      padding: 16px;
+      border: 1px solid #e1e1e1;
+    }
+
+    .preview-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: #616161;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .email-preview {
+      background: white;
+      border-radius: 6px;
+      padding: 12px;
+      border: 1px solid #e1e1e1;
+    }
+
+    .email-preview-header {
+      font-size: 12px;
+      color: #616161;
+      margin-bottom: 8px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .attachment-preview {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px;
+      background: #fafafa;
+      border-radius: 4px;
+      margin-bottom: 6px;
+      font-size: 12px;
+    }
+
+    .attachment-preview:last-child {
+      margin-bottom: 0;
+    }
+
+    .attachment-preview-icon {
+      width: 20px;
+      height: 20px;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .attachment-preview-icon.pdf {
+      background: #fde7e9;
+      color: #d13438;
+    }
+
+    .attachment-preview-icon.docx {
+      background: #e6f2fb;
+      color: #0078d4;
+    }
+
+    .no-attachments {
+      text-align: center;
+      padding: 16px;
+      color: #616161;
+      font-size: 12px;
+      font-style: italic;
+    }
+
+    /* Side Panel Footer */
+    .side-panel-footer {
+      padding: 16px 20px;
+      border-top: 1px solid #e1e1e1;
+      background: #fafafa;
+      border-radius: 0 0 8px 8px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="header-info">
+        <h1>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+          </svg>
+          Document Management
+        </h1>
+        <p>Configure documents and their attachment settings for booking emails</p>
+      </div>
+      <button class="btn btn-primary">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+          <polyline points="17 21 17 13 7 13 7 21"/>
+          <polyline points="7 3 7 8 15 8"/>
+        </svg>
+        Save All Settings
+      </button>
+    </div>
+
+    <div class="split-layout">
+      <!-- Main Panel - Document List -->
+      <div class="main-panel">
+        <div class="panel-header">
+          <div class="panel-title">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+            </svg>
+            Document Library
+          </div>
+          <span style="font-size: 13px; color: #616161;">3 documents</span>
+        </div>
+
+        <div class="document-list">
+          <div class="document-item selected">
+            <div class="document-icon pdf">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z"/>
+              </svg>
+            </div>
+            <div class="document-info">
+              <div class="document-name">License Pulse v2.0 Product Explainer.pdf</div>
+              <div class="document-meta">PDF • 2.4 MB • Updated Jan 15, 2026</div>
+            </div>
+            <div class="document-badges">
+              <span class="badge badge-demo">Demo</span>
+            </div>
+          </div>
+
+          <div class="document-item">
+            <div class="document-icon docx">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z"/>
+              </svg>
+            </div>
+            <div class="document-info">
+              <div class="document-name">First Digital - License Pulse Setup Requirements v2.0.docx</div>
+              <div class="document-meta">DOCX • 856 KB • Updated Jan 10, 2026</div>
+            </div>
+            <div class="document-badges">
+              <span class="badge badge-deployment">Deployment</span>
+            </div>
+          </div>
+
+          <div class="document-item">
+            <div class="document-icon pdf">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z"/>
+              </svg>
+            </div>
+            <div class="document-info">
+              <div class="document-name">License Pulse Pricing Guide 2026.pdf</div>
+              <div class="document-meta">PDF • 1.2 MB • Updated Jan 5, 2026</div>
+            </div>
+            <div class="document-badges">
+              <span class="badge badge-demo">Demo</span>
+              <span class="badge badge-deployment">Deployment</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="upload-inline">
+          <div class="upload-zone">
+            <div class="upload-zone-content">
+              <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="17 8 12 3 7 8"/>
+                <line x1="12" y1="3" x2="12" y2="15"/>
+              </svg>
+              <div class="upload-text">
+                <strong>Add new document</strong>
+                <span>Drop file here or click to upload</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Side Panel - Document Settings -->
+      <div class="side-panel">
+        <div class="side-panel-header">
+          <div class="side-panel-title">Document Settings</div>
+          <div class="side-panel-subtitle">License Pulse v2.0 Product Explainer.pdf</div>
+        </div>
+
+        <div class="side-panel-body">
+          <div class="settings-section">
+            <div class="settings-label">Attach to Booking Types</div>
+
+            <div class="toggle-option active">
+              <div class="toggle-label">
+                <div class="toggle-icon demo">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                    <polygon points="5 3 19 12 5 21 5 3"/>
+                  </svg>
+                </div>
+                <div>
+                  <div class="toggle-text">Demo Bookings</div>
+                  <div class="toggle-description">Send with demo confirmations</div>
+                </div>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" checked>
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+
+            <div class="toggle-option">
+              <div class="toggle-label">
+                <div class="toggle-icon deployment">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path d="M22 12l-4-4v3H3v2h15v3l4-4z"/>
+                  </svg>
+                </div>
+                <div>
+                  <div class="toggle-text">Deployment Bookings</div>
+                  <div class="toggle-description">Send with deployment confirmations</div>
+                </div>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox">
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+          </div>
+
+          <div class="settings-section">
+            <div class="preview-section">
+              <div class="preview-title">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                  <circle cx="12" cy="12" r="3"/>
+                </svg>
+                Demo Email Preview
+              </div>
+              <div class="email-preview">
+                <div class="email-preview-header">
+                  <strong>Attachments (2):</strong>
+                </div>
+                <div class="attachment-preview">
+                  <div class="attachment-preview-icon pdf">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z"/>
+                    </svg>
+                  </div>
+                  <span>License Pulse v2.0 Product Explainer.pdf</span>
+                </div>
+                <div class="attachment-preview">
+                  <div class="attachment-preview-icon pdf">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z"/>
+                    </svg>
+                  </div>
+                  <span>License Pulse Pricing Guide 2026.pdf</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="settings-section">
+            <div class="preview-section">
+              <div class="preview-title">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                  <circle cx="12" cy="12" r="3"/>
+                </svg>
+                Deployment Email Preview
+              </div>
+              <div class="email-preview">
+                <div class="email-preview-header">
+                  <strong>Attachments (2):</strong>
+                </div>
+                <div class="attachment-preview">
+                  <div class="attachment-preview-icon docx">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z"/>
+                    </svg>
+                  </div>
+                  <span>First Digital - Setup Requirements v2.0.docx</span>
+                </div>
+                <div class="attachment-preview">
+                  <div class="attachment-preview-icon pdf">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z"/>
+                    </svg>
+                  </div>
+                  <span>License Pulse Pricing Guide 2026.pdf</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="side-panel-footer">
+          <button class="btn btn-secondary btn-sm" style="width: 100%; justify-content: center;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="3 6 5 6 21 6"/>
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+            </svg>
+            Remove Document
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Document selection
+    document.querySelectorAll('.document-item').forEach(item => {
+      item.addEventListener('click', () => {
+        document.querySelectorAll('.document-item').forEach(i => i.classList.remove('selected'));
+        item.classList.add('selected');
+      });
+    });
+
+    // Toggle switches - update active state on parent
+    document.querySelectorAll('.toggle-switch input').forEach(toggle => {
+      toggle.addEventListener('change', () => {
+        const parent = toggle.closest('.toggle-option');
+        if (toggle.checked) {
+          parent.classList.add('active');
+        } else {
+          parent.classList.remove('active');
+        }
+      });
+    });
+  </script>
+</body>
+</html>

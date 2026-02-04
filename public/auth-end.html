@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Authentication</title>
+</head>
+<body>
+    <script src="https://res.cdn.office.net/teams-js/2.0.0/js/MicrosoftTeams.min.js"></script>
+    <script>
+        (async function() {
+            try {
+                await microsoftTeams.app.initialize();
+
+                // Get the hash from the URL (contains the auth response)
+                const hash = window.location.hash;
+
+                if (hash) {
+                    // Notify success with the hash (contains tokens/code)
+                    microsoftTeams.authentication.notifySuccess(hash);
+                } else {
+                    // Check for error in query params
+                    const params = new URLSearchParams(window.location.search);
+                    const error = params.get('error');
+                    if (error) {
+                        microsoftTeams.authentication.notifyFailure(error);
+                    } else {
+                        microsoftTeams.authentication.notifySuccess('');
+                    }
+                }
+            } catch (error) {
+                console.error('Auth end error:', error);
+                // Try to close anyway
+                try {
+                    microsoftTeams.authentication.notifyFailure('Authentication failed');
+                } catch {
+                    window.close();
+                }
+            }
+        })();
+    </script>
+    <p>Completing authentication...</p>
+</body>
+</html>

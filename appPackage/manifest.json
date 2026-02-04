@@ -1,0 +1,52 @@
+﻿{
+    "$schema":  "https://developer.microsoft.com/en-us/json-schemas/teams/v1.16/MicrosoftTeams.schema.json",
+    "manifestVersion":  "1.16",
+    "version":  "1.7.5",
+    "id":  "617ebc47-16a0-457c-94ad-919b2e6827d9",
+    "packageName":  "com.firsttech.lpbookingapp",
+    "developer":  {
+                      "name":  "FirstTech Digital",
+                      "websiteUrl":  "https://firsttech.digital",
+                      "privacyUrl":  "https://firsttech.digital/privacy",
+                      "termsOfUseUrl":  "https://firsttech.digital/terms"
+                  },
+    "name":  {
+                 "short":  "LP Booking",
+                 "full":  "License Pulse Demo Booking App"
+             },
+    "description":  {
+                        "short":  "Book License Pulse demos and deployments",
+                        "full":  "A Microsoft Teams application for account managers to book product demos and deployments. Integrates with SharePoint for data storage and Microsoft Graph for calendar management."
+                    },
+    "icons":  {
+                  "color":  "color.png",
+                  "outline":  "outline.png"
+              },
+    "accentColor":  "#0078D4",
+    "staticTabs":  [
+                       {
+                           "entityId":  "home",
+                           "name":  "License Pulse Scheduler",
+                           "contentUrl":  "https://wonderful-ocean-036cdeb10.4.azurestaticapps.net/index.html",
+                           "websiteUrl":  "https://wonderful-ocean-036cdeb10.4.azurestaticapps.net/index.html",
+                           "scopes":  [
+                                          "personal"
+                                      ]
+                       }
+                   ],
+    "permissions":  [
+                        "identity",
+                        "messageTeamMembers"
+                    ],
+    "validDomains":  [
+                         "wonderful-ocean-036cdeb10.4.azurestaticapps.net",
+                         "hallofd.sharepoint.com",
+                         "*.sharepoint.com",
+                         "*.microsoftonline.com",
+                         "login.microsoftonline.com"
+                     ],
+    "webApplicationInfo":  {
+                               "id":  "617ebc47-16a0-457c-94ad-919b2e6827d9",
+                               "resource":  "api://wonderful-ocean-036cdeb10.4.azurestaticapps.net/617ebc47-16a0-457c-94ad-919b2e6827d9"
+                           }
+}
