@@ -15,6 +15,11 @@ import { ManagerDashboard } from './components/Dashboard';
 import { AdminPage, AccountManagerManagement } from './components/Admin';
 import { ChecklistPage } from './components/Checklist';
 import { Header, ErrorBoundary, LoadingSpinner, UserGuide } from './components/Common';
+// DWx Traffic Manager - New Components
+import { ServiceCatalog } from './components/ServiceCatalog';
+import { ServiceRequestForm } from './components/ServiceRequest';
+import { MyRequests } from './components/MyRequests';
+import { SalesFunnelDashboard } from './components/SalesFunnel';
 import { LoginPage } from './components/LoginPage';
 import { getAuthService } from './services/serviceFactory';
 import { validateConfig } from './config/environmentConfig';
@@ -89,7 +94,21 @@ const AppRoutes: React.FC = () => {
       <UserGuide userName={user?.displayName} />
       <main className={styles.main}>
         <Routes>
-          <Route path="/" element={<Navigate to="/booking" replace />} />
+          {/* DWx Traffic Manager - Primary Routes */}
+          <Route path="/" element={<Navigate to="/services" replace />} />
+          <Route path="/services" element={<ServiceCatalog />} />
+          <Route path="/request" element={<ServiceRequestForm />} />
+          <Route path="/requests" element={<MyRequests />} />
+          <Route
+            path="/pipeline"
+            element={
+              <ManagerRoute>
+                <SalesFunnelDashboard />
+              </ManagerRoute>
+            }
+          />
+
+          {/* Legacy LP Booking Routes (for backward compatibility) */}
           <Route path="/booking" element={<BookingForm />} />
           <Route path="/bookings" element={<MyBookings />} />
           <Route path="/checklist/:bookingId" element={<ChecklistPage />} />
@@ -117,7 +136,7 @@ const AppRoutes: React.FC = () => {
               </ManagerRoute>
             }
           />
-          <Route path="*" element={<Navigate to="/booking" replace />} />
+          <Route path="*" element={<Navigate to="/services" replace />} />
         </Routes>
       </main>
     </div>

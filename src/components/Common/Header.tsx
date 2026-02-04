@@ -18,6 +18,10 @@ import {
   Person24Regular,
   DataUsage24Regular,
   Settings24Regular,
+  GridRegular,
+  AddRegular,
+  DocumentBulletListRegular,
+  ArrowTrendingRegular,
 } from '@fluentui/react-icons';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -87,34 +91,45 @@ export const Header: React.FC = () => {
   return (
     <header className={styles.header}>
       <div className={styles.logo}>
-        <CalendarLtr24Regular />
-        <Text className={styles.logoText}>License Pulse Scheduler</Text>
+        <ArrowTrendingRegular />
+        <Text className={styles.logoText}>DWx Traffic Manager</Text>
       </div>
 
       <nav className={styles.nav}>
+        {/* DWx Traffic Manager - Primary Navigation */}
         <Button
           appearance="subtle"
-          className={`${styles.navButton} ${isActive('/booking') ? styles.navButtonActive : ''}`}
-          onClick={() => navigate('/booking')}
+          className={`${styles.navButton} ${isActive('/services') ? styles.navButtonActive : ''}`}
+          onClick={() => navigate('/services')}
+          icon={<GridRegular />}
         >
-          New Booking
+          Services
         </Button>
         <Button
           appearance="subtle"
-          className={`${styles.navButton} ${isActive('/bookings') ? styles.navButtonActive : ''}`}
-          onClick={() => navigate('/bookings')}
+          className={`${styles.navButton} ${isActive('/request') ? styles.navButtonActive : ''}`}
+          onClick={() => navigate('/request')}
+          icon={<AddRegular />}
         >
-          My Bookings
+          New Request
+        </Button>
+        <Button
+          appearance="subtle"
+          className={`${styles.navButton} ${isActive('/requests') ? styles.navButtonActive : ''}`}
+          onClick={() => navigate('/requests')}
+          icon={<DocumentBulletListRegular />}
+        >
+          My Requests
         </Button>
         {isManager && (
           <>
             <Button
               appearance="subtle"
-              className={`${styles.navButton} ${isActive('/dashboard') ? styles.navButtonActive : ''}`}
-              onClick={() => navigate('/dashboard')}
+              className={`${styles.navButton} ${isActive('/pipeline') ? styles.navButtonActive : ''}`}
+              onClick={() => navigate('/pipeline')}
               icon={<DataUsage24Regular />}
             >
-              Dashboard
+              Pipeline
             </Button>
             <Button
               appearance="subtle"

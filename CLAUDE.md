@@ -307,24 +307,24 @@ VITE_ENV=development
 - [x] Create TypeScript types (ServiceRequest.ts)
 - [x] Update environment configuration
 
-### Phase 2: Core Services - IN PROGRESS
-- [x] ServiceCatalogService.ts - Service catalog CRUD
+### Phase 2: Core Services - COMPLETE
+- [x] ServiceCatalogService.ts - Service catalog CRUD with fallback defaults
 - [x] ServiceRequestService.ts - Funnel orchestration with stage transitions
-- [ ] SpecialistService.ts - Specialist management and availability
-- [ ] PipelineService.ts - Dashboard metrics calculations
+- [x] SpecialistService.ts - Specialist management and availability checking
+- [x] PipelineService.ts - Dashboard metrics, win rates, conversion rates, forecasting
 
-### Phase 3: UI Components - PENDING
-- [ ] ServiceCatalog components (ServiceCatalog, ServiceCard, ServiceDetails)
-- [ ] ServiceRequestForm multi-step wizard
-- [ ] MyRequests components with stage filtering
-- [ ] SalesFunnelDashboard with pipeline visualizations
-- [ ] Admin components (ServiceManagement, SpecialistManagement)
+### Phase 3: UI Components - COMPLETE
+- [x] ServiceCatalog components (ServiceCatalog.tsx, ServiceCard.tsx, ServiceDetails.tsx)
+- [x] ServiceRequestForm.tsx - 5-step wizard (Service → Client → Requirements → Schedule → Review)
+- [x] MyRequests components (MyRequests.tsx, RequestCard.tsx, RequestDetails.tsx, StageProgressBar.tsx)
+- [x] SalesFunnelDashboard (FunnelChart.tsx, PipelineKPIs.tsx, ConversionRatesCard.tsx, RequestsQueue.tsx)
+- [ ] Admin components (ServiceManagement, SpecialistManagement) - PENDING
 
-### Phase 4: Integration - PENDING
-- [ ] Update App.tsx with new routes
-- [ ] Update Header with new navigation
-- [ ] Test mode configuration for E2E testing
-- [ ] Email notification templates (DW branding)
+### Phase 4: Integration - COMPLETE
+- [x] Update App.tsx with new routes (/services, /request, /requests, /pipeline)
+- [x] Update Header with new navigation (Services, New Request, My Requests, Pipeline)
+- [ ] Test mode configuration for E2E testing - PENDING
+- [ ] Email notification templates (DW branding) - PENDING
 
 ### Phase 5: Deployment - PENDING
 - [ ] Azure AD app registration
@@ -384,8 +384,15 @@ The app supports Account Managers from an external partner tenant:
 | `src/types/ServiceRequest.ts` | Core type definitions for all DWx entities |
 | `src/services/ServiceCatalogService.ts` | Service catalog CRUD operations |
 | `src/services/ServiceRequestService.ts` | Funnel workflow orchestration |
+| `src/services/SpecialistService.ts` | Specialist management and availability |
+| `src/services/PipelineService.ts` | Dashboard metrics and analytics |
 | `src/config/environmentConfig.ts` | Environment configuration with DWx lists |
-| `src/App.tsx` | Main app with routing (to be updated) |
+| `src/App.tsx` | Main app with DWx routes |
+| `src/components/ServiceCatalog/` | Service catalog UI (ServiceCatalog, ServiceCard, ServiceDetails) |
+| `src/components/ServiceRequest/` | Request wizard (ServiceRequestForm) |
+| `src/components/MyRequests/` | Request list (MyRequests, RequestCard, RequestDetails, StageProgressBar) |
+| `src/components/SalesFunnel/` | Dashboard (SalesFunnelDashboard, FunnelChart, PipelineKPIs, ConversionRatesCard, RequestsQueue) |
+| `src/components/Common/Header.tsx` | Navigation header with DWx branding |
 
 ## Confirmed Design Decisions
 
