@@ -8,7 +8,7 @@ import {
   Tab,
   TabList,
 } from '@fluentui/react-components';
-import { ArrowClockwise24Regular, ArrowDownload24Regular, CalendarMonth24Regular, Timeline24Regular, Trophy24Regular, Money24Regular } from '@fluentui/react-icons';
+import { ArrowClockwise24Regular, ArrowDownload24Regular, CalendarMonth24Regular, Timeline24Regular, Trophy24Regular, Money24Regular, TargetRegular } from '@fluentui/react-icons';
 import { useAuth } from '../../contexts/AuthContext';
 import { dashboardService } from '../../services/DashboardService';
 import { DashboardData, DashboardFilters } from '../../types/Dashboard';
@@ -31,6 +31,8 @@ import { GamificationTab } from './GamificationTab';
 import { CommercialTab } from './CommercialTab';
 import { bookingService, ApprovalResult } from '../../services/BookingService';
 import { useToast } from '../../contexts/ToastContext';
+// DWx Traffic Manager - Pipeline Components
+import { SalesFunnelDashboard } from '../SalesFunnel/SalesFunnelDashboard';
 
 const useStyles = makeStyles({
   container: {
@@ -124,7 +126,7 @@ const useStyles = makeStyles({
   },
 });
 
-type DashboardTab = 'overview' | 'approvals' | 'calendar' | 'timeline' | 'performance' | 'clients' | 'commercial' | 'gamification';
+type DashboardTab = 'overview' | 'pipeline' | 'approvals' | 'calendar' | 'timeline' | 'performance' | 'clients' | 'commercial' | 'gamification';
 
 export const ManagerDashboard: React.FC = () => {
   const styles = useStyles();
@@ -141,7 +143,7 @@ export const ManagerDashboard: React.FC = () => {
   // Read tab from URL params, default to 'overview'
   const tabFromUrl = searchParams.get('tab') as DashboardTab | null;
   const [selectedTab, setSelectedTab] = useState<DashboardTab>(
-    tabFromUrl && ['overview', 'approvals', 'calendar', 'timeline', 'leaderboard', 'commercial'].includes(tabFromUrl)
+    tabFromUrl && ['overview', 'pipeline', 'approvals', 'calendar', 'timeline', 'leaderboard', 'commercial'].includes(tabFromUrl)
       ? tabFromUrl
       : 'overview'
   );
@@ -151,7 +153,7 @@ export const ManagerDashboard: React.FC = () => {
     const tab = searchParams.get('tab') as DashboardTab | null;
     const bookingId = searchParams.get('bookingId');
 
-    if (tab && ['overview', 'approvals', 'calendar', 'timeline', 'leaderboard', 'commercial'].includes(tab)) {
+    if (tab && ['overview', 'pipeline', 'approvals', 'calendar', 'timeline', 'leaderboard', 'commercial'].includes(tab)) {
       setSelectedTab(tab);
     }
 
@@ -299,7 +301,7 @@ export const ManagerDashboard: React.FC = () => {
         <div className={styles.titleSection}>
           <Text className={styles.title}>Manager Dashboard</Text>
           <Text className={styles.subtitle}>
-            Overview of all License Pulse booking activity
+            Overview of bookings, pipeline, and team performance
           </Text>
         </div>
         <div className={styles.actions}>
@@ -371,6 +373,7 @@ export const ManagerDashboard: React.FC = () => {
         onTabSelect={(_, data) => setSelectedTab(data.value as DashboardTab)}
       >
         <Tab value="overview">Overview</Tab>
+        <Tab value="pipeline" icon={<TargetRegular />}>Pipeline</Tab>
         <Tab value="approvals">
           Approvals {pendingApprovalsCount > 0 && `(${pendingApprovalsCount})`}
         </Tab>
@@ -405,6 +408,11 @@ export const ManagerDashboard: React.FC = () => {
                 <TrendsChart data={dashboardData.trends} />
               </div>
             </>
+          )}
+
+          {/* Pipeline Tab - DWx Traffic Manager Sales Funnel */}
+          {selectedTab === 'pipeline' && (
+            <SalesFunnelDashboard />
           )}
 
           {/* Approvals Tab */}
