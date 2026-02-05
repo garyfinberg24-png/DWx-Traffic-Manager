@@ -1,7 +1,8 @@
 # DWx Traffic Manager - Session State
 
 > Last updated: 2026-02-05
-> Last commit: (uncommitted) - 13-Issue Process Remediation
+> Last commit: 835fd53 - feat: Deep dive R1-R3 (v2.2.0)
+> Tags: v2.2.0, deep-dive-r1-r3
 
 ## Current State Summary
 
@@ -12,138 +13,141 @@ The DWx Traffic Manager is a fully functional React/TypeScript Teams app with:
 - **Sales funnel** with 7 stages (Lead through Won/Lost) and complete stage transition handlers
 - **Product catalog** with 29 products across 3 types (Apps, Web Parts, Adaptive Cards)
 - **Product request form** wired to SharePoint via ProductRequestService
-- **Admin panel** with 10 tabs covering all entity management (including new Specialists tab)
+- **Product request details modal** with status actions, specialist assignment, demo confirmation
+- **Admin panel** with 10 tabs covering all entity management (including Specialists tab)
 - **Audit logging** for all 10 entity types including Specialist and ProductRequest
+- **16 notification methods** covering service + product request lifecycle events
+- **20 email templates** with DWx branding
+- **Calendar conflict detection** with error-aware UI (green/red/yellow badges)
+- **Weighted pipeline calculation** on both create and independent DealValue updates
 - **Route-level error boundaries** on every route in App.tsx
 - **Legacy LP code removed** (BookingService, SharePointProvisioningService, SharePointProvisioning)
 - **Build status**: Clean - `npx tsc --noEmit` and `npm run build` both pass
 
-## What Was Just Completed (This Session)
+## What Was Completed (Deep Dive Rounds 1-3)
 
-### 13-Issue Process Remediation (5 Phases)
+### Round 1: Data Integrity Fixes (B1-B5)
 
-Deep dive review identified 13 process/logic dead ends. 12 actionable issues fixed (Issue #6 was already implemented).
+| Bug | File | Fix |
+| --- | ---- | --- |
+| B1: Specialist reassignment | ProductRequestService.ts | Track previous specialist, decrement deal count on reassignment |
+| B2: Terminal status decrement | ProductRequestService.ts | Decrement specialist count on Completed/Cancelled (double-decrement guard) |
+| B3: Product demo calendar | ProductRequestService.ts | New `confirmProductDemo()` creates calendar events via Graph API |
+| B4: Calendar conflict false negative | GraphService.ts, ApprovalQueue.tsx | Return `error: true` on failure, show yellow "Unknown" badge |
+| B5: WeightedPipeline on update | ServiceRequestService.ts | New `updateDealInfo()` recalculates WeightedPipeline |
 
-**Phase 1 - Critical Data Pipeline:**
+### Round 2: Missing Notifications (N1-N6)
 
-- Created `src/types/ProductRequest.ts` - types for product request entities
-- Created `src/services/ProductRequestService.ts` - CRUD for product requests against DWxProductRequests SP list
-- Wired `ProductRequestForm.tsx` to actually save to SharePoint (was just `console.log`)
-- Added `'Specialist' | 'ProductRequest'` to AuditEntity union type
-- Fixed client LTV update: moved from `recordOutcome()` into `updateStage()` for Won transitions
+7 new email templates added to EmailTemplates.ts:
 
-**Phase 2 - Calendar & Stage Transitions:**
+| Template | Purpose |
+| -------- | ------- |
+| productSpecialistAssignedAM | AM notification for product specialist assignment |
+| productSpecialistAssignedSpecialist | Specialist notification with product details + proposed slots |
+| specialistReassigned | Generic unassignment notice for previous specialist |
+| productRequestStatusChangedManager | Manager visibility on product status changes |
+| dealValueChanged | Manager notification with strikethrough previous values |
+| calendarEventFailed | Manager escalation with manual action checklist |
+| productDemoConfirmedSpecialist | Specialist confirmed slot notification with prep checklist |
 
-- Filled empty `handleStageTransitionActions` switch cases in ServiceRequestService:
-  - **Won**: Decrements specialist `currentDealCount`
-  - **Lost**: Deletes calendar event (shared mailbox + user fallback), clears `CalendarEventId` in SP, decrements specialist deal count
-  - **Proposal**: Documented that notification is handled above the switch
+6 new methods added to DWxNotificationService.ts:
 
-**Phase 3 - Specialist Admin & Audit:**
+| Method | Trigger |
+| ------ | ------- |
+| sendProductSpecialistAssignedNotifications() | ProductRequestService.assignSpecialist() |
+| notifySpecialistReassigned() | Both assignSpecialist() methods on reassignment |
+| notifyProductRequestStatusChangedManagers() | ProductRequestService.updateStatus() + confirmProductDemo() |
+| notifyDealValueChanged() | ServiceRequestService.updateDealInfo() |
+| notifyCalendarEventFailed() | Both confirmDiscovery() and confirmProductDemo() catch blocks |
+| notifyProductDemoConfirmedSpecialist() | ProductRequestService.confirmProductDemo() |
 
-- Created `src/components/Admin/SpecialistManagement.tsx` - table with search, role filter, Edit/Deactivate actions
-- Created `src/components/Admin/SpecialistForm.tsx` - dialog form with react-hook-form + yup
-- Added Specialists tab (10th tab) to AdminPage
-- Added audit logging to `SpecialistService.ts` (create, update, deactivate)
-- Added audit logging to `ServiceManagement.tsx` `handleToggleActive()`
+### Round 3: High-Priority Enhancements (H3 partial)
 
-**Phase 4 - Safety & Integration:**
+- Created `src/components/MyRequests/ProductRequestDetails.tsx` — full details modal for product requests with:
+  - Status actions (Awaiting Approval, Cancelled, Completed) for managers
+  - Specialist assignment/reassignment dropdown with deal count display
+  - Demo/trial confirmation flow with slot selection dropdown
+  - Product info, client/contact details, account manager, time slots, requirements, comments
+  - DWx-consistent design matching RequestDetails.tsx pattern
+- Made product request cards clickable in MyRequests.tsx with hover effects
+- Added ProductRequestDetails to component exports
 
-- Added orphan protection to `ClientList.tsx` delete - checks for active service requests before allowing deletion
-- Added product requests tab to `MyRequests.tsx` - TabList with "Service Requests" and "Product Requests"
-
-**Phase 5 - Cleanup & Hardening:**
-
-- Moved `ApprovalResult` and related types from `BookingService.ts` to `types/Booking.ts`
-- Updated `ApprovalQueue.tsx` import to point to `types/Booking`
-- Deleted 3 legacy files: `BookingService.ts` (1,094 lines), `SharePointProvisioningService.ts` (2,234 lines), `SharePointProvisioning.tsx` (897 lines)
-- Cleaned exports from `services/index.ts` and `components/Admin/index.ts`
-- Fixed `MockGraphService.ts` LP hardcoding - replaced `lpdemo` prefix check with DWx-aware list name matching for all 10 lists
-- Added route-level `<ErrorBoundary>` wrappers to every `<Route>` in `App.tsx`
-
-### Files Created (4)
+### Files Created This Session (1)
 
 | File | Purpose |
-| ------ | ------- |
-| `src/types/ProductRequest.ts` | ProductRequest, CreateProductRequestInput, ProductRequestResult types |
-| `src/services/ProductRequestService.ts` | Product request CRUD against DWxProductRequests |
-| `src/components/Admin/SpecialistManagement.tsx` | Specialist admin list with search/filter/actions |
-| `src/components/Admin/SpecialistForm.tsx` | Specialist create/edit dialog form |
+| ---- | ------- |
+| `src/components/MyRequests/ProductRequestDetails.tsx` | Product request details modal with status/specialist/demo actions |
 
-### Files Deleted (3)
-
-| File | Reason |
-| ------ | ------ |
-| `src/services/BookingService.ts` | Legacy LP booking orchestration - no longer used |
-| `src/services/SharePointProvisioningService.ts` | Legacy LP provisioning - replaced by DWxSharePointProvisioningService |
-| `src/components/Admin/SharePointProvisioning.tsx` | Legacy LP provisioning UI - replaced by DWxSharePointProvisioning |
-
-### Files Modified (15)
+### Files Modified This Session (10)
 
 | File | Changes |
-| ------ | ------- |
-| `src/services/AuditService.ts` | Added Specialist, ProductRequest to AuditEntity |
-| `src/services/ServiceRequestService.ts` | LTV update in updateStage(), filled stage handlers, specialist import |
-| `src/services/SpecialistService.ts` | Added audit logging to create/update/deactivate |
-| `src/services/ProductRequestService.ts` | Fixed unused parameter warning |
-| `src/services/MockGraphService.ts` | DWx-aware list name matching |
-| `src/services/index.ts` | Removed bookingService + sharePointProvisioningService exports |
-| `src/components/ProductRequest/ProductRequestForm.tsx` | Wired to ProductRequestService |
-| `src/components/Admin/AdminPage.tsx` | Added Specialists tab |
-| `src/components/Admin/index.ts` | Added SpecialistManagement/Form, removed SharePointProvisioning |
-| `src/components/Admin/ServiceManagement.tsx` | Added audit to toggle active |
-| `src/components/Admin/ClientList.tsx` | Added orphan protection |
-| `src/components/MyRequests/MyRequests.tsx` | Added product requests tab |
-| `src/components/Dashboard/ApprovalQueue.tsx` | Updated ApprovalResult import |
-| `src/types/Booking.ts` | Added ApprovalResult and related types |
-| `src/App.tsx` | Route-level ErrorBoundary wrappers |
+| ---- | ------- |
+| `src/services/ProductRequestService.ts` | B1 reassignment, B2 terminal decrement, B3 confirmProductDemo, N1/N2/N3/N5/N6 notifications |
+| `src/services/ServiceRequestService.ts` | B5 updateDealInfo, N2 reassignment, N4 deal value, N5 calendar failure |
+| `src/services/GraphService.ts` | B4 error flag on conflict check failure |
+| `src/services/MockGraphService.ts` | B4 error flag in return types |
+| `src/services/EmailTemplates.ts` | 7 new email templates (N1-N6) |
+| `src/services/DWxNotificationService.ts` | 6 new notification methods (N1-N6) |
+| `src/components/Dashboard/ApprovalQueue.tsx` | B4 yellow "Unknown" badge for failed calendar checks |
+| `src/components/MyRequests/MyRequests.tsx` | H3 clickable product cards + ProductRequestDetails modal |
+| `src/components/MyRequests/index.ts` | Added ProductRequestDetails export |
+| `src/types/ProductRequest.ts` | Added calendarEventId to ProductRequestResult |
 
-## What Was NOT Done / Still Pending
+## What's Still Pending
 
-### Completed Since Last Session
+### Round 3 Remaining (High Priority)
 
-- [x] **Azure AD app registration** - App registration sorted
-- [x] **SharePoint site provisioning** - Site provisioned
-- [x] **Email notification templates** - Already DWx branded (DWxNotificationService.ts, NotificationService.ts, EmailTemplates.ts all use DWx teal color scheme, [DWx] subject prefixes, "Digital Workplace" headers/footers)
+- [ ] **H4: Product Request Approval Queue** — No manager approval UI for product requests (managers can use ProductRequestDetails modal but no dedicated queue)
+- [ ] **H1: Request inline editing** — RequestDetails.tsx is read-only, needs edit mode for contact info, deal value, probability, requirements
+- [ ] **H6: Product request status workflow UI** — Statuses exist but no dedicated flow UI
+- [ ] **H5: Quick-action context menus** — Limited card interactions on pipeline/request cards
+
+### Round 4: Medium-Priority Enhancements (Not Yet Started)
+
+- [ ] M1-M10 medium-priority items from deep dive assessment
 
 ### Deferred
 
-- [ ] **Teams app manifest** - Will create once app fully built and tested
-- [ ] **Test mode for E2E testing** - testModeConfig.ts update deferred to E2E testing phase
-
-### Medium Priority
-
-- [ ] **Service Detail Page edit button** - ServiceDetailPage shows rich content but doesn't have a direct "Edit" link to admin
-
-### Low Priority / Nice-to-Have
-
-- [ ] **Teams Adaptive Card notifications** - Requires Power Automate flow
-- [ ] **Mobile experience optimization**
-- [ ] **Code splitting** - Bundle is 3MB (Vite warns about chunk size)
+- [ ] **Teams app manifest** — Will create once app fully built and tested
+- [ ] **Test mode update** — testModeConfig.ts needs DWx-specific mock data
+- [ ] **Code splitting** — Bundle is 3MB (Vite chunk size warning)
 
 ## Architecture Notes for Next Agent
 
 ### Key Patterns
 
-1. **Service Factory**: All services are created via `serviceFactory.ts` which checks `isTestMode()` and returns mock or real implementations.
+1. **Service Factory**: All services created via `serviceFactory.ts` which checks `isTestMode()` and returns mock or real implementations.
 
-2. **Admin Component Pattern**: Admin CRUD components follow a consistent pattern:
-   - `*List.tsx` or `*Management.tsx` - Table with search/filter + action menus
-   - `*Form.tsx` - Dialog form with react-hook-form + yup validation
-   - `Import*Dialog.tsx` - XLSX import with 3 phases (upload, preview, import)
+2. **Admin Component Pattern**: Admin CRUD components follow consistent pattern:
+   - `*Management.tsx` — Table with search/filter + action menus
+   - `*Form.tsx` — Dialog form with react-hook-form + yup validation
+   - `Import*Dialog.tsx` — XLSX import with upload/preview/import phases
    - All use `ConfirmDialog` for destructive actions
    - All integrate with `auditService` for change tracking
    - All use `useToast()` for success/error notifications
 
-3. **Rich Content Fallback**: `ServiceCatalogService.mapToService()` reads JSON columns from SharePoint first, then falls back to matching `DEFAULT_SERVICES` by title. This means the app works even before SP columns are populated.
+3. **Notification Architecture**: Two notification services coexist:
+   - `DWxNotificationService.ts` — 16 methods for DWx-specific events (service + product requests)
+   - `NotificationService.ts` — Legacy LP notification methods (still used by ApprovalQueue)
+   - `EmailTemplates.ts` — 20 templates with DWx teal branding
 
-4. **SharePoint Provisioning**: `DWxSharePointProvisioning.tsx` creates all 10 lists via Graph API. Each list has a "Re-provision" button to add missing columns to existing lists. Seed buttons available for Services, Team Members, Clients, Account Managers.
+4. **Product Request Lifecycle**: Pending Review → Awaiting Approval → Confirmed → Completed (any non-terminal status can transition to Cancelled)
+   - `confirmProductDemo()` handles Confirmed transition with calendar event
+   - `updateStatus()` handles all other transitions with specialist deal count management
+   - All transitions send notifications to AM + managers
 
-5. **List Name Config**: All 10 SharePoint list names are configured in `environmentConfig.ts` with env var overrides and sensible defaults (DWx-prefixed).
+5. **Calendar Conflict Detection**: `GraphService.checkCalendarConflicts()` returns `{ hasConflict, conflicts, error? }`. When `error: true`, UI shows yellow "Unknown" badge instead of misleading green "Available".
 
-6. **Stage Transition Side Effects**: `ServiceRequestService.handleStageTransitionActions()` handles all stage-specific logic (calendar cleanup, specialist deal counts, LTV updates). All transitions are audit-logged.
+6. **Specialist Deal Count Management**:
+   - Incremented on `assignSpecialist()` (both service + product)
+   - Decremented on reassignment (previous specialist)
+   - Decremented on terminal status (Won/Lost for service, Completed/Cancelled for product)
+   - Double-decrement guard: only decrements if previous status was non-terminal
 
-7. **Route Error Isolation**: Each route in App.tsx is wrapped with its own `<ErrorBoundary>` so a crash in one route doesn't take down the entire app.
+7. **WeightedPipeline Calculation**:
+   - On create: `DealValue * (DealProbability / 100)`
+   - On `updateDealInfo()`: recalculated with new values
+   - On Won: `updateClientLifetimeValue()` called
 
 ### File Naming Conventions
 
@@ -154,8 +158,10 @@ Deep dive review identified 13 process/logic dead ends. 12 actionable issues fix
 
 ### Known Quirks
 
-- The `yupResolver` in ServiceForm.tsx uses `as any` cast due to TypeScript generic inference issues between yup and react-hook-form
-- MockGraphService returns empty arrays for lists without mock data (services, specialists, product requests, managers)
+- The `yupResolver` in ServiceForm.tsx uses `as any` cast due to TypeScript generic inference issues
+- MockGraphService returns empty arrays for lists without mock data
+- `shorthands.borderColor()` required in makeStyles for hover pseudo-selector (Griffel limitation)
+- ApprovalQueue uses `Warning24Regular` icon for calendar check error states
 
 ## Quick Start for New Agent
 
@@ -163,9 +169,12 @@ Deep dive review identified 13 process/logic dead ends. 12 actionable issues fix
 2. Read `CLAUDE.md` for full project context
 3. Run `npm run build` to verify clean state
 4. Key entry points:
-   - `src/App.tsx` - Routes and providers (with route-level error boundaries)
-   - `src/components/Admin/AdminPage.tsx` - Admin panel (10 tabs)
-   - `src/config/environmentConfig.ts` - All SP list names and config
-   - `src/types/ServiceRequest.ts` - Core types + DEFAULT_SERVICES data
-   - `src/services/DWxSharePointProvisioningService.ts` - All list schemas
-   - `src/services/ServiceRequestService.ts` - Funnel orchestration + stage handlers
+   - `src/App.tsx` — Routes and providers (with route-level error boundaries)
+   - `src/components/Admin/AdminPage.tsx` — Admin panel (10 tabs)
+   - `src/config/environmentConfig.ts` — All SP list names and config
+   - `src/types/ServiceRequest.ts` — Core types + DEFAULT_SERVICES data
+   - `src/types/ProductRequest.ts` — Product request types + status workflow
+   - `src/services/ServiceRequestService.ts` — Funnel orchestration + stage handlers + updateDealInfo
+   - `src/services/ProductRequestService.ts` — Product CRUD + confirmProductDemo + specialist assignment
+   - `src/services/DWxNotificationService.ts` — 16 notification methods
+   - `src/services/EmailTemplates.ts` — 20 DW-branded email templates
