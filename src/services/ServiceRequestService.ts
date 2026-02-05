@@ -225,6 +225,11 @@ class ServiceRequestService {
     try {
       const graphService = getGraphService();
 
+      // Check if there's a previously assigned specialist (reassignment case)
+      const currentItem = await graphService.getListItemById(this.listName, requestId) as Record<string, unknown> | null;
+      const currentRequest = currentItem ? this.mapToServiceRequest(currentItem) : null;
+      const previousSpecialistEmail = currentRequest?.AssignedSpecialistEmail;
+
       const updateData = {
         AssignedSpecialistName: specialist.Title,
         AssignedSpecialistEmail: specialist.Email,
@@ -234,12 +239,27 @@ class ServiceRequestService {
       const result = await graphService.updateListItem(this.listName, requestId, updateData);
       const request = this.mapToServiceRequest(result);
 
+      // Update specialist deal counts
+      try {
+        // Decrement previous specialist's deal count if reassigning
+        if (previousSpecialistEmail && previousSpecialistEmail !== specialist.Email) {
+          const previousSpecialist = await specialistService.getSpecialistByEmail(previousSpecialistEmail);
+          if (previousSpecialist) {
+            await specialistService.decrementDealCount(previousSpecialist.Id);
+          }
+        }
+        // Increment new specialist's deal count
+        await specialistService.incrementDealCount(specialist.Id);
+      } catch (countError) {
+        console.error('Failed to update specialist deal counts:', countError);
+      }
+
       // Audit log
       await auditService.logUpdate(
         'ServiceRequest',
         requestId,
         request.Title,
-        { specialist: null },
+        { specialist: previousSpecialistEmail || null },
         { specialist: specialist.Title, assignedBy: userName }
       );
 

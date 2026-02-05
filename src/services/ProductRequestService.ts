@@ -6,6 +6,9 @@
 import { config } from '../config/environmentConfig';
 import { getGraphService } from './serviceFactory';
 import { auditService } from './AuditService';
+import { dwxNotificationService } from './DWxNotificationService';
+import { specialistService } from './SpecialistService';
+import { Specialist } from '../types/ServiceRequest';
 import {
   ProductRequest,
   CreateProductRequestInput,
@@ -67,6 +70,13 @@ class ProductRequestService {
         requestType: data.RequestType,
         clientName: data.ClientName,
       });
+
+      // Send notifications to AM and managers
+      try {
+        await dwxNotificationService.sendProductRequestCreatedNotifications(request);
+      } catch (notifError) {
+        console.error('Failed to send product request notifications:', notifError);
+      }
 
       return {
         success: true,
@@ -164,6 +174,13 @@ class ProductRequestService {
         { status, changedBy: userName }
       );
 
+      // Notify AM of status change
+      try {
+        await dwxNotificationService.notifyProductRequestStatusChanged(current, previousStatus, status);
+      } catch (notifError) {
+        console.error('Failed to send status change notification:', notifError);
+      }
+
       const updated = await this.getRequestById(id);
       return {
         success: true,
@@ -174,6 +191,61 @@ class ProductRequestService {
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error updating status',
+      };
+    }
+  }
+
+  /**
+   * Assign a specialist to a product request
+   */
+  async assignSpecialist(
+    requestId: number,
+    specialist: Specialist,
+    _userEmail: string,
+    userName: string
+  ): Promise<ProductRequestResult> {
+    try {
+      const graphService = getGraphService();
+
+      const updateData = {
+        AssignedSpecialistName: specialist.Title,
+        AssignedSpecialistEmail: specialist.Email,
+        AssignedSpecialistRole: specialist.Role,
+      };
+
+      await graphService.updateListItem(this.listName, requestId, updateData);
+
+      // Get updated request
+      const request = await this.getRequestById(requestId);
+      if (!request) {
+        return { success: false, error: 'Product request not found after update' };
+      }
+
+      // Increment specialist deal count
+      try {
+        await specialistService.incrementDealCount(specialist.Id);
+      } catch (countError) {
+        console.error('Failed to increment specialist deal count:', countError);
+      }
+
+      // Audit log
+      await auditService.logUpdate(
+        'ProductRequest',
+        requestId,
+        request.Title,
+        { specialist: null },
+        { specialist: specialist.Title, assignedBy: userName }
+      );
+
+      return {
+        success: true,
+        request,
+      };
+    } catch (error) {
+      console.error('Error assigning specialist to product request:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error assigning specialist',
       };
     }
   }

@@ -100,16 +100,19 @@ Deep dive review identified 13 process/logic dead ends. 12 actionable issues fix
 
 ## What Was NOT Done / Still Pending
 
-### High Priority
+### Completed Since Last Session
 
-- [ ] **Azure AD app registration** - No Azure AD app configured for DWx yet
-- [ ] **SharePoint site provisioning** - Production SP site not yet created
-- [ ] **Teams app manifest** - No Teams manifest package created for DWx
-- [ ] **Test mode for E2E testing** - testModeConfig.ts exists but not updated for DWx entities
+- [x] **Azure AD app registration** - App registration sorted
+- [x] **SharePoint site provisioning** - Site provisioned
+- [x] **Email notification templates** - Already DWx branded (DWxNotificationService.ts, NotificationService.ts, EmailTemplates.ts all use DWx teal color scheme, [DWx] subject prefixes, "Digital Workplace" headers/footers)
+
+### Deferred
+
+- [ ] **Teams app manifest** - Will create once app fully built and tested
+- [ ] **Test mode for E2E testing** - testModeConfig.ts update deferred to E2E testing phase
 
 ### Medium Priority
 
-- [ ] **Email notification templates** - DW-branded notification emails not fully implemented
 - [ ] **Service Detail Page edit button** - ServiceDetailPage shows rich content but doesn't have a direct "Edit" link to admin
 
 ### Low Priority / Nice-to-Have

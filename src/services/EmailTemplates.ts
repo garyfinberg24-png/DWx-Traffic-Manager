@@ -4,6 +4,7 @@
  */
 
 import { ServiceRequest, FunnelStage, DWService } from '../types/ServiceRequest';
+import { ProductRequest } from '../types/ProductRequest';
 import { format } from 'date-fns';
 
 // DW Brand Colors
@@ -607,6 +608,190 @@ Managed by DWx Traffic Manager
   `.trim();
 };
 
+// ============================================================================
+// Product Request Email Templates
+// ============================================================================
+
+/**
+ * Product request submitted - sent to AM
+ */
+export const productRequestCreatedAM = (request: ProductRequest): { subject: string; body: string } => {
+  const content = `
+    <h2>Your Product Request Has Been Submitted</h2>
+    <p>Hi ${request.AccountManagerName},</p>
+    <p>Your ${request.RequestType.toLowerCase()} request for <strong>${request.ProductName}</strong> has been successfully submitted.</p>
+
+    <div class="info-box">
+      <div class="info-row">
+        <span class="info-label">Product:</span>
+        <span class="info-value">${request.ProductName}</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Type:</span>
+        <span class="info-value">${request.ProductType} — ${request.RequestType}</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Client:</span>
+        <span class="info-value">${request.ClientName}${request.IsPremiumClient ? ' ⭐ Premium' : ''}</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Contact:</span>
+        <span class="info-value">${request.ContactName} (${request.ContactEmail})</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Status:</span>
+        <span class="info-value"><span class="stage-badge stage-lead">${request.Status}</span></span>
+      </div>
+      ${request.LicenseCount ? `
+      <div class="info-row">
+        <span class="info-label">Licenses:</span>
+        <span class="info-value">${request.LicenseCount}</span>
+      </div>` : ''}
+      ${request.EstimatedValue ? `
+      <div class="info-row">
+        <span class="info-label">Estimated Value:</span>
+        <span class="info-value deal-value">${formatCurrency(request.EstimatedValue)}</span>
+      </div>` : ''}
+    </div>
+
+    ${request.ProposedSlot1 ? `
+    <h3>Proposed Time Slots</h3>
+    <div class="time-slots">
+      <div class="time-slot">📅 Slot 1: ${formatDateTime(request.ProposedSlot1)}</div>
+      ${request.ProposedSlot2 ? `<div class="time-slot">📅 Slot 2: ${formatDateTime(request.ProposedSlot2)}</div>` : ''}
+      ${request.ProposedSlot3 ? `<div class="time-slot">📅 Slot 3: ${formatDateTime(request.ProposedSlot3)}</div>` : ''}
+    </div>` : ''}
+
+    <p>You'll be notified when the request is reviewed and a specialist is assigned.</p>
+  `;
+
+  return {
+    subject: `[DWx] Product ${request.RequestType} Request Submitted — ${request.ProductName} for ${request.ClientName}`,
+    body: wrapEmail(
+      'Product Request Submitted',
+      `${request.RequestType} request for ${request.ProductName}`,
+      content
+    ),
+  };
+};
+
+/**
+ * Product request submitted - sent to managers
+ */
+export const productRequestCreatedManager = (request: ProductRequest): { subject: string; body: string } => {
+  const content = `
+    <h2>New Product ${request.RequestType} Request</h2>
+    <p>A new product request requires your review.</p>
+
+    <div class="info-box">
+      <div class="info-row">
+        <span class="info-label">Product:</span>
+        <span class="info-value">${request.ProductName} (${request.ProductType})</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Request Type:</span>
+        <span class="info-value">${request.RequestType}</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Client:</span>
+        <span class="info-value">${request.ClientName}${request.IsPremiumClient ? ' ⭐ Premium' : ''}</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Contact:</span>
+        <span class="info-value">${request.ContactName} (${request.ContactEmail})</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Submitted By:</span>
+        <span class="info-value">${request.AccountManagerName} (${request.AccountManagerEmail})</span>
+      </div>
+      ${request.LicenseCount ? `
+      <div class="info-row">
+        <span class="info-label">Licenses:</span>
+        <span class="info-value">${request.LicenseCount}</span>
+      </div>` : ''}
+      ${request.EstimatedValue ? `
+      <div class="info-row">
+        <span class="info-label">Estimated Value:</span>
+        <span class="info-value deal-value">${formatCurrency(request.EstimatedValue)}</span>
+      </div>` : ''}
+    </div>
+
+    ${request.ProposedSlot1 ? `
+    <h3>Proposed Time Slots</h3>
+    <div class="time-slots">
+      <div class="time-slot">📅 Slot 1: ${formatDateTime(request.ProposedSlot1)}</div>
+      ${request.ProposedSlot2 ? `<div class="time-slot">📅 Slot 2: ${formatDateTime(request.ProposedSlot2)}</div>` : ''}
+      ${request.ProposedSlot3 ? `<div class="time-slot">📅 Slot 3: ${formatDateTime(request.ProposedSlot3)}</div>` : ''}
+    </div>` : ''}
+
+    ${request.Comments ? `
+    <h3>Comments</h3>
+    <p>${request.Comments}</p>` : ''}
+
+    <p>Please review this request and assign a specialist.</p>
+  `;
+
+  return {
+    subject: `[DWx] 🆕 Product ${request.RequestType} — ${request.ProductName} for ${request.ClientName}`,
+    body: wrapEmail(
+      'New Product Request',
+      `${request.RequestType} request from ${request.AccountManagerName}`,
+      content
+    ),
+  };
+};
+
+/**
+ * Product request status changed - sent to AM
+ */
+export const productRequestStatusChanged = (
+  request: ProductRequest,
+  previousStatus: string,
+  newStatus: string
+): { subject: string; body: string } => {
+  const statusColors: Record<string, string> = {
+    'Pending Review': 'stage-lead',
+    'Awaiting Approval': 'stage-qualified',
+    'Confirmed': 'stage-won',
+    'Completed': 'stage-discovery',
+    'Cancelled': 'stage-lost',
+  };
+
+  const content = `
+    <h2>Product Request Status Updated</h2>
+    <p>Hi ${request.AccountManagerName},</p>
+    <p>The status of your product request has been updated.</p>
+
+    <div class="info-box">
+      <div class="info-row">
+        <span class="info-label">Product:</span>
+        <span class="info-value">${request.ProductName} (${request.ProductType})</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Client:</span>
+        <span class="info-value">${request.ClientName}</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Previous Status:</span>
+        <span class="info-value"><span class="stage-badge ${statusColors[previousStatus] || 'stage-lead'}">${previousStatus}</span></span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">New Status:</span>
+        <span class="info-value"><span class="stage-badge ${statusColors[newStatus] || 'stage-lead'}">${newStatus}</span></span>
+      </div>
+    </div>
+  `;
+
+  return {
+    subject: `[DWx] Product Request ${newStatus} — ${request.ProductName} for ${request.ClientName}`,
+    body: wrapEmail(
+      'Status Update',
+      `${request.ProductName} — ${previousStatus} → ${newStatus}`,
+      content
+    ),
+  };
+};
+
 export const EmailTemplates = {
   requestCreatedAM,
   requestCreatedManager,
@@ -617,4 +802,7 @@ export const EmailTemplates = {
   dealWon,
   dealLost,
   calendarEventDescription,
+  productRequestCreatedAM,
+  productRequestCreatedManager,
+  productRequestStatusChanged,
 };

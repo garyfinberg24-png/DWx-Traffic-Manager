@@ -5,6 +5,7 @@
 
 import { getGraphService } from './serviceFactory';
 import { ServiceRequest, FunnelStage, DWService } from '../types/ServiceRequest';
+import { ProductRequest } from '../types/ProductRequest';
 import { config } from '../config/environmentConfig';
 import { EmailTemplates } from './EmailTemplates';
 
@@ -246,6 +247,42 @@ class DWxNotificationService {
    */
   getCalendarEventDescription(request: ServiceRequest, service?: DWService): string {
     return EmailTemplates.calendarEventDescription(request, service);
+  }
+
+  // ==========================================================================
+  // Product Request Notifications
+  // ==========================================================================
+
+  /**
+   * Send all notifications for a new product request
+   */
+  async sendProductRequestCreatedNotifications(request: ProductRequest): Promise<NotificationResult[]> {
+    const results: NotificationResult[] = [];
+
+    // Notify AM
+    const amTemplate = EmailTemplates.productRequestCreatedAM(request);
+    results.push(await this.sendEmail([request.AccountManagerEmail], amTemplate.subject, amTemplate.body));
+
+    // Notify managers
+    const managerEmails = this.getManagerEmails();
+    if (managerEmails.length > 0) {
+      const managerTemplate = EmailTemplates.productRequestCreatedManager(request);
+      results.push(await this.sendEmail(managerEmails, managerTemplate.subject, managerTemplate.body));
+    }
+
+    return results;
+  }
+
+  /**
+   * Notify AM of product request status change
+   */
+  async notifyProductRequestStatusChanged(
+    request: ProductRequest,
+    previousStatus: string,
+    newStatus: string
+  ): Promise<NotificationResult> {
+    const { subject, body } = EmailTemplates.productRequestStatusChanged(request, previousStatus, newStatus);
+    return this.sendEmail([request.AccountManagerEmail], subject, body);
   }
 }
 
