@@ -173,13 +173,25 @@ export const ManagerDashboard: React.FC = () => {
       setIsLoading(true);
       setError(null);
 
-      // Load legacy bookings (for calendar, timeline, etc. - will be migrated later)
-      const allBookings = await dashboardService.getAllBookings(filters);
-      setBookings(allBookings);
-
-      // Load service requests (for the new approval workflow)
-      const allRequests = await serviceRequestService.getRequests();
+      // Load service requests (primary data for DWx Traffic Manager)
+      let allRequests: ServiceRequest[] = [];
+      try {
+        allRequests = await serviceRequestService.getRequests();
+      } catch (requestErr) {
+        console.warn('Could not load service requests:', requestErr);
+        // Continue with empty requests - list may not exist yet
+      }
       setServiceRequests(allRequests);
+
+      // Load legacy bookings (optional - for backward compatibility during migration)
+      let allBookings: Booking[] = [];
+      try {
+        allBookings = await dashboardService.getAllBookings(filters);
+      } catch (bookingErr) {
+        console.warn('Could not load legacy bookings:', bookingErr);
+        // Continue with empty bookings - this is expected for new DWx TM deployments
+      }
+      setBookings(allBookings);
 
       const data = dashboardService.calculateDashboardData(allBookings);
       setDashboardData(data);
