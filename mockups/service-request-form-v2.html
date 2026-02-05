@@ -1,0 +1,1171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DWx Traffic Manager - New Service Request (Redesigned)</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #f0f2f5;
+      color: #242424;
+      min-height: 100vh;
+    }
+
+    /* ============ HEADER ============ */
+    .app-header {
+      background: linear-gradient(135deg, #1a365d 0%, #1e6b7b 100%);
+      color: white;
+      padding: 0 64px;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      gap: 32px;
+      font-size: 14px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .app-header .logo {
+      font-size: 16px;
+      font-weight: 600;
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .app-header .logo svg { width: 20px; height: 20px; }
+    .app-header nav { display: flex; gap: 24px; }
+    .app-header nav a {
+      color: rgba(255,255,255,0.85);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+    }
+    .app-header nav a.active { color: white; font-weight: 600; }
+    .app-header .spacer { flex: 1; }
+    .app-header .user {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+    }
+    .app-header .avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 12px;
+    }
+
+    /* ============ MAIN CONTAINER ============ */
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 24px 64px;
+    }
+
+    /* ============ FORM CARD ============ */
+    .form-card {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 1.6px 3.6px rgba(0,0,0,.13), 0 0.3px 0.9px rgba(0,0,0,.11);
+      overflow: hidden;
+    }
+
+    /* ============ CARD HEADER (Title + Subtitle on new line) ============ */
+    .card-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      padding: 24px;
+      border-bottom: 1px solid #e1e1e1;
+      background: #fafafa;
+    }
+    .card-header-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #1e6b7b 0%, #2d8a9c 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      color: white;
+    }
+    .card-header-content { flex: 1; }
+    .card-header-title {
+      font-size: 22px;
+      font-weight: 600;
+      color: #242424;
+      line-height: 1.3;
+    }
+    .card-header-title .service-name {
+      color: #1e6b7b;
+    }
+    .card-header-subtitle {
+      font-size: 14px;
+      color: #616161;
+      margin-top: 4px;
+    }
+
+    /* ============ PROGRESS STEPPER ============ */
+    .progress-container {
+      padding: 16px 24px;
+      background: #f5f5f5;
+      border-bottom: 1px solid #e1e1e1;
+    }
+    .progress-steps {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    .progress-step {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      flex: 1;
+    }
+    .step-number {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+    .step-number.active { background: #1e6b7b; color: white; }
+    .step-number.completed { background: #107c10; color: white; }
+    .step-number.pending { background: #e1e1e1; color: #616161; }
+    .step-label { font-size: 11px; color: #616161; text-align: center; }
+    .progress-bar {
+      height: 4px;
+      background: #e1e1e1;
+      border-radius: 2px;
+      overflow: hidden;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      background: #1e6b7b;
+      border-radius: 2px;
+      transition: width 0.3s;
+    }
+
+    /* ============ CARD BODY ============ */
+    .card-body {
+      padding: 0;
+      min-height: 500px;
+    }
+
+    /* ============ STEP-LEVEL TABS ============ */
+    .step-tabs {
+      display: flex;
+      border-bottom: 2px solid #e1e1e1;
+      padding: 0 24px;
+      background: #fafafa;
+      overflow-x: auto;
+    }
+    .step-tab {
+      padding: 14px 20px;
+      font-size: 14px;
+      font-weight: 500;
+      color: #616161;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -2px;
+      white-space: nowrap;
+      transition: all 0.15s;
+      user-select: none;
+    }
+    .step-tab:hover { color: #242424; background: #f0f0f0; }
+    .step-tab.active {
+      color: #1e6b7b;
+      font-weight: 600;
+      border-bottom-color: #1e6b7b;
+    }
+
+    /* ============ TAB CONTENT ============ */
+    .tab-panel { padding: 24px; display: none; }
+    .tab-panel.active { display: block; }
+
+    /* ============ BLUE SECTION HEADER ============ */
+    .section-header {
+      background: linear-gradient(135deg, #1a5a8a 0%, #2873a8 100%);
+      color: white;
+      padding: 16px 20px;
+      border-radius: 8px 8px 0 0;
+      margin-bottom: 0;
+    }
+    .section-header h3 {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+    .section-header p {
+      font-size: 12px;
+      opacity: 0.9;
+    }
+    .section-body {
+      padding: 20px;
+      border: 1px solid #e0e0e0;
+      border-top: none;
+      border-radius: 0 0 8px 8px;
+      margin-bottom: 20px;
+    }
+
+    /* ============ ACCORDION ============ */
+    .accordion { margin-bottom: 16px; border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden; }
+    .accordion:last-child { margin-bottom: 0; }
+    .accordion-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 20px;
+      background: #f8f9fa;
+      cursor: pointer;
+      user-select: none;
+      transition: background 0.15s;
+    }
+    .accordion-header:hover { background: #f0f2f5; }
+    .accordion-header h4 {
+      font-size: 14px;
+      font-weight: 600;
+      color: #1a5a8a;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .accordion-header .badge {
+      font-size: 11px;
+      font-weight: 500;
+      padding: 2px 8px;
+      border-radius: 10px;
+      background: #e8f4f8;
+      color: #1e6b7b;
+    }
+    .accordion-header .badge.required {
+      background: #fff4e5;
+      color: #d97706;
+    }
+    .accordion-chevron {
+      font-size: 18px;
+      color: #616161;
+      transition: transform 0.2s;
+    }
+    .accordion.open .accordion-chevron { transform: rotate(180deg); }
+    .accordion-body {
+      padding: 0 20px 20px 20px;
+      display: none;
+    }
+    .accordion.open .accordion-body { display: block; }
+
+    /* ============ FORM FIELDS ============ */
+    .form-group { margin-bottom: 20px; }
+    .form-group:last-child { margin-bottom: 0; }
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    .form-row-3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 20px;
+    }
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: #242424;
+      margin-bottom: 6px;
+    }
+    label .required { color: #d13438; margin-left: 2px; }
+    .field-hint {
+      font-size: 12px;
+      color: #616161;
+      margin-top: 4px;
+    }
+    input[type="text"],
+    input[type="email"],
+    input[type="tel"],
+    input[type="number"],
+    input[type="date"],
+    select,
+    textarea {
+      width: 100%;
+      padding: 8px 12px;
+      font-size: 14px;
+      font-family: inherit;
+      border: 1px solid #d0d0d0;
+      border-radius: 6px;
+      background: white;
+      color: #242424;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: #1e6b7b;
+      box-shadow: 0 0 0 2px rgba(30, 107, 123, 0.15);
+    }
+    textarea { resize: vertical; min-height: 80px; }
+
+    /* Checkbox / Radio groups */
+    .checkbox-group { display: flex; flex-direction: column; gap: 8px; }
+    .checkbox-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 10px 14px;
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.1s, border-color 0.1s;
+    }
+    .checkbox-item:hover { background: #f0f5f7; border-color: #c5d8df; }
+    .checkbox-item input { margin-top: 2px; accent-color: #1e6b7b; }
+    .checkbox-item .option-label { font-size: 14px; font-weight: 500; color: #242424; }
+    .checkbox-item .option-desc { font-size: 12px; color: #616161; margin-top: 2px; }
+
+    .radio-group { display: flex; flex-direction: column; gap: 8px; }
+    .radio-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.1s;
+    }
+    .radio-item:hover { background: #f0f5f7; }
+    .radio-item input { accent-color: #1e6b7b; }
+
+    /* ============ SECTION TITLES (inside tab panels) ============ */
+    .section-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: #1a5a8a;
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #e0e0e0;
+    }
+    .section-divider {
+      height: 1px;
+      background: #e0e0e0;
+      margin: 24px 0;
+    }
+
+    /* ============ SLOT ROW ============ */
+    .slot-row {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      margin-bottom: 16px;
+    }
+    .slot-row .slot-label {
+      font-size: 13px;
+      font-weight: 500;
+      color: #424242;
+      min-width: 140px;
+      padding-top: 8px;
+    }
+    .slot-row input[type="date"],
+    .slot-row select {
+      flex: 1;
+    }
+
+    /* ============ PREVIEW ============ */
+    .preview-item {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      padding: 12px;
+      background: #f9f9f9;
+      border-radius: 8px;
+      margin-bottom: 8px;
+    }
+    .preview-label {
+      font-size: 11px;
+      color: #616161;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+    .preview-value {
+      font-size: 14px;
+      font-weight: 500;
+      color: #242424;
+    }
+
+    /* ============ CARD FOOTER ============ */
+    .card-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 24px;
+      border-top: 1px solid #e1e1e1;
+      background: #fafafa;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 20px;
+      font-size: 14px;
+      font-weight: 500;
+      font-family: inherit;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .btn-secondary {
+      background: #f0f0f0;
+      color: #424242;
+      border: 1px solid #d0d0d0;
+    }
+    .btn-secondary:hover { background: #e5e5e5; }
+    .btn-primary {
+      background: #1e6b7b;
+      color: white;
+    }
+    .btn-primary:hover { background: #165a68; }
+
+    /* ============ NOTE CALLOUTS ============ */
+    .design-note {
+      background: #fff8e1;
+      border-left: 4px solid #f9a825;
+      padding: 12px 16px;
+      margin: 16px 0;
+      font-size: 13px;
+      border-radius: 0 6px 6px 0;
+    }
+    .design-note strong { color: #e65100; }
+
+    /* ============ RESPONSIVE ============ */
+    @media (max-width: 768px) {
+      .container { padding: 16px; }
+      .app-header { padding: 0 16px; gap: 16px; }
+      .form-row, .form-row-3 { grid-template-columns: 1fr; }
+      .step-tabs { padding: 0 16px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ============ APP HEADER ============ -->
+  <div class="app-header">
+    <div class="logo">
+      <svg viewBox="0 0 20 20" fill="currentColor"><circle cx="10" cy="10" r="8" fill="none" stroke="currentColor" stroke-width="2"/><path d="M10 5v5l3 3" stroke="currentColor" stroke-width="2" fill="none"/></svg>
+      DWx Traffic Manager
+    </div>
+    <nav>
+      <a href="#">&#9783; Services</a>
+      <a href="#">&#9783; Products</a>
+      <a href="#" class="active">+ New Request</a>
+      <a href="#">&#128196; My Requests</a>
+      <a href="#">&#128202; Dashboard</a>
+      <a href="#">&#9881; Admin</a>
+    </nav>
+    <div class="spacer"></div>
+    <div class="user">
+      <span>&#128276;</span>
+      Gary Finberg
+      <div class="avatar">GF</div>
+    </div>
+  </div>
+
+  <!-- ============ MAIN ============ -->
+  <div class="container">
+    <div class="form-card">
+
+      <!-- ============ CARD HEADER ============ -->
+      <!-- CHANGE 1: Title shows "New Service Request - {Service Name}" -->
+      <!-- CHANGE 2: Subtitle moves to new line below -->
+      <div class="card-header">
+        <div class="card-header-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M6 2h12a2 2 0 012 2v16a2 2 0 01-2 2H6a2 2 0 01-2-2V4a2 2 0 012-2zm0 2v16h12V4H6zm2 3h8v2H8V7zm0 4h8v2H8v-2zm0 4h5v2H8v-2z"/></svg>
+        </div>
+        <div class="card-header-content">
+          <div class="card-header-title">
+            New Service Request <span class="service-name">- SPFx Development</span>
+          </div>
+          <div class="card-header-subtitle">
+            Request a pre-sales consultation for DW services
+          </div>
+        </div>
+      </div>
+
+      <!-- ============ PROGRESS STEPPER ============ -->
+      <div class="progress-container">
+        <div class="progress-steps">
+          <div class="progress-step">
+            <div class="step-number completed">&#10003;</div>
+            <span class="step-label">Service</span>
+          </div>
+          <div class="progress-step">
+            <div class="step-number completed">&#10003;</div>
+            <span class="step-label">Client</span>
+          </div>
+          <div class="progress-step">
+            <div class="step-number active">3</div>
+            <span class="step-label">Discovery</span>
+          </div>
+          <div class="progress-step">
+            <div class="step-number pending">4</div>
+            <span class="step-label">Deal Info</span>
+          </div>
+          <div class="progress-step">
+            <div class="step-number pending">5</div>
+            <span class="step-label">Schedule</span>
+          </div>
+          <div class="progress-step">
+            <div class="step-number pending">6</div>
+            <span class="step-label">Review</span>
+          </div>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-bar-fill" style="width: 33%"></div>
+        </div>
+      </div>
+
+      <!-- ============ CARD BODY ============ -->
+      <div class="card-body">
+
+        <!-- =========================================================
+             STEP 3: DISCOVERY - SPFx Development Requirements
+             Shows the TAB-based layout for service-specific requirements
+             ========================================================= -->
+
+        <!-- CHANGE 3: Step-level tabs replace scrollable sections -->
+        <div class="step-tabs" id="discoveryTabs">
+          <div class="step-tab active" onclick="switchTab('projectScope')">Project Scope</div>
+          <div class="step-tab" onclick="switchTab('functional')">Functional Requirements</div>
+          <div class="step-tab" onclick="switchTab('technical')">Technical Environment</div>
+        </div>
+
+        <!-- ======== TAB: Project Scope ======== -->
+        <div class="tab-panel active" id="tab-projectScope">
+          <div class="design-note">
+            <strong>Design Note:</strong> Each service-specific requirements section becomes a tab.
+            SPFx has 3 sections (Project Scope, Functional Requirements, Technical Environment) &rarr; 3 tabs.
+            Power Platform has 3 sections &rarr; 3 tabs. Migration has 3 sections &rarr; 3 tabs. etc.
+          </div>
+
+          <div class="form-group">
+            <label>What type of SPFx solution do you need? <span class="required">*</span></label>
+            <div class="checkbox-group">
+              <label class="checkbox-item">
+                <input type="checkbox">
+                <div>
+                  <div class="option-label">Web Part (Intranet component)</div>
+                </div>
+              </label>
+              <label class="checkbox-item">
+                <input type="checkbox">
+                <div>
+                  <div class="option-label">Application Customizer (Header/Footer)</div>
+                </div>
+              </label>
+              <label class="checkbox-item">
+                <input type="checkbox">
+                <div>
+                  <div class="option-label">Command Set (List/Library toolbar)</div>
+                </div>
+              </label>
+              <label class="checkbox-item">
+                <input type="checkbox">
+                <div>
+                  <div class="option-label">Field Customizer (Column formatting)</div>
+                </div>
+              </label>
+              <label class="checkbox-item">
+                <input type="checkbox">
+                <div>
+                  <div class="option-label">Adaptive Card Extension (Viva Connections)</div>
+                </div>
+              </label>
+              <label class="checkbox-item">
+                <input type="checkbox">
+                <div>
+                  <div class="option-label">Teams Tab/Personal App</div>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Where will this solution be deployed? <span class="required">*</span></label>
+            <div class="checkbox-group">
+              <label class="checkbox-item">
+                <input type="checkbox">
+                <div><div class="option-label">SharePoint pages</div></div>
+              </label>
+              <label class="checkbox-item">
+                <input type="checkbox">
+                <div><div class="option-label">Microsoft Teams</div></div>
+              </label>
+              <label class="checkbox-item">
+                <input type="checkbox">
+                <div><div class="option-label">Viva Connections dashboard</div></div>
+              </label>
+              <label class="checkbox-item">
+                <input type="checkbox">
+                <div><div class="option-label">Outlook (Add-in)</div></div>
+              </label>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>What is the deployment scope? <span class="required">*</span></label>
+            <div class="radio-group">
+              <label class="radio-item">
+                <input type="radio" name="scope">
+                Single site collection
+              </label>
+              <label class="radio-item">
+                <input type="radio" name="scope">
+                Tenant-wide (App Catalog)
+              </label>
+              <label class="radio-item">
+                <input type="radio" name="scope">
+                Both - start with site, then tenant
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- ======== TAB: Functional Requirements ======== -->
+        <div class="tab-panel" id="tab-functional">
+          <div class="form-group">
+            <label>What data sources will the solution use? <span class="required">*</span></label>
+            <div class="checkbox-group">
+              <label class="checkbox-item">
+                <input type="checkbox">
+                <div><div class="option-label">SharePoint Lists</div></div>
+              </label>
+              <label class="checkbox-item">
+                <input type="checkbox">
+                <div><div class="option-label">SharePoint Document Libraries</div></div>
+              </label>
+              <label class="checkbox-item">
+                <input type="checkbox">
+                <div><div class="option-label">Microsoft Graph API</div></div>
+              </label>
+              <label class="checkbox-item">
+                <input type="checkbox">
+                <div><div class="option-label">External APIs</div></div>
+              </label>
+              <label class="checkbox-item">
+                <input type="checkbox">
+                <div><div class="option-label">Azure services (Functions, SQL, etc.)</div></div>
+              </label>
+              <label class="checkbox-item">
+                <input type="checkbox">
+                <div><div class="option-label">Dataverse</div></div>
+              </label>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>What features are needed?</label>
+            <div class="checkbox-group">
+              <label class="checkbox-item">
+                <input type="checkbox">
+                <div><div class="option-label">Create/Read/Update/Delete data</div></div>
+              </label>
+              <label class="checkbox-item">
+                <input type="checkbox">
+                <div><div class="option-label">Search &amp; filtering</div></div>
+              </label>
+              <label class="checkbox-item">
+                <input type="checkbox">
+                <div><div class="option-label">File upload</div></div>
+              </label>
+              <label class="checkbox-item">
+                <input type="checkbox">
+                <div><div class="option-label">Export to Excel/PDF</div></div>
+              </label>
+              <label class="checkbox-item">
+                <input type="checkbox">
+                <div><div class="option-label">Role-based access</div></div>
+              </label>
+              <label class="checkbox-item">
+                <input type="checkbox">
+                <div><div class="option-label">Notifications/Alerts</div></div>
+              </label>
+              <label class="checkbox-item">
+                <input type="checkbox">
+                <div><div class="option-label">Offline support</div></div>
+              </label>
+              <label class="checkbox-item">
+                <input type="checkbox">
+                <div><div class="option-label">Multi-language support</div></div>
+              </label>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Is this replacing an existing solution? <span class="required">*</span></label>
+            <div class="radio-group">
+              <label class="radio-item">
+                <input type="radio" name="existing">
+                No, this is a new solution
+              </label>
+              <label class="radio-item">
+                <input type="radio" name="existing">
+                Yes, replacing classic SharePoint solution
+              </label>
+              <label class="radio-item">
+                <input type="radio" name="existing">
+                Yes, replacing custom development
+              </label>
+              <label class="radio-item">
+                <input type="radio" name="existing">
+                Extending existing SPFx solution
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- ======== TAB: Technical Environment ======== -->
+        <div class="tab-panel" id="tab-technical">
+          <div class="form-group">
+            <label>Do you have an App Catalog configured? <span class="required">*</span></label>
+            <div class="radio-group">
+              <label class="radio-item"><input type="radio" name="appcatalog"> Yes</label>
+              <label class="radio-item"><input type="radio" name="appcatalog"> No</label>
+              <label class="radio-item"><input type="radio" name="appcatalog"> Not sure</label>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Is Office 365 CDN enabled? <span class="required">*</span></label>
+            <div class="radio-group">
+              <label class="radio-item"><input type="radio" name="cdn"> Yes</label>
+              <label class="radio-item"><input type="radio" name="cdn"> No</label>
+              <label class="radio-item"><input type="radio" name="cdn"> Not sure</label>
+            </div>
+          </div>
+
+          <div class="design-note">
+            <strong>Design Note:</strong> Shorter sections like "Technical Environment" (only 2 questions)
+            fit naturally within a tab without scrolling. The tab layout shines when there are
+            long sections like "Functional Requirements" with many checkbox groups.
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ============ CARD FOOTER ============ -->
+      <div class="card-footer">
+        <button class="btn btn-secondary">&larr; Back</button>
+        <button class="btn btn-primary">Next &rarr;</button>
+      </div>
+    </div>
+
+    <!-- =========================================================
+         ALTERNATE VIEW: STEP 2 - CLIENT INFO (Tab + Accordion layout)
+         Shows how the Client step uses tabs for sections
+         ========================================================= -->
+    <div style="margin-top: 48px;">
+      <h2 style="margin-bottom: 16px; color: #1a5a8a; font-size: 18px;">
+        &#128204; Alternate View: Step 2 - Client Information (with Tabs)
+      </h2>
+    </div>
+
+    <div class="form-card">
+      <div class="card-header">
+        <div class="card-header-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M6 2h12a2 2 0 012 2v16a2 2 0 01-2 2H6a2 2 0 01-2-2V4a2 2 0 012-2zm0 2v16h12V4H6zm2 3h8v2H8V7zm0 4h8v2H8v-2zm0 4h5v2H8v-2z"/></svg>
+        </div>
+        <div class="card-header-content">
+          <div class="card-header-title">
+            New Service Request <span class="service-name">- Power Platform Development</span>
+          </div>
+          <div class="card-header-subtitle">
+            Request a pre-sales consultation for DW services
+          </div>
+        </div>
+      </div>
+
+      <div class="progress-container">
+        <div class="progress-steps">
+          <div class="progress-step">
+            <div class="step-number completed">&#10003;</div>
+            <span class="step-label">Service</span>
+          </div>
+          <div class="progress-step">
+            <div class="step-number active">2</div>
+            <span class="step-label">Client</span>
+          </div>
+          <div class="progress-step">
+            <div class="step-number pending">3</div>
+            <span class="step-label">Discovery</span>
+          </div>
+          <div class="progress-step">
+            <div class="step-number pending">4</div>
+            <span class="step-label">Deal Info</span>
+          </div>
+          <div class="progress-step">
+            <div class="step-number pending">5</div>
+            <span class="step-label">Schedule</span>
+          </div>
+          <div class="progress-step">
+            <div class="step-number pending">6</div>
+            <span class="step-label">Review</span>
+          </div>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-bar-fill" style="width: 16%"></div>
+        </div>
+      </div>
+
+      <div class="card-body">
+        <!-- Client step tabs -->
+        <div class="step-tabs" id="clientTabs">
+          <div class="step-tab active" onclick="switchClientTab('request')">Request Context</div>
+          <div class="step-tab" onclick="switchClientTab('company')">Company Details</div>
+          <div class="step-tab" onclick="switchClientTab('contact')">Primary Contact</div>
+        </div>
+
+        <!-- Tab: Request Context -->
+        <div class="tab-panel active" id="ctab-request">
+          <div class="form-group">
+            <label>Request Title <span class="required">*</span></label>
+            <input type="text" placeholder="Brief title for this request (e.g., 'Power Platform Assessment for Contoso')">
+          </div>
+          <div class="form-group">
+            <label>Request Details</label>
+            <textarea placeholder="Describe the context and specific needs for this service request..." rows="4"></textarea>
+          </div>
+        </div>
+
+        <!-- Tab: Company Details -->
+        <div class="tab-panel" id="ctab-company">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Client Company Name <span class="required">*</span></label>
+              <input type="text" placeholder="Enter company name">
+            </div>
+            <div class="form-group">
+              <label>Industry</label>
+              <select>
+                <option value="">Select industry</option>
+                <option>Technology</option>
+                <option>Finance</option>
+                <option>Healthcare</option>
+                <option>Retail</option>
+                <option>Manufacturing</option>
+                <option>Government</option>
+                <option>Education</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Company Size</label>
+            <select>
+              <option value="">Select company size</option>
+              <option>SMB (&lt;50 employees)</option>
+              <option>Medium (50-250)</option>
+              <option>Large (250-1000)</option>
+              <option>Enterprise (1000+)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Tab: Primary Contact -->
+        <div class="tab-panel" id="ctab-contact">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Contact Name <span class="required">*</span></label>
+              <input type="text" placeholder="Enter contact name">
+            </div>
+            <div class="form-group">
+              <label>Contact Email <span class="required">*</span></label>
+              <input type="email" placeholder="Enter email address">
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Contact Phone</label>
+            <input type="tel" placeholder="Enter phone number">
+          </div>
+        </div>
+      </div>
+
+      <div class="card-footer">
+        <button class="btn btn-secondary">&larr; Back</button>
+        <button class="btn btn-primary">Next &rarr;</button>
+      </div>
+    </div>
+
+    <!-- =========================================================
+         ALTERNATE VIEW: STEP 4 - DEAL INFO (Accordion approach)
+         Shows how longer step content uses accordions
+         ========================================================= -->
+    <div style="margin-top: 48px;">
+      <h2 style="margin-bottom: 16px; color: #1a5a8a; font-size: 18px;">
+        &#128204; Alternate View: Step 4 - Deal Info (with Accordions)
+      </h2>
+    </div>
+
+    <div class="form-card">
+      <div class="card-header">
+        <div class="card-header-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm0-4h-2V7h2v8z"/></svg>
+        </div>
+        <div class="card-header-content">
+          <div class="card-header-title">
+            New Service Request <span class="service-name">- SharePoint Migration</span>
+          </div>
+          <div class="card-header-subtitle">
+            Request a pre-sales consultation for DW services
+          </div>
+        </div>
+      </div>
+
+      <div class="card-body" style="padding: 24px;">
+
+        <div class="section-header">
+          <h3>Deal Information</h3>
+          <p>Provide details about the potential deal and engagement history</p>
+        </div>
+        <div class="section-body">
+          <!-- Accordion: Deal Qualification -->
+          <div class="accordion open" onclick="toggleAccordion(this)">
+            <div class="accordion-header">
+              <h4>
+                &#128176; Deal Qualification
+                <span class="badge required">Required</span>
+              </h4>
+              <span class="accordion-chevron">&#9660;</span>
+            </div>
+            <div class="accordion-body">
+              <div class="form-row" style="margin-top: 16px;">
+                <div class="form-group">
+                  <label>Interest Level <span class="required">*</span></label>
+                  <select>
+                    <option>Hot</option>
+                    <option selected>Warm</option>
+                    <option>Cold</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>Estimated Deal Value (ZAR)</label>
+                  <input type="number" placeholder="Enter estimated value">
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Win Probability (%)</label>
+                  <input type="number" value="50" min="0" max="100" placeholder="0-100">
+                </div>
+                <div class="form-group">
+                  <label>Expected Close Date</label>
+                  <input type="date">
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Client's Budget</label>
+                  <input type="text" placeholder="e.g., R100,000 - R150,000">
+                </div>
+                <div class="form-group">
+                  <label>Client's Timeline</label>
+                  <input type="text" placeholder="e.g., Q2 2026">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Accordion: Additional Context -->
+          <div class="accordion" onclick="toggleAccordion(this)">
+            <div class="accordion-header">
+              <h4>
+                &#128221; Additional Context
+                <span class="badge">Optional</span>
+              </h4>
+              <span class="accordion-chevron">&#9660;</span>
+            </div>
+            <div class="accordion-body">
+              <div class="form-group" style="margin-top: 16px;">
+                <label>Requirements Summary</label>
+                <textarea placeholder="Describe the client's key requirements, pain points, and objectives..." rows="4"></textarea>
+              </div>
+              <div class="form-group">
+                <label>Previous Engagement History</label>
+                <textarea placeholder="Any previous engagements or interactions with this client..." rows="3"></textarea>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="design-note">
+          <strong>Design Note:</strong> Accordions are used within a step when the step has
+          subsections of varying importance (e.g., required vs optional). The required section
+          starts expanded, optional sections start collapsed. This avoids long scrolling.
+        </div>
+      </div>
+
+      <div class="card-footer">
+        <button class="btn btn-secondary">&larr; Back</button>
+        <button class="btn btn-primary">Next &rarr;</button>
+      </div>
+    </div>
+
+    <!-- =========================================================
+         DESIGN SUMMARY
+         ========================================================= -->
+    <div style="margin-top: 48px; padding: 24px; background: white; border-radius: 12px; box-shadow: 0 1.6px 3.6px rgba(0,0,0,.13);">
+      <h2 style="color: #1a5a8a; margin-bottom: 16px;">Design Changes Summary</h2>
+
+      <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+        <thead>
+          <tr style="background: #f5f5f5; text-align: left;">
+            <th style="padding: 10px; border-bottom: 2px solid #e0e0e0; width: 30%;">Change</th>
+            <th style="padding: 10px; border-bottom: 2px solid #e0e0e0; width: 35%;">Before</th>
+            <th style="padding: 10px; border-bottom: 2px solid #e0e0e0; width: 35%;">After</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="padding: 10px; border-bottom: 1px solid #eee; font-weight: 600; color: #1e6b7b;">1. Form Title</td>
+            <td style="padding: 10px; border-bottom: 1px solid #eee;">
+              "New Service Request" only<br>
+              <span style="color: #888;">(selected service not shown in title)</span>
+            </td>
+            <td style="padding: 10px; border-bottom: 1px solid #eee;">
+              "New Service Request <strong>- SPFx Development</strong>"<br>
+              <span style="color: #888;">(service name appended with hyphen)</span>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 10px; border-bottom: 1px solid #eee; font-weight: 600; color: #1e6b7b;">2. Subtitle Position</td>
+            <td style="padding: 10px; border-bottom: 1px solid #eee;">
+              Inline after title (same line)<br>
+              <span style="color: #888;">"New Service RequestRequest a pre-sales..."</span>
+            </td>
+            <td style="padding: 10px; border-bottom: 1px solid #eee;">
+              On its own line below title<br>
+              <span style="color: #888;">Clear visual hierarchy</span>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 10px; border-bottom: 1px solid #eee; font-weight: 600; color: #1e6b7b;">3. Content Layout</td>
+            <td style="padding: 10px; border-bottom: 1px solid #eee;">
+              Long scrollable single-column content<br>
+              <span style="color: #888;">(all sections visible, requires heavy scrolling)</span>
+            </td>
+            <td style="padding: 10px; border-bottom: 1px solid #eee;">
+              <strong>Tab-based navigation</strong> within each step<br>
+              <span style="color: #888;">Each section becomes a tab &mdash; no scrolling needed</span>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 10px; border-bottom: 1px solid #eee; font-weight: 600; color: #1e6b7b;">4. Long Subsections</td>
+            <td style="padding: 10px; border-bottom: 1px solid #eee;">
+              Flat layout with divider lines<br>
+              <span style="color: #888;">(all expanded, user must scroll past everything)</span>
+            </td>
+            <td style="padding: 10px; border-bottom: 1px solid #eee;">
+              <strong>Accordion</strong> for subsections within a tab<br>
+              <span style="color: #888;">Required = expanded, Optional = collapsed</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3 style="margin-top: 24px; margin-bottom: 12px; color: #1a5a8a;">Tab Strategy Per Step</h3>
+      <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+        <thead>
+          <tr style="background: #f5f5f5; text-align: left;">
+            <th style="padding: 10px; border-bottom: 2px solid #e0e0e0;">Step</th>
+            <th style="padding: 10px; border-bottom: 2px solid #e0e0e0;">Layout</th>
+            <th style="padding: 10px; border-bottom: 2px solid #e0e0e0;">Tabs / Accordions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="padding: 10px; border-bottom: 1px solid #eee; font-weight: 600;">1. Service</td>
+            <td style="padding: 10px; border-bottom: 1px solid #eee;">Grid cards (no change)</td>
+            <td style="padding: 10px; border-bottom: 1px solid #eee;">None needed &mdash; card selection grid works well</td>
+          </tr>
+          <tr>
+            <td style="padding: 10px; border-bottom: 1px solid #eee; font-weight: 600;">2. Client</td>
+            <td style="padding: 10px; border-bottom: 1px solid #eee;">Tabs</td>
+            <td style="padding: 10px; border-bottom: 1px solid #eee;">3 tabs: Request Context | Company Details | Primary Contact</td>
+          </tr>
+          <tr>
+            <td style="padding: 10px; border-bottom: 1px solid #eee; font-weight: 600;">3. Discovery</td>
+            <td style="padding: 10px; border-bottom: 1px solid #eee;">Tabs (dynamic per service)</td>
+            <td style="padding: 10px; border-bottom: 1px solid #eee;">
+              Tabs = service sections (e.g., SPFx: Project Scope | Functional Reqs | Tech Env)<br>
+              <span style="color: #888;">Tabs auto-generated from ServiceRequirementsConfig.sections[]</span>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 10px; border-bottom: 1px solid #eee; font-weight: 600;">4. Deal Info</td>
+            <td style="padding: 10px; border-bottom: 1px solid #eee;">Accordions</td>
+            <td style="padding: 10px; border-bottom: 1px solid #eee;">
+              2 accordions: Deal Qualification (expanded) | Additional Context (collapsed)
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 10px; border-bottom: 1px solid #eee; font-weight: 600;">5. Schedule</td>
+            <td style="padding: 10px; border-bottom: 1px solid #eee;">Accordions</td>
+            <td style="padding: 10px; border-bottom: 1px solid #eee;">
+              2 accordions: Meeting Options (expanded) | Additional Notes (collapsed)
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 10px; border-bottom: 1px solid #eee; font-weight: 600;">6. Review</td>
+            <td style="padding: 10px; border-bottom: 1px solid #eee;">Accordions</td>
+            <td style="padding: 10px; border-bottom: 1px solid #eee;">
+              3 accordions: Request Overview | Deal Info | Schedule &amp; Ownership (all expanded)
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div style="height: 48px;"></div>
+  </div>
+
+  <script>
+    // Discovery step tabs
+    function switchTab(tabId) {
+      document.querySelectorAll('#discoveryTabs .step-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('[id^="tab-"]').forEach(p => p.classList.remove('active'));
+      event.target.classList.add('active');
+      document.getElementById('tab-' + tabId).classList.add('active');
+    }
+
+    // Client step tabs
+    function switchClientTab(tabId) {
+      document.querySelectorAll('#clientTabs .step-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('[id^="ctab-"]').forEach(p => p.classList.remove('active'));
+      event.target.classList.add('active');
+      document.getElementById('ctab-' + tabId).classList.add('active');
+    }
+
+    // Accordion toggle
+    function toggleAccordion(el) {
+      // Only toggle if clicked on the header
+      if (event.target.closest('.accordion-body')) return;
+      el.classList.toggle('open');
+    }
+  </script>
+</body>
+</html>

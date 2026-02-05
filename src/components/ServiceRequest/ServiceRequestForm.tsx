@@ -39,6 +39,18 @@ import {
   MoneyRegular,
   SendRegular,
   ClipboardTaskListLtr24Regular,
+  ChevronDownRegular,
+  ChevronRightRegular,
+  NotepadRegular,
+  BuildingRegular,
+  PersonCallRegular,
+  ScalesRegular,
+  ChatBubblesQuestionRegular,
+  ClockRegular,
+  NoteRegular,
+  EyeRegular,
+  BriefcaseRegular,
+  CalendarLtrRegular,
 } from '@fluentui/react-icons';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
@@ -287,6 +299,90 @@ const useStyles = makeStyles({
     backgroundColor: '#e0e0e0',
     margin: '20px 0',
   },
+  // Accordion section styles (V6 two-level pattern)
+  accordion: {
+    borderRadius: '8px',
+    border: '1px solid #e0e0e0',
+    overflow: 'hidden',
+    marginBottom: '12px',
+    transition: 'box-shadow 0.2s ease',
+    ':hover': {
+      boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
+    },
+  },
+  accordionLast: {
+    marginBottom: '0',
+  },
+  accordionHeader: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '12px',
+    padding: '16px 20px',
+    cursor: 'pointer',
+    backgroundColor: '#fafafa',
+    border: 'none',
+    width: '100%',
+    textAlign: 'left',
+    transition: 'all 0.2s ease',
+    ':hover': {
+      backgroundColor: '#f0f0f0',
+    },
+  },
+  accordionHeaderOpen: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '12px',
+    padding: '16px 20px',
+    cursor: 'pointer',
+    border: 'none',
+    width: '100%',
+    textAlign: 'left',
+    background: 'linear-gradient(135deg, #1a5a8a 0%, #2873a8 100%)',
+    color: 'white',
+  },
+  accordionIcon: {
+    width: '36px',
+    height: '36px',
+    borderRadius: '8px',
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
+  },
+  accordionIconClosed: {
+    width: '36px',
+    height: '36px',
+    borderRadius: '8px',
+    backgroundColor: '#e8f4f8',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
+    color: '#1a5a8a',
+  },
+  accordionInfo: {
+    flex: 1,
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '2px',
+  },
+  accordionTitle: {
+    fontSize: '15px',
+    fontWeight: '600',
+  },
+  accordionDescription: {
+    fontSize: '12px',
+    opacity: 0.8,
+  },
+  accordionChevron: {
+    flexShrink: 0,
+    transition: 'transform 0.2s ease',
+  },
+  accordionBody: {
+    padding: '20px 24px',
+    borderTop: '1px solid #e0e0e0',
+  },
 });
 
 interface ServiceRequestFormData {
@@ -392,6 +488,16 @@ export const ServiceRequestForm: React.FC<ServiceRequestFormProps> = ({
   // Service requirements state (separate from react-hook-form for flexibility)
   const [serviceRequirements, setServiceRequirements] = useState<Record<string, unknown>>({});
 
+  // Accordion open state per section (key = "step-sectionIndex")
+  const [openSections, setOpenSections] = useState<Record<string, boolean>>({
+    'client-0': true,  // Request Context open by default
+    'deal-0': true,    // Deal Qualification open by default
+    'schedule-0': true, // Meeting Options open by default
+    'review-0': true,  // All review sections open by default
+    'review-1': true,
+    'review-2': true,
+  });
+
   const {
     control,
     handleSubmit,
@@ -428,6 +534,44 @@ export const ServiceRequestForm: React.FC<ServiceRequestFormProps> = ({
 
     loadServices();
   }, []);
+
+  const toggleSection = (key: string) => {
+    setOpenSections(prev => ({ ...prev, [key]: !prev[key] }));
+  };
+
+  const AccordionSection: React.FC<{
+    sectionKey: string;
+    icon: React.ReactNode;
+    title: string;
+    description?: string;
+    isLast?: boolean;
+    children: React.ReactNode;
+  }> = ({ sectionKey, icon, title, description, isLast, children }) => {
+    const isOpen = openSections[sectionKey] ?? false;
+    return (
+      <div className={`${styles.accordion}${isLast ? ` ${styles.accordionLast}` : ''}`}>
+        <div
+          className={isOpen ? styles.accordionHeaderOpen : styles.accordionHeader}
+          onClick={() => toggleSection(sectionKey)}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => e.key === 'Enter' && toggleSection(sectionKey)}
+        >
+          <div className={isOpen ? styles.accordionIcon : styles.accordionIconClosed}>
+            {icon}
+          </div>
+          <div className={styles.accordionInfo}>
+            <div className={styles.accordionTitle}>{title}</div>
+            {description && <div className={styles.accordionDescription}>{description}</div>}
+          </div>
+          <div className={styles.accordionChevron}>
+            {isOpen ? <ChevronDownRegular /> : <ChevronRightRegular />}
+          </div>
+        </div>
+        {isOpen && <div className={styles.accordionBody}>{children}</div>}
+      </div>
+    );
+  };
 
   const handleServiceSelect = (service: DWService) => {
     setSelectedService(service);
@@ -668,9 +812,12 @@ export const ServiceRequestForm: React.FC<ServiceRequestFormProps> = ({
         <div className={styles.stepHeaderSubtitle}>Enter the client details for this service request</div>
       </div>
       <div className={styles.stepBody}>
-        {/* Request Context Section */}
-        <div className={styles.stepSection}>
-          <Text className={styles.stepSectionTitle} block>Request Context</Text>
+        <AccordionSection
+          sectionKey="client-0"
+          icon={<NotepadRegular style={{ width: 18, height: 18 }} />}
+          title="Request Context"
+          description="Title and details for this service request"
+        >
           <div className={styles.form}>
             <Controller
               name="requestTitle"
@@ -702,13 +849,14 @@ export const ServiceRequestForm: React.FC<ServiceRequestFormProps> = ({
               )}
             />
           </div>
-        </div>
+        </AccordionSection>
 
-        <div className={styles.stepDivider} />
-
-        {/* Company Details Section */}
-        <div className={styles.stepSection}>
-          <Text className={styles.stepSectionTitle} block>Company Details</Text>
+        <AccordionSection
+          sectionKey="client-1"
+          icon={<BuildingRegular style={{ width: 18, height: 18 }} />}
+          title="Company Details"
+          description="Client organization and industry information"
+        >
           <div className={styles.form}>
             <div className={styles.row}>
               <Controller
@@ -773,12 +921,15 @@ export const ServiceRequestForm: React.FC<ServiceRequestFormProps> = ({
               )}
             />
           </div>
-        </div>
+        </AccordionSection>
 
-        <div className={styles.stepDivider} />
-
-        <div className={styles.stepSectionLast}>
-          <Text className={styles.stepSectionTitle} block>Primary Contact</Text>
+        <AccordionSection
+          sectionKey="client-2"
+          icon={<PersonCallRegular style={{ width: 18, height: 18 }} />}
+          title="Primary Contact"
+          description="Main point of contact at the client organization"
+          isLast
+        >
           <div className={styles.form}>
             <div className={styles.row}>
               <Controller
@@ -825,7 +976,7 @@ export const ServiceRequestForm: React.FC<ServiceRequestFormProps> = ({
               )}
             />
           </div>
-        </div>
+        </AccordionSection>
       </div>
     </div>
   );
@@ -857,8 +1008,12 @@ export const ServiceRequestForm: React.FC<ServiceRequestFormProps> = ({
         <div className={styles.stepHeaderSubtitle}>Provide details about the potential deal and engagement history</div>
       </div>
       <div className={styles.stepBody}>
-        <div className={styles.stepSection}>
-          <Text className={styles.stepSectionTitle} block>Deal Qualification</Text>
+        <AccordionSection
+          sectionKey="deal-0"
+          icon={<ScalesRegular style={{ width: 18, height: 18 }} />}
+          title="Deal Qualification"
+          description="Interest level, deal value, probability, and timeline"
+        >
           <div className={styles.form}>
             <div className={styles.row}>
               <Controller
@@ -954,12 +1109,15 @@ export const ServiceRequestForm: React.FC<ServiceRequestFormProps> = ({
               />
             </div>
           </div>
-        </div>
+        </AccordionSection>
 
-        <div className={styles.stepDivider} />
-
-        <div className={styles.stepSectionLast}>
-          <Text className={styles.stepSectionTitle} block>Additional Context</Text>
+        <AccordionSection
+          sectionKey="deal-1"
+          icon={<ChatBubblesQuestionRegular style={{ width: 18, height: 18 }} />}
+          title="Additional Context"
+          description="Requirements summary and previous engagement history"
+          isLast
+        >
           <div className={styles.form}>
             <Controller
               name="requirements"
@@ -990,7 +1148,7 @@ export const ServiceRequestForm: React.FC<ServiceRequestFormProps> = ({
               )}
             />
           </div>
-        </div>
+        </AccordionSection>
       </div>
     </div>
   );
@@ -1002,8 +1160,12 @@ export const ServiceRequestForm: React.FC<ServiceRequestFormProps> = ({
         <div className={styles.stepHeaderSubtitle}>Propose up to 3 time slots for the discovery meeting</div>
       </div>
       <div className={styles.stepBody}>
-        <div className={styles.stepSection}>
-          <Text className={styles.stepSectionTitle} block>Meeting Options</Text>
+        <AccordionSection
+          sectionKey="schedule-0"
+          icon={<ClockRegular style={{ width: 18, height: 18 }} />}
+          title="Meeting Options"
+          description="Propose up to 3 available time slots"
+        >
           <div className={styles.form}>
             {/* Slot 1 - Required */}
             <div className={styles.slotContainer}>
@@ -1130,12 +1292,15 @@ export const ServiceRequestForm: React.FC<ServiceRequestFormProps> = ({
               </div>
             </div>
           </div>
-        </div>
+        </AccordionSection>
 
-        <div className={styles.stepDivider} />
-
-        <div className={styles.stepSectionLast}>
-          <Text className={styles.stepSectionTitle} block>Additional Notes</Text>
+        <AccordionSection
+          sectionKey="schedule-1"
+          icon={<NoteRegular style={{ width: 18, height: 18 }} />}
+          title="Additional Notes"
+          description="Special requirements or comments for the meeting"
+          isLast
+        >
           <Controller
             name="comments"
             control={control}
@@ -1149,7 +1314,7 @@ export const ServiceRequestForm: React.FC<ServiceRequestFormProps> = ({
               </Field>
             )}
           />
-        </div>
+        </AccordionSection>
       </div>
     </div>
   );
@@ -1168,8 +1333,12 @@ export const ServiceRequestForm: React.FC<ServiceRequestFormProps> = ({
           <div className={styles.stepHeaderSubtitle}>Please review all details before submitting</div>
         </div>
         <div className={styles.stepBody}>
-          <div className={styles.stepSection}>
-            <Text className={styles.stepSectionTitle} block>Request Overview</Text>
+          <AccordionSection
+            sectionKey="review-0"
+            icon={<EyeRegular style={{ width: 18, height: 18 }} />}
+            title="Request Overview"
+            description="Service, client, and contact details"
+          >
             <div className={styles.previewSection}>
               <div className={styles.previewItem}>
                 <Text className={styles.previewLabel}>Request Title</Text>
@@ -1202,12 +1371,14 @@ export const ServiceRequestForm: React.FC<ServiceRequestFormProps> = ({
                 </div>
               </div>
             </div>
-          </div>
+          </AccordionSection>
 
-          <div className={styles.stepDivider} />
-
-          <div className={styles.stepSection}>
-            <Text className={styles.stepSectionTitle} block>Deal Information</Text>
+          <AccordionSection
+            sectionKey="review-1"
+            icon={<BriefcaseRegular style={{ width: 18, height: 18 }} />}
+            title="Deal Information"
+            description="Interest level, value, and requirements"
+          >
             <div className={styles.previewSection}>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
                 <div className={styles.previewItem}>
@@ -1233,12 +1404,15 @@ export const ServiceRequestForm: React.FC<ServiceRequestFormProps> = ({
                 </div>
               )}
             </div>
-          </div>
+          </AccordionSection>
 
-          <div className={styles.stepDivider} />
-
-          <div className={styles.stepSectionLast}>
-            <Text className={styles.stepSectionTitle} block>Schedule & Ownership</Text>
+          <AccordionSection
+            sectionKey="review-2"
+            icon={<CalendarLtrRegular style={{ width: 18, height: 18 }} />}
+            title="Schedule & Ownership"
+            description="Proposed meeting times and account manager"
+            isLast
+          >
             <div className={styles.previewSection}>
               <div className={styles.previewItem}>
                 <Text className={styles.previewLabel}>Proposed Meeting Times</Text>
@@ -1264,7 +1438,7 @@ export const ServiceRequestForm: React.FC<ServiceRequestFormProps> = ({
                 <Text className={styles.previewValue}>{user?.displayName} ({user?.email})</Text>
               </div>
             </div>
-          </div>
+          </AccordionSection>
         </div>
       </div>
     );
@@ -1279,8 +1453,10 @@ export const ServiceRequestForm: React.FC<ServiceRequestFormProps> = ({
             <DocumentRegular style={{ width: '24px', height: '24px' }} />
           </div>
           <div className={styles.cardHeaderContent}>
-            <Text className={styles.cardTitle}>New Service Request</Text>
-            <Text className={styles.cardSubtitle}>
+            <Text className={styles.cardTitle}>
+              New Service Request{selectedService ? ` - ${selectedService.Title}` : ''}
+            </Text>
+            <Text className={styles.cardSubtitle} block>
               Request a pre-sales consultation for DW services
             </Text>
           </div>

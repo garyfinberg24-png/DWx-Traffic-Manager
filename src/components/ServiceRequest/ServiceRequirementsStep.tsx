@@ -1,10 +1,10 @@
 /**
  * DWx Traffic Manager - Service Requirements Step
  * Dynamic questionnaire component based on selected service category
- * Styled with blue header card design matching standard modals
+ * Uses V6 two-level pattern: underline tabs for sections + accordion panels for question groups
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Text,
   Field,
@@ -17,8 +17,17 @@ import {
   Radio,
   makeStyles,
   Slider,
+  TabList,
+  Tab,
+  SelectTabData,
+  SelectTabEvent,
 } from '@fluentui/react-components';
 import { DatePicker } from '@fluentui/react-datepicker-compat';
+import {
+  ChevronDownRegular,
+  ChevronRightRegular,
+  ClipboardTaskListLtr24Regular,
+} from '@fluentui/react-icons';
 import {
   ServiceRequirementsConfig,
   ServiceQuestion,
@@ -47,34 +56,99 @@ const useStyles = makeStyles({
     fontSize: '13px',
     opacity: '0.9',
   },
+  // Tab navigation
+  tabContainer: {
+    borderBottom: '1px solid #e0e0e0',
+    padding: '0 24px',
+    backgroundColor: '#fafafa',
+  },
   // Card body with sections
   body: {
     padding: '24px',
   },
-  section: {
-    marginBottom: '24px',
+  // Accordion styles
+  accordion: {
+    borderRadius: '8px',
+    border: '1px solid #e0e0e0',
+    overflow: 'hidden',
+    marginBottom: '12px',
+    transition: 'box-shadow 0.2s ease',
+    ':hover': {
+      boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
+    },
   },
-  sectionLast: {
+  accordionLast: {
     marginBottom: '0',
   },
-  sectionTitle: {
+  accordionHeader: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '12px',
+    padding: '16px 20px',
+    cursor: 'pointer',
+    backgroundColor: '#fafafa',
+    border: 'none',
+    width: '100%',
+    textAlign: 'left',
+    transition: 'all 0.2s ease',
+    ':hover': {
+      backgroundColor: '#f0f0f0',
+    },
+  },
+  accordionHeaderOpen: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '12px',
+    padding: '16px 20px',
+    cursor: 'pointer',
+    border: 'none',
+    width: '100%',
+    textAlign: 'left',
+    background: 'linear-gradient(135deg, #1a5a8a 0%, #2873a8 100%)',
+    color: 'white',
+  },
+  accordionIcon: {
+    width: '36px',
+    height: '36px',
+    borderRadius: '8px',
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
+  },
+  accordionIconClosed: {
+    width: '36px',
+    height: '36px',
+    borderRadius: '8px',
+    backgroundColor: '#e8f4f8',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
+    color: '#1a5a8a',
+  },
+  accordionInfo: {
+    flex: 1,
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '2px',
+  },
+  accordionTitle: {
     fontSize: '15px',
     fontWeight: '600',
-    color: '#1a5a8a',
-    marginBottom: '16px',
-    paddingBottom: '8px',
-    borderBottom: '1px solid #e0e0e0',
   },
-  sectionDescription: {
-    fontSize: '13px',
-    color: '#616161',
-    marginTop: '-12px',
-    marginBottom: '16px',
+  accordionDescription: {
+    fontSize: '12px',
+    opacity: 0.8,
   },
-  divider: {
-    height: '1px',
-    backgroundColor: '#e0e0e0',
-    margin: '20px 0',
+  accordionChevron: {
+    flexShrink: 0,
+    transition: 'transform 0.2s ease',
+  },
+  accordionBody: {
+    padding: '20px 24px',
+    borderTop: '1px solid #e0e0e0',
   },
   questionContainer: {
     display: 'flex',
@@ -144,6 +218,22 @@ export const ServiceRequirementsStep: React.FC<ServiceRequirementsStepProps> = (
   errors,
 }) => {
   const styles = useStyles();
+  const [activeTab, setActiveTab] = useState<string>('tab-0');
+  const [openAccordions, setOpenAccordions] = useState<Record<string, boolean>>({
+    'section-0': true, // First section accordion open by default
+  });
+
+  const handleTabSelect = (_event: SelectTabEvent, data: SelectTabData) => {
+    setActiveTab(data.value as string);
+    // Open the accordion for the newly selected tab by default
+    const tabIndex = data.value as string;
+    const sectionKey = `section-${tabIndex.replace('tab-', '')}`;
+    setOpenAccordions(prev => ({ ...prev, [sectionKey]: true }));
+  };
+
+  const toggleAccordion = (key: string) => {
+    setOpenAccordions(prev => ({ ...prev, [key]: !prev[key] }));
+  };
 
   const shouldShowQuestion = (question: ServiceQuestion): boolean => {
     if (!question.conditional) return true;
@@ -159,6 +249,18 @@ export const ServiceRequirementsStep: React.FC<ServiceRequirementsStepProps> = (
     }
 
     return dependentValue === showWhen;
+  };
+
+  const getAnsweredCount = (sectionIndex: number): { answered: number; total: number } => {
+    const section = config.sections[sectionIndex];
+    const visibleQuestions = section.questions.filter(q => shouldShowQuestion(q));
+    const answeredQuestions = visibleQuestions.filter(q => {
+      const val = values[q.id];
+      if (val === undefined || val === null || val === '') return false;
+      if (Array.isArray(val) && val.length === 0) return false;
+      return true;
+    });
+    return { answered: answeredQuestions.length, total: visibleQuestions.length };
   };
 
   const renderQuestion = (question: ServiceQuestion) => {
@@ -392,32 +494,58 @@ export const ServiceRequirementsStep: React.FC<ServiceRequirementsStepProps> = (
     }
   };
 
-  return (
-    <div className={styles.card}>
-      {/* Blue gradient header */}
-      <div className={styles.header}>
-        <div className={styles.headerTitle}>{config.title}</div>
-        <div className={styles.headerSubtitle}>{config.subtitle}</div>
-      </div>
+  const renderSectionContent = (sectionIndex: number) => {
+    const section = config.sections[sectionIndex];
+    const sectionKey = `section-${sectionIndex}`;
+    const isOpen = openAccordions[sectionKey] ?? false;
+    const { answered, total } = getAnsweredCount(sectionIndex);
 
-      {/* Card body with sections */}
-      <div className={styles.body}>
-        {config.sections.map((section, sectionIndex) => (
-          <div
-            key={section.title}
-            className={sectionIndex === config.sections.length - 1 ? styles.sectionLast : styles.section}
-          >
-            {sectionIndex > 0 && <div className={styles.divider} />}
-
-            <Text className={styles.sectionTitle} block>
-              {section.title}
-            </Text>
+    return (
+      <div className={styles.accordion} key={section.title}>
+        <div
+          className={isOpen ? styles.accordionHeaderOpen : styles.accordionHeader}
+          onClick={() => toggleAccordion(sectionKey)}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => e.key === 'Enter' && toggleAccordion(sectionKey)}
+        >
+          <div className={isOpen ? styles.accordionIcon : styles.accordionIconClosed}>
+            <ClipboardTaskListLtr24Regular style={{ width: 18, height: 18 }} />
+          </div>
+          <div className={styles.accordionInfo}>
+            <div className={styles.accordionTitle}>{section.title}</div>
             {section.description && (
-              <Text className={styles.sectionDescription} block>
-                {section.description}
-              </Text>
+              <div className={styles.accordionDescription}>{section.description}</div>
             )}
-
+          </div>
+          <div style={{
+            fontSize: '11px',
+            fontWeight: 600,
+            padding: '2px 8px',
+            borderRadius: '10px',
+            backgroundColor: isOpen
+              ? 'rgba(255,255,255,0.2)'
+              : answered === total && total > 0
+                ? '#dff6dd'
+                : answered > 0
+                  ? '#e5f6fd'
+                  : '#fff4ce',
+            color: isOpen
+              ? 'white'
+              : answered === total && total > 0
+                ? '#107c10'
+                : answered > 0
+                  ? '#0078d4'
+                  : '#a4762c',
+          }}>
+            {answered}/{total}
+          </div>
+          <div className={styles.accordionChevron}>
+            {isOpen ? <ChevronDownRegular /> : <ChevronRightRegular />}
+          </div>
+        </div>
+        {isOpen && (
+          <div className={styles.accordionBody}>
             {section.questions.map((question, qIndex) => (
               <div
                 key={question.id}
@@ -427,7 +555,62 @@ export const ServiceRequirementsStep: React.FC<ServiceRequirementsStepProps> = (
               </div>
             ))}
           </div>
-        ))}
+        )}
+      </div>
+    );
+  };
+
+  // If there's only one section, no tabs needed - just use accordion
+  const useTabs = config.sections.length > 1;
+
+  return (
+    <div className={styles.card}>
+      {/* Blue gradient header */}
+      <div className={styles.header}>
+        <div className={styles.headerTitle}>{config.title}</div>
+        <div className={styles.headerSubtitle}>{config.subtitle}</div>
+      </div>
+
+      {/* Section tabs (underline style) */}
+      {useTabs && (
+        <div className={styles.tabContainer}>
+          <TabList
+            selectedValue={activeTab}
+            onTabSelect={handleTabSelect}
+            appearance="subtle"
+            size="medium"
+          >
+            {config.sections.map((section, index) => {
+              const { answered, total } = getAnsweredCount(index);
+              return (
+                <Tab key={section.title} value={`tab-${index}`}>
+                  {section.title}
+                  {total > 0 && (
+                    <span style={{
+                      marginLeft: '6px',
+                      fontSize: '11px',
+                      fontWeight: 600,
+                      padding: '1px 6px',
+                      borderRadius: '8px',
+                      backgroundColor: answered === total ? '#dff6dd' : answered > 0 ? '#e5f6fd' : '#f0f0f0',
+                      color: answered === total ? '#107c10' : answered > 0 ? '#0078d4' : '#616161',
+                    }}>
+                      {answered}/{total}
+                    </span>
+                  )}
+                </Tab>
+              );
+            })}
+          </TabList>
+        </div>
+      )}
+
+      {/* Card body with section content */}
+      <div className={styles.body}>
+        {useTabs
+          ? renderSectionContent(parseInt(activeTab.replace('tab-', '')))
+          : config.sections.map((_, index) => renderSectionContent(index))
+        }
       </div>
     </div>
   );

@@ -1,7 +1,7 @@
 # DWx Traffic Manager - Session State
 
 > Last updated: 2026-02-05
-> Last commit: `432e0e3` feat: Add Service CRUD management with spreadsheet import to Admin panel
+> Last commit: (pending) style: Redesign service request form with V6 accordion + tab layout
 
 ## Current State Summary
 
@@ -16,30 +16,26 @@ The DWx Traffic Manager is a fully functional React/TypeScript Teams app with:
 
 ## What Was Just Completed (This Session)
 
-### 1. Role Selection Validation Fix (commit `af822fc`)
+### 1. Service Request Form V6 Redesign (accordion + tab layout)
 
-Fixed a bug in `TeamMemberForm.tsx` where role chips appeared visually selected but react-hook-form validation didn't recognize them. Root cause: `setValue` calls missing `{ shouldValidate: true }`.
+Redesigned all form steps in the Service Request wizard using the "V6 two-level" pattern: underline tabs for section navigation + rich accordion panels for content grouping. This was selected after prototyping 6 HTML mockup variations.
 
-### 2. Service CRUD Management + Spreadsheet Import (commit `432e0e3`)
+**Design pattern:**
 
-Full implementation of service CRUD in the Admin panel. This was an 8-step implementation:
+- Accordion headers use blue gradient (`linear-gradient(135deg, #1a5a8a, #2873a8)`) when open, light gray when closed
+- Each accordion has an icon, title, description, and chevron toggle
+- Steps with 3+ sections use tabs + accordions; steps with 1-2 sections use accordions only
+- Discovery step (ServiceRequirementsStep) uses Fluent UI `TabList` with completion badges (answered/total)
 
-**Backend changes (3 files modified):**
+**Files modified (2):**
 
-- `DWxSharePointProvisioningService.ts` - Added 5 JSON Note columns (WhatsIncluded_JSON, EngagementPhases_JSON, KeyBenefits_JSON, IdealFor_JSON, RelatedCategories_JSON). Fixed Category choices from abbreviated to full TypeScript type names. Updated seed data to include rich content.
-- `ServiceCatalogService.ts` - Updated createService/updateService to write rich content JSON. Added deleteService method. Updated mapToService to read from SP JSON columns first, falling back to DEFAULT_SERVICES.
-- `AuditService.ts` - Added 'Service' to AuditEntity type union.
+- `ServiceRequestForm.tsx` - Card header now shows "New Service Request - {Service Name}" with subtitle on new line. Added `AccordionSection` inline component with toggle state, 12 new accordion styles, and 11 new icon imports. Converted Client step (3 accordions: Request Context, Company Details, Primary Contact), Deal Info step (2 accordions: Deal Qualification, Additional Context), Schedule step (2 accordions: Meeting Options, Additional Notes), and Review step (3 accordions, all expanded: Request Overview, Deal Information, Schedule & Ownership).
+- `ServiceRequirementsStep.tsx` - Replaced scrollable divider-separated sections with Fluent UI `TabList` (underline style) for section navigation. Each tab shows its content inside a rich accordion panel. Added completion badges on both tabs and accordion headers with color coding (green = complete, blue = partial, amber = empty). Single-section configs skip tabs and show accordion only.
 
-**New components (3 files created):**
+**HTML mockups created (2):**
 
-- `ServiceManagement.tsx` - Admin list component with search, category filter, table with CRUD actions (edit, activate/deactivate, delete), audit logging, toast notifications.
-- `ServiceForm.tsx` - 4-tab dialog form: Basic Info, Content (textareas with one-item-per-line), Engagement Phases (repeater via useFieldArray), Relations (multi-select chips). Uses react-hook-form + yup.
-- `ImportServicesDialog.tsx` - XLSX/CSV import with template download, preview validation, progress tracking. Uses pipe-delimited format for arrays.
-
-**Integration (2 files modified):**
-
-- `AdminPage.tsx` - Added "Services" tab (9th tab, positioned between Clients and Manager Access).
-- `Admin/index.ts` - Added exports for ServiceManagement, ServiceForm, ImportServicesDialog.
+- `mockups/service-request-form-v2.html` - Initial mockup with 4 proposed changes
+- `mockups/service-request-form-variations.html` - 6 layout variations (V1-V6) with comparison table
 
 ## What Was NOT Done / Still Pending
 
@@ -82,6 +78,8 @@ Full implementation of service CRUD in the Admin panel. This was an 8-step imple
 
 5. **List Name Config**: All 10 SharePoint list names are configured in `environmentConfig.ts` with env var overrides and sensible defaults (DWx-prefixed).
 
+6. **V6 Accordion + Tab Layout** (Service Request Form): Form steps use a two-level navigation pattern - Fluent UI `TabList` (underline style) for section navigation within steps, and rich accordion panels for collapsible content groups. Accordion headers show blue gradient when open. `AccordionSection` is an inline component in `ServiceRequestForm.tsx` driven by `openSections` state. `ServiceRequirementsStep.tsx` uses `TabList` with dynamic completion badges for the Discovery step's service-specific sections.
+
 ### File Naming Conventions
 
 - Services: `src/services/{EntityName}Service.ts`
@@ -98,6 +96,8 @@ Full implementation of service CRUD in the Admin panel. This was an 8-step imple
 ## Recent Commit History
 
 ```text
+(pending) style: Redesign service request form with V6 accordion + tab layout
+58e7bc8 docs: Update CLAUDE.md and create SESSION_STATE.md for agent handoff
 432e0e3 feat: Add Service CRUD management with spreadsheet import to Admin panel
 af822fc fix: Role selector validation not triggering on selection
 b841a82 feat: Add Re-provision button for individual lists in admin UI

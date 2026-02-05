@@ -1,0 +1,2368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DWx Traffic Manager - Service Request Form - 5 Layout Variations</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #f0f2f5;
+      color: #242424;
+      min-height: 100vh;
+    }
+
+    /* ============ VARIATION NAVIGATION ============ */
+    .variation-nav {
+      position: sticky;
+      top: 0;
+      z-index: 200;
+      background: #1a365d;
+      color: white;
+      padding: 12px 64px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    }
+    .variation-nav h1 {
+      font-size: 15px;
+      font-weight: 600;
+      white-space: nowrap;
+      margin-right: 8px;
+    }
+    .var-btn {
+      padding: 6px 16px;
+      font-size: 13px;
+      font-weight: 500;
+      font-family: inherit;
+      border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 20px;
+      background: transparent;
+      color: rgba(255,255,255,0.85);
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.15s;
+    }
+    .var-btn:hover { background: rgba(255,255,255,0.15); color: white; }
+    .var-btn.active {
+      background: white;
+      color: #1a365d;
+      font-weight: 600;
+      border-color: white;
+    }
+
+    /* ============ VARIATION SECTIONS ============ */
+    .variation-section {
+      display: none;
+      padding: 32px 64px;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+    .variation-section.active { display: block; }
+    .variation-label {
+      display: inline-block;
+      padding: 4px 12px;
+      background: #1e6b7b;
+      color: white;
+      font-size: 11px;
+      font-weight: 600;
+      border-radius: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+    }
+    .variation-title {
+      font-size: 22px;
+      font-weight: 700;
+      color: #1a365d;
+      margin-bottom: 6px;
+    }
+    .variation-desc {
+      font-size: 14px;
+      color: #616161;
+      margin-bottom: 24px;
+      max-width: 700px;
+      line-height: 1.5;
+    }
+
+    /* ============ FORM CARD (shared) ============ */
+    .form-card {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 1.6px 3.6px rgba(0,0,0,.13), 0 0.3px 0.9px rgba(0,0,0,.11);
+      overflow: hidden;
+      margin-bottom: 32px;
+    }
+
+    /* ============ CARD HEADER (shared) ============ */
+    .card-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      padding: 24px;
+      border-bottom: 1px solid #e1e1e1;
+      background: #fafafa;
+    }
+    .card-header-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #1e6b7b 0%, #2d8a9c 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      color: white;
+    }
+    .card-header-content { flex: 1; }
+    .card-header-title {
+      font-size: 22px;
+      font-weight: 600;
+      color: #242424;
+      line-height: 1.3;
+    }
+    .card-header-title .service-name { color: #1e6b7b; }
+    .card-header-subtitle {
+      font-size: 14px;
+      color: #616161;
+      margin-top: 4px;
+    }
+
+    /* ============ PROGRESS STEPPER (shared) ============ */
+    .progress-container {
+      padding: 16px 24px;
+      background: #f5f5f5;
+      border-bottom: 1px solid #e1e1e1;
+    }
+    .progress-steps {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    .progress-step {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      flex: 1;
+    }
+    .step-number {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .step-number.active { background: #1e6b7b; color: white; }
+    .step-number.completed { background: #107c10; color: white; }
+    .step-number.pending { background: #e1e1e1; color: #616161; }
+    .step-label { font-size: 11px; color: #616161; text-align: center; }
+    .progress-bar { height: 4px; background: #e1e1e1; border-radius: 2px; overflow: hidden; }
+    .progress-bar-fill { height: 100%; background: #1e6b7b; border-radius: 2px; }
+
+    /* ============ CARD BODY (shared) ============ */
+    .card-body { min-height: 480px; }
+
+    /* ============ CARD FOOTER (shared) ============ */
+    .card-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 24px;
+      border-top: 1px solid #e1e1e1;
+      background: #fafafa;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 20px;
+      font-size: 14px;
+      font-weight: 500;
+      font-family: inherit;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .btn-secondary { background: #f0f0f0; color: #424242; border: 1px solid #d0d0d0; }
+    .btn-secondary:hover { background: #e5e5e5; }
+    .btn-primary { background: #1e6b7b; color: white; }
+    .btn-primary:hover { background: #165a68; }
+
+    /* ============ FORM FIELDS (shared) ============ */
+    .form-group { margin-bottom: 20px; }
+    .form-group:last-child { margin-bottom: 0; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: #242424;
+      margin-bottom: 6px;
+    }
+    label .required { color: #d13438; margin-left: 2px; }
+    .field-hint { font-size: 12px; color: #616161; margin-top: 4px; }
+    input[type="text"], input[type="email"], input[type="tel"],
+    input[type="number"], input[type="date"], select, textarea {
+      width: 100%;
+      padding: 8px 12px;
+      font-size: 14px;
+      font-family: inherit;
+      border: 1px solid #d0d0d0;
+      border-radius: 6px;
+      background: white;
+      color: #242424;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: #1e6b7b;
+      box-shadow: 0 0 0 2px rgba(30,107,123,0.15);
+    }
+    textarea { resize: vertical; min-height: 80px; }
+    .checkbox-group { display: flex; flex-direction: column; gap: 8px; }
+    .checkbox-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 10px 14px;
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.1s, border-color 0.1s;
+    }
+    .checkbox-item:hover { background: #f0f5f7; border-color: #c5d8df; }
+    .checkbox-item input { margin-top: 2px; accent-color: #1e6b7b; }
+    .checkbox-item .option-label { font-size: 14px; font-weight: 500; color: #242424; }
+    .radio-group { display: flex; flex-direction: column; gap: 8px; }
+    .radio-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .radio-item:hover { background: #f0f5f7; }
+    .radio-item input { accent-color: #1e6b7b; }
+
+    /* ============ DESIGN NOTE ============ */
+    .design-note {
+      background: #fff8e1;
+      border-left: 4px solid #f9a825;
+      padding: 12px 16px;
+      margin: 16px 0;
+      font-size: 13px;
+      border-radius: 0 6px 6px 0;
+      line-height: 1.5;
+    }
+    .design-note strong { color: #e65100; }
+
+    /* ====================================================================
+       VARIATION 1: UNDERLINE TABS + FULL-WIDTH CONTENT
+       Classic horizontal tabs with underline indicator
+       ==================================================================== */
+    .v1-tabs {
+      display: flex;
+      border-bottom: 2px solid #e1e1e1;
+      padding: 0 24px;
+      background: #fafafa;
+      overflow-x: auto;
+    }
+    .v1-tab {
+      padding: 14px 20px;
+      font-size: 14px;
+      font-weight: 500;
+      color: #616161;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -2px;
+      white-space: nowrap;
+      transition: all 0.15s;
+      user-select: none;
+    }
+    .v1-tab:hover { color: #242424; background: #f0f0f0; }
+    .v1-tab.active {
+      color: #1e6b7b;
+      font-weight: 600;
+      border-bottom-color: #1e6b7b;
+    }
+    .v1-panel { padding: 24px; display: none; }
+    .v1-panel.active { display: block; }
+
+    /* ====================================================================
+       VARIATION 2: PILL TABS + ACCORDION QUESTION GROUPS
+       Rounded pill-style tabs + questions grouped in accordions
+       ==================================================================== */
+    .v2-tab-bar {
+      display: flex;
+      gap: 8px;
+      padding: 16px 24px;
+      background: #f5f5f5;
+      border-bottom: 1px solid #e1e1e1;
+      overflow-x: auto;
+    }
+    .v2-pill {
+      padding: 8px 18px;
+      font-size: 13px;
+      font-weight: 500;
+      color: #424242;
+      background: white;
+      border: 1px solid #d0d0d0;
+      border-radius: 20px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.15s;
+      user-select: none;
+    }
+    .v2-pill:hover { background: #f0f5f7; border-color: #1e6b7b; }
+    .v2-pill.active {
+      background: #1e6b7b;
+      color: white;
+      border-color: #1e6b7b;
+      font-weight: 600;
+    }
+    .v2-panel { padding: 24px; display: none; }
+    .v2-panel.active { display: block; }
+    .v2-accordion {
+      margin-bottom: 12px;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .v2-accordion-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 16px;
+      background: #f8f9fa;
+      cursor: pointer;
+      user-select: none;
+      transition: background 0.15s;
+    }
+    .v2-accordion-header:hover { background: #eef1f4; }
+    .v2-accordion-header h4 {
+      font-size: 14px;
+      font-weight: 600;
+      color: #1a5a8a;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .v2-accordion-header .q-count {
+      font-size: 11px;
+      font-weight: 500;
+      padding: 2px 8px;
+      border-radius: 10px;
+      background: #e8f4f8;
+      color: #1e6b7b;
+    }
+    .v2-chevron {
+      font-size: 16px;
+      color: #616161;
+      transition: transform 0.2s;
+    }
+    .v2-accordion.open .v2-chevron { transform: rotate(180deg); }
+    .v2-accordion-body { padding: 0 16px 16px; display: none; }
+    .v2-accordion.open .v2-accordion-body { display: block; }
+
+    /* ====================================================================
+       VARIATION 3: VERTICAL SIDE TABS + MAIN CONTENT AREA
+       Left sidebar navigation + right content panel (split layout)
+       ==================================================================== */
+    .v3-layout {
+      display: flex;
+      min-height: 480px;
+    }
+    .v3-sidebar {
+      width: 220px;
+      background: #f5f7f9;
+      border-right: 1px solid #e1e1e1;
+      padding: 16px 0;
+      flex-shrink: 0;
+    }
+    .v3-side-tab {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 20px;
+      font-size: 13px;
+      font-weight: 500;
+      color: #616161;
+      cursor: pointer;
+      transition: all 0.15s;
+      border-left: 3px solid transparent;
+      user-select: none;
+    }
+    .v3-side-tab:hover { background: #edf1f5; color: #242424; }
+    .v3-side-tab.active {
+      background: #e8f4f8;
+      color: #1e6b7b;
+      font-weight: 600;
+      border-left-color: #1e6b7b;
+    }
+    .v3-side-tab .tab-icon {
+      width: 20px;
+      text-align: center;
+      font-size: 14px;
+    }
+    .v3-side-tab .tab-badge {
+      margin-left: auto;
+      font-size: 11px;
+      background: #e0e0e0;
+      color: #616161;
+      padding: 1px 7px;
+      border-radius: 10px;
+    }
+    .v3-side-tab.active .tab-badge {
+      background: #1e6b7b;
+      color: white;
+    }
+    .v3-content {
+      flex: 1;
+      padding: 24px;
+    }
+    .v3-panel { display: none; }
+    .v3-panel.active { display: block; }
+    .v3-section-header {
+      font-size: 16px;
+      font-weight: 600;
+      color: #1a5a8a;
+      margin-bottom: 4px;
+    }
+    .v3-section-desc {
+      font-size: 13px;
+      color: #616161;
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #e8e8e8;
+    }
+
+    /* ====================================================================
+       VARIATION 4: SEGMENTED CONTROL + CARD-WRAPPED QUESTIONS
+       iOS-style segmented toggle + each question in its own card
+       ==================================================================== */
+    .v4-segment-bar {
+      display: flex;
+      justify-content: center;
+      padding: 16px 24px;
+      background: #f5f5f5;
+      border-bottom: 1px solid #e1e1e1;
+    }
+    .v4-segment {
+      display: flex;
+      background: #e0e0e0;
+      border-radius: 8px;
+      padding: 3px;
+      gap: 2px;
+    }
+    .v4-seg-btn {
+      padding: 8px 20px;
+      font-size: 13px;
+      font-weight: 500;
+      font-family: inherit;
+      color: #424242;
+      background: transparent;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.15s;
+      user-select: none;
+    }
+    .v4-seg-btn:hover { color: #242424; }
+    .v4-seg-btn.active {
+      background: white;
+      color: #1e6b7b;
+      font-weight: 600;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+    }
+    .v4-panel { padding: 24px; display: none; }
+    .v4-panel.active { display: block; }
+    .v4-question-card {
+      background: #fafbfc;
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      padding: 20px;
+      margin-bottom: 16px;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .v4-question-card:hover {
+      border-color: #c5d8df;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+    }
+    .v4-question-card:focus-within {
+      border-color: #1e6b7b;
+      box-shadow: 0 0 0 2px rgba(30,107,123,0.1);
+    }
+    .v4-q-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: #1e6b7b;
+      color: white;
+      font-size: 11px;
+      font-weight: 600;
+      margin-right: 8px;
+    }
+    .v4-q-label {
+      font-size: 14px;
+      font-weight: 600;
+      color: #242424;
+      margin-bottom: 10px;
+    }
+
+    /* ====================================================================
+       VARIATION 5: FULL ACCORDION (NO TABS) - EVERYTHING IS ACCORDIONS
+       All sections are expandable panels, wizard still controls steps
+       ==================================================================== */
+    .v5-body { padding: 24px; }
+    .v5-accordion {
+      margin-bottom: 12px;
+      border: 1px solid #e0e0e0;
+      border-radius: 10px;
+      overflow: hidden;
+      transition: box-shadow 0.15s;
+    }
+    .v5-accordion:hover { box-shadow: 0 2px 6px rgba(0,0,0,0.06); }
+    .v5-accordion-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px 20px;
+      cursor: pointer;
+      user-select: none;
+      transition: background 0.15s;
+    }
+    .v5-accordion-header:hover { background: #f5f7f9; }
+    .v5-accordion.open .v5-accordion-header {
+      background: linear-gradient(135deg, #1a5a8a 0%, #2873a8 100%);
+      color: white;
+    }
+    .v5-accordion-header .v5-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      background: #e8f4f8;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      flex-shrink: 0;
+      transition: background 0.15s;
+    }
+    .v5-accordion.open .v5-accordion-header .v5-icon {
+      background: rgba(255,255,255,0.2);
+    }
+    .v5-accordion-header .v5-title {
+      flex: 1;
+    }
+    .v5-accordion-header .v5-title h4 {
+      font-size: 15px;
+      font-weight: 600;
+    }
+    .v5-accordion-header .v5-title p {
+      font-size: 12px;
+      opacity: 0.75;
+      margin-top: 2px;
+    }
+    .v5-accordion-header .v5-status {
+      font-size: 11px;
+      font-weight: 500;
+      padding: 3px 10px;
+      border-radius: 12px;
+    }
+    .v5-status-empty { background: #fff4e5; color: #d97706; }
+    .v5-status-partial { background: #e8f4f8; color: #1e6b7b; }
+    .v5-status-complete { background: #e6f4ea; color: #107c10; }
+    .v5-accordion.open .v5-status-empty,
+    .v5-accordion.open .v5-status-partial,
+    .v5-accordion.open .v5-status-complete {
+      background: rgba(255,255,255,0.2);
+      color: white;
+    }
+    .v5-chevron {
+      font-size: 18px;
+      transition: transform 0.2s;
+    }
+    .v5-accordion.open .v5-chevron { transform: rotate(180deg); }
+    .v5-accordion-body {
+      display: none;
+      padding: 20px;
+      border-top: 1px solid #e0e0e0;
+    }
+    .v5-accordion.open .v5-accordion-body { display: block; }
+    .v5-progress-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 24px;
+      background: #f8f9fa;
+      border-bottom: 1px solid #e1e1e1;
+    }
+    .v5-progress-label { font-size: 12px; color: #616161; white-space: nowrap; }
+    .v5-progress-track {
+      flex: 1;
+      height: 6px;
+      background: #e1e1e1;
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .v5-progress-fill {
+      height: 100%;
+      background: #1e6b7b;
+      border-radius: 3px;
+    }
+    .v5-progress-text { font-size: 12px; font-weight: 600; color: #1e6b7b; white-space: nowrap; }
+
+    /* ====================================================================
+       VARIATION 6: UNDERLINE TABS (V1) + ACCORDION QUESTION GROUPS (V5)
+       Best of both: familiar tab navigation + rich accordion Q&A panels
+       ==================================================================== */
+    .v6-tabs {
+      display: flex;
+      border-bottom: 2px solid #e1e1e1;
+      padding: 0 24px;
+      background: #fafafa;
+      overflow-x: auto;
+    }
+    .v6-tab {
+      padding: 14px 20px;
+      font-size: 14px;
+      font-weight: 500;
+      color: #616161;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -2px;
+      white-space: nowrap;
+      transition: all 0.15s;
+      user-select: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .v6-tab:hover { color: #242424; background: #f0f0f0; }
+    .v6-tab.active {
+      color: #1e6b7b;
+      font-weight: 600;
+      border-bottom-color: #1e6b7b;
+    }
+    .v6-tab .v6-tab-count {
+      font-size: 11px;
+      font-weight: 500;
+      padding: 1px 7px;
+      border-radius: 10px;
+      background: #e0e0e0;
+      color: #616161;
+    }
+    .v6-tab.active .v6-tab-count {
+      background: #e8f4f8;
+      color: #1e6b7b;
+    }
+    .v6-panel { padding: 24px; display: none; }
+    .v6-panel.active { display: block; }
+
+    /* V6 accordion - question-level grouping */
+    .v6-accordion {
+      margin-bottom: 12px;
+      border: 1px solid #e0e0e0;
+      border-radius: 10px;
+      overflow: hidden;
+      transition: box-shadow 0.15s;
+    }
+    .v6-accordion:last-child { margin-bottom: 0; }
+    .v6-accordion:hover { box-shadow: 0 2px 6px rgba(0,0,0,0.06); }
+    .v6-acc-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 18px;
+      cursor: pointer;
+      user-select: none;
+      transition: background 0.15s;
+    }
+    .v6-acc-header:hover { background: #f5f7f9; }
+    .v6-accordion.open .v6-acc-header {
+      background: linear-gradient(135deg, #1a5a8a 0%, #2873a8 100%);
+      color: white;
+    }
+    .v6-acc-header .v6-acc-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: #e8f4f8;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      flex-shrink: 0;
+    }
+    .v6-accordion.open .v6-acc-header .v6-acc-icon {
+      background: rgba(255,255,255,0.2);
+    }
+    .v6-acc-header .v6-acc-info { flex: 1; }
+    .v6-acc-header .v6-acc-info h4 {
+      font-size: 14px;
+      font-weight: 600;
+    }
+    .v6-acc-header .v6-acc-info p {
+      font-size: 12px;
+      opacity: 0.7;
+      margin-top: 1px;
+    }
+    .v6-acc-header .v6-acc-status {
+      font-size: 11px;
+      font-weight: 500;
+      padding: 3px 10px;
+      border-radius: 12px;
+    }
+    .v6-acc-status-empty { background: #fff4e5; color: #d97706; }
+    .v6-acc-status-partial { background: #e8f4f8; color: #1e6b7b; }
+    .v6-acc-status-complete { background: #e6f4ea; color: #107c10; }
+    .v6-accordion.open .v6-acc-status-empty,
+    .v6-accordion.open .v6-acc-status-partial,
+    .v6-accordion.open .v6-acc-status-complete {
+      background: rgba(255,255,255,0.2);
+      color: white;
+    }
+    .v6-acc-chevron {
+      font-size: 16px;
+      transition: transform 0.2s;
+    }
+    .v6-accordion.open .v6-acc-chevron { transform: rotate(180deg); }
+    .v6-acc-body {
+      display: none;
+      padding: 20px;
+      border-top: 1px solid #e0e0e0;
+    }
+    .v6-accordion.open .v6-acc-body { display: block; }
+
+    /* V6 question-level mini-accordion (inside section accordions) */
+    .v6-question {
+      margin-bottom: 8px;
+      border: 1px solid #e8eaed;
+      border-radius: 8px;
+      overflow: hidden;
+      transition: border-color 0.15s;
+    }
+    .v6-question:last-child { margin-bottom: 0; }
+    .v6-question:hover { border-color: #c5d8df; }
+    .v6-question.open { border-color: #1e6b7b; }
+    .v6-q-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      cursor: pointer;
+      user-select: none;
+      background: #f9fafb;
+      transition: background 0.12s;
+    }
+    .v6-q-header:hover { background: #f0f5f7; }
+    .v6-question.open .v6-q-header {
+      background: #e8f4f8;
+      border-bottom: 1px solid #d0e4ea;
+    }
+    .v6-q-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: #e0e0e0;
+      color: #616161;
+      font-size: 11px;
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+    .v6-question.open .v6-q-number {
+      background: #1e6b7b;
+      color: white;
+    }
+    .v6-question.answered .v6-q-number {
+      background: #107c10;
+      color: white;
+    }
+    .v6-q-text {
+      flex: 1;
+      font-size: 13px;
+      font-weight: 600;
+      color: #242424;
+    }
+    .v6-q-text .required { color: #d13438; margin-left: 2px; }
+    .v6-q-badge {
+      font-size: 10px;
+      font-weight: 500;
+      padding: 2px 8px;
+      border-radius: 10px;
+      white-space: nowrap;
+    }
+    .v6-q-badge-required { background: #ffeef0; color: #d13438; }
+    .v6-q-badge-optional { background: #f0f0f0; color: #616161; }
+    .v6-q-badge-answered { background: #e6f4ea; color: #107c10; }
+    .v6-q-chevron {
+      font-size: 14px;
+      color: #999;
+      transition: transform 0.15s;
+    }
+    .v6-question.open .v6-q-chevron { transform: rotate(180deg); color: #1e6b7b; }
+    .v6-q-body {
+      display: none;
+      padding: 14px;
+    }
+    .v6-question.open .v6-q-body { display: block; }
+
+    /* ============ COMPARISON TABLE ============ */
+    .comparison-section {
+      padding: 32px 64px;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+    .comparison-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+      background: white;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 1.6px 3.6px rgba(0,0,0,.13);
+    }
+    .comparison-table th {
+      padding: 12px 16px;
+      text-align: left;
+      background: #1a365d;
+      color: white;
+      font-weight: 600;
+      font-size: 13px;
+    }
+    .comparison-table td {
+      padding: 12px 16px;
+      border-bottom: 1px solid #eee;
+      vertical-align: top;
+    }
+    .comparison-table tr:last-child td { border-bottom: none; }
+    .comparison-table tr:hover td { background: #f9fafb; }
+    .pro { color: #107c10; font-weight: 500; }
+    .con { color: #d13438; font-weight: 500; }
+
+    @media (max-width: 900px) {
+      .variation-nav { padding: 12px 16px; gap: 8px; flex-wrap: wrap; }
+      .variation-section, .comparison-section { padding: 16px; }
+      .v3-layout { flex-direction: column; }
+      .v3-sidebar { width: 100%; border-right: none; border-bottom: 1px solid #e1e1e1; padding: 8px 0; }
+      .v3-side-tab { padding: 8px 16px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ============ TOP NAVIGATION ============ -->
+  <div class="variation-nav">
+    <h1>Form Layout Variations</h1>
+    <button class="var-btn active" onclick="showVariation(1)">V1: Underline Tabs</button>
+    <button class="var-btn" onclick="showVariation(2)">V2: Pill Tabs + Accordions</button>
+    <button class="var-btn" onclick="showVariation(3)">V3: Vertical Side Tabs</button>
+    <button class="var-btn" onclick="showVariation(4)">V4: Segmented Control + Cards</button>
+    <button class="var-btn" onclick="showVariation(5)">V5: Full Accordion (No Tabs)</button>
+    <button class="var-btn" onclick="showVariation(6)">V6: Underline Tabs + Accordions</button>
+    <button class="var-btn" onclick="showVariation(0)">Compare All</button>
+  </div>
+
+
+  <!-- ====================================================================
+       VARIATION 1: UNDERLINE TABS (CLASSIC HORIZONTAL)
+       ==================================================================== -->
+  <div class="variation-section active" id="var-1">
+    <div class="variation-label">Variation 1</div>
+    <div class="variation-title">Underline Tabs (Classic Horizontal)</div>
+    <div class="variation-desc">
+      Standard horizontal tab bar with underline indicator. Clean and familiar.
+      Best when sections have similar content volume. This is the approach from the original V2 mockup.
+    </div>
+
+    <div class="form-card">
+      <div class="card-header">
+        <div class="card-header-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M6 2h12a2 2 0 012 2v16a2 2 0 01-2 2H6a2 2 0 01-2-2V4a2 2 0 012-2zm0 2v16h12V4H6zm2 3h8v2H8V7zm0 4h8v2H8v-2zm0 4h5v2H8v-2z"/></svg>
+        </div>
+        <div class="card-header-content">
+          <div class="card-header-title">New Service Request <span class="service-name">- SPFx Development</span></div>
+          <div class="card-header-subtitle">Request a pre-sales consultation for DW services</div>
+        </div>
+      </div>
+      <div class="progress-container">
+        <div class="progress-steps">
+          <div class="progress-step"><div class="step-number completed">&#10003;</div><span class="step-label">Service</span></div>
+          <div class="progress-step"><div class="step-number completed">&#10003;</div><span class="step-label">Client</span></div>
+          <div class="progress-step"><div class="step-number active">3</div><span class="step-label">Discovery</span></div>
+          <div class="progress-step"><div class="step-number pending">4</div><span class="step-label">Deal Info</span></div>
+          <div class="progress-step"><div class="step-number pending">5</div><span class="step-label">Schedule</span></div>
+          <div class="progress-step"><div class="step-number pending">6</div><span class="step-label">Review</span></div>
+        </div>
+        <div class="progress-bar"><div class="progress-bar-fill" style="width:33%"></div></div>
+      </div>
+      <div class="card-body">
+        <div class="v1-tabs" id="v1tabs">
+          <div class="v1-tab active" onclick="switchV1('scope')">Project Scope</div>
+          <div class="v1-tab" onclick="switchV1('functional')">Functional Requirements</div>
+          <div class="v1-tab" onclick="switchV1('technical')">Technical Environment</div>
+        </div>
+        <div class="v1-panel active" id="v1-scope">
+          <div class="form-group">
+            <label>What type of SPFx solution do you need? <span class="required">*</span></label>
+            <div class="checkbox-group">
+              <label class="checkbox-item"><input type="checkbox"><div><div class="option-label">Web Part (Intranet component)</div></div></label>
+              <label class="checkbox-item"><input type="checkbox"><div><div class="option-label">Application Customizer (Header/Footer)</div></div></label>
+              <label class="checkbox-item"><input type="checkbox"><div><div class="option-label">Command Set (List/Library toolbar)</div></div></label>
+              <label class="checkbox-item"><input type="checkbox"><div><div class="option-label">Field Customizer (Column formatting)</div></div></label>
+              <label class="checkbox-item"><input type="checkbox"><div><div class="option-label">Adaptive Card Extension (Viva Connections)</div></div></label>
+              <label class="checkbox-item"><input type="checkbox"><div><div class="option-label">Teams Tab/Personal App</div></div></label>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Where will this solution be deployed? <span class="required">*</span></label>
+            <div class="checkbox-group">
+              <label class="checkbox-item"><input type="checkbox"><div><div class="option-label">SharePoint pages</div></div></label>
+              <label class="checkbox-item"><input type="checkbox"><div><div class="option-label">Microsoft Teams</div></div></label>
+              <label class="checkbox-item"><input type="checkbox"><div><div class="option-label">Viva Connections dashboard</div></div></label>
+              <label class="checkbox-item"><input type="checkbox"><div><div class="option-label">Outlook (Add-in)</div></div></label>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>What is the deployment scope? <span class="required">*</span></label>
+            <div class="radio-group">
+              <label class="radio-item"><input type="radio" name="v1scope"> Single site collection</label>
+              <label class="radio-item"><input type="radio" name="v1scope"> Tenant-wide (App Catalog)</label>
+              <label class="radio-item"><input type="radio" name="v1scope"> Both - start with site, then tenant</label>
+            </div>
+          </div>
+        </div>
+        <div class="v1-panel" id="v1-functional">
+          <div class="form-group">
+            <label>What data sources will the solution use? <span class="required">*</span></label>
+            <div class="checkbox-group">
+              <label class="checkbox-item"><input type="checkbox"><div><div class="option-label">SharePoint Lists</div></div></label>
+              <label class="checkbox-item"><input type="checkbox"><div><div class="option-label">SharePoint Document Libraries</div></div></label>
+              <label class="checkbox-item"><input type="checkbox"><div><div class="option-label">Microsoft Graph API</div></div></label>
+              <label class="checkbox-item"><input type="checkbox"><div><div class="option-label">External APIs</div></div></label>
+              <label class="checkbox-item"><input type="checkbox"><div><div class="option-label">Azure services (Functions, SQL, etc.)</div></div></label>
+              <label class="checkbox-item"><input type="checkbox"><div><div class="option-label">Dataverse</div></div></label>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Is this replacing an existing solution? <span class="required">*</span></label>
+            <div class="radio-group">
+              <label class="radio-item"><input type="radio" name="v1existing"> No, this is a new solution</label>
+              <label class="radio-item"><input type="radio" name="v1existing"> Yes, replacing classic SharePoint solution</label>
+              <label class="radio-item"><input type="radio" name="v1existing"> Extending existing SPFx solution</label>
+            </div>
+          </div>
+        </div>
+        <div class="v1-panel" id="v1-technical">
+          <div class="form-group">
+            <label>Do you have an App Catalog configured? <span class="required">*</span></label>
+            <div class="radio-group">
+              <label class="radio-item"><input type="radio" name="v1catalog"> Yes</label>
+              <label class="radio-item"><input type="radio" name="v1catalog"> No</label>
+              <label class="radio-item"><input type="radio" name="v1catalog"> Not sure</label>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Is Office 365 CDN enabled? <span class="required">*</span></label>
+            <div class="radio-group">
+              <label class="radio-item"><input type="radio" name="v1cdn"> Yes</label>
+              <label class="radio-item"><input type="radio" name="v1cdn"> No</label>
+              <label class="radio-item"><input type="radio" name="v1cdn"> Not sure</label>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card-footer">
+        <button class="btn btn-secondary">&larr; Back</button>
+        <button class="btn btn-primary">Next &rarr;</button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ====================================================================
+       VARIATION 2: PILL TABS + ACCORDION QUESTION GROUPS
+       ==================================================================== -->
+  <div class="variation-section" id="var-2">
+    <div class="variation-label">Variation 2</div>
+    <div class="variation-title">Pill Tabs + Accordion Question Groups</div>
+    <div class="variation-desc">
+      Rounded pill-style tabs for section navigation. Within each section, questions are grouped
+      into collapsible accordions by topic. Great for sections with many questions (6+) where
+      you want to reduce visual overwhelm.
+    </div>
+
+    <div class="form-card">
+      <div class="card-header">
+        <div class="card-header-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M6 2h12a2 2 0 012 2v16a2 2 0 01-2 2H6a2 2 0 01-2-2V4a2 2 0 012-2zm0 2v16h12V4H6zm2 3h8v2H8V7zm0 4h8v2H8v-2zm0 4h5v2H8v-2z"/></svg>
+        </div>
+        <div class="card-header-content">
+          <div class="card-header-title">New Service Request <span class="service-name">- SPFx Development</span></div>
+          <div class="card-header-subtitle">Request a pre-sales consultation for DW services</div>
+        </div>
+      </div>
+      <div class="progress-container">
+        <div class="progress-steps">
+          <div class="progress-step"><div class="step-number completed">&#10003;</div><span class="step-label">Service</span></div>
+          <div class="progress-step"><div class="step-number completed">&#10003;</div><span class="step-label">Client</span></div>
+          <div class="progress-step"><div class="step-number active">3</div><span class="step-label">Discovery</span></div>
+          <div class="progress-step"><div class="step-number pending">4</div><span class="step-label">Deal Info</span></div>
+          <div class="progress-step"><div class="step-number pending">5</div><span class="step-label">Schedule</span></div>
+          <div class="progress-step"><div class="step-number pending">6</div><span class="step-label">Review</span></div>
+        </div>
+        <div class="progress-bar"><div class="progress-bar-fill" style="width:33%"></div></div>
+      </div>
+      <div class="card-body">
+        <div class="v2-tab-bar" id="v2tabs">
+          <div class="v2-pill active" onclick="switchV2('scope2')">Project Scope</div>
+          <div class="v2-pill" onclick="switchV2('func2')">Functional Requirements</div>
+          <div class="v2-pill" onclick="switchV2('tech2')">Technical Environment</div>
+        </div>
+
+        <!-- Tab: Project Scope - with accordion sub-groups -->
+        <div class="v2-panel active" id="v2-scope2">
+          <div class="v2-accordion open" onclick="toggleV2(this)">
+            <div class="v2-accordion-header">
+              <h4>Solution Type &amp; Deployment <span class="q-count">3 questions</span></h4>
+              <span class="v2-chevron">&#9660;</span>
+            </div>
+            <div class="v2-accordion-body">
+              <div class="form-group" style="margin-top: 12px;">
+                <label>What type of SPFx solution do you need? <span class="required">*</span></label>
+                <div class="checkbox-group">
+                  <label class="checkbox-item"><input type="checkbox"><div><div class="option-label">Web Part (Intranet component)</div></div></label>
+                  <label class="checkbox-item"><input type="checkbox"><div><div class="option-label">Application Customizer (Header/Footer)</div></div></label>
+                  <label class="checkbox-item"><input type="checkbox"><div><div class="option-label">Command Set (List/Library toolbar)</div></div></label>
+                  <label class="checkbox-item"><input type="checkbox"><div><div class="option-label">Field Customizer (Column formatting)</div></div></label>
+                  <label class="checkbox-item"><input type="checkbox"><div><div class="option-label">Adaptive Card Extension (Viva Connections)</div></div></label>
+                  <label class="checkbox-item"><input type="checkbox"><div><div class="option-label">Teams Tab/Personal App</div></div></label>
+                </div>
+              </div>
+              <div class="form-group">
+                <label>Where will this solution be deployed? <span class="required">*</span></label>
+                <div class="checkbox-group">
+                  <label class="checkbox-item"><input type="checkbox"><div><div class="option-label">SharePoint pages</div></div></label>
+                  <label class="checkbox-item"><input type="checkbox"><div><div class="option-label">Microsoft Teams</div></div></label>
+                  <label class="checkbox-item"><input type="checkbox"><div><div class="option-label">Viva Connections dashboard</div></div></label>
+                  <label class="checkbox-item"><input type="checkbox"><div><div class="option-label">Outlook (Add-in)</div></div></label>
+                </div>
+              </div>
+              <div class="form-group">
+                <label>What is the deployment scope? <span class="required">*</span></label>
+                <div class="radio-group">
+                  <label class="radio-item"><input type="radio" name="v2scope"> Single site collection</label>
+                  <label class="radio-item"><input type="radio" name="v2scope"> Tenant-wide (App Catalog)</label>
+                  <label class="radio-item"><input type="radio" name="v2scope"> Both - start with site, then tenant</label>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="design-note">
+            <strong>Design Note:</strong> In V2, within each pill tab the questions are grouped
+            into accordion sub-groups. For "Project Scope" there's only one group so the accordion
+            auto-opens. For "Functional Requirements" you'd see 2 sub-groups: "Data Sources"
+            and "Features &amp; Capabilities", letting users focus on one set at a time.
+          </div>
+        </div>
+
+        <div class="v2-panel" id="v2-func2">
+          <div class="v2-accordion open" onclick="toggleV2(this)">
+            <div class="v2-accordion-header">
+              <h4>Data Sources <span class="q-count">1 question</span></h4>
+              <span class="v2-chevron">&#9660;</span>
+            </div>
+            <div class="v2-accordion-body">
+              <div class="form-group" style="margin-top: 12px;">
+                <label>What data sources will the solution use? <span class="required">*</span></label>
+                <div class="checkbox-group">
+                  <label class="checkbox-item"><input type="checkbox"><div><div class="option-label">SharePoint Lists</div></div></label>
+                  <label class="checkbox-item"><input type="checkbox"><div><div class="option-label">Microsoft Graph API</div></div></label>
+                  <label class="checkbox-item"><input type="checkbox"><div><div class="option-label">External APIs</div></div></label>
+                  <label class="checkbox-item"><input type="checkbox"><div><div class="option-label">Azure services</div></div></label>
+                  <label class="checkbox-item"><input type="checkbox"><div><div class="option-label">Dataverse</div></div></label>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="v2-accordion" onclick="toggleV2(this)">
+            <div class="v2-accordion-header">
+              <h4>Features &amp; Migration <span class="q-count">2 questions</span></h4>
+              <span class="v2-chevron">&#9660;</span>
+            </div>
+            <div class="v2-accordion-body">
+              <div class="form-group" style="margin-top: 12px;">
+                <label>What features are needed?</label>
+                <div class="checkbox-group">
+                  <label class="checkbox-item"><input type="checkbox"><div><div class="option-label">CRUD operations</div></div></label>
+                  <label class="checkbox-item"><input type="checkbox"><div><div class="option-label">Search &amp; filtering</div></div></label>
+                  <label class="checkbox-item"><input type="checkbox"><div><div class="option-label">File upload</div></div></label>
+                  <label class="checkbox-item"><input type="checkbox"><div><div class="option-label">Export to Excel/PDF</div></div></label>
+                  <label class="checkbox-item"><input type="checkbox"><div><div class="option-label">Role-based access</div></div></label>
+                </div>
+              </div>
+              <div class="form-group">
+                <label>Is this replacing an existing solution? <span class="required">*</span></label>
+                <div class="radio-group">
+                  <label class="radio-item"><input type="radio" name="v2replace"> No, this is a new solution</label>
+                  <label class="radio-item"><input type="radio" name="v2replace"> Yes, replacing classic SharePoint</label>
+                  <label class="radio-item"><input type="radio" name="v2replace"> Extending existing SPFx solution</label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="v2-panel" id="v2-tech2">
+          <div class="v2-accordion open" onclick="toggleV2(this)">
+            <div class="v2-accordion-header">
+              <h4>Infrastructure <span class="q-count">2 questions</span></h4>
+              <span class="v2-chevron">&#9660;</span>
+            </div>
+            <div class="v2-accordion-body">
+              <div class="form-group" style="margin-top: 12px;">
+                <label>Do you have an App Catalog configured? <span class="required">*</span></label>
+                <div class="radio-group">
+                  <label class="radio-item"><input type="radio" name="v2cat"> Yes</label>
+                  <label class="radio-item"><input type="radio" name="v2cat"> No</label>
+                  <label class="radio-item"><input type="radio" name="v2cat"> Not sure</label>
+                </div>
+              </div>
+              <div class="form-group">
+                <label>Is Office 365 CDN enabled? <span class="required">*</span></label>
+                <div class="radio-group">
+                  <label class="radio-item"><input type="radio" name="v2cdn"> Yes</label>
+                  <label class="radio-item"><input type="radio" name="v2cdn"> No</label>
+                  <label class="radio-item"><input type="radio" name="v2cdn"> Not sure</label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card-footer">
+        <button class="btn btn-secondary">&larr; Back</button>
+        <button class="btn btn-primary">Next &rarr;</button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ====================================================================
+       VARIATION 3: VERTICAL SIDE TABS
+       ==================================================================== -->
+  <div class="variation-section" id="var-3">
+    <div class="variation-label">Variation 3</div>
+    <div class="variation-title">Vertical Side Tabs (Split Panel)</div>
+    <div class="variation-desc">
+      Left sidebar navigation with icons and question counts. Content fills the right panel.
+      Keeps all sections visible at once for easy navigation. Works well when there are 3-5 sections
+      and the card has enough horizontal space.
+    </div>
+
+    <div class="form-card">
+      <div class="card-header">
+        <div class="card-header-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M6 2h12a2 2 0 012 2v16a2 2 0 01-2 2H6a2 2 0 01-2-2V4a2 2 0 012-2zm0 2v16h12V4H6zm2 3h8v2H8V7zm0 4h8v2H8v-2zm0 4h5v2H8v-2z"/></svg>
+        </div>
+        <div class="card-header-content">
+          <div class="card-header-title">New Service Request <span class="service-name">- SPFx Development</span></div>
+          <div class="card-header-subtitle">Request a pre-sales consultation for DW services</div>
+        </div>
+      </div>
+      <div class="progress-container">
+        <div class="progress-steps">
+          <div class="progress-step"><div class="step-number completed">&#10003;</div><span class="step-label">Service</span></div>
+          <div class="progress-step"><div class="step-number completed">&#10003;</div><span class="step-label">Client</span></div>
+          <div class="progress-step"><div class="step-number active">3</div><span class="step-label">Discovery</span></div>
+          <div class="progress-step"><div class="step-number pending">4</div><span class="step-label">Deal Info</span></div>
+          <div class="progress-step"><div class="step-number pending">5</div><span class="step-label">Schedule</span></div>
+          <div class="progress-step"><div class="step-number pending">6</div><span class="step-label">Review</span></div>
+        </div>
+        <div class="progress-bar"><div class="progress-bar-fill" style="width:33%"></div></div>
+      </div>
+      <div class="card-body">
+        <div class="v3-layout">
+          <div class="v3-sidebar">
+            <div class="v3-side-tab active" onclick="switchV3('v3scope')">
+              <span class="tab-icon">&#128196;</span>
+              Project Scope
+              <span class="tab-badge">3</span>
+            </div>
+            <div class="v3-side-tab" onclick="switchV3('v3func')">
+              <span class="tab-icon">&#9881;</span>
+              Functional Reqs
+              <span class="tab-badge">3</span>
+            </div>
+            <div class="v3-side-tab" onclick="switchV3('v3tech')">
+              <span class="tab-icon">&#128187;</span>
+              Technical Env
+              <span class="tab-badge">2</span>
+            </div>
+          </div>
+          <div class="v3-content">
+            <div class="v3-panel active" id="v3-v3scope">
+              <div class="v3-section-header">Project Scope</div>
+              <div class="v3-section-desc">Define the type and scope of the SPFx solution you need</div>
+              <div class="form-group">
+                <label>What type of SPFx solution do you need? <span class="required">*</span></label>
+                <div class="checkbox-group">
+                  <label class="checkbox-item"><input type="checkbox"><div><div class="option-label">Web Part (Intranet component)</div></div></label>
+                  <label class="checkbox-item"><input type="checkbox"><div><div class="option-label">Application Customizer (Header/Footer)</div></div></label>
+                  <label class="checkbox-item"><input type="checkbox"><div><div class="option-label">Command Set (List/Library toolbar)</div></div></label>
+                  <label class="checkbox-item"><input type="checkbox"><div><div class="option-label">Field Customizer (Column formatting)</div></div></label>
+                  <label class="checkbox-item"><input type="checkbox"><div><div class="option-label">Adaptive Card Extension (Viva Connections)</div></div></label>
+                  <label class="checkbox-item"><input type="checkbox"><div><div class="option-label">Teams Tab/Personal App</div></div></label>
+                </div>
+              </div>
+              <div class="form-group">
+                <label>Where will this solution be deployed? <span class="required">*</span></label>
+                <div class="checkbox-group">
+                  <label class="checkbox-item"><input type="checkbox"><div><div class="option-label">SharePoint pages</div></div></label>
+                  <label class="checkbox-item"><input type="checkbox"><div><div class="option-label">Microsoft Teams</div></div></label>
+                  <label class="checkbox-item"><input type="checkbox"><div><div class="option-label">Viva Connections dashboard</div></div></label>
+                </div>
+              </div>
+              <div class="form-group">
+                <label>What is the deployment scope? <span class="required">*</span></label>
+                <div class="radio-group">
+                  <label class="radio-item"><input type="radio" name="v3scope"> Single site collection</label>
+                  <label class="radio-item"><input type="radio" name="v3scope"> Tenant-wide (App Catalog)</label>
+                  <label class="radio-item"><input type="radio" name="v3scope"> Both</label>
+                </div>
+              </div>
+            </div>
+            <div class="v3-panel" id="v3-v3func">
+              <div class="v3-section-header">Functional Requirements</div>
+              <div class="v3-section-desc">Specify the capabilities and features the solution needs</div>
+              <div class="form-group">
+                <label>What data sources will the solution use? <span class="required">*</span></label>
+                <div class="checkbox-group">
+                  <label class="checkbox-item"><input type="checkbox"><div><div class="option-label">SharePoint Lists</div></div></label>
+                  <label class="checkbox-item"><input type="checkbox"><div><div class="option-label">Microsoft Graph API</div></div></label>
+                  <label class="checkbox-item"><input type="checkbox"><div><div class="option-label">External APIs</div></div></label>
+                  <label class="checkbox-item"><input type="checkbox"><div><div class="option-label">Azure services</div></div></label>
+                </div>
+              </div>
+              <div class="form-group">
+                <label>What features are needed?</label>
+                <div class="checkbox-group">
+                  <label class="checkbox-item"><input type="checkbox"><div><div class="option-label">CRUD operations</div></div></label>
+                  <label class="checkbox-item"><input type="checkbox"><div><div class="option-label">Search &amp; filtering</div></div></label>
+                  <label class="checkbox-item"><input type="checkbox"><div><div class="option-label">File upload</div></div></label>
+                  <label class="checkbox-item"><input type="checkbox"><div><div class="option-label">Export to Excel/PDF</div></div></label>
+                  <label class="checkbox-item"><input type="checkbox"><div><div class="option-label">Role-based access</div></div></label>
+                </div>
+              </div>
+              <div class="form-group">
+                <label>Is this replacing an existing solution? <span class="required">*</span></label>
+                <div class="radio-group">
+                  <label class="radio-item"><input type="radio" name="v3exist"> No, new solution</label>
+                  <label class="radio-item"><input type="radio" name="v3exist"> Yes, replacing classic SP</label>
+                  <label class="radio-item"><input type="radio" name="v3exist"> Extending existing SPFx</label>
+                </div>
+              </div>
+            </div>
+            <div class="v3-panel" id="v3-v3tech">
+              <div class="v3-section-header">Technical Environment</div>
+              <div class="v3-section-desc">Tell us about your current SharePoint and M365 infrastructure</div>
+              <div class="form-group">
+                <label>Do you have an App Catalog configured? <span class="required">*</span></label>
+                <div class="radio-group">
+                  <label class="radio-item"><input type="radio" name="v3cat"> Yes</label>
+                  <label class="radio-item"><input type="radio" name="v3cat"> No</label>
+                  <label class="radio-item"><input type="radio" name="v3cat"> Not sure</label>
+                </div>
+              </div>
+              <div class="form-group">
+                <label>Is Office 365 CDN enabled? <span class="required">*</span></label>
+                <div class="radio-group">
+                  <label class="radio-item"><input type="radio" name="v3cdn"> Yes</label>
+                  <label class="radio-item"><input type="radio" name="v3cdn"> No</label>
+                  <label class="radio-item"><input type="radio" name="v3cdn"> Not sure</label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card-footer">
+        <button class="btn btn-secondary">&larr; Back</button>
+        <button class="btn btn-primary">Next &rarr;</button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ====================================================================
+       VARIATION 4: SEGMENTED CONTROL + CARD-WRAPPED QUESTIONS
+       ==================================================================== -->
+  <div class="variation-section" id="var-4">
+    <div class="variation-label">Variation 4</div>
+    <div class="variation-title">Segmented Control + Question Cards</div>
+    <div class="variation-desc">
+      iOS/macOS-style segmented toggle for section switching. Each individual question is wrapped
+      in its own bordered card with a numbered indicator. Creates a clean, survey-like feel where
+      each question stands out distinctly.
+    </div>
+
+    <div class="form-card">
+      <div class="card-header">
+        <div class="card-header-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M6 2h12a2 2 0 012 2v16a2 2 0 01-2 2H6a2 2 0 01-2-2V4a2 2 0 012-2zm0 2v16h12V4H6zm2 3h8v2H8V7zm0 4h8v2H8v-2zm0 4h5v2H8v-2z"/></svg>
+        </div>
+        <div class="card-header-content">
+          <div class="card-header-title">New Service Request <span class="service-name">- SPFx Development</span></div>
+          <div class="card-header-subtitle">Request a pre-sales consultation for DW services</div>
+        </div>
+      </div>
+      <div class="progress-container">
+        <div class="progress-steps">
+          <div class="progress-step"><div class="step-number completed">&#10003;</div><span class="step-label">Service</span></div>
+          <div class="progress-step"><div class="step-number completed">&#10003;</div><span class="step-label">Client</span></div>
+          <div class="progress-step"><div class="step-number active">3</div><span class="step-label">Discovery</span></div>
+          <div class="progress-step"><div class="step-number pending">4</div><span class="step-label">Deal Info</span></div>
+          <div class="progress-step"><div class="step-number pending">5</div><span class="step-label">Schedule</span></div>
+          <div class="progress-step"><div class="step-number pending">6</div><span class="step-label">Review</span></div>
+        </div>
+        <div class="progress-bar"><div class="progress-bar-fill" style="width:33%"></div></div>
+      </div>
+      <div class="card-body">
+        <div class="v4-segment-bar" id="v4tabs">
+          <div class="v4-segment">
+            <button class="v4-seg-btn active" onclick="switchV4('v4scope')">Project Scope</button>
+            <button class="v4-seg-btn" onclick="switchV4('v4func')">Functional Requirements</button>
+            <button class="v4-seg-btn" onclick="switchV4('v4tech')">Technical Environment</button>
+          </div>
+        </div>
+
+        <div class="v4-panel active" id="v4-v4scope">
+          <div class="v4-question-card">
+            <div class="v4-q-label"><span class="v4-q-number">1</span> What type of SPFx solution do you need? <span class="required">*</span></div>
+            <div class="checkbox-group">
+              <label class="checkbox-item"><input type="checkbox"><div><div class="option-label">Web Part (Intranet component)</div></div></label>
+              <label class="checkbox-item"><input type="checkbox"><div><div class="option-label">Application Customizer (Header/Footer)</div></div></label>
+              <label class="checkbox-item"><input type="checkbox"><div><div class="option-label">Command Set (List/Library toolbar)</div></div></label>
+              <label class="checkbox-item"><input type="checkbox"><div><div class="option-label">Field Customizer (Column formatting)</div></div></label>
+              <label class="checkbox-item"><input type="checkbox"><div><div class="option-label">Adaptive Card Extension (Viva Connections)</div></div></label>
+              <label class="checkbox-item"><input type="checkbox"><div><div class="option-label">Teams Tab/Personal App</div></div></label>
+            </div>
+          </div>
+          <div class="v4-question-card">
+            <div class="v4-q-label"><span class="v4-q-number">2</span> Where will this solution be deployed? <span class="required">*</span></div>
+            <div class="checkbox-group">
+              <label class="checkbox-item"><input type="checkbox"><div><div class="option-label">SharePoint pages</div></div></label>
+              <label class="checkbox-item"><input type="checkbox"><div><div class="option-label">Microsoft Teams</div></div></label>
+              <label class="checkbox-item"><input type="checkbox"><div><div class="option-label">Viva Connections dashboard</div></div></label>
+              <label class="checkbox-item"><input type="checkbox"><div><div class="option-label">Outlook (Add-in)</div></div></label>
+            </div>
+          </div>
+          <div class="v4-question-card">
+            <div class="v4-q-label"><span class="v4-q-number">3</span> What is the deployment scope? <span class="required">*</span></div>
+            <div class="radio-group">
+              <label class="radio-item"><input type="radio" name="v4scope"> Single site collection</label>
+              <label class="radio-item"><input type="radio" name="v4scope"> Tenant-wide (App Catalog)</label>
+              <label class="radio-item"><input type="radio" name="v4scope"> Both - start with site, then tenant</label>
+            </div>
+          </div>
+        </div>
+
+        <div class="v4-panel" id="v4-v4func">
+          <div class="v4-question-card">
+            <div class="v4-q-label"><span class="v4-q-number">1</span> What data sources will the solution use? <span class="required">*</span></div>
+            <div class="checkbox-group">
+              <label class="checkbox-item"><input type="checkbox"><div><div class="option-label">SharePoint Lists</div></div></label>
+              <label class="checkbox-item"><input type="checkbox"><div><div class="option-label">Microsoft Graph API</div></div></label>
+              <label class="checkbox-item"><input type="checkbox"><div><div class="option-label">External APIs</div></div></label>
+              <label class="checkbox-item"><input type="checkbox"><div><div class="option-label">Azure services</div></div></label>
+              <label class="checkbox-item"><input type="checkbox"><div><div class="option-label">Dataverse</div></div></label>
+            </div>
+          </div>
+          <div class="v4-question-card">
+            <div class="v4-q-label"><span class="v4-q-number">2</span> What features are needed?</div>
+            <div class="checkbox-group">
+              <label class="checkbox-item"><input type="checkbox"><div><div class="option-label">CRUD operations</div></div></label>
+              <label class="checkbox-item"><input type="checkbox"><div><div class="option-label">Search &amp; filtering</div></div></label>
+              <label class="checkbox-item"><input type="checkbox"><div><div class="option-label">File upload</div></div></label>
+              <label class="checkbox-item"><input type="checkbox"><div><div class="option-label">Export to Excel/PDF</div></div></label>
+              <label class="checkbox-item"><input type="checkbox"><div><div class="option-label">Role-based access</div></div></label>
+            </div>
+          </div>
+          <div class="v4-question-card">
+            <div class="v4-q-label"><span class="v4-q-number">3</span> Is this replacing an existing solution? <span class="required">*</span></div>
+            <div class="radio-group">
+              <label class="radio-item"><input type="radio" name="v4exist"> No, this is a new solution</label>
+              <label class="radio-item"><input type="radio" name="v4exist"> Yes, replacing classic SharePoint</label>
+              <label class="radio-item"><input type="radio" name="v4exist"> Extending existing SPFx solution</label>
+            </div>
+          </div>
+        </div>
+
+        <div class="v4-panel" id="v4-v4tech">
+          <div class="v4-question-card">
+            <div class="v4-q-label"><span class="v4-q-number">1</span> Do you have an App Catalog configured? <span class="required">*</span></div>
+            <div class="radio-group">
+              <label class="radio-item"><input type="radio" name="v4cat"> Yes</label>
+              <label class="radio-item"><input type="radio" name="v4cat"> No</label>
+              <label class="radio-item"><input type="radio" name="v4cat"> Not sure</label>
+            </div>
+          </div>
+          <div class="v4-question-card">
+            <div class="v4-q-label"><span class="v4-q-number">2</span> Is Office 365 CDN enabled? <span class="required">*</span></div>
+            <div class="radio-group">
+              <label class="radio-item"><input type="radio" name="v4cdn"> Yes</label>
+              <label class="radio-item"><input type="radio" name="v4cdn"> No</label>
+              <label class="radio-item"><input type="radio" name="v4cdn"> Not sure</label>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card-footer">
+        <button class="btn btn-secondary">&larr; Back</button>
+        <button class="btn btn-primary">Next &rarr;</button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ====================================================================
+       VARIATION 5: FULL ACCORDION (NO TABS)
+       ==================================================================== -->
+  <div class="variation-section" id="var-5">
+    <div class="variation-label">Variation 5</div>
+    <div class="variation-title">Full Accordion (No Tabs)</div>
+    <div class="variation-desc">
+      No tab bar at all. All requirement sections are expandable accordion panels with icons,
+      descriptions, and completion status badges. The active section has a colored header.
+      A mini progress bar shows overall section completion. This works like a guided interview.
+    </div>
+
+    <div class="form-card">
+      <div class="card-header">
+        <div class="card-header-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M6 2h12a2 2 0 012 2v16a2 2 0 01-2 2H6a2 2 0 01-2-2V4a2 2 0 012-2zm0 2v16h12V4H6zm2 3h8v2H8V7zm0 4h8v2H8v-2zm0 4h5v2H8v-2z"/></svg>
+        </div>
+        <div class="card-header-content">
+          <div class="card-header-title">New Service Request <span class="service-name">- SPFx Development</span></div>
+          <div class="card-header-subtitle">Request a pre-sales consultation for DW services</div>
+        </div>
+      </div>
+      <div class="progress-container">
+        <div class="progress-steps">
+          <div class="progress-step"><div class="step-number completed">&#10003;</div><span class="step-label">Service</span></div>
+          <div class="progress-step"><div class="step-number completed">&#10003;</div><span class="step-label">Client</span></div>
+          <div class="progress-step"><div class="step-number active">3</div><span class="step-label">Discovery</span></div>
+          <div class="progress-step"><div class="step-number pending">4</div><span class="step-label">Deal Info</span></div>
+          <div class="progress-step"><div class="step-number pending">5</div><span class="step-label">Schedule</span></div>
+          <div class="progress-step"><div class="step-number pending">6</div><span class="step-label">Review</span></div>
+        </div>
+        <div class="progress-bar"><div class="progress-bar-fill" style="width:33%"></div></div>
+      </div>
+
+      <!-- Section progress within step -->
+      <div class="v5-progress-row">
+        <span class="v5-progress-label">Discovery progress:</span>
+        <div class="v5-progress-track">
+          <div class="v5-progress-fill" style="width: 33%"></div>
+        </div>
+        <span class="v5-progress-text">1 of 3 sections</span>
+      </div>
+
+      <div class="card-body">
+        <div class="v5-body">
+          <!-- Section 1: Project Scope (open, in-progress) -->
+          <div class="v5-accordion open" onclick="toggleV5(this)">
+            <div class="v5-accordion-header">
+              <div class="v5-icon">&#128196;</div>
+              <div class="v5-title">
+                <h4>Project Scope</h4>
+                <p>Define the type and scope of the SPFx solution</p>
+              </div>
+              <span class="v5-status v5-status-partial">1 of 3 answered</span>
+              <span class="v5-chevron">&#9660;</span>
+            </div>
+            <div class="v5-accordion-body">
+              <div class="form-group">
+                <label>What type of SPFx solution do you need? <span class="required">*</span></label>
+                <div class="checkbox-group">
+                  <label class="checkbox-item"><input type="checkbox" checked><div><div class="option-label">Web Part (Intranet component)</div></div></label>
+                  <label class="checkbox-item"><input type="checkbox"><div><div class="option-label">Application Customizer (Header/Footer)</div></div></label>
+                  <label class="checkbox-item"><input type="checkbox"><div><div class="option-label">Command Set (List/Library toolbar)</div></div></label>
+                  <label class="checkbox-item"><input type="checkbox"><div><div class="option-label">Field Customizer (Column formatting)</div></div></label>
+                  <label class="checkbox-item"><input type="checkbox"><div><div class="option-label">Adaptive Card Extension (Viva Connections)</div></div></label>
+                  <label class="checkbox-item"><input type="checkbox"><div><div class="option-label">Teams Tab/Personal App</div></div></label>
+                </div>
+              </div>
+              <div class="form-group">
+                <label>Where will this solution be deployed? <span class="required">*</span></label>
+                <div class="checkbox-group">
+                  <label class="checkbox-item"><input type="checkbox"><div><div class="option-label">SharePoint pages</div></div></label>
+                  <label class="checkbox-item"><input type="checkbox"><div><div class="option-label">Microsoft Teams</div></div></label>
+                  <label class="checkbox-item"><input type="checkbox"><div><div class="option-label">Viva Connections dashboard</div></div></label>
+                  <label class="checkbox-item"><input type="checkbox"><div><div class="option-label">Outlook (Add-in)</div></div></label>
+                </div>
+              </div>
+              <div class="form-group">
+                <label>What is the deployment scope? <span class="required">*</span></label>
+                <div class="radio-group">
+                  <label class="radio-item"><input type="radio" name="v5scope"> Single site collection</label>
+                  <label class="radio-item"><input type="radio" name="v5scope"> Tenant-wide (App Catalog)</label>
+                  <label class="radio-item"><input type="radio" name="v5scope"> Both</label>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section 2: Functional Requirements (closed, not started) -->
+          <div class="v5-accordion" onclick="toggleV5(this)">
+            <div class="v5-accordion-header">
+              <div class="v5-icon">&#9881;</div>
+              <div class="v5-title">
+                <h4>Functional Requirements</h4>
+                <p>Specify capabilities, data sources, and features</p>
+              </div>
+              <span class="v5-status v5-status-empty">Not started</span>
+              <span class="v5-chevron">&#9660;</span>
+            </div>
+            <div class="v5-accordion-body">
+              <div class="form-group">
+                <label>What data sources will the solution use? <span class="required">*</span></label>
+                <div class="checkbox-group">
+                  <label class="checkbox-item"><input type="checkbox"><div><div class="option-label">SharePoint Lists</div></div></label>
+                  <label class="checkbox-item"><input type="checkbox"><div><div class="option-label">Microsoft Graph API</div></div></label>
+                  <label class="checkbox-item"><input type="checkbox"><div><div class="option-label">External APIs</div></div></label>
+                  <label class="checkbox-item"><input type="checkbox"><div><div class="option-label">Azure services</div></div></label>
+                </div>
+              </div>
+              <div class="form-group">
+                <label>What features are needed?</label>
+                <div class="checkbox-group">
+                  <label class="checkbox-item"><input type="checkbox"><div><div class="option-label">CRUD operations</div></div></label>
+                  <label class="checkbox-item"><input type="checkbox"><div><div class="option-label">Search &amp; filtering</div></div></label>
+                  <label class="checkbox-item"><input type="checkbox"><div><div class="option-label">File upload</div></div></label>
+                  <label class="checkbox-item"><input type="checkbox"><div><div class="option-label">Role-based access</div></div></label>
+                </div>
+              </div>
+              <div class="form-group">
+                <label>Is this replacing an existing solution? <span class="required">*</span></label>
+                <div class="radio-group">
+                  <label class="radio-item"><input type="radio" name="v5exist"> No, new solution</label>
+                  <label class="radio-item"><input type="radio" name="v5exist"> Yes, replacing classic SP</label>
+                  <label class="radio-item"><input type="radio" name="v5exist"> Extending existing SPFx</label>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section 3: Technical Environment (closed, not started) -->
+          <div class="v5-accordion" onclick="toggleV5(this)">
+            <div class="v5-accordion-header">
+              <div class="v5-icon">&#128187;</div>
+              <div class="v5-title">
+                <h4>Technical Environment</h4>
+                <p>Current SharePoint and M365 infrastructure details</p>
+              </div>
+              <span class="v5-status v5-status-empty">Not started</span>
+              <span class="v5-chevron">&#9660;</span>
+            </div>
+            <div class="v5-accordion-body">
+              <div class="form-group">
+                <label>Do you have an App Catalog configured? <span class="required">*</span></label>
+                <div class="radio-group">
+                  <label class="radio-item"><input type="radio" name="v5cat"> Yes</label>
+                  <label class="radio-item"><input type="radio" name="v5cat"> No</label>
+                  <label class="radio-item"><input type="radio" name="v5cat"> Not sure</label>
+                </div>
+              </div>
+              <div class="form-group">
+                <label>Is Office 365 CDN enabled? <span class="required">*</span></label>
+                <div class="radio-group">
+                  <label class="radio-item"><input type="radio" name="v5cdn"> Yes</label>
+                  <label class="radio-item"><input type="radio" name="v5cdn"> No</label>
+                  <label class="radio-item"><input type="radio" name="v5cdn"> Not sure</label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card-footer">
+        <button class="btn btn-secondary">&larr; Back</button>
+        <button class="btn btn-primary">Next &rarr;</button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ====================================================================
+       VARIATION 6: UNDERLINE TABS + ACCORDION QUESTION GROUPS (HYBRID)
+       ==================================================================== -->
+  <div class="variation-section" id="var-6">
+    <div class="variation-label">Variation 6 (Hybrid)</div>
+    <div class="variation-title">Underline Tabs + Section Accordions + Question Accordions</div>
+    <div class="variation-desc">
+      Three levels of organization: V1 underline <strong>tabs</strong> for section navigation,
+      V5 <strong>section accordions</strong> for grouping related questions, and
+      <strong>question-level mini-accordions</strong> so each Q&amp;A can be individually collapsed.
+      Users see the question labels at a glance and expand only the one they're working on.
+    </div>
+
+    <!-- ===== EXAMPLE 1: Discovery Step (SPFx) ===== -->
+    <div class="form-card">
+      <div class="card-header">
+        <div class="card-header-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M6 2h12a2 2 0 012 2v16a2 2 0 01-2 2H6a2 2 0 01-2-2V4a2 2 0 012-2zm0 2v16h12V4H6zm2 3h8v2H8V7zm0 4h8v2H8v-2zm0 4h5v2H8v-2z"/></svg>
+        </div>
+        <div class="card-header-content">
+          <div class="card-header-title">New Service Request <span class="service-name">- SPFx Development</span></div>
+          <div class="card-header-subtitle">Request a pre-sales consultation for DW services</div>
+        </div>
+      </div>
+      <div class="progress-container">
+        <div class="progress-steps">
+          <div class="progress-step"><div class="step-number completed">&#10003;</div><span class="step-label">Service</span></div>
+          <div class="progress-step"><div class="step-number completed">&#10003;</div><span class="step-label">Client</span></div>
+          <div class="progress-step"><div class="step-number active">3</div><span class="step-label">Discovery</span></div>
+          <div class="progress-step"><div class="step-number pending">4</div><span class="step-label">Deal Info</span></div>
+          <div class="progress-step"><div class="step-number pending">5</div><span class="step-label">Schedule</span></div>
+          <div class="progress-step"><div class="step-number pending">6</div><span class="step-label">Review</span></div>
+        </div>
+        <div class="progress-bar"><div class="progress-bar-fill" style="width:33%"></div></div>
+      </div>
+      <div class="card-body">
+        <!-- V1-style underline tabs for sections -->
+        <div class="v6-tabs" id="v6tabs">
+          <div class="v6-tab active" onclick="switchV6('scope6')">Project Scope <span class="v6-tab-count">3</span></div>
+          <div class="v6-tab" onclick="switchV6('func6')">Functional Requirements <span class="v6-tab-count">3</span></div>
+          <div class="v6-tab" onclick="switchV6('tech6')">Technical Environment <span class="v6-tab-count">2</span></div>
+        </div>
+
+        <!-- ===== TAB 1: Project Scope ===== -->
+        <div class="v6-panel active" id="v6-scope6">
+
+          <!-- Section Accordion: Solution Type -->
+          <div class="v6-accordion open" onclick="toggleV6(this)">
+            <div class="v6-acc-header">
+              <div class="v6-acc-icon">&#128204;</div>
+              <div class="v6-acc-info">
+                <h4>Solution Type &amp; Deployment</h4>
+                <p>Define what you need and where it will run</p>
+              </div>
+              <span class="v6-acc-status v6-acc-status-partial">1 of 3 answered</span>
+              <span class="v6-acc-chevron">&#9660;</span>
+            </div>
+            <div class="v6-acc-body">
+
+              <!-- Question 1 (answered - collapsed to show summary) -->
+              <div class="v6-question answered" onclick="toggleV6Q(this)">
+                <div class="v6-q-header">
+                  <span class="v6-q-number">1</span>
+                  <span class="v6-q-text">What type of SPFx solution do you need? <span class="required">*</span></span>
+                  <span class="v6-q-badge v6-q-badge-answered">&#10003; Answered</span>
+                  <span class="v6-q-chevron">&#9660;</span>
+                </div>
+                <div class="v6-q-body">
+                  <div class="checkbox-group">
+                    <label class="checkbox-item"><input type="checkbox" checked><div><div class="option-label">Web Part (Intranet component)</div></div></label>
+                    <label class="checkbox-item"><input type="checkbox"><div><div class="option-label">Application Customizer (Header/Footer)</div></div></label>
+                    <label class="checkbox-item"><input type="checkbox"><div><div class="option-label">Command Set (List/Library toolbar)</div></div></label>
+                    <label class="checkbox-item"><input type="checkbox"><div><div class="option-label">Field Customizer (Column formatting)</div></div></label>
+                    <label class="checkbox-item"><input type="checkbox"><div><div class="option-label">Adaptive Card Extension (Viva Connections)</div></div></label>
+                    <label class="checkbox-item"><input type="checkbox"><div><div class="option-label">Teams Tab/Personal App</div></div></label>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Question 2 (open - currently working on) -->
+              <div class="v6-question open" onclick="toggleV6Q(this)">
+                <div class="v6-q-header">
+                  <span class="v6-q-number">2</span>
+                  <span class="v6-q-text">Where will this solution be deployed? <span class="required">*</span></span>
+                  <span class="v6-q-badge v6-q-badge-required">Required</span>
+                  <span class="v6-q-chevron">&#9660;</span>
+                </div>
+                <div class="v6-q-body">
+                  <div class="checkbox-group">
+                    <label class="checkbox-item"><input type="checkbox"><div><div class="option-label">SharePoint pages</div></div></label>
+                    <label class="checkbox-item"><input type="checkbox"><div><div class="option-label">Microsoft Teams</div></div></label>
+                    <label class="checkbox-item"><input type="checkbox"><div><div class="option-label">Viva Connections dashboard</div></div></label>
+                    <label class="checkbox-item"><input type="checkbox"><div><div class="option-label">Outlook (Add-in)</div></div></label>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Question 3 (not started - collapsed) -->
+              <div class="v6-question" onclick="toggleV6Q(this)">
+                <div class="v6-q-header">
+                  <span class="v6-q-number">3</span>
+                  <span class="v6-q-text">What is the deployment scope? <span class="required">*</span></span>
+                  <span class="v6-q-badge v6-q-badge-required">Required</span>
+                  <span class="v6-q-chevron">&#9660;</span>
+                </div>
+                <div class="v6-q-body">
+                  <div class="radio-group">
+                    <label class="radio-item"><input type="radio" name="v6scope"> Single site collection</label>
+                    <label class="radio-item"><input type="radio" name="v6scope"> Tenant-wide (App Catalog)</label>
+                    <label class="radio-item"><input type="radio" name="v6scope"> Both - start with site, then tenant</label>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+        <!-- ===== TAB 2: Functional Requirements ===== -->
+        <div class="v6-panel" id="v6-func6">
+
+          <!-- Section Accordion: Data Sources -->
+          <div class="v6-accordion open" onclick="toggleV6(this)">
+            <div class="v6-acc-header">
+              <div class="v6-acc-icon">&#128451;</div>
+              <div class="v6-acc-info">
+                <h4>Data Sources</h4>
+                <p>What systems will the solution connect to?</p>
+              </div>
+              <span class="v6-acc-status v6-acc-status-empty">Not started</span>
+              <span class="v6-acc-chevron">&#9660;</span>
+            </div>
+            <div class="v6-acc-body">
+
+              <div class="v6-question open" onclick="toggleV6Q(this)">
+                <div class="v6-q-header">
+                  <span class="v6-q-number">1</span>
+                  <span class="v6-q-text">What data sources will the solution use? <span class="required">*</span></span>
+                  <span class="v6-q-badge v6-q-badge-required">Required</span>
+                  <span class="v6-q-chevron">&#9660;</span>
+                </div>
+                <div class="v6-q-body">
+                  <div class="checkbox-group">
+                    <label class="checkbox-item"><input type="checkbox"><div><div class="option-label">SharePoint Lists</div></div></label>
+                    <label class="checkbox-item"><input type="checkbox"><div><div class="option-label">SharePoint Document Libraries</div></div></label>
+                    <label class="checkbox-item"><input type="checkbox"><div><div class="option-label">Microsoft Graph API</div></div></label>
+                    <label class="checkbox-item"><input type="checkbox"><div><div class="option-label">External APIs</div></div></label>
+                    <label class="checkbox-item"><input type="checkbox"><div><div class="option-label">Azure services (Functions, SQL, etc.)</div></div></label>
+                    <label class="checkbox-item"><input type="checkbox"><div><div class="option-label">Dataverse</div></div></label>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Section Accordion: Features & Capabilities -->
+          <div class="v6-accordion" onclick="toggleV6(this)">
+            <div class="v6-acc-header">
+              <div class="v6-acc-icon">&#9881;</div>
+              <div class="v6-acc-info">
+                <h4>Features &amp; Capabilities</h4>
+                <p>Required features and migration context</p>
+              </div>
+              <span class="v6-acc-status v6-acc-status-empty">Not started</span>
+              <span class="v6-acc-chevron">&#9660;</span>
+            </div>
+            <div class="v6-acc-body">
+
+              <div class="v6-question" onclick="toggleV6Q(this)">
+                <div class="v6-q-header">
+                  <span class="v6-q-number">1</span>
+                  <span class="v6-q-text">What features are needed?</span>
+                  <span class="v6-q-badge v6-q-badge-optional">Optional</span>
+                  <span class="v6-q-chevron">&#9660;</span>
+                </div>
+                <div class="v6-q-body">
+                  <div class="checkbox-group">
+                    <label class="checkbox-item"><input type="checkbox"><div><div class="option-label">Create/Read/Update/Delete data</div></div></label>
+                    <label class="checkbox-item"><input type="checkbox"><div><div class="option-label">Search &amp; filtering</div></div></label>
+                    <label class="checkbox-item"><input type="checkbox"><div><div class="option-label">File upload</div></div></label>
+                    <label class="checkbox-item"><input type="checkbox"><div><div class="option-label">Export to Excel/PDF</div></div></label>
+                    <label class="checkbox-item"><input type="checkbox"><div><div class="option-label">Role-based access</div></div></label>
+                    <label class="checkbox-item"><input type="checkbox"><div><div class="option-label">Notifications/Alerts</div></div></label>
+                    <label class="checkbox-item"><input type="checkbox"><div><div class="option-label">Offline support</div></div></label>
+                    <label class="checkbox-item"><input type="checkbox"><div><div class="option-label">Multi-language support</div></div></label>
+                  </div>
+                </div>
+              </div>
+
+              <div class="v6-question" onclick="toggleV6Q(this)">
+                <div class="v6-q-header">
+                  <span class="v6-q-number">2</span>
+                  <span class="v6-q-text">Is this replacing an existing solution? <span class="required">*</span></span>
+                  <span class="v6-q-badge v6-q-badge-required">Required</span>
+                  <span class="v6-q-chevron">&#9660;</span>
+                </div>
+                <div class="v6-q-body">
+                  <div class="radio-group">
+                    <label class="radio-item"><input type="radio" name="v6existing"> No, this is a new solution</label>
+                    <label class="radio-item"><input type="radio" name="v6existing"> Yes, replacing classic SharePoint solution</label>
+                    <label class="radio-item"><input type="radio" name="v6existing"> Yes, replacing custom development</label>
+                    <label class="radio-item"><input type="radio" name="v6existing"> Extending existing SPFx solution</label>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+        <!-- ===== TAB 3: Technical Environment ===== -->
+        <div class="v6-panel" id="v6-tech6">
+
+          <!-- Section Accordion: Infrastructure -->
+          <div class="v6-accordion open" onclick="toggleV6(this)">
+            <div class="v6-acc-header">
+              <div class="v6-acc-icon">&#128187;</div>
+              <div class="v6-acc-info">
+                <h4>SharePoint Infrastructure</h4>
+                <p>Current tenant configuration and readiness</p>
+              </div>
+              <span class="v6-acc-status v6-acc-status-empty">Not started</span>
+              <span class="v6-acc-chevron">&#9660;</span>
+            </div>
+            <div class="v6-acc-body">
+
+              <div class="v6-question open" onclick="toggleV6Q(this)">
+                <div class="v6-q-header">
+                  <span class="v6-q-number">1</span>
+                  <span class="v6-q-text">Do you have an App Catalog configured? <span class="required">*</span></span>
+                  <span class="v6-q-badge v6-q-badge-required">Required</span>
+                  <span class="v6-q-chevron">&#9660;</span>
+                </div>
+                <div class="v6-q-body">
+                  <div class="radio-group">
+                    <label class="radio-item"><input type="radio" name="v6catalog"> Yes</label>
+                    <label class="radio-item"><input type="radio" name="v6catalog"> No</label>
+                    <label class="radio-item"><input type="radio" name="v6catalog"> Not sure</label>
+                  </div>
+                </div>
+              </div>
+
+              <div class="v6-question" onclick="toggleV6Q(this)">
+                <div class="v6-q-header">
+                  <span class="v6-q-number">2</span>
+                  <span class="v6-q-text">Is Office 365 CDN enabled? <span class="required">*</span></span>
+                  <span class="v6-q-badge v6-q-badge-required">Required</span>
+                  <span class="v6-q-chevron">&#9660;</span>
+                </div>
+                <div class="v6-q-body">
+                  <div class="radio-group">
+                    <label class="radio-item"><input type="radio" name="v6cdn"> Yes</label>
+                    <label class="radio-item"><input type="radio" name="v6cdn"> No</label>
+                    <label class="radio-item"><input type="radio" name="v6cdn"> Not sure</label>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card-footer">
+        <button class="btn btn-secondary">&larr; Back</button>
+        <button class="btn btn-primary">Next &rarr;</button>
+      </div>
+    </div>
+
+    <!-- ===== EXAMPLE 2: Client Step with Underline Tabs + Accordions ===== -->
+    <div style="margin-top: 32px;">
+      <h3 style="color: #1a5a8a; margin-bottom: 12px; font-size: 16px;">Same pattern applied to Step 2: Client Information</h3>
+    </div>
+
+    <div class="form-card">
+      <div class="card-header">
+        <div class="card-header-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M6 2h12a2 2 0 012 2v16a2 2 0 01-2 2H6a2 2 0 01-2-2V4a2 2 0 012-2zm0 2v16h12V4H6zm2 3h8v2H8V7zm0 4h8v2H8v-2zm0 4h5v2H8v-2z"/></svg>
+        </div>
+        <div class="card-header-content">
+          <div class="card-header-title">New Service Request <span class="service-name">- Power Platform</span></div>
+          <div class="card-header-subtitle">Request a pre-sales consultation for DW services</div>
+        </div>
+      </div>
+      <div class="progress-container">
+        <div class="progress-steps">
+          <div class="progress-step"><div class="step-number completed">&#10003;</div><span class="step-label">Service</span></div>
+          <div class="progress-step"><div class="step-number active">2</div><span class="step-label">Client</span></div>
+          <div class="progress-step"><div class="step-number pending">3</div><span class="step-label">Discovery</span></div>
+          <div class="progress-step"><div class="step-number pending">4</div><span class="step-label">Deal Info</span></div>
+          <div class="progress-step"><div class="step-number pending">5</div><span class="step-label">Schedule</span></div>
+          <div class="progress-step"><div class="step-number pending">6</div><span class="step-label">Review</span></div>
+        </div>
+        <div class="progress-bar"><div class="progress-bar-fill" style="width:16%"></div></div>
+      </div>
+      <div class="card-body">
+        <div class="v6-tabs" id="v6ctabs">
+          <div class="v6-tab active" onclick="switchV6c('req6')">Request Context</div>
+          <div class="v6-tab" onclick="switchV6c('company6')">Company Details</div>
+          <div class="v6-tab" onclick="switchV6c('contact6')">Primary Contact</div>
+        </div>
+
+        <!-- Tab: Request Context -->
+        <div class="v6-panel active" id="v6-req6">
+          <div class="v6-accordion open" onclick="toggleV6(this)">
+            <div class="v6-acc-header">
+              <div class="v6-acc-icon">&#128221;</div>
+              <div class="v6-acc-info">
+                <h4>Request Details</h4>
+                <p>Title and description for this service request</p>
+              </div>
+              <span class="v6-acc-status v6-acc-status-empty">Not started</span>
+              <span class="v6-acc-chevron">&#9660;</span>
+            </div>
+            <div class="v6-acc-body">
+              <div class="form-group">
+                <label>Request Title <span class="required">*</span></label>
+                <input type="text" placeholder="Brief title (e.g., 'Power Platform Assessment for Contoso')">
+              </div>
+              <div class="form-group">
+                <label>Request Details</label>
+                <textarea placeholder="Describe the context and specific needs for this service request..." rows="4"></textarea>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab: Company Details -->
+        <div class="v6-panel" id="v6-company6">
+          <div class="v6-accordion open" onclick="toggleV6(this)">
+            <div class="v6-acc-header">
+              <div class="v6-acc-icon">&#127970;</div>
+              <div class="v6-acc-info">
+                <h4>Company Information</h4>
+                <p>Client organization details</p>
+              </div>
+              <span class="v6-acc-status v6-acc-status-empty">Not started</span>
+              <span class="v6-acc-chevron">&#9660;</span>
+            </div>
+            <div class="v6-acc-body">
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Client Company Name <span class="required">*</span></label>
+                  <input type="text" placeholder="Enter company name">
+                </div>
+                <div class="form-group">
+                  <label>Industry</label>
+                  <select>
+                    <option value="">Select industry</option>
+                    <option>Technology</option>
+                    <option>Finance</option>
+                    <option>Healthcare</option>
+                    <option>Retail</option>
+                    <option>Manufacturing</option>
+                    <option>Government</option>
+                    <option>Education</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-group">
+                <label>Company Size</label>
+                <select>
+                  <option value="">Select company size</option>
+                  <option>SMB (&lt;50 employees)</option>
+                  <option>Medium (50-250)</option>
+                  <option>Large (250-1000)</option>
+                  <option>Enterprise (1000+)</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab: Primary Contact -->
+        <div class="v6-panel" id="v6-contact6">
+          <div class="v6-accordion open" onclick="toggleV6(this)">
+            <div class="v6-acc-header">
+              <div class="v6-acc-icon">&#128100;</div>
+              <div class="v6-acc-info">
+                <h4>Contact Person</h4>
+                <p>Primary point of contact at the client</p>
+              </div>
+              <span class="v6-acc-status v6-acc-status-empty">Not started</span>
+              <span class="v6-acc-chevron">&#9660;</span>
+            </div>
+            <div class="v6-acc-body">
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Contact Name <span class="required">*</span></label>
+                  <input type="text" placeholder="Enter contact name">
+                </div>
+                <div class="form-group">
+                  <label>Contact Email <span class="required">*</span></label>
+                  <input type="email" placeholder="Enter email address">
+                </div>
+              </div>
+              <div class="form-group">
+                <label>Contact Phone</label>
+                <input type="tel" placeholder="Enter phone number">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card-footer">
+        <button class="btn btn-secondary">&larr; Back</button>
+        <button class="btn btn-primary">Next &rarr;</button>
+      </div>
+    </div>
+
+    <!-- ===== EXAMPLE 3: Deal Info Step with Accordions only (no tabs) ===== -->
+    <div style="margin-top: 32px;">
+      <h3 style="color: #1a5a8a; margin-bottom: 12px; font-size: 16px;">Step 4: Deal Info - Accordions only (no tabs needed, only 2 groups)</h3>
+    </div>
+
+    <div class="form-card">
+      <div class="card-header">
+        <div class="card-header-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm0-4h-2V7h2v8z"/></svg>
+        </div>
+        <div class="card-header-content">
+          <div class="card-header-title">New Service Request <span class="service-name">- SharePoint Migration</span></div>
+          <div class="card-header-subtitle">Request a pre-sales consultation for DW services</div>
+        </div>
+      </div>
+      <div class="progress-container">
+        <div class="progress-steps">
+          <div class="progress-step"><div class="step-number completed">&#10003;</div><span class="step-label">Service</span></div>
+          <div class="progress-step"><div class="step-number completed">&#10003;</div><span class="step-label">Client</span></div>
+          <div class="progress-step"><div class="step-number completed">&#10003;</div><span class="step-label">Discovery</span></div>
+          <div class="progress-step"><div class="step-number active">4</div><span class="step-label">Deal Info</span></div>
+          <div class="progress-step"><div class="step-number pending">5</div><span class="step-label">Schedule</span></div>
+          <div class="progress-step"><div class="step-number pending">6</div><span class="step-label">Review</span></div>
+        </div>
+        <div class="progress-bar"><div class="progress-bar-fill" style="width:50%"></div></div>
+      </div>
+      <div class="card-body" style="padding: 24px;">
+        <!-- No tabs - just section accordions with question accordions inside -->
+        <div class="v6-accordion open" onclick="toggleV6(this)">
+          <div class="v6-acc-header">
+            <div class="v6-acc-icon">&#128176;</div>
+            <div class="v6-acc-info">
+              <h4>Deal Qualification</h4>
+              <p>Interest level, deal value, and probability</p>
+            </div>
+            <span class="v6-acc-status v6-acc-status-partial">1 of 6 answered</span>
+            <span class="v6-acc-chevron">&#9660;</span>
+          </div>
+          <div class="v6-acc-body">
+
+            <div class="v6-question answered" onclick="toggleV6Q(this)">
+              <div class="v6-q-header">
+                <span class="v6-q-number">1</span>
+                <span class="v6-q-text">Interest Level <span class="required">*</span></span>
+                <span class="v6-q-badge v6-q-badge-answered">&#10003; Warm</span>
+                <span class="v6-q-chevron">&#9660;</span>
+              </div>
+              <div class="v6-q-body">
+                <select><option>Hot</option><option selected>Warm</option><option>Cold</option></select>
+              </div>
+            </div>
+
+            <div class="v6-question open" onclick="toggleV6Q(this)">
+              <div class="v6-q-header">
+                <span class="v6-q-number">2</span>
+                <span class="v6-q-text">Estimated Deal Value (ZAR)</span>
+                <span class="v6-q-badge v6-q-badge-optional">Optional</span>
+                <span class="v6-q-chevron">&#9660;</span>
+              </div>
+              <div class="v6-q-body">
+                <input type="number" placeholder="Enter estimated value">
+              </div>
+            </div>
+
+            <div class="v6-question" onclick="toggleV6Q(this)">
+              <div class="v6-q-header">
+                <span class="v6-q-number">3</span>
+                <span class="v6-q-text">Win Probability (%)</span>
+                <span class="v6-q-badge v6-q-badge-optional">Optional</span>
+                <span class="v6-q-chevron">&#9660;</span>
+              </div>
+              <div class="v6-q-body">
+                <input type="number" value="50" min="0" max="100">
+              </div>
+            </div>
+
+            <div class="v6-question" onclick="toggleV6Q(this)">
+              <div class="v6-q-header">
+                <span class="v6-q-number">4</span>
+                <span class="v6-q-text">Expected Close Date</span>
+                <span class="v6-q-badge v6-q-badge-optional">Optional</span>
+                <span class="v6-q-chevron">&#9660;</span>
+              </div>
+              <div class="v6-q-body">
+                <input type="date">
+              </div>
+            </div>
+
+            <div class="v6-question" onclick="toggleV6Q(this)">
+              <div class="v6-q-header">
+                <span class="v6-q-number">5</span>
+                <span class="v6-q-text">Client's Budget</span>
+                <span class="v6-q-badge v6-q-badge-optional">Optional</span>
+                <span class="v6-q-chevron">&#9660;</span>
+              </div>
+              <div class="v6-q-body">
+                <input type="text" placeholder="e.g., R100,000 - R150,000">
+              </div>
+            </div>
+
+            <div class="v6-question" onclick="toggleV6Q(this)">
+              <div class="v6-q-header">
+                <span class="v6-q-number">6</span>
+                <span class="v6-q-text">Client's Timeline</span>
+                <span class="v6-q-badge v6-q-badge-optional">Optional</span>
+                <span class="v6-q-chevron">&#9660;</span>
+              </div>
+              <div class="v6-q-body">
+                <input type="text" placeholder="e.g., Q2 2026">
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <div class="v6-accordion" onclick="toggleV6(this)">
+          <div class="v6-acc-header">
+            <div class="v6-acc-icon">&#128221;</div>
+            <div class="v6-acc-info">
+              <h4>Additional Context</h4>
+              <p>Requirements summary and engagement history</p>
+            </div>
+            <span class="v6-acc-status v6-acc-status-empty">Not started</span>
+            <span class="v6-acc-chevron">&#9660;</span>
+          </div>
+          <div class="v6-acc-body">
+
+            <div class="v6-question" onclick="toggleV6Q(this)">
+              <div class="v6-q-header">
+                <span class="v6-q-number">1</span>
+                <span class="v6-q-text">Requirements Summary</span>
+                <span class="v6-q-badge v6-q-badge-optional">Optional</span>
+                <span class="v6-q-chevron">&#9660;</span>
+              </div>
+              <div class="v6-q-body">
+                <textarea placeholder="Describe the client's key requirements, pain points, and objectives..." rows="4"></textarea>
+              </div>
+            </div>
+
+            <div class="v6-question" onclick="toggleV6Q(this)">
+              <div class="v6-q-header">
+                <span class="v6-q-number">2</span>
+                <span class="v6-q-text">Previous Engagement History</span>
+                <span class="v6-q-badge v6-q-badge-optional">Optional</span>
+                <span class="v6-q-chevron">&#9660;</span>
+              </div>
+              <div class="v6-q-body">
+                <textarea placeholder="Any previous engagements or interactions with this client..." rows="3"></textarea>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+      <div class="card-footer">
+        <button class="btn btn-secondary">&larr; Back</button>
+        <button class="btn btn-primary">Next &rarr;</button>
+      </div>
+    </div>
+
+    <div class="design-note" style="margin-top: 24px;">
+      <strong>V6 Three-Level Hierarchy:</strong><br><br>
+      <strong>Level 1 - Underline Tabs</strong>: Section navigation (e.g., Project Scope | Functional Requirements | Technical Environment)<br>
+      <strong>Level 2 - Section Accordions</strong>: Group related questions with icon, description, and completion status badge<br>
+      <strong>Level 3 - Question Accordions</strong>: Each individual Q&amp;A is collapsible. Shows question text, required/optional/answered badge. Expand to see the answer controls.<br><br>
+      <strong>States shown above:</strong> Q1 in Project Scope is "Answered" (green badge, collapsed by default). Q2 is "open" (user is working on it). Q3 is collapsed with "Required" badge. In Deal Info, "Interest Level" shows the answered value right in the badge ("Warm").<br><br>
+      <strong>Steps with 2+ sections</strong> (Client, Discovery): All 3 levels.<br>
+      <strong>Steps with 1-2 groups</strong> (Deal Info, Schedule): Levels 2+3 only (no tabs).<br>
+      <strong>Step 1 (Service)</strong>: Card grid (no change). <strong>Step 6 (Review)</strong>: Section accordions (all expanded).
+    </div>
+  </div>
+
+
+  <!-- ====================================================================
+       COMPARISON TABLE
+       ==================================================================== -->
+  <div class="variation-section" id="var-0">
+    <div class="variation-label">Comparison</div>
+    <div class="variation-title">Side-by-Side Comparison</div>
+    <div class="variation-desc">
+      A summary of all 5 variations with pros, cons, and recommended use cases.
+    </div>
+
+    <table class="comparison-table">
+      <thead>
+        <tr>
+          <th style="width:14%">Variation</th>
+          <th style="width:20%">Style</th>
+          <th style="width:22%">Pros</th>
+          <th style="width:22%">Cons</th>
+          <th style="width:22%">Best For</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>V1</strong><br>Underline Tabs</td>
+          <td>Classic horizontal tabs with underline active indicator</td>
+          <td class="pro">+ Familiar pattern (Fluent UI native)<br>+ Clean, minimal<br>+ Easy to implement with TabList</td>
+          <td class="con">- Tab labels can crowd on narrow screens<br>- All questions visible in tab panel (may still scroll)</td>
+          <td>Steps with 2-4 evenly-sized sections. Default choice for Discovery step.</td>
+        </tr>
+        <tr>
+          <td><strong>V2</strong><br>Pill Tabs + Accordions</td>
+          <td>Rounded pill buttons for sections, accordion sub-groups within</td>
+          <td class="pro">+ Two levels of organization<br>+ Reduces visual overwhelm<br>+ Question counts in badges</td>
+          <td class="con">- More complex to implement<br>- Users must click twice (pill + accordion)<br>- May feel over-engineered for small sections</td>
+          <td>Sections with 5+ questions that can be sub-grouped logically.</td>
+        </tr>
+        <tr>
+          <td><strong>V3</strong><br>Vertical Side Tabs</td>
+          <td>Left sidebar with icons and badges, right content panel</td>
+          <td class="pro">+ Always-visible navigation<br>+ Room for icons + question counts<br>+ Professional look</td>
+          <td class="con">- Takes horizontal space (~220px sidebar)<br>- Sidebar adds complexity on mobile<br>- Less standard for forms</td>
+          <td>Steps with 4+ sections. Settings-like UIs. Wide screens.</td>
+        </tr>
+        <tr>
+          <td><strong>V4</strong><br>Segmented + Cards</td>
+          <td>iOS-style segmented control, questions wrapped in individual cards</td>
+          <td class="pro">+ Very clean, survey-like feel<br>+ Each question stands out<br>+ Numbered progress</td>
+          <td class="con">- More vertical space per question<br>- Cards can feel repetitive<br>- Segmented control less familiar in web</td>
+          <td>Questionnaire-style discovery. Sections with varied question types.</td>
+        </tr>
+        <tr>
+          <td><strong>V5</strong><br>Full Accordion</td>
+          <td>No tabs. All sections are expandable panels with status badges</td>
+          <td class="pro">+ Guided interview feel<br>+ Completion tracking built-in<br>+ No hidden content behind tabs<br>+ Progressive disclosure</td>
+          <td class="con">- Only one section open at a time<br>- Switching sections requires scrolling<br>- Less discoverable than tabs</td>
+          <td>Linear/sequential discovery. When users should complete sections in order.</td>
+        </tr>
+        <tr style="background: #f0f7f9;">
+          <td><strong style="color: #1e6b7b;">V6</strong><br><strong style="color: #1e6b7b;">Hybrid</strong></td>
+          <td>3 levels: V1 underline tabs &rarr; V5 section accordions &rarr; question-level mini-accordions for each Q&amp;A</td>
+          <td class="pro">+ Best of all patterns<br>+ Tabs for section nav<br>+ Section accordions for grouping<br>+ Question accordions for focus<br>+ Completion badges at every level<br>+ Answered Qs collapse to one line<br>+ Scales to any question count</td>
+          <td class="con">- Most complex to build<br>- Three levels of nesting</td>
+          <td>Discovery step with many questions per section. The recommended approach for rich questionnaires.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div style="margin-top: 32px; padding: 24px; background: white; border-radius: 12px; box-shadow: 0 1.6px 3.6px rgba(0,0,0,.13);">
+      <h3 style="color: #1a365d; margin-bottom: 12px;">Recommendation</h3>
+      <p style="font-size: 14px; line-height: 1.6; color: #424242;">
+        <strong style="color: #1e6b7b;">V6 (Underline Tabs + Accordions)</strong> is the recommended approach.
+        It combines the familiar, clean section navigation of V1's underline tabs with V5's rich
+        accordion panels for question grouping. This gives users two levels of organization:
+        <strong>tabs</strong> to jump between sections quickly, and <strong>accordions</strong> to expand/collapse
+        question groups within each section, with completion status badges to track progress.
+      </p>
+      <p style="font-size: 14px; line-height: 1.6; color: #424242; margin-top: 12px;">
+        <strong>Strategy per step:</strong> Steps with 2+ sections (Client, Discovery) get underline tabs +
+        accordion groups. Steps with only 1-2 groups (Deal Info, Schedule) use accordions alone
+        without tabs. The pattern adapts naturally to each step's content volume.
+      </p>
+    </div>
+  </div>
+
+
+  <div style="height: 48px;"></div>
+
+  <script>
+    // ============ VARIATION NAVIGATION ============
+    function showVariation(n) {
+      document.querySelectorAll('.variation-section').forEach(s => s.classList.remove('active'));
+      document.querySelectorAll('.var-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById('var-' + n).classList.add('active');
+      event.target.classList.add('active');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // ============ V1: UNDERLINE TABS ============
+    function switchV1(id) {
+      document.querySelectorAll('#v1tabs .v1-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('[id^="v1-"]').forEach(p => p.classList.remove('active'));
+      event.target.classList.add('active');
+      document.getElementById('v1-' + id).classList.add('active');
+    }
+
+    // ============ V2: PILL TABS ============
+    function switchV2(id) {
+      document.querySelectorAll('#v2tabs .v2-pill').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('[id^="v2-"]').forEach(p => p.classList.remove('active'));
+      event.target.classList.add('active');
+      document.getElementById('v2-' + id).classList.add('active');
+    }
+    function toggleV2(el) {
+      if (event.target.closest('.v2-accordion-body')) return;
+      el.classList.toggle('open');
+    }
+
+    // ============ V3: VERTICAL SIDE TABS ============
+    function switchV3(id) {
+      document.querySelectorAll('.v3-side-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('[id^="v3-"]').forEach(p => p.classList.remove('active'));
+      event.target.closest('.v3-side-tab').classList.add('active');
+      document.getElementById('v3-' + id).classList.add('active');
+    }
+
+    // ============ V4: SEGMENTED CONTROL ============
+    function switchV4(id) {
+      document.querySelectorAll('#v4tabs .v4-seg-btn').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('[id^="v4-"]').forEach(p => p.classList.remove('active'));
+      event.target.classList.add('active');
+      document.getElementById('v4-' + id).classList.add('active');
+    }
+
+    // ============ V5: FULL ACCORDION ============
+    function toggleV5(el) {
+      if (event.target.closest('.v5-accordion-body')) return;
+      // Close all others, open clicked
+      const wasOpen = el.classList.contains('open');
+      document.querySelectorAll('.v5-accordion').forEach(a => a.classList.remove('open'));
+      if (!wasOpen) el.classList.add('open');
+    }
+
+    // ============ V6: UNDERLINE TABS + ACCORDIONS ============
+    function switchV6(id) {
+      document.querySelectorAll('#v6tabs .v6-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('#var-6 .form-card:first-of-type [id^="v6-"]').forEach(p => p.classList.remove('active'));
+      event.target.closest('.v6-tab').classList.add('active');
+      document.getElementById('v6-' + id).classList.add('active');
+    }
+    function switchV6c(id) {
+      document.querySelectorAll('#v6ctabs .v6-tab').forEach(t => t.classList.remove('active'));
+      // Only target panels that are siblings of v6ctabs
+      const card = document.getElementById('v6ctabs').closest('.form-card');
+      card.querySelectorAll('.v6-panel').forEach(p => p.classList.remove('active'));
+      event.target.closest('.v6-tab').classList.add('active');
+      document.getElementById('v6-' + id).classList.add('active');
+    }
+    function toggleV6(el) {
+      if (event.target.closest('.v6-acc-body')) return;
+      // Toggle individually (multiple can be open at once)
+      el.classList.toggle('open');
+    }
+    function toggleV6Q(el) {
+      // Don't toggle if clicking inside the answer body (inputs, checkboxes, etc.)
+      if (event.target.closest('.v6-q-body')) return;
+      // Toggle this question independently
+      el.classList.toggle('open');
+    }
+  </script>
+</body>
+</html>
