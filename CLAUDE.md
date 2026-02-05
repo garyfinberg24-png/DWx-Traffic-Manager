@@ -6,7 +6,7 @@
 
 **Project Origin**: Cloned from LP Booking App (v1.7.5) - a production Teams app for License Pulse demo scheduling.
 
-**Current Version**: February 2026 - Service CRUD Management + Spreadsheet Import complete
+**Current Version**: February 2026 - 13-Issue Process Remediation complete
 
 ## Critical Configuration Values
 
@@ -253,7 +253,7 @@ const STAGE_TRANSITIONS = {
 |--------|------|-------------|
 | Title | Text | Action summary |
 | Action | Choice | CREATE, UPDATE, DELETE, VIEW, APPROVE, REJECT, RESCHEDULE, LOGIN, LOGOUT |
-| EntityType | Text | Booking, TeamMember, Client, Checklist, User, AccountManager, ServiceRequest, Service |
+| EntityType | Text | Booking, TeamMember, Client, Checklist, User, AccountManager, ServiceRequest, Service, Specialist, ProductRequest |
 | EntityId | Text | ID of affected entity |
 | EntityName | Text | Human-readable entity name |
 | PerformedBy | Text | User display name |
@@ -319,22 +319,23 @@ DWx-Traffic-Manager/
 │   │   │   ├── GamificationTab.tsx       # Gamification dashboard
 │   │   │   └── index.ts
 │   │   ├── Admin/
-│   │   │   ├── AdminPage.tsx             # Admin tabbed container (9 tabs)
+│   │   │   ├── AdminPage.tsx             # Admin tabbed container (10 tabs)
 │   │   │   ├── TeamMemberList.tsx        # Team member CRUD
 │   │   │   ├── TeamMemberForm.tsx        # Team member form dialog
 │   │   │   ├── ClientList.tsx            # Client management
 │   │   │   ├── ClientForm.tsx            # Client form dialog
 │   │   │   ├── ImportClientsDialog.tsx   # XLSX client import
-│   │   │   ├── ServiceManagement.tsx     # Service CRUD list (NEW)
-│   │   │   ├── ServiceForm.tsx           # 4-tab service form dialog (NEW)
-│   │   │   ├── ImportServicesDialog.tsx  # XLSX service import (NEW)
+│   │   │   ├── ServiceManagement.tsx     # Service CRUD list
+│   │   │   ├── ServiceForm.tsx           # 4-tab service form dialog
+│   │   │   ├── ImportServicesDialog.tsx  # XLSX service import
+│   │   │   ├── SpecialistManagement.tsx  # Specialist CRUD list (NEW)
+│   │   │   ├── SpecialistForm.tsx        # Specialist form dialog (NEW)
 │   │   │   ├── AccountManagerManagement.tsx # AM CRUD with Entra ID
 │   │   │   ├── EntraUserPicker.tsx       # Entra ID user search
 │   │   │   ├── ManagerSettings.tsx       # Manager access control
 │   │   │   ├── GuestInvitations.tsx      # Guest user management
 │   │   │   ├── ChecklistManagement.tsx   # Checklist management
 │   │   │   ├── DocumentManagement.tsx    # Document management
-│   │   │   ├── SharePointProvisioning.tsx     # Legacy LP provisioning
 │   │   │   ├── DWxSharePointProvisioning.tsx  # DWx list provisioning (Graph API)
 │   │   │   └── index.ts
 │   │   ├── Gamification/
@@ -369,17 +370,16 @@ DWx-Traffic-Manager/
 │   │   ├── DWxNotificationService.ts     # DW-branded notifications
 │   │   ├── AuthService.ts                # MSAL authentication + Teams SSO
 │   │   ├── GraphService.ts               # Microsoft Graph API
-│   │   ├── AuditService.ts               # Change tracking (entities: Booking, TeamMember, Client, Checklist, User, AccountManager, ServiceRequest, Service)
+│   │   ├── AuditService.ts               # Change tracking (10 entity types)
+│   │   ├── ProductRequestService.ts      # Product request CRUD (NEW)
 │   │   ├── ManagerService.ts             # Manager access CRUD
 │   │   ├── AccountManagerService.ts      # AM CRUD operations
 │   │   ├── ReferenceDataService.ts       # Clients/team members
 │   │   ├── DashboardService.ts           # Dashboard metrics
-│   │   ├── BookingService.ts             # Legacy booking orchestration
 │   │   ├── NotificationService.ts        # Email notifications
 │   │   ├── DocumentService.ts            # Document library operations
 │   │   ├── GuestInvitationService.ts     # Guest user management
 │   │   ├── DWxSharePointProvisioningService.ts # DWx list provisioning (Graph API)
-│   │   ├── SharePointProvisioningService.ts    # Legacy LP provisioning
 │   │   ├── SharePointService.ts          # SharePoint REST API
 │   │   ├── EmailTemplates.ts             # Email template strings
 │   │   ├── PowerAutomateService.ts       # Power Automate with retry/circuit breaker
@@ -395,8 +395,9 @@ DWx-Traffic-Manager/
 │   │   └── index.ts
 │   ├── types/
 │   │   ├── ServiceRequest.ts             # Core DWx types (DWService, DWServiceInput, ServiceCategory, FunnelStage, etc.)
+│   │   ├── ProductRequest.ts             # Product request entity types (NEW)
 │   │   ├── Product.ts                    # Product catalog types (29 products)
-│   │   ├── ProductRequirements.ts        # Product request types
+│   │   ├── ProductRequirements.ts        # Product requirements form types
 │   │   ├── ServiceRequirements.ts        # Service requirements types
 │   │   ├── Commercial.ts                 # Commercial metrics types
 │   │   ├── Gamification.ts               # Gamification types
@@ -453,14 +454,15 @@ DWx-Traffic-Manager/
 | `/admin` | AdminPage | Managers only |
 | `/admin/account-managers` | AccountManagerManagement | Managers only |
 
-## Admin Panel Tabs (9 Tabs)
+## Admin Panel Tabs (10 Tabs)
 
 | Tab | Component | Description |
 |-----|-----------|-------------|
 | Team Members | TeamMemberList | Team member CRUD with roles |
 | Account Managers | AccountManagerManagement | AM CRUD with Entra ID picker |
-| Clients | ClientList | Client management with XLSX import |
-| **Services** | **ServiceManagement** | **Service CRUD with rich content editing + XLSX import (NEW)** |
+| Clients | ClientList | Client management with XLSX import + orphan protection |
+| Services | ServiceManagement | Service CRUD with rich content editing + XLSX import |
+| **Specialists** | **SpecialistManagement** | **Specialist CRUD with workload tracking (NEW)** |
 | Manager Access | ManagerSettings | Manager access control |
 | Guest Invitations | GuestInvitations | Guest user management |
 | Checklist | ChecklistManagement | Checklist management |
@@ -558,6 +560,24 @@ VITE_ENV=development
 - [ ] Test mode configuration for E2E testing - PENDING
 - [ ] Email notification templates (DW branding) - PENDING
 
+### Phase 6: 13-Issue Process Remediation - COMPLETE
+
+Deep dive review found 13 process/logic dead ends. All 12 actionable issues fixed (Issue #6 was already implemented).
+
+- [x] **#1 Product requests save to SharePoint** - Created `ProductRequestService.ts` + `ProductRequest.ts` types, wired `ProductRequestForm.tsx`
+- [x] **#2 Client LTV updates on Won deals** - Moved LTV update into `updateStage()` for Won transitions
+- [x] **#3 Calendar events cleaned up on Lost deals** - `handleStageTransitionActions` now deletes calendar events and clears `CalendarEventId`
+- [x] **#4 Specialist admin UI** - Created `SpecialistManagement.tsx` + `SpecialistForm.tsx`, added Specialists tab to AdminPage
+- [x] **#5 Specialist CRUD audit logging** - Added `auditService.logCreate/logUpdate` to `SpecialistService.ts`
+- [x] ~~#6 Stage transitions audit logging~~ - Already implemented (found at `ServiceRequestService.ts:177-183`)
+- [x] **#7 Service toggle audit logging** - Added `auditService.logUpdate` to `ServiceManagement.handleToggleActive()`
+- [x] **#8 Orphan protection on entity deletion** - ClientList checks for active service requests before delete; SpecialistManagement warns on active deals
+- [x] **#9 MyRequests shows product requests** - Added TabList with "Service Requests" and "Product Requests" tabs
+- [x] **#10 Empty stage action handlers filled** - Won/Lost handlers decrement specialist deal counts; Lost cleans up calendar
+- [x] **#11 Legacy LP code cleanup** - Deleted `BookingService.ts`, `SharePointProvisioningService.ts`, `SharePointProvisioning.tsx`; moved `ApprovalResult` to `types/Booking.ts`
+- [x] **#12 MockGraphService DWx-aware** - Replaced `lpdemo` prefix check with DWx list name matching for all 10 lists
+- [x] **#13 Route-level error boundaries** - Each `<Route>` in App.tsx wrapped with `<ErrorBoundary>`
+
 ## Key Type Definitions
 
 ### Service Categories
@@ -618,7 +638,9 @@ type AuditEntity =
   | 'User'
   | 'AccountManager'
   | 'ServiceRequest'
-  | 'Service';
+  | 'Service'
+  | 'Specialist'
+  | 'ProductRequest';
 ```
 
 ## Service CRUD Architecture
@@ -669,7 +691,8 @@ The app supports Account Managers from an external partner tenant:
 | `src/services/ServiceRequestService.ts` | Funnel workflow orchestration |
 | `src/services/SpecialistService.ts` | Specialist management and availability |
 | `src/services/PipelineService.ts` | Dashboard metrics and analytics |
-| `src/services/AuditService.ts` | Audit logging (8 entity types) |
+| `src/services/AuditService.ts` | Audit logging (10 entity types) |
+| `src/services/ProductRequestService.ts` | Product request CRUD + audit |
 | `src/services/DWxSharePointProvisioningService.ts` | All DWx list provisioning via Graph API |
 | `src/config/environmentConfig.ts` | Environment config with all 10 DWx list names |
 | `src/App.tsx` | Main app with all routes |

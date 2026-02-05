@@ -43,6 +43,7 @@ import {
 } from '../../types/ReferenceData';
 import { referenceDataService } from '../../services/ReferenceDataService';
 import { accountManagerService } from '../../services/AccountManagerService';
+import { serviceRequestService } from '../../services/ServiceRequestService';
 import { ClientForm } from './ClientForm';
 import { ImportClientsDialog } from './ImportClientsDialog';
 import { useToast } from '../../contexts/ToastContext';
@@ -235,6 +236,21 @@ export const ClientList: React.FC = () => {
     if (!deletingClient) return;
     try {
       setIsSaving(true);
+
+      // Check for active service requests referencing this client
+      const allRequests = await serviceRequestService.getRequests();
+      const activeRequests = allRequests.filter(
+        r => r.ClientId === deletingClient.Id && !['Won', 'Lost'].includes(r.FunnelStage)
+      );
+
+      if (activeRequests.length > 0) {
+        showToast(
+          `Cannot delete: ${deletingClient.Title} has ${activeRequests.length} active service request(s). Move them to Won/Lost first.`,
+          'error'
+        );
+        return;
+      }
+
       await referenceDataService.deleteClient(deletingClient.Id);
       showToast('Client deleted successfully', 'success');
       await loadData();

@@ -221,6 +221,13 @@ export const ServiceManagement: React.FC = () => {
     try {
       setIsSaving(true);
       await serviceCatalogService.updateService(service.Id, { IsActive: !service.IsActive });
+      await auditService.logUpdate(
+        'Service',
+        service.Id,
+        service.Title,
+        { IsActive: service.IsActive },
+        { IsActive: !service.IsActive }
+      );
       showToast(
         `Service ${service.IsActive ? 'deactivated' : 'activated'} successfully`,
         'success'

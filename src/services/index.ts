@@ -3,7 +3,6 @@ export { getAuthService, getGraphService, authServiceInstance as authService, gr
 export { sharePointService } from './SharePointService';
 export { powerAutomateService } from './PowerAutomateService';
 export { dashboardService } from './DashboardService';
-export { bookingService } from './BookingService';
 export { notificationService } from './NotificationService';
 export { referenceDataService } from './ReferenceDataService';
 export { accountManagerService } from './AccountManagerService';
@@ -12,7 +11,7 @@ export { documentService } from './DocumentService';
 export { managerService } from './ManagerService';
 export { guestInvitationService } from './GuestInvitationService';
 export { gamificationService } from './GamificationService';
-export { sharePointProvisioningService } from './SharePointProvisioningService';
+export { productRequestService } from './ProductRequestService';
 
 // Re-export individual services for direct access when needed
 export { authService as realAuthService } from './AuthService';

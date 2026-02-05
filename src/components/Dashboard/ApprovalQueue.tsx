@@ -49,7 +49,7 @@ import { referenceDataService } from '../../services/ReferenceDataService';
 import { sharePointService } from '../../services/SharePointService';
 import { notificationService } from '../../services/NotificationService';
 import { useAuth } from '../../contexts/AuthContext';
-import { ApprovalResult } from '../../services/BookingService';
+import { ApprovalResult } from '../../types/Booking';
 
 const useStyles = makeStyles({
   container: {

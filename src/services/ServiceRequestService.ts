@@ -7,6 +7,7 @@ import { config } from '../config/environmentConfig';
 import { getGraphService } from './serviceFactory';
 import { auditService } from './AuditService';
 import { dwxNotificationService } from './DWxNotificationService';
+import { specialistService } from './SpecialistService';
 import {
   ServiceRequest,
   CreateServiceRequestInput,
@@ -172,6 +173,16 @@ class ServiceRequestService {
       // Update in SharePoint
       const result = await graphService.updateListItem(this.listName, requestId, updateData);
       const updatedRequest = this.mapToServiceRequest(result);
+
+      // If Won, update client lifetime value (TotalRevenue, EngagementCount, etc.)
+      if (newStage === 'Won') {
+        try {
+          await this.updateClientLifetimeValue(updatedRequest);
+        } catch (ltvError) {
+          console.error('Failed to update client lifetime value:', ltvError);
+          // Don't fail the stage transition for LTV update failure
+        }
+      }
 
       // Audit log
       await auditService.logUpdate(
@@ -359,14 +370,7 @@ class ServiceRequestService {
       };
     }
 
-    // If Won, update client lifetime value
-    if (outcome === 'Won' && result.request) {
-      try {
-        await this.updateClientLifetimeValue(result.request);
-      } catch (error) {
-        console.error('Failed to update client lifetime value:', error);
-      }
-    }
+    // Note: Client LTV update is now handled inside updateStage() for Won transitions
 
     return {
       success: true,
@@ -468,16 +472,52 @@ class ServiceRequestService {
       console.error('Failed to send stage change notification:', error);
     }
 
-    // Stage-specific actions
+    // Stage-specific side effects (notifications are already sent above)
     switch (newStage) {
       case 'Won':
-        // Celebration notification / update metrics
+        // Decrement specialist deal count (deal is complete)
+        if (request.AssignedSpecialistEmail) {
+          try {
+            const specialist = await specialistService.getSpecialistByEmail(request.AssignedSpecialistEmail);
+            if (specialist) {
+              await specialistService.decrementDealCount(specialist.Id);
+            }
+          } catch (specError) {
+            console.error('Failed to decrement specialist deal count on Won:', specError);
+          }
+        }
         break;
       case 'Lost':
-        // Schedule follow-up reminder
+        // Clean up calendar event if one exists
+        if (request.CalendarEventId) {
+          try {
+            const graphService = getGraphService();
+            try {
+              await graphService.deleteCalendarEvent(request.CalendarEventId);
+            } catch {
+              // Fallback: try deleting from user's own calendar
+              await graphService.deleteMyCalendarEvent(request.CalendarEventId);
+            }
+            // Clear the CalendarEventId in SharePoint
+            await graphService.updateListItem(this.listName, request.Id, { CalendarEventId: '' });
+          } catch (calError) {
+            console.error('Failed to clean up calendar event for Lost deal:', calError);
+          }
+        }
+        // Decrement specialist deal count if assigned
+        if (request.AssignedSpecialistEmail) {
+          try {
+            const specialist = await specialistService.getSpecialistByEmail(request.AssignedSpecialistEmail);
+            if (specialist) {
+              await specialistService.decrementDealCount(specialist.Id);
+            }
+          } catch (specError) {
+            console.error('Failed to decrement specialist deal count on Lost:', specError);
+          }
+        }
         break;
       case 'Proposal':
-        // Notify proposal team
+        // Proposal notification is already handled above the switch block
         break;
     }
   }

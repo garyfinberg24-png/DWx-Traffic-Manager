@@ -410,25 +410,41 @@ class MockGraphService {
     // Return appropriate mock data based on list name (case-insensitive)
     const normalizedListName = listName.toLowerCase();
 
-    // Handle booking list - LPDemoScheduler (the actual SharePoint list name)
-    if (normalizedListName.startsWith('lpdemo')) {
+    // DWx Traffic Manager lists (also handles legacy LP list names)
+    if (normalizedListName.includes('servicerequests') || normalizedListName.startsWith('lpdemo')) {
       return this.transformBookingsToListItems(getTestBookings());
     }
 
-    if (normalizedListName === 'clients') {
+    if (normalizedListName.includes('clients')) {
       return this.transformClientsToListItems(getTestClients());
     }
 
-    if (normalizedListName === 'teammembers') {
+    if (normalizedListName.includes('teammembers')) {
       return this.transformTeamMembersToListItems(getTestTeamMembers());
     }
 
-    if (normalizedListName === 'accountmanagers') {
+    if (normalizedListName.includes('accountmanagers')) {
       return this.transformAccountManagersToListItems(getTestAccountManagers());
     }
 
-    if (normalizedListName === 'auditlog') {
+    if (normalizedListName.includes('auditlog')) {
       return []; // Return empty audit log for tests
+    }
+
+    if (normalizedListName.includes('services') && !normalizedListName.includes('request')) {
+      return []; // Return empty services catalog for tests
+    }
+
+    if (normalizedListName.includes('specialists')) {
+      return []; // Return empty specialists for tests
+    }
+
+    if (normalizedListName.includes('productrequests')) {
+      return []; // Return empty product requests for tests
+    }
+
+    if (normalizedListName.includes('managers') && !normalizedListName.includes('account')) {
+      return []; // Return empty managers list for tests
     }
 
     console.warn(`[MockGraphService] Unknown list: ${listName}`);

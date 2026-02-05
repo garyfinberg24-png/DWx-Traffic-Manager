@@ -41,6 +41,8 @@ import { Product, DWX_APPS, WEBPARTS, ADAPTIVE_CARDS, DWX_AGENTS } from '../../t
 import { ProductRequirementsStep } from '../ServiceRequest/ProductRequirementsStep';
 import { getProductRequirements, validateProductRequirements } from '../../types/ProductRequirements';
 import { ClientIndustry, CompanySize } from '../../types/ServiceRequest';
+import { productRequestService } from '../../services/ProductRequestService';
+import { ProductRequestType } from '../../types/ProductRequest';
 import { addHours, format, setHours, setMinutes } from 'date-fns';
 
 const useStyles = makeStyles({
@@ -407,20 +409,42 @@ export const ProductRequestForm: React.FC = () => {
       setSubmitting(true);
       setError(null);
 
-      // This would call a booking service similar to DWx Traffic Manager
-      // For now, we'll show a success message
-      console.log('Product request submitted:', {
-        ...data,
-        accountManagerName: user.displayName,
-        accountManagerEmail: user.email,
-        proposedSlot1: combineDateTime(data.proposedDate1, data.proposedTime1),
-        proposedSlot2: combineDateTime(data.proposedDate2, data.proposedTime2),
-        proposedSlot3: combineDateTime(data.proposedDate3, data.proposedTime3),
-      });
+      // Map form RequestType to SharePoint ProductRequestType
+      const requestType: ProductRequestType = data.requestType === 'Trial' ? 'Trial Deployment' : 'Demo';
 
-      // TODO: Integrate with BookingService for actual submission
-      showToast(`${data.requestType} request for ${selectedProduct.name} submitted successfully!`, 'success');
-      navigate('/requests');
+      const result = await productRequestService.createRequest(
+        {
+          ProductId: selectedProduct.id || selectedProduct.name,
+          ProductName: selectedProduct.name,
+          ProductType: selectedProduct.type as 'App' | 'Web Part' | 'Adaptive Card' | 'Agent',
+          ProductCategory: selectedProduct.category || '',
+          RequestType: requestType,
+          ClientName: data.clientName,
+          ContactName: data.contactName,
+          ContactEmail: data.contactEmail,
+          ContactPhone: data.contactPhone,
+          Industry: data.industry,
+          CompanySize: data.companySize,
+          IsPremiumClient: data.isPremiumClient,
+          LicenseCount: data.licenseCount,
+          ProposedSlot1: combineDateTime(data.proposedDate1, data.proposedTime1) || new Date().toISOString(),
+          ProposedSlot2: combineDateTime(data.proposedDate2, data.proposedTime2),
+          ProposedSlot3: combineDateTime(data.proposedDate3, data.proposedTime3),
+          ProductRequirements: Object.keys(productRequirements).length > 0
+            ? JSON.stringify(productRequirements)
+            : undefined,
+          Comments: data.comments,
+        },
+        user.email,
+        user.displayName
+      );
+
+      if (result.success) {
+        showToast(`${data.requestType} request for ${selectedProduct.name} submitted successfully!`, 'success');
+        navigate('/requests');
+      } else {
+        throw new Error(result.error || 'Failed to create product request');
+      }
     } catch (err) {
       console.error('Error creating product request:', err);
       setError(err instanceof Error ? err.message : 'Failed to create request');

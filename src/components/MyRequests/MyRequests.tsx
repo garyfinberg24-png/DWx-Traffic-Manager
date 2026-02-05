@@ -11,17 +11,23 @@ import {
   Dropdown,
   Option,
   Button,
+  Badge,
   makeStyles,
   shorthands,
   MessageBar,
   MessageBarBody,
   MessageBarTitle,
+  TabList,
+  Tab,
+  SelectTabEvent,
+  SelectTabData,
 } from '@fluentui/react-components';
 import {
   SearchRegular,
   AddRegular,
   FilterRegular,
   GridRegular,
+  Apps24Regular,
 } from '@fluentui/react-icons';
 import { useAuth } from '../../contexts/AuthContext';
 import {
@@ -31,6 +37,8 @@ import {
   STAGE_METADATA,
 } from '../../types/ServiceRequest';
 import { serviceRequestService } from '../../services/ServiceRequestService';
+import { productRequestService } from '../../services/ProductRequestService';
+import { ProductRequest } from '../../types/ProductRequest';
 import { RequestCard } from './RequestCard';
 import { RequestDetails } from './RequestDetails';
 
@@ -194,6 +202,44 @@ const useStyles = makeStyles({
     fontSize: '11px',
     color: '#107c10',
   },
+  tabList: {
+    marginBottom: '8px',
+  },
+  productGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fill, minmax(360px, 1fr))',
+    gap: '16px',
+  },
+  productCard: {
+    padding: '20px',
+    backgroundColor: '#ffffff',
+    borderRadius: '8px',
+    boxShadow: '0 1px 2px rgba(0,0,0,0.08)',
+    border: '1px solid #e1e1e1',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '12px',
+    cursor: 'default',
+  },
+  productCardHeader: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+  },
+  productCardTitle: {
+    fontSize: '16px',
+    fontWeight: '600',
+    color: '#242424',
+  },
+  productCardMeta: {
+    display: 'flex',
+    gap: '8px',
+    flexWrap: 'wrap',
+  },
+  productCardDetail: {
+    fontSize: '13px',
+    color: '#616161',
+  },
 });
 
 const STAGE_OPTIONS: (FunnelStage | 'All')[] = [
@@ -225,8 +271,11 @@ export const MyRequests: React.FC<MyRequestsProps> = ({ onNewRequest }) => {
   const styles = useStyles();
   const { user } = useAuth();
 
+  const [activeTab, setActiveTab] = useState<'service' | 'product'>('service');
   const [requests, setRequests] = useState<ServiceRequest[]>([]);
+  const [productRequests, setProductRequests] = useState<ProductRequest[]>([]);
   const [loading, setLoading] = useState(true);
+  const [productLoading, setProductLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [searchText, setSearchText] = useState('');
   const [selectedStage, setSelectedStage] = useState<FunnelStage | 'All'>('All');
@@ -256,6 +305,24 @@ export const MyRequests: React.FC<MyRequestsProps> = ({ onNewRequest }) => {
     };
 
     loadRequests();
+  }, [user]);
+
+  // Load product requests
+  useEffect(() => {
+    const loadProductRequests = async () => {
+      if (!user) return;
+      try {
+        setProductLoading(true);
+        const data = await productRequestService.getRequestsByUser(user.email);
+        setProductRequests(data);
+      } catch (err) {
+        console.error('Error loading product requests:', err);
+      } finally {
+        setProductLoading(false);
+      }
+    };
+
+    loadProductRequests();
   }, [user]);
 
   // Calculate stage counts
@@ -394,6 +461,22 @@ export const MyRequests: React.FC<MyRequestsProps> = ({ onNewRequest }) => {
         )}
       </div>
 
+      {/* Tab Navigation */}
+      <TabList
+        className={styles.tabList}
+        selectedValue={activeTab}
+        onTabSelect={(_: SelectTabEvent, data: SelectTabData) =>
+          setActiveTab(data.value as 'service' | 'product')
+        }
+      >
+        <Tab value="service">
+          Service Requests ({requests.length})
+        </Tab>
+        <Tab value="product" icon={<Apps24Regular />}>
+          Product Requests ({productRequests.length})
+        </Tab>
+      </TabList>
+
       {/* Error Message */}
       {error && (
         <MessageBar intent="error">
@@ -404,6 +487,73 @@ export const MyRequests: React.FC<MyRequestsProps> = ({ onNewRequest }) => {
         </MessageBar>
       )}
 
+      {/* Product Requests Tab */}
+      {activeTab === 'product' && (
+        <>
+          {productLoading ? (
+            <div className={styles.loadingContainer}>
+              <Spinner size="large" />
+              <Text>Loading product requests...</Text>
+            </div>
+          ) : productRequests.length > 0 ? (
+            <div className={styles.productGrid}>
+              {productRequests.map((pr) => (
+                <div key={pr.Id} className={styles.productCard}>
+                  <div className={styles.productCardHeader}>
+                    <Text className={styles.productCardTitle}>{pr.ProductName}</Text>
+                    <Badge
+                      appearance="filled"
+                      color={
+                        pr.Status === 'Confirmed' ? 'success' :
+                        pr.Status === 'Completed' ? 'success' :
+                        pr.Status === 'Cancelled' ? 'danger' :
+                        pr.Status === 'Awaiting Approval' ? 'warning' :
+                        'informative'
+                      }
+                    >
+                      {pr.Status}
+                    </Badge>
+                  </div>
+                  <div className={styles.productCardMeta}>
+                    <Badge appearance="outline" size="small">{pr.RequestType}</Badge>
+                    <Badge appearance="outline" size="small">{pr.ProductType}</Badge>
+                    {pr.IsPremiumClient && (
+                      <Badge appearance="outline" size="small" color="warning">Premium</Badge>
+                    )}
+                  </div>
+                  <Text className={styles.productCardDetail}>
+                    Client: {pr.ClientName} &middot; Contact: {pr.ContactName}
+                  </Text>
+                  {pr.ProposedSlot1 && (
+                    <Text className={styles.productCardDetail}>
+                      Proposed: {new Date(pr.ProposedSlot1).toLocaleDateString('en-ZA', {
+                        weekday: 'short',
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric',
+                      })}
+                    </Text>
+                  )}
+                  <Text className={styles.productCardDetail} style={{ fontSize: '11px', color: '#8a8886' }}>
+                    Created: {new Date(pr.Created).toLocaleDateString('en-ZA')}
+                  </Text>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className={styles.emptyState}>
+              <Apps24Regular className={styles.emptyIcon} />
+              <Text className={styles.emptyTitle}>No product requests yet</Text>
+              <Text className={styles.emptyText}>
+                Browse the product catalog to request demos or trial deployments
+              </Text>
+            </div>
+          )}
+        </>
+      )}
+
+      {/* Service Requests Tab */}
+      {activeTab === 'service' && <>
       {/* Summary Stats */}
       <div className={styles.statsRow}>
         <div className={styles.statCard}>
@@ -530,6 +680,7 @@ export const MyRequests: React.FC<MyRequestsProps> = ({ onNewRequest }) => {
           onRequestUpdated={handleRequestUpdated}
         />
       )}
+      </>}
     </div>
   );
 };

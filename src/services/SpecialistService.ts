@@ -5,6 +5,7 @@
 
 import { config } from '../config/environmentConfig';
 import { getGraphService } from './serviceFactory';
+import { auditService } from './AuditService';
 import {
   Specialist,
   SpecialistInput,
@@ -211,8 +212,17 @@ class SpecialistService {
       };
 
       const result = await graphService.createListItem(this.listName, itemData);
+      const specialist = this.mapToSpecialist(result);
 
-      return this.mapToSpecialist(result);
+      // Audit log
+      await auditService.logCreate('Specialist', specialist.Id, data.Title, {
+        email: data.Email,
+        role: data.Role,
+        specializations: data.Specializations,
+        maxConcurrentDeals: data.MaxConcurrentDeals,
+      });
+
+      return specialist;
     } catch (error) {
       console.error('Error creating specialist:', error);
       throw error;
@@ -242,8 +252,15 @@ class SpecialistService {
       if (data.Phone !== undefined) itemData.Phone = data.Phone;
 
       const result = await graphService.updateListItem(this.listName, id, itemData);
+      const specialist = this.mapToSpecialist(result);
 
-      return this.mapToSpecialist(result);
+      // Audit log
+      await auditService.logUpdate('Specialist', id, specialist.Title,
+        undefined,
+        itemData as Record<string, unknown>
+      );
+
+      return specialist;
     } catch (error) {
       console.error('Error updating specialist:', error);
       throw error;
@@ -297,6 +314,12 @@ class SpecialistService {
     try {
       const graphService = getGraphService();
       await graphService.updateListItem(this.listName, id, { IsActive: false });
+
+      // Audit log
+      await auditService.logUpdate('Specialist', id, 'Specialist',
+        { IsActive: true },
+        { IsActive: false }
+      );
     } catch (error) {
       console.error('Error deactivating specialist:', error);
       throw error;

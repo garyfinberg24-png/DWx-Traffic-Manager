@@ -821,6 +821,103 @@ class DWxSharePointProvisioningService {
   }
 
   /**
+   * Seed the DWxTeamMembers list with sample team members
+   */
+  async seedTeamMembersData(): Promise<{ results: Array<{ name: string; success: boolean; message: string }> }> {
+    const results: Array<{ name: string; success: boolean; message: string }> = [];
+
+    const seedData = [
+      { Title: 'Gary Finberg', Email: 'gary@firsttech.digital', Phone: '+27 82 555 0001', Role: 'Solution Architect', Department: 'Digital Workplace', IsActive: true },
+      { Title: 'Wimpie Baard', Email: 'wimpie.baard@firsttech.digital', Phone: '+27 82 555 0002', Role: 'Technical Specialist', Department: 'Digital Workplace', IsActive: true },
+      { Title: 'Gulzar Ismail', Email: 'Gulzar.Ismail@firsttech.digital', Phone: '+27 82 555 0003', Role: 'Senior Consultant', Department: 'Digital Workplace', IsActive: true },
+      { Title: 'Chris van Niekerk', Email: 'chris@firsttech.digital', Phone: '+27 82 555 0004', Role: 'Consultant', Department: 'Digital Workplace', IsActive: true },
+      { Title: 'Sarah Mitchell', Email: 'sarah.mitchell@firsttech.digital', Phone: '+27 82 555 0005', Role: 'Demo Specialist', Department: 'Pre-Sales', IsActive: true },
+      { Title: 'James Peterson', Email: 'james.peterson@firsttech.digital', Phone: '+27 82 555 0006', Role: 'Project Manager', Department: 'Digital Workplace', IsActive: true },
+    ];
+
+    try {
+      const graphService = getGraphService();
+      for (const member of seedData) {
+        try {
+          await graphService.createListItem('DWxTeamMembers', member);
+          results.push({ name: member.Title, success: true, message: 'Created successfully' });
+        } catch (err) {
+          results.push({ name: member.Title, success: false, message: err instanceof Error ? err.message : 'Unknown error' });
+        }
+      }
+    } catch (error) {
+      results.push({ name: 'All', success: false, message: error instanceof Error ? error.message : 'Failed to seed team members' });
+    }
+
+    return { results };
+  }
+
+  /**
+   * Seed the DWxClients list with sample client organizations
+   */
+  async seedClientsData(): Promise<{ results: Array<{ name: string; success: boolean; message: string }> }> {
+    const results: Array<{ name: string; success: boolean; message: string }> = [];
+
+    const seedData = [
+      { Title: 'Contoso Ltd', PrimaryContactName: 'John Smith', PrimaryContactEmail: 'john.smith@contoso.com', Industry: 'Technology', CompanySize: 'Large (250-1000)', IsPremium: true, ContractStatus: 'Active', AccountManagerEmail: 'gary@firsttech.digital', EngagementCount: 5 },
+      { Title: 'Fabrikam Inc', PrimaryContactName: 'Alice Johnson', PrimaryContactEmail: 'alice@fabrikam.com', Industry: 'Manufacturing', CompanySize: 'Enterprise (1000+)', IsPremium: true, ContractStatus: 'Active', AccountManagerEmail: 'wimpie.baard@firsttech.digital', EngagementCount: 3 },
+      { Title: 'Northwind Traders', PrimaryContactName: 'Bob Williams', PrimaryContactEmail: 'bob@northwind.com', Industry: 'Retail', CompanySize: 'Medium (50-250)', IsPremium: false, ContractStatus: 'Active', AccountManagerEmail: 'gary@firsttech.digital', EngagementCount: 2 },
+      { Title: 'Adventure Works', PrimaryContactName: 'Carol Davis', PrimaryContactEmail: 'carol@adventureworks.com', Industry: 'Finance', CompanySize: 'Enterprise (1000+)', IsPremium: false, ContractStatus: 'Prospect', AccountManagerEmail: 'chris@firsttech.digital', EngagementCount: 0 },
+      { Title: 'Woodgrove Bank', PrimaryContactName: 'David Lee', PrimaryContactEmail: 'david.lee@woodgrove.com', Industry: 'Finance', CompanySize: 'Large (250-1000)', IsPremium: true, ContractStatus: 'Active', AccountManagerEmail: 'Gulzar.Ismail@firsttech.digital', EngagementCount: 8 },
+      { Title: 'Trey Research', PrimaryContactName: 'Emily Chen', PrimaryContactEmail: 'emily@treyresearch.com', Industry: 'Technology', CompanySize: 'SMB (<50)', IsPremium: false, ContractStatus: 'Prospect', AccountManagerEmail: 'gary@firsttech.digital', EngagementCount: 1 },
+      { Title: 'Litware Inc', PrimaryContactName: 'Frank Brown', PrimaryContactEmail: 'frank@litware.com', Industry: 'Government', CompanySize: 'Large (250-1000)', IsPremium: false, ContractStatus: 'Active', AccountManagerEmail: 'wimpie.baard@firsttech.digital', EngagementCount: 4 },
+      { Title: 'Proseware', PrimaryContactName: 'Grace Kim', PrimaryContactEmail: 'grace@proseware.com', Industry: 'Healthcare', CompanySize: 'Medium (50-250)', IsPremium: false, ContractStatus: 'Churned', AccountManagerEmail: 'chris@firsttech.digital', EngagementCount: 2 },
+    ];
+
+    try {
+      const graphService = getGraphService();
+      for (const client of seedData) {
+        try {
+          await graphService.createListItem('DWxClients', client);
+          results.push({ name: client.Title, success: true, message: 'Created successfully' });
+        } catch (err) {
+          results.push({ name: client.Title, success: false, message: err instanceof Error ? err.message : 'Unknown error' });
+        }
+      }
+    } catch (error) {
+      results.push({ name: 'All', success: false, message: error instanceof Error ? error.message : 'Failed to seed clients' });
+    }
+
+    return { results };
+  }
+
+  /**
+   * Seed the DWxAccountManagers list with sample account managers
+   */
+  async seedAccountManagersData(): Promise<{ results: Array<{ name: string; success: boolean; message: string }> }> {
+    const results: Array<{ name: string; success: boolean; message: string }> = [];
+
+    const seedData = [
+      { Title: 'Gary Finberg', Email: 'gary@firsttech.digital', Phone: '+27 21 555 0001', Department: 'Sales', JobTitle: 'Senior Account Manager', Region: 'Western Cape', Status: 'Active', Source: 'Internal', Company: 'First Technology Digital' },
+      { Title: 'Wimpie Baard', Email: 'wimpie.baard@firsttech.digital', Phone: '+27 11 555 0002', Department: 'Sales', JobTitle: 'Account Manager', Region: 'Gauteng', Status: 'Active', Source: 'Internal', Company: 'First Technology Digital' },
+      { Title: 'Gulzar Ismail', Email: 'Gulzar.Ismail@firsttech.digital', Phone: '+27 31 555 0003', Department: 'Sales', JobTitle: 'Account Manager', Region: 'KZN', Status: 'Active', Source: 'Internal', Company: 'First Technology Digital' },
+      { Title: 'Chris van Niekerk', Email: 'chris@firsttech.digital', Phone: '+27 21 555 0004', Department: 'Sales', JobTitle: 'Account Executive', Region: 'Western Cape', Status: 'Active', Source: 'Internal', Company: 'First Technology Digital' },
+      { Title: 'James Peterson', Email: 'james.peterson@firsttech.digital', Phone: '+44 20 555 0005', Department: 'International Sales', JobTitle: 'Account Manager', Region: 'UK', Status: 'Active', Source: 'Internal', Company: 'First Technology Digital' },
+    ];
+
+    try {
+      const graphService = getGraphService();
+      for (const am of seedData) {
+        try {
+          await graphService.createListItem('DWxAccountManagers', am);
+          results.push({ name: am.Title, success: true, message: 'Created successfully' });
+        } catch (err) {
+          results.push({ name: am.Title, success: false, message: err instanceof Error ? err.message : 'Unknown error' });
+        }
+      }
+    } catch (error) {
+      results.push({ name: 'All', success: false, message: error instanceof Error ? error.message : 'Failed to seed account managers' });
+    }
+
+    return { results };
+  }
+
+  /**
    * Get all fields for a list (for diagnostics)
    */
   async getListFields(listTitle: string): Promise<Array<{

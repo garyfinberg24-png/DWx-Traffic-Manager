@@ -106,3 +106,38 @@ export interface CreateBookingData {
   dealValue?: string;
   priority?: BookingPriority;
 }
+
+/**
+ * Result types for booking operations (moved from BookingService)
+ */
+export interface ApprovalResult {
+  success: boolean;
+  booking?: Booking;
+  calendarEventUpdated: boolean;
+  notificationSent: boolean;
+  error?: string;
+  warnings?: string[];
+}
+
+export interface RescheduleResult {
+  success: boolean;
+  booking?: Booking;
+  oldCalendarEventDeleted: boolean;
+  notificationSent: boolean;
+  error?: string;
+}
+
+export interface CancellationResult {
+  success: boolean;
+  booking?: Booking;
+  calendarEventDeleted: boolean;
+  notificationSent: boolean;
+  error?: string;
+}
+
+export interface DeletionResult {
+  success: boolean;
+  calendarEventDeleted: boolean;
+  notificationSent: boolean;
+  error?: string;
+}

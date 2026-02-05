@@ -94,18 +94,18 @@ const AppRoutes: React.FC = () => {
       <main className={styles.main}>
         <Routes>
           {/* DWx Traffic Manager - Primary Routes */}
-          <Route path="/" element={<LandingPage />} />
-          <Route path="/services" element={<ServiceCatalog />} />
-          <Route path="/services/:serviceId" element={<ServiceDetailPage />} />
-          <Route path="/products" element={<ProductCatalog />} />
-          <Route path="/request" element={<ServiceRequestForm />} />
-          <Route path="/product-request" element={<ProductRequestForm />} />
-          <Route path="/requests" element={<MyRequests />} />
+          <Route path="/" element={<ErrorBoundary><LandingPage /></ErrorBoundary>} />
+          <Route path="/services" element={<ErrorBoundary><ServiceCatalog /></ErrorBoundary>} />
+          <Route path="/services/:serviceId" element={<ErrorBoundary><ServiceDetailPage /></ErrorBoundary>} />
+          <Route path="/products" element={<ErrorBoundary><ProductCatalog /></ErrorBoundary>} />
+          <Route path="/request" element={<ErrorBoundary><ServiceRequestForm /></ErrorBoundary>} />
+          <Route path="/product-request" element={<ErrorBoundary><ProductRequestForm /></ErrorBoundary>} />
+          <Route path="/requests" element={<ErrorBoundary><MyRequests /></ErrorBoundary>} />
           <Route
             path="/pipeline"
             element={
               <ManagerRoute>
-                <SalesFunnelDashboard />
+                <ErrorBoundary><SalesFunnelDashboard /></ErrorBoundary>
               </ManagerRoute>
             }
           />
@@ -115,7 +115,7 @@ const AppRoutes: React.FC = () => {
             path="/dashboard"
             element={
               <ManagerRoute>
-                <ManagerDashboard />
+                <ErrorBoundary><ManagerDashboard /></ErrorBoundary>
               </ManagerRoute>
             }
           />
@@ -123,7 +123,7 @@ const AppRoutes: React.FC = () => {
             path="/admin"
             element={
               <ManagerRoute>
-                <AdminPage />
+                <ErrorBoundary><AdminPage /></ErrorBoundary>
               </ManagerRoute>
             }
           />
@@ -131,7 +131,7 @@ const AppRoutes: React.FC = () => {
             path="/admin/account-managers"
             element={
               <ManagerRoute>
-                <AccountManagerManagement />
+                <ErrorBoundary><AccountManagerManagement /></ErrorBoundary>
               </ManagerRoute>
             }
           />
