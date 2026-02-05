@@ -173,13 +173,13 @@ export const TeamMemberForm: React.FC<TeamMemberFormProps> = ({
   const handleRoleSelect = (role: TeamMemberRole) => {
     const currentRoles = selectedRoles || [];
     if (!currentRoles.includes(role)) {
-      setValue('Roles', [...currentRoles, role]);
+      setValue('Roles', [...currentRoles, role], { shouldValidate: true });
     }
   };
 
   const handleRoleRemove = (role: TeamMemberRole) => {
     const currentRoles = selectedRoles || [];
-    setValue('Roles', currentRoles.filter(r => r !== role));
+    setValue('Roles', currentRoles.filter(r => r !== role), { shouldValidate: true });
   };
 
   const availableRoles = TEAM_MEMBER_ROLES.filter(role => !selectedRoles.includes(role));
