@@ -11,6 +11,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useForm, Controller } from 'react-hook-form';
 import {
   Button,
@@ -364,13 +365,18 @@ interface ServiceRequestFormProps {
 }
 
 export const ServiceRequestForm: React.FC<ServiceRequestFormProps> = ({
-  preSelectedService,
+  preSelectedService: propPreSelectedService,
   onSuccess,
   onCancel,
 }) => {
   const styles = useStyles();
+  const location = useLocation();
+  const navigate = useNavigate();
   const { user } = useAuth();
   const { showToast } = useToast();
+
+  // Get pre-selected service from props OR from navigation state
+  const preSelectedService = propPreSelectedService || (location.state?.preSelectedService as DWService | undefined);
 
   const [currentStep, setCurrentStep] = useState(preSelectedService ? 2 : 1);
   const [services, setServices] = useState<DWService[]>([]);
@@ -1271,8 +1277,8 @@ export const ServiceRequestForm: React.FC<ServiceRequestFormProps> = ({
         {/* Footer */}
         <div className={styles.cardFooter}>
           <div>
-            {onCancel && currentStep === 1 && (
-              <Button appearance="secondary" onClick={onCancel}>
+            {currentStep === 1 && (
+              <Button appearance="secondary" onClick={onCancel || (() => navigate(-1))}>
                 Cancel
               </Button>
             )}
