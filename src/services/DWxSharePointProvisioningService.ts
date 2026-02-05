@@ -549,13 +549,72 @@ class DWxSharePointProvisioningService {
     };
   }
 
+  private get teamMembersListDefinition(): ListDefinition {
+    return {
+      title: 'DWxTeamMembers',
+      description: 'DWx Team Members - Internal team members for assignments',
+      fields: [
+        { internalName: 'Email', displayName: 'Email', type: 'Text', required: true },
+        { internalName: 'Phone', displayName: 'Phone', type: 'Text' },
+        {
+          internalName: 'Role',
+          displayName: 'Role',
+          type: 'Choice',
+          choices: ['Solution Architect', 'Technical Specialist', 'Consultant', 'Senior Consultant', 'Demo Specialist', 'Project Manager'],
+        },
+        { internalName: 'Department', displayName: 'Department', type: 'Text' },
+        { internalName: 'IsActive', displayName: 'Is Active', type: 'Boolean', defaultValue: '1' },
+      ],
+    };
+  }
+
+  private get accountManagersListDefinition(): ListDefinition {
+    return {
+      title: 'DWxAccountManagers',
+      description: 'DWx Account Managers - Account managers who submit service requests',
+      fields: [
+        { internalName: 'Email', displayName: 'Email', type: 'Text', required: true },
+        { internalName: 'Phone', displayName: 'Phone', type: 'Text' },
+        { internalName: 'MobilePhone', displayName: 'Mobile Phone', type: 'Text' },
+        { internalName: 'Department', displayName: 'Department', type: 'Text' },
+        { internalName: 'JobTitle', displayName: 'Job Title', type: 'Text' },
+        {
+          internalName: 'Region',
+          displayName: 'Region',
+          type: 'Choice',
+          choices: ['Western Cape', 'Gauteng', 'KZN', 'UK'],
+        },
+        {
+          internalName: 'Status',
+          displayName: 'Status',
+          type: 'Choice',
+          choices: ['Active', 'Inactive', 'On Leave'],
+          defaultValue: 'Active',
+        },
+        {
+          internalName: 'Source',
+          displayName: 'Source',
+          type: 'Choice',
+          choices: ['Internal', 'External', 'Guest'],
+          defaultValue: 'Internal',
+        },
+        { internalName: 'EntraUserId', displayName: 'Entra User ID', type: 'Text' },
+        { internalName: 'ExternalTenant', displayName: 'External Tenant', type: 'Text' },
+        { internalName: 'Company', displayName: 'Company', type: 'Text' },
+        { internalName: 'ManagerEmail', displayName: 'Manager Email', type: 'Text' },
+        { internalName: 'HireDate', displayName: 'Hire Date', type: 'DateTime' },
+        { internalName: 'Notes', displayName: 'Notes', type: 'Note' },
+      ],
+    };
+  }
+
   // ==================== PUBLIC METHODS ====================
 
   /**
    * Check which DWx lists exist
    */
   async checkListsStatus(): Promise<ListStatus[]> {
-    const listNames = ['DWxServices', 'DWxServiceRequests', 'DWxProductRequests', 'DWxClients', 'DWxSpecialists', 'DWxAuditLog'];
+    const listNames = ['DWxServices', 'DWxServiceRequests', 'DWxProductRequests', 'DWxClients', 'DWxSpecialists', 'DWxAuditLog', 'DWxTeamMembers', 'DWxAccountManagers'];
     const results: ListStatus[] = [];
 
     for (const name of listNames) {
@@ -617,6 +676,20 @@ class DWxSharePointProvisioningService {
   }
 
   /**
+   * Provision the DWxTeamMembers list
+   */
+  async provisionTeamMembersList(): Promise<ProvisionResult> {
+    return this.provisionList(this.teamMembersListDefinition);
+  }
+
+  /**
+   * Provision the DWxAccountManagers list
+   */
+  async provisionAccountManagersList(): Promise<ProvisionResult> {
+    return this.provisionList(this.accountManagersListDefinition);
+  }
+
+  /**
    * Create the DWxSupportingDocuments document library
    */
   async provisionDocumentLibrary(): Promise<ProvisionResult> {
@@ -651,6 +724,8 @@ class DWxSharePointProvisioningService {
       { name: 'DWxProductRequests', provision: () => this.provisionProductRequestsList() },
       { name: 'DWxClients', provision: () => this.provisionClientsList() },
       { name: 'DWxSpecialists', provision: () => this.provisionSpecialistsList() },
+      { name: 'DWxTeamMembers', provision: () => this.provisionTeamMembersList() },
+      { name: 'DWxAccountManagers', provision: () => this.provisionAccountManagersList() },
       { name: 'DWxAuditLog', provision: () => this.provisionAuditLogList() },
       { name: 'DWxSupportingDocuments', provision: () => this.provisionDocumentLibrary() },
     ];

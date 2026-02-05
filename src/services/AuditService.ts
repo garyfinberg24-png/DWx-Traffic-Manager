@@ -1,4 +1,5 @@
 import { getGraphService, getAuthService } from './serviceFactory';
+import { config } from '../config/environmentConfig';
 
 // Get the appropriate services based on test mode
 const graphService = getGraphService();
@@ -55,7 +56,7 @@ interface GraphListItem {
 }
 
 class AuditService {
-  private listName = 'AuditLog';
+  private listName = config.sharepoint.auditLogListName;
 
   async logAction(input: AuditLogInput): Promise<void> {
     try {

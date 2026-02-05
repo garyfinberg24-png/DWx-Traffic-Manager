@@ -13,6 +13,14 @@ export const config = {
     clientsListName: import.meta.env.VITE_CLIENTS_LIST || 'DWxClients',
     // Specialists list
     specialistsListName: import.meta.env.VITE_SPECIALISTS_LIST || 'DWxSpecialists',
+    // Team Members list
+    teamMembersListName: import.meta.env.VITE_TEAM_MEMBERS_LIST || 'DWxTeamMembers',
+    // Account Managers list
+    accountManagersListName: import.meta.env.VITE_ACCOUNT_MANAGERS_LIST || 'DWxAccountManagers',
+    // Audit Log list
+    auditLogListName: import.meta.env.VITE_AUDIT_LOG_LIST || 'DWxAuditLog',
+    // Product Requests list
+    productRequestsListName: import.meta.env.VITE_PRODUCT_REQUESTS_LIST || 'DWxProductRequests',
     // Document library for uploads
     documentLibrary: import.meta.env.VITE_DOCUMENT_LIBRARY || 'DWxSupportingDocuments',
   },

@@ -1,5 +1,6 @@
 import { getGraphService } from './serviceFactory';
 import { auditService } from './AuditService';
+import { config } from '../config/environmentConfig';
 
 // Get the appropriate graph service based on test mode
 const graphService = getGraphService();
@@ -20,8 +21,8 @@ interface GraphListItem {
 }
 
 class ReferenceDataService {
-  private readonly teamMembersListName = 'TeamMembers';
-  private readonly clientsListName = 'Clients';
+  private readonly teamMembersListName = config.sharepoint.teamMembersListName;
+  private readonly clientsListName = config.sharepoint.clientsListName;
 
   // ==================== TEAM MEMBERS ====================
 

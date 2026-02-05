@@ -1,5 +1,6 @@
 import { getGraphService } from './serviceFactory';
 import { auditService } from './AuditService';
+import { config } from '../config/environmentConfig';
 
 // Get the appropriate graph service based on test mode
 const graphService = getGraphService();
@@ -18,7 +19,7 @@ interface GraphListItem {
 }
 
 class AccountManagerService {
-  private readonly listName = 'AccountManagers';
+  private readonly listName = config.sharepoint.accountManagersListName;
 
   // ==================== READ OPERATIONS ====================
 
