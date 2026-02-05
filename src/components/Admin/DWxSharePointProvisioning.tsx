@@ -428,17 +428,15 @@ export const DWxSharePointProvisioning: React.FC = () => {
               <Text className={styles.listDescription}>
                 {info.description}
               </Text>
-              {exists === false && (
-                <Button
-                  size="small"
-                  appearance="outline"
-                  icon={<Add24Regular />}
-                  onClick={() => provisionSingleList(listName)}
-                  disabled={isProvisioning}
-                >
-                  Create
-                </Button>
-              )}
+              <Button
+                size="small"
+                appearance={exists === false ? 'outline' : 'subtle'}
+                icon={exists === false ? <Add24Regular /> : <ArrowSync24Regular />}
+                onClick={() => provisionSingleList(listName)}
+                disabled={isProvisioning}
+              >
+                {exists === false ? 'Create' : 'Re-provision'}
+              </Button>
             </Card>
           );
         })}
