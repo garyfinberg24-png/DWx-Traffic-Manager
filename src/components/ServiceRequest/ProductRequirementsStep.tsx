@@ -1,6 +1,6 @@
 /**
- * DWx Traffic Manager - Service Requirements Step
- * Dynamic questionnaire component based on selected service category
+ * DWx Traffic Manager - Product Requirements Step
+ * Dynamic questionnaire component based on selected product type
  * Styled with blue header card design matching standard modals
  */
 
@@ -20,9 +20,9 @@ import {
 } from '@fluentui/react-components';
 import { DatePicker } from '@fluentui/react-datepicker-compat';
 import {
-  ServiceRequirementsConfig,
-  ServiceQuestion,
-} from '../../types/ServiceRequirements';
+  ProductRequirementsConfig,
+} from '../../types/ProductRequirements';
+import { ServiceQuestion } from '../../types/ServiceRequirements';
 
 const useStyles = makeStyles({
   // Main card container with shadow
@@ -130,18 +130,20 @@ const useStyles = makeStyles({
   },
 });
 
-interface ServiceRequirementsStepProps {
-  config: ServiceRequirementsConfig;
+interface ProductRequirementsStepProps {
+  config: ProductRequirementsConfig;
   values: Record<string, unknown>;
   onChange: (questionId: string, value: unknown) => void;
   errors?: Record<string, string>;
+  productName?: string;
 }
 
-export const ServiceRequirementsStep: React.FC<ServiceRequirementsStepProps> = ({
+export const ProductRequirementsStep: React.FC<ProductRequirementsStepProps> = ({
   config,
   values,
   onChange,
   errors,
+  productName,
 }) => {
   const styles = useStyles();
 
@@ -392,11 +394,16 @@ export const ServiceRequirementsStep: React.FC<ServiceRequirementsStepProps> = (
     }
   };
 
+  // Build dynamic title based on product name
+  const displayTitle = productName
+    ? `${productName} - Requirements`
+    : config.title;
+
   return (
     <div className={styles.card}>
       {/* Blue gradient header */}
       <div className={styles.header}>
-        <div className={styles.headerTitle}>{config.title}</div>
+        <div className={styles.headerTitle}>{displayTitle}</div>
         <div className={styles.headerSubtitle}>{config.subtitle}</div>
       </div>
 
@@ -433,4 +440,4 @@ export const ServiceRequirementsStep: React.FC<ServiceRequirementsStepProps> = (
   );
 };
 
-export default ServiceRequirementsStep;
+export default ProductRequirementsStep;

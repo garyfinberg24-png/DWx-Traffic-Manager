@@ -17,7 +17,8 @@ export type ServiceCategory =
   | 'SharePoint Migration'
   | 'M365 Assessment'
   | 'Copilot Agents'
-  | 'MS Viva';
+  | 'MS Viva'
+  | 'Training';
 
 export type ServiceComplexity = 'Low' | 'Medium' | 'High' | 'Enterprise';
 export type PricingModel = 'Fixed' | 'Hourly' | 'Project-based' | 'TBD';
@@ -521,6 +522,20 @@ export const DEFAULT_SERVICES: DWServiceInput[] = [
     SortOrder: 6,
     IconName: 'PeopleTeam',
   },
+  {
+    Title: 'Zero to AI Copilot Chat Hero',
+    Description: 'Comprehensive Copilot Studio training program covering planning, setup, and mastery of Copilot Chat. Includes 6 training sessions (13 hours) plus 8 hours of follow-up support through "The AI Guy" managed service. Takes participants from zero knowledge to confident Copilot Chat users with community setup and reporting.',
+    ShortDescription: 'Copilot Studio Training Program',
+    Category: 'Training',
+    TypicalDuration: 'Multi-day',
+    ComplexityLevel: 'Medium',
+    PricingModel: 'Fixed',
+    RequiredRoles: ['Consultant', 'Technical Specialist'],
+    Prerequisites: 'M365 license with Copilot Studio access, max 50 participants per cohort',
+    IsActive: true,
+    SortOrder: 7,
+    IconName: 'LightningBolt',
+  },
 ];
 
 /**
@@ -611,5 +626,19 @@ export const DW_SERVICES_SEED_DATA = [
     Prerequisites: 'Viva license, SharePoint home site configured',
     SortOrder: 6,
     IconName: 'PeopleTeam',
+  },
+  {
+    Title: 'Zero to AI Copilot Chat Hero',
+    Description: 'Comprehensive Copilot Studio training: Plan & Setup (1hr), Zero to Hero sessions (8hrs), Community & Reports setup (4hrs), plus The AI Guy managed service (8hrs over 4 months). Max 50 participants per cohort.',
+    ShortDescription: 'Copilot Studio Training Program',
+    Category: 'Training',
+    TypicalDuration: 'Multi-day',
+    ComplexityLevel: 'Medium',
+    PricingModel: 'Fixed',
+    BasePrice: 35000,
+    RequiredRoles: ['Consultant', 'Technical Specialist'],
+    Prerequisites: 'M365 license with Copilot Studio access',
+    SortOrder: 7,
+    IconName: 'LightningBolt',
   },
 ];

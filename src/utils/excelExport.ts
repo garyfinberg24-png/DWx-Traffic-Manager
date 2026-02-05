@@ -84,7 +84,7 @@ export function downloadBookingsCSV(bookings: Booking[], filename?: string): voi
   const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
 
-  const defaultFilename = `LP_Bookings_${format(new Date(), 'yyyy-MM-dd_HHmm')}.csv`;
+  const defaultFilename = `DWx_Bookings_${format(new Date(), 'yyyy-MM-dd_HHmm')}.csv`;
   const link = document.createElement('a');
   link.href = url;
   link.download = filename || defaultFilename;
@@ -181,7 +181,7 @@ export function downloadBookingsExcel(bookings: Booking[], filename?: string): v
   const blob = new Blob([xml], { type: 'application/vnd.ms-excel' });
   const url = URL.createObjectURL(blob);
 
-  const defaultFilename = `LP_Bookings_${format(new Date(), 'yyyy-MM-dd_HHmm')}.xls`;
+  const defaultFilename = `DWx_Bookings_${format(new Date(), 'yyyy-MM-dd_HHmm')}.xls`;
   const link = document.createElement('a');
   link.href = url;
   link.download = filename || defaultFilename;

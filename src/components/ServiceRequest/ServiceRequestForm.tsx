@@ -243,6 +243,49 @@ const useStyles = makeStyles({
       backgroundColor: '#165a68',
     },
   },
+  // Step card styles (blue header card design)
+  stepCard: {
+    backgroundColor: '#ffffff',
+    borderRadius: '8px',
+    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+    overflow: 'hidden',
+  },
+  stepHeader: {
+    background: 'linear-gradient(135deg, #1a5a8a 0%, #2873a8 100%)',
+    color: 'white',
+    padding: '20px 24px',
+  },
+  stepHeaderTitle: {
+    fontSize: '18px',
+    fontWeight: '600',
+    marginBottom: '4px',
+  },
+  stepHeaderSubtitle: {
+    fontSize: '13px',
+    opacity: '0.9',
+  },
+  stepBody: {
+    padding: '24px',
+  },
+  stepSection: {
+    marginBottom: '24px',
+  },
+  stepSectionLast: {
+    marginBottom: '0',
+  },
+  stepSectionTitle: {
+    fontSize: '15px',
+    fontWeight: '600',
+    color: '#1a5a8a',
+    marginBottom: '16px',
+    paddingBottom: '8px',
+    borderBottom: '1px solid #e0e0e0',
+  },
+  stepDivider: {
+    height: '1px',
+    backgroundColor: '#e0e0e0',
+    margin: '20px 0',
+  },
 });
 
 interface ServiceRequestFormData {
@@ -607,120 +650,131 @@ export const ServiceRequestForm: React.FC<ServiceRequestFormProps> = ({
   );
 
   const renderClientStep = () => (
-    <div className={styles.form}>
-      <Text className={styles.sectionTitle}>Client Information</Text>
-      <Text className={styles.sectionHint}>
-        Enter the client details for this service request.
-      </Text>
-
-      <div className={styles.row}>
-        <Controller
-          name="clientName"
-          control={control}
-          rules={{ required: 'Client name is required' }}
-          render={({ field }) => (
-            <Field
-              label="Client Company Name"
-              required
-              validationMessage={errors.clientName?.message}
-            >
-              <Input {...field} placeholder="Enter company name" />
-            </Field>
-          )}
-        />
-
-        <Controller
-          name="industry"
-          control={control}
-          render={({ field }) => (
-            <Field label="Industry">
-              <Dropdown
-                placeholder="Select industry"
-                selectedOptions={field.value ? [field.value] : []}
-                onOptionSelect={(_, data) => field.onChange(data.optionValue)}
-              >
-                {INDUSTRIES.map((industry) => (
-                  <Option key={industry} value={industry}>
-                    {industry}
-                  </Option>
-                ))}
-              </Dropdown>
-            </Field>
-          )}
-        />
+    <div className={styles.stepCard}>
+      <div className={styles.stepHeader}>
+        <div className={styles.stepHeaderTitle}>Client Information</div>
+        <div className={styles.stepHeaderSubtitle}>Enter the client details for this service request</div>
       </div>
+      <div className={styles.stepBody}>
+        <div className={styles.stepSection}>
+          <Text className={styles.stepSectionTitle} block>Company Details</Text>
+          <div className={styles.form}>
+            <div className={styles.row}>
+              <Controller
+                name="clientName"
+                control={control}
+                rules={{ required: 'Client name is required' }}
+                render={({ field }) => (
+                  <Field
+                    label="Client Company Name"
+                    required
+                    validationMessage={errors.clientName?.message}
+                  >
+                    <Input {...field} placeholder="Enter company name" />
+                  </Field>
+                )}
+              />
 
-      <div className={styles.row}>
-        <Controller
-          name="contactName"
-          control={control}
-          rules={{ required: 'Contact name is required' }}
-          render={({ field }) => (
-            <Field
-              label="Primary Contact Name"
-              required
-              validationMessage={errors.contactName?.message}
-            >
-              <Input {...field} placeholder="Enter contact name" />
-            </Field>
-          )}
-        />
+              <Controller
+                name="industry"
+                control={control}
+                render={({ field }) => (
+                  <Field label="Industry">
+                    <Dropdown
+                      placeholder="Select industry"
+                      selectedOptions={field.value ? [field.value] : []}
+                      onOptionSelect={(_, data) => field.onChange(data.optionValue)}
+                    >
+                      {INDUSTRIES.map((industry) => (
+                        <Option key={industry} value={industry}>
+                          {industry}
+                        </Option>
+                      ))}
+                    </Dropdown>
+                  </Field>
+                )}
+              />
+            </div>
 
-        <Controller
-          name="contactEmail"
-          control={control}
-          rules={{
-            required: 'Contact email is required',
-            pattern: { value: /^\S+@\S+\.\S+$/, message: 'Invalid email address' },
-          }}
-          render={({ field }) => (
-            <Field
-              label="Contact Email"
-              required
-              validationMessage={errors.contactEmail?.message}
-            >
-              <Input {...field} type="email" placeholder="Enter email address" />
-            </Field>
-          )}
-        />
-      </div>
+            <Controller
+              name="companySize"
+              control={control}
+              render={({ field }) => (
+                <Field label="Company Size">
+                  <Dropdown
+                    placeholder="Select company size"
+                    selectedOptions={field.value ? [field.value] : []}
+                    onOptionSelect={(_, data) => field.onChange(data.optionValue)}
+                  >
+                    {COMPANY_SIZES.map((size) => (
+                      <Option key={size} value={size}>
+                        {size === 'SMB'
+                          ? 'SMB (<50 employees)'
+                          : size === 'Medium'
+                          ? 'Medium (50-250)'
+                          : size === 'Large'
+                          ? 'Large (250-1000)'
+                          : 'Enterprise (1000+)'}
+                      </Option>
+                    ))}
+                  </Dropdown>
+                </Field>
+              )}
+            />
+          </div>
+        </div>
 
-      <div className={styles.row}>
-        <Controller
-          name="contactPhone"
-          control={control}
-          render={({ field }) => (
-            <Field label="Contact Phone">
-              <Input {...field} placeholder="Enter phone number" />
-            </Field>
-          )}
-        />
+        <div className={styles.stepDivider} />
 
-        <Controller
-          name="companySize"
-          control={control}
-          render={({ field }) => (
-            <Field label="Company Size">
-              <Dropdown
-                placeholder="Select company size"
-                selectedOptions={field.value ? [field.value] : []}
-                onOptionSelect={(_, data) => field.onChange(data.optionValue)}
-              >
-                {COMPANY_SIZES.map((size) => (
-                  <Option key={size} value={size}>
-                    {size === 'SMB'
-                      ? 'SMB (<50 employees)'
-                      : size === 'Medium'
-                      ? 'Medium (50-250)'
-                      : size === 'Large'
-                      ? 'Large (250-1000)'
-                      : 'Enterprise (1000+)'}
-                  </Option>
-                ))}
-              </Dropdown>
-            </Field>
-          )}
-        />
+        <div className={styles.stepSectionLast}>
+          <Text className={styles.stepSectionTitle} block>Primary Contact</Text>
+          <div className={styles.form}>
+            <div className={styles.row}>
+              <Controller
+                name="contactName"
+                control={control}
+                rules={{ required: 'Contact name is required' }}
+                render={({ field }) => (
+                  <Field
+                    label="Contact Name"
+                    required
+                    validationMessage={errors.contactName?.message}
+                  >
+                    <Input {...field} placeholder="Enter contact name" />
+                  </Field>
+                )}
+              />
+
+              <Controller
+                name="contactEmail"
+                control={control}
+                rules={{
+                  required: 'Contact email is required',
+                  pattern: { value: /^\S+@\S+\.\S+$/, message: 'Invalid email address' },
+                }}
+                render={({ field }) => (
+                  <Field
+                    label="Contact Email"
+                    required
+                    validationMessage={errors.contactEmail?.message}
+                  >
+                    <Input {...field} type="email" placeholder="Enter email address" />
+                  </Field>
+                )}
+              />
+            </div>
+
+            <Controller
+              name="contactPhone"
+              control={control}
+              render={({ field }) => (
+                <Field label="Contact Phone">
+                  <Input {...field} placeholder="Enter phone number" />
+                </Field>
+              )}
+            />
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -746,282 +800,306 @@ export const ServiceRequestForm: React.FC<ServiceRequestFormProps> = ({
   };
 
   const renderDealInfoStep = () => (
-    <div className={styles.form}>
-      <Text className={styles.sectionTitle}>Deal Information</Text>
-      <Text className={styles.sectionHint}>
-        Provide details about the potential deal and engagement history.
-      </Text>
-
-      <div className={styles.row}>
-        <Controller
-          name="interestLevel"
-          control={control}
-          render={({ field }) => (
-            <Field label="Interest Level" required>
-              <Dropdown
-                selectedOptions={field.value ? [field.value] : ['Warm']}
-                onOptionSelect={(_, data) => field.onChange(data.optionValue)}
-              >
-                {INTEREST_LEVELS.map((level) => (
-                  <Option key={level} value={level}>
-                    {level}
-                  </Option>
-                ))}
-              </Dropdown>
-            </Field>
-          )}
-        />
-
-        <Controller
-          name="dealValue"
-          control={control}
-          render={({ field }) => (
-            <Field label="Estimated Deal Value (ZAR)">
-              <Input
-                {...field}
-                type="number"
-                placeholder="Enter estimated value"
-                value={field.value?.toString() || ''}
-                onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : undefined)}
-              />
-            </Field>
-          )}
-        />
+    <div className={styles.stepCard}>
+      <div className={styles.stepHeader}>
+        <div className={styles.stepHeaderTitle}>Deal Information</div>
+        <div className={styles.stepHeaderSubtitle}>Provide details about the potential deal and engagement history</div>
       </div>
-
-      <div className={styles.row}>
-        <Controller
-          name="dealProbability"
-          control={control}
-          render={({ field }) => (
-            <Field label="Win Probability (%)">
-              <Input
-                {...field}
-                type="number"
-                min={0}
-                max={100}
-                placeholder="0-100"
-                value={field.value?.toString() || '50'}
-                onChange={(e) => field.onChange(Math.min(100, Math.max(0, parseInt(e.target.value) || 0)))}
+      <div className={styles.stepBody}>
+        <div className={styles.stepSection}>
+          <Text className={styles.stepSectionTitle} block>Deal Qualification</Text>
+          <div className={styles.form}>
+            <div className={styles.row}>
+              <Controller
+                name="interestLevel"
+                control={control}
+                render={({ field }) => (
+                  <Field label="Interest Level" required>
+                    <Dropdown
+                      selectedOptions={field.value ? [field.value] : ['Warm']}
+                      onOptionSelect={(_, data) => field.onChange(data.optionValue)}
+                    >
+                      {INTEREST_LEVELS.map((level) => (
+                        <Option key={level} value={level}>
+                          {level}
+                        </Option>
+                      ))}
+                    </Dropdown>
+                  </Field>
+                )}
               />
-            </Field>
-          )}
-        />
 
-        <Controller
-          name="expectedCloseDate"
-          control={control}
-          render={({ field }) => (
-            <Field label="Expected Close Date">
-              <DatePicker
-                value={field.value}
-                onSelectDate={(date) => field.onChange(date)}
-                placeholder="Select date"
-                minDate={new Date()}
+              <Controller
+                name="dealValue"
+                control={control}
+                render={({ field }) => (
+                  <Field label="Estimated Deal Value (ZAR)">
+                    <Input
+                      {...field}
+                      type="number"
+                      placeholder="Enter estimated value"
+                      value={field.value?.toString() || ''}
+                      onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : undefined)}
+                    />
+                  </Field>
+                )}
               />
-            </Field>
-          )}
-        />
-      </div>
+            </div>
 
-      <div className={styles.row}>
-        <Controller
-          name="budget"
-          control={control}
-          render={({ field }) => (
-            <Field label="Client's Budget">
-              <Input {...field} placeholder="e.g., R100,000 - R150,000" />
-            </Field>
-          )}
-        />
+            <div className={styles.row}>
+              <Controller
+                name="dealProbability"
+                control={control}
+                render={({ field }) => (
+                  <Field label="Win Probability (%)">
+                    <Input
+                      {...field}
+                      type="number"
+                      min={0}
+                      max={100}
+                      placeholder="0-100"
+                      value={field.value?.toString() || '50'}
+                      onChange={(e) => field.onChange(Math.min(100, Math.max(0, parseInt(e.target.value) || 0)))}
+                    />
+                  </Field>
+                )}
+              />
 
-        <Controller
-          name="timeline"
-          control={control}
-          render={({ field }) => (
-            <Field label="Client's Timeline">
-              <Input {...field} placeholder="e.g., Q2 2026" />
-            </Field>
-          )}
-        />
-      </div>
+              <Controller
+                name="expectedCloseDate"
+                control={control}
+                render={({ field }) => (
+                  <Field label="Expected Close Date">
+                    <DatePicker
+                      value={field.value}
+                      onSelectDate={(date) => field.onChange(date)}
+                      placeholder="Select date"
+                      minDate={new Date()}
+                    />
+                  </Field>
+                )}
+              />
+            </div>
 
-      <Controller
-        name="requirements"
-        control={control}
-        render={({ field }) => (
-          <Field label="Requirements Summary">
-            <Textarea
-              {...field}
-              placeholder="Describe the client's key requirements, pain points, and objectives..."
-              resize="vertical"
-              style={{ minHeight: '100px' }}
+            <div className={styles.row}>
+              <Controller
+                name="budget"
+                control={control}
+                render={({ field }) => (
+                  <Field label="Client's Budget">
+                    <Input {...field} placeholder="e.g., R100,000 - R150,000" />
+                  </Field>
+                )}
+              />
+
+              <Controller
+                name="timeline"
+                control={control}
+                render={({ field }) => (
+                  <Field label="Client's Timeline">
+                    <Input {...field} placeholder="e.g., Q2 2026" />
+                  </Field>
+                )}
+              />
+            </div>
+          </div>
+        </div>
+
+        <div className={styles.stepDivider} />
+
+        <div className={styles.stepSectionLast}>
+          <Text className={styles.stepSectionTitle} block>Additional Context</Text>
+          <div className={styles.form}>
+            <Controller
+              name="requirements"
+              control={control}
+              render={({ field }) => (
+                <Field label="Requirements Summary">
+                  <Textarea
+                    {...field}
+                    placeholder="Describe the client's key requirements, pain points, and objectives..."
+                    resize="vertical"
+                    style={{ minHeight: '100px' }}
+                  />
+                </Field>
+              )}
             />
-          </Field>
-        )}
-      />
 
-      <Controller
-        name="serviceHistory"
-        control={control}
-        render={({ field }) => (
-          <Field label="Previous Engagement History">
-            <Textarea
-              {...field}
-              placeholder="Any previous engagements or interactions with this client..."
-              resize="vertical"
+            <Controller
+              name="serviceHistory"
+              control={control}
+              render={({ field }) => (
+                <Field label="Previous Engagement History">
+                  <Textarea
+                    {...field}
+                    placeholder="Any previous engagements or interactions with this client..."
+                    resize="vertical"
+                  />
+                </Field>
+              )}
             />
-          </Field>
-        )}
-      />
+          </div>
+        </div>
+      </div>
     </div>
   );
 
   const renderScheduleStep = () => (
-    <div className={styles.form}>
-      <Text className={styles.sectionTitle}>Proposed Discovery Meeting Times</Text>
-      <Text className={styles.sectionHint}>
-        Propose up to 3 time slots for the discovery meeting. At least one slot is required.
-      </Text>
-
-      {/* Slot 1 - Required */}
-      <div className={styles.slotContainer}>
-        <Text className={styles.slotLabel}>Option 1 (Required)</Text>
-        <div className={styles.dateTimeRow}>
-          <Controller
-            name="proposedDate1"
-            control={control}
-            rules={{ required: 'First time slot is required' }}
-            render={({ field }) => (
-              <Field validationMessage={errors.proposedDate1?.message} style={{ flex: 1 }}>
-                <DatePicker
-                  value={field.value}
-                  onSelectDate={(date) => field.onChange(date)}
-                  placeholder="Select date"
-                  minDate={addHours(new Date(), 24)}
+    <div className={styles.stepCard}>
+      <div className={styles.stepHeader}>
+        <div className={styles.stepHeaderTitle}>Proposed Discovery Meeting Times</div>
+        <div className={styles.stepHeaderSubtitle}>Propose up to 3 time slots for the discovery meeting</div>
+      </div>
+      <div className={styles.stepBody}>
+        <div className={styles.stepSection}>
+          <Text className={styles.stepSectionTitle} block>Meeting Options</Text>
+          <div className={styles.form}>
+            {/* Slot 1 - Required */}
+            <div className={styles.slotContainer}>
+              <Text className={styles.slotLabel}>Option 1 (Required)</Text>
+              <div className={styles.dateTimeRow}>
+                <Controller
+                  name="proposedDate1"
+                  control={control}
+                  rules={{ required: 'First time slot is required' }}
+                  render={({ field }) => (
+                    <Field validationMessage={errors.proposedDate1?.message} style={{ flex: 1 }}>
+                      <DatePicker
+                        value={field.value}
+                        onSelectDate={(date) => field.onChange(date)}
+                        placeholder="Select date"
+                        minDate={addHours(new Date(), 24)}
+                      />
+                    </Field>
+                  )}
                 />
-              </Field>
-            )}
-          />
+                <Controller
+                  name="proposedTime1"
+                  control={control}
+                  rules={{ required: 'Time is required' }}
+                  render={({ field }) => (
+                    <Field validationMessage={errors.proposedTime1?.message}>
+                      <Dropdown
+                        className={styles.timeDropdown}
+                        placeholder="Time"
+                        selectedOptions={field.value ? [field.value] : []}
+                        onOptionSelect={(_, data) => field.onChange(data.optionValue)}
+                      >
+                        {TIME_SLOTS.map((time) => (
+                          <Option key={time} value={time}>
+                            {time}
+                          </Option>
+                        ))}
+                      </Dropdown>
+                    </Field>
+                  )}
+                />
+              </div>
+            </div>
+
+            {/* Slot 2 - Optional */}
+            <div className={styles.slotContainer}>
+              <Text className={styles.slotLabel}>Option 2 (Optional)</Text>
+              <div className={styles.dateTimeRow}>
+                <Controller
+                  name="proposedDate2"
+                  control={control}
+                  render={({ field }) => (
+                    <Field style={{ flex: 1 }}>
+                      <DatePicker
+                        value={field.value}
+                        onSelectDate={(date) => field.onChange(date)}
+                        placeholder="Select date"
+                        minDate={addHours(new Date(), 24)}
+                      />
+                    </Field>
+                  )}
+                />
+                <Controller
+                  name="proposedTime2"
+                  control={control}
+                  render={({ field }) => (
+                    <Field>
+                      <Dropdown
+                        className={styles.timeDropdown}
+                        placeholder="Time"
+                        selectedOptions={field.value ? [field.value] : []}
+                        onOptionSelect={(_, data) => field.onChange(data.optionValue)}
+                      >
+                        {TIME_SLOTS.map((time) => (
+                          <Option key={time} value={time}>
+                            {time}
+                          </Option>
+                        ))}
+                      </Dropdown>
+                    </Field>
+                  )}
+                />
+              </div>
+            </div>
+
+            {/* Slot 3 - Optional */}
+            <div className={styles.slotContainer}>
+              <Text className={styles.slotLabel}>Option 3 (Optional)</Text>
+              <div className={styles.dateTimeRow}>
+                <Controller
+                  name="proposedDate3"
+                  control={control}
+                  render={({ field }) => (
+                    <Field style={{ flex: 1 }}>
+                      <DatePicker
+                        value={field.value}
+                        onSelectDate={(date) => field.onChange(date)}
+                        placeholder="Select date"
+                        minDate={addHours(new Date(), 24)}
+                      />
+                    </Field>
+                  )}
+                />
+                <Controller
+                  name="proposedTime3"
+                  control={control}
+                  render={({ field }) => (
+                    <Field>
+                      <Dropdown
+                        className={styles.timeDropdown}
+                        placeholder="Time"
+                        selectedOptions={field.value ? [field.value] : []}
+                        onOptionSelect={(_, data) => field.onChange(data.optionValue)}
+                      >
+                        {TIME_SLOTS.map((time) => (
+                          <Option key={time} value={time}>
+                            {time}
+                          </Option>
+                        ))}
+                      </Dropdown>
+                    </Field>
+                  )}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className={styles.stepDivider} />
+
+        <div className={styles.stepSectionLast}>
+          <Text className={styles.stepSectionTitle} block>Additional Notes</Text>
           <Controller
-            name="proposedTime1"
+            name="comments"
             control={control}
-            rules={{ required: 'Time is required' }}
             render={({ field }) => (
-              <Field validationMessage={errors.proposedTime1?.message}>
-                <Dropdown
-                  className={styles.timeDropdown}
-                  placeholder="Time"
-                  selectedOptions={field.value ? [field.value] : []}
-                  onOptionSelect={(_, data) => field.onChange(data.optionValue)}
-                >
-                  {TIME_SLOTS.map((time) => (
-                    <Option key={time} value={time}>
-                      {time}
-                    </Option>
-                  ))}
-                </Dropdown>
+              <Field label="Comments">
+                <Textarea
+                  {...field}
+                  placeholder="Any additional notes or special requirements for the meeting..."
+                  resize="vertical"
+                />
               </Field>
             )}
           />
         </div>
       </div>
-
-      {/* Slot 2 - Optional */}
-      <div className={styles.slotContainer}>
-        <Text className={styles.slotLabel}>Option 2 (Optional)</Text>
-        <div className={styles.dateTimeRow}>
-          <Controller
-            name="proposedDate2"
-            control={control}
-            render={({ field }) => (
-              <Field style={{ flex: 1 }}>
-                <DatePicker
-                  value={field.value}
-                  onSelectDate={(date) => field.onChange(date)}
-                  placeholder="Select date"
-                  minDate={addHours(new Date(), 24)}
-                />
-              </Field>
-            )}
-          />
-          <Controller
-            name="proposedTime2"
-            control={control}
-            render={({ field }) => (
-              <Field>
-                <Dropdown
-                  className={styles.timeDropdown}
-                  placeholder="Time"
-                  selectedOptions={field.value ? [field.value] : []}
-                  onOptionSelect={(_, data) => field.onChange(data.optionValue)}
-                >
-                  {TIME_SLOTS.map((time) => (
-                    <Option key={time} value={time}>
-                      {time}
-                    </Option>
-                  ))}
-                </Dropdown>
-              </Field>
-            )}
-          />
-        </div>
-      </div>
-
-      {/* Slot 3 - Optional */}
-      <div className={styles.slotContainer}>
-        <Text className={styles.slotLabel}>Option 3 (Optional)</Text>
-        <div className={styles.dateTimeRow}>
-          <Controller
-            name="proposedDate3"
-            control={control}
-            render={({ field }) => (
-              <Field style={{ flex: 1 }}>
-                <DatePicker
-                  value={field.value}
-                  onSelectDate={(date) => field.onChange(date)}
-                  placeholder="Select date"
-                  minDate={addHours(new Date(), 24)}
-                />
-              </Field>
-            )}
-          />
-          <Controller
-            name="proposedTime3"
-            control={control}
-            render={({ field }) => (
-              <Field>
-                <Dropdown
-                  className={styles.timeDropdown}
-                  placeholder="Time"
-                  selectedOptions={field.value ? [field.value] : []}
-                  onOptionSelect={(_, data) => field.onChange(data.optionValue)}
-                >
-                  {TIME_SLOTS.map((time) => (
-                    <Option key={time} value={time}>
-                      {time}
-                    </Option>
-                  ))}
-                </Dropdown>
-              </Field>
-            )}
-          />
-        </div>
-      </div>
-
-      <Controller
-        name="comments"
-        control={control}
-        render={({ field }) => (
-          <Field label="Additional Comments">
-            <Textarea
-              {...field}
-              placeholder="Any additional notes or special requirements for the meeting..."
-              resize="vertical"
-            />
-          </Field>
-        )}
-      />
     </div>
   );
 
@@ -1033,77 +1111,97 @@ export const ServiceRequestForm: React.FC<ServiceRequestFormProps> = ({
     };
 
     return (
-      <div className={styles.previewSection}>
-        <Text className={styles.sectionTitle}>Review Your Service Request</Text>
-        <Text className={styles.sectionHint}>
-          Please review the details before submitting.
-        </Text>
-
-        <div className={styles.previewItem}>
-          <Text className={styles.previewLabel}>Service</Text>
-          <Text className={styles.previewValue}>{selectedService?.Title}</Text>
+      <div className={styles.stepCard}>
+        <div className={styles.stepHeader}>
+          <div className={styles.stepHeaderTitle}>Review Your Service Request</div>
+          <div className={styles.stepHeaderSubtitle}>Please review all details before submitting</div>
         </div>
+        <div className={styles.stepBody}>
+          <div className={styles.stepSection}>
+            <Text className={styles.stepSectionTitle} block>Service & Client</Text>
+            <div className={styles.previewSection}>
+              <div className={styles.previewItem}>
+                <Text className={styles.previewLabel}>Service</Text>
+                <Text className={styles.previewValue}>{selectedService?.Title}</Text>
+              </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-          <div className={styles.previewItem}>
-            <Text className={styles.previewLabel}>Client</Text>
-            <Text className={styles.previewValue}>{watchedValues.clientName}</Text>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <div className={styles.previewItem}>
+                  <Text className={styles.previewLabel}>Client</Text>
+                  <Text className={styles.previewValue}>{watchedValues.clientName}</Text>
+                </div>
+
+                <div className={styles.previewItem}>
+                  <Text className={styles.previewLabel}>Contact</Text>
+                  <Text className={styles.previewValue}>
+                    {watchedValues.contactName} ({watchedValues.contactEmail})
+                  </Text>
+                </div>
+              </div>
+            </div>
           </div>
 
-          <div className={styles.previewItem}>
-            <Text className={styles.previewLabel}>Contact</Text>
-            <Text className={styles.previewValue}>
-              {watchedValues.contactName} ({watchedValues.contactEmail})
-            </Text>
+          <div className={styles.stepDivider} />
+
+          <div className={styles.stepSection}>
+            <Text className={styles.stepSectionTitle} block>Deal Information</Text>
+            <div className={styles.previewSection}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
+                <div className={styles.previewItem}>
+                  <Text className={styles.previewLabel}>Interest Level</Text>
+                  <Text className={styles.previewValue}>{watchedValues.interestLevel || 'Warm'}</Text>
+                </div>
+
+                <div className={styles.previewItem}>
+                  <Text className={styles.previewLabel}>Deal Value</Text>
+                  <Text className={styles.previewValue}>{formatCurrency(watchedValues.dealValue)}</Text>
+                </div>
+
+                <div className={styles.previewItem}>
+                  <Text className={styles.previewLabel}>Probability</Text>
+                  <Text className={styles.previewValue}>{watchedValues.dealProbability || 50}%</Text>
+                </div>
+              </div>
+
+              {watchedValues.requirements && (
+                <div className={styles.previewItem}>
+                  <Text className={styles.previewLabel}>Requirements</Text>
+                  <Text className={styles.previewValue}>{watchedValues.requirements}</Text>
+                </div>
+              )}
+            </div>
           </div>
-        </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
-          <div className={styles.previewItem}>
-            <Text className={styles.previewLabel}>Interest Level</Text>
-            <Text className={styles.previewValue}>{watchedValues.interestLevel || 'Warm'}</Text>
+          <div className={styles.stepDivider} />
+
+          <div className={styles.stepSectionLast}>
+            <Text className={styles.stepSectionTitle} block>Schedule & Ownership</Text>
+            <div className={styles.previewSection}>
+              <div className={styles.previewItem}>
+                <Text className={styles.previewLabel}>Proposed Meeting Times</Text>
+                <Text className={styles.previewValue}>
+                  1. {formatDateTime(watchedValues.proposedDate1, watchedValues.proposedTime1)}
+                  {watchedValues.proposedDate2 && (
+                    <>
+                      <br />
+                      2. {formatDateTime(watchedValues.proposedDate2, watchedValues.proposedTime2)}
+                    </>
+                  )}
+                  {watchedValues.proposedDate3 && (
+                    <>
+                      <br />
+                      3. {formatDateTime(watchedValues.proposedDate3, watchedValues.proposedTime3)}
+                    </>
+                  )}
+                </Text>
+              </div>
+
+              <div className={styles.previewItem}>
+                <Text className={styles.previewLabel}>Account Manager</Text>
+                <Text className={styles.previewValue}>{user?.displayName} ({user?.email})</Text>
+              </div>
+            </div>
           </div>
-
-          <div className={styles.previewItem}>
-            <Text className={styles.previewLabel}>Deal Value</Text>
-            <Text className={styles.previewValue}>{formatCurrency(watchedValues.dealValue)}</Text>
-          </div>
-
-          <div className={styles.previewItem}>
-            <Text className={styles.previewLabel}>Probability</Text>
-            <Text className={styles.previewValue}>{watchedValues.dealProbability || 50}%</Text>
-          </div>
-        </div>
-
-        {watchedValues.requirements && (
-          <div className={styles.previewItem}>
-            <Text className={styles.previewLabel}>Requirements</Text>
-            <Text className={styles.previewValue}>{watchedValues.requirements}</Text>
-          </div>
-        )}
-
-        <div className={styles.previewItem}>
-          <Text className={styles.previewLabel}>Proposed Meeting Times</Text>
-          <Text className={styles.previewValue}>
-            1. {formatDateTime(watchedValues.proposedDate1, watchedValues.proposedTime1)}
-            {watchedValues.proposedDate2 && (
-              <>
-                <br />
-                2. {formatDateTime(watchedValues.proposedDate2, watchedValues.proposedTime2)}
-              </>
-            )}
-            {watchedValues.proposedDate3 && (
-              <>
-                <br />
-                3. {formatDateTime(watchedValues.proposedDate3, watchedValues.proposedTime3)}
-              </>
-            )}
-          </Text>
-        </div>
-
-        <div className={styles.previewItem}>
-          <Text className={styles.previewLabel}>Account Manager</Text>
-          <Text className={styles.previewValue}>{user?.displayName} ({user?.email})</Text>
         </div>
       </div>
     );

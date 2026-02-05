@@ -1003,7 +1003,7 @@ class BookingService {
    */
   private buildCalendarEventBody(booking: Booking, proposedSlots: string[]): string {
     return `
-      <h2>License Pulse ${booking.BookingType} Booking</h2>
+      <h2>DWx Service ${booking.BookingType} Booking</h2>
       <p><strong>Client:</strong> ${booking.ClientName} ${booking.IsPremiumClient ? '⭐ (Premium)' : ''}</p>
       <p><strong>Type:</strong> ${booking.BookingType}</p>
       <p><strong>Licenses:</strong> ${booking.LicenseCount.toLocaleString()}</p>
@@ -1018,7 +1018,7 @@ class BookingService {
       </ul>
       ${booking.Comments ? `<p><strong>Comments:</strong> ${booking.Comments}</p>` : ''}
       <hr/>
-      <p><em>This event was automatically created by LP Demo Scheduler</em></p>
+      <p><em>This event was automatically created by DWx Traffic Manager</em></p>
     `;
   }
 
@@ -1046,7 +1046,7 @@ class BookingService {
     ` : '';
 
     return `
-      <h2>✅ CONFIRMED: License Pulse ${booking.BookingType}</h2>
+      <h2>✅ CONFIRMED: DWx Service ${booking.BookingType}</h2>
       <p><strong>Client:</strong> ${booking.ClientName} ${booking.IsPremiumClient ? '⭐ (Premium)' : ''}</p>
       <p><strong>Type:</strong> ${booking.BookingType}</p>
       <p><strong>Licenses:</strong> ${booking.LicenseCount.toLocaleString()}</p>
@@ -1058,7 +1058,7 @@ class BookingService {
       ${booking.Comments ? `<p><strong>Comments:</strong> ${booking.Comments}</p>` : ''}
       ${deploymentChecklistSection}
       <hr/>
-      <p><em>This event was automatically updated by LP Demo Scheduler</em></p>
+      <p><em>This event was automatically updated by DWx Traffic Manager</em></p>
     `;
   }
 
@@ -1071,7 +1071,7 @@ class BookingService {
     reason: string
   ): string {
     return `
-      <h2>🔄 RESCHEDULING: License Pulse ${booking.BookingType}</h2>
+      <h2>🔄 RESCHEDULING: DWx Service ${booking.BookingType}</h2>
       <p><strong>Client:</strong> ${booking.ClientName} ${booking.IsPremiumClient ? '⭐ (Premium)' : ''}</p>
       <p><strong>Type:</strong> ${booking.BookingType}</p>
       <p><strong>Licenses:</strong> ${booking.LicenseCount.toLocaleString()}</p>
@@ -1086,7 +1086,7 @@ class BookingService {
       </ul>
       <p><em>Awaiting approval for new time slot</em></p>
       <hr/>
-      <p><em>This event was automatically created by LP Demo Scheduler</em></p>
+      <p><em>This event was automatically created by DWx Traffic Manager</em></p>
     `;
   }
 }

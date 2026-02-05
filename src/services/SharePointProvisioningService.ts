@@ -1072,7 +1072,7 @@ class SharePointProvisioningService {
   private get accountManagersListDefinition(): ListDefinition {
     return {
       title: 'AccountManagers',
-      description: 'Account Managers for the LP Booking App',
+      description: 'Account Managers for the DWx Traffic Manager',
       fields: [
         { internalName: 'Email', displayName: 'Email', type: 'Text', required: true },
         { internalName: 'Phone', displayName: 'Phone', type: 'Text' },

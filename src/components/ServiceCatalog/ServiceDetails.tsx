@@ -43,6 +43,10 @@ const useStyles = makeStyles({
     gap: '16px',
     backgroundColor: '#1a5a8a',
     color: 'white',
+    borderRadius: '8px 8px 0 0',
+    marginTop: '-1px',
+    marginLeft: '-1px',
+    marginRight: '-1px',
   },
   iconContainer: {
     width: '48px',
@@ -68,12 +72,6 @@ const useStyles = makeStyles({
     fontSize: '13px',
     color: 'rgba(255, 255, 255, 0.8)',
   },
-  headerActions: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '8px',
-    flexShrink: 0,
-  },
   closeButton: {
     minWidth: '36px',
     height: '36px',
@@ -88,16 +86,6 @@ const useStyles = makeStyles({
     justifyContent: 'center',
     ':hover': {
       backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    },
-  },
-  requestButton: {
-    backgroundColor: 'white',
-    color: '#1a5a8a',
-    fontWeight: '600',
-    padding: '8px 16px',
-    borderRadius: '6px',
-    ':hover': {
-      backgroundColor: '#f0f0f0',
     },
   },
   content: {
@@ -292,22 +280,13 @@ export const ServiceDetails: React.FC<ServiceDetailsProps> = ({
               <Text className={styles.title}>{service.Title}</Text>
               <Text className={styles.subtitle}>{service.Category}</Text>
             </div>
-            <div className={styles.headerActions}>
-              <button
-                className={styles.closeButton}
-                onClick={onClose}
-                title="Close"
-              >
-                <Dismiss24Regular />
-              </button>
-              <Button
-                className={styles.requestButton}
-                appearance="primary"
-                onClick={() => onRequestService(service)}
-              >
-                Request This Service
-              </Button>
-            </div>
+            <button
+              className={styles.closeButton}
+              onClick={onClose}
+              title="Close"
+            >
+              <Dismiss24Regular />
+            </button>
           </div>
 
           {/* Content */}

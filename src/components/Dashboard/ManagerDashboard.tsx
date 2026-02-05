@@ -8,11 +8,12 @@ import {
   Tab,
   TabList,
 } from '@fluentui/react-components';
-import { ArrowClockwise24Regular, ArrowDownload24Regular, CalendarMonth24Regular, Timeline24Regular, Trophy24Regular, Money24Regular, TargetRegular } from '@fluentui/react-icons';
+import { ArrowClockwise24Regular, ArrowDownload24Regular, CalendarMonth24Regular, Timeline24Regular, Trophy24Regular, Money24Regular, TargetRegular, DocumentFolder24Regular } from '@fluentui/react-icons';
 import { useAuth } from '../../contexts/AuthContext';
 import { dashboardService } from '../../services/DashboardService';
 import { DashboardData, DashboardFilters } from '../../types/Dashboard';
 import { Booking } from '../../types/Booking';
+import { ServiceRequest } from '../../types/ServiceRequest';
 import { subDays, startOfDay, endOfDay } from 'date-fns';
 
 import { KPICards } from './KPICards';
@@ -22,17 +23,18 @@ import { TrendsChart } from './TrendsChart';
 import { AccountManagerTable } from './AccountManagerTable';
 import { ClientTable } from './ClientTable';
 import { DashboardFiltersComponent } from './DashboardFilters';
-import { ApprovalQueue } from './ApprovalQueue';
 import { CalendarView } from './CalendarView';
 import { TimelineView } from './TimelineView';
 import { BookingDetails } from '../MyBookings/BookingDetails';
 import { downloadBookingsExcel } from '../../utils/excelExport';
 import { GamificationTab } from './GamificationTab';
 import { CommercialTab } from './CommercialTab';
-import { bookingService, ApprovalResult } from '../../services/BookingService';
+import { ResourcesTab } from './ResourcesTab';
 import { useToast } from '../../contexts/ToastContext';
-// DWx Traffic Manager - Pipeline Components
+// DWx Traffic Manager - Pipeline & Service Request Components
 import { SalesFunnelDashboard } from '../SalesFunnel/SalesFunnelDashboard';
+import { RequestsQueue } from '../SalesFunnel/RequestsQueue';
+import { serviceRequestService } from '../../services/ServiceRequestService';
 
 const useStyles = makeStyles({
   container: {
@@ -126,24 +128,25 @@ const useStyles = makeStyles({
   },
 });
 
-type DashboardTab = 'overview' | 'pipeline' | 'approvals' | 'calendar' | 'timeline' | 'performance' | 'clients' | 'commercial' | 'gamification';
+type DashboardTab = 'overview' | 'pipeline' | 'approvals' | 'calendar' | 'timeline' | 'performance' | 'clients' | 'commercial' | 'gamification' | 'resources';
 
 export const ManagerDashboard: React.FC = () => {
   const styles = useStyles();
   const { user } = useAuth();
   const { showToast } = useToast();
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
   const [bookings, setBookings] = useState<Booking[]>([]);
+  const [serviceRequests, setServiceRequests] = useState<ServiceRequest[]>([]);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
-  const [highlightedBookingId, setHighlightedBookingId] = useState<number | null>(null);
 
   // Read tab from URL params, default to 'overview'
+  const validTabs = ['overview', 'pipeline', 'approvals', 'calendar', 'timeline', 'performance', 'clients', 'commercial', 'gamification', 'resources'];
   const tabFromUrl = searchParams.get('tab') as DashboardTab | null;
   const [selectedTab, setSelectedTab] = useState<DashboardTab>(
-    tabFromUrl && ['overview', 'pipeline', 'approvals', 'calendar', 'timeline', 'leaderboard', 'commercial'].includes(tabFromUrl)
+    tabFromUrl && validTabs.includes(tabFromUrl)
       ? tabFromUrl
       : 'overview'
   );
@@ -151,20 +154,11 @@ export const ManagerDashboard: React.FC = () => {
   // Handle URL parameters for deep linking
   useEffect(() => {
     const tab = searchParams.get('tab') as DashboardTab | null;
-    const bookingId = searchParams.get('bookingId');
 
-    if (tab && ['overview', 'pipeline', 'approvals', 'calendar', 'timeline', 'leaderboard', 'commercial'].includes(tab)) {
+    if (tab && validTabs.includes(tab)) {
       setSelectedTab(tab);
     }
-
-    if (bookingId) {
-      setHighlightedBookingId(parseInt(bookingId, 10));
-      // Clear the bookingId from URL after reading it (keeps the tab)
-      const newParams = new URLSearchParams(searchParams);
-      newParams.delete('bookingId');
-      setSearchParams(newParams, { replace: true });
-    }
-  }, [searchParams, setSearchParams]);
+  }, [searchParams]);
   const [filters, setFilters] = useState<DashboardFilters>({
     dateRange: {
       start: startOfDay(subDays(new Date(), 30)),
@@ -179,8 +173,13 @@ export const ManagerDashboard: React.FC = () => {
       setIsLoading(true);
       setError(null);
 
+      // Load legacy bookings (for calendar, timeline, etc. - will be migrated later)
       const allBookings = await dashboardService.getAllBookings(filters);
       setBookings(allBookings);
+
+      // Load service requests (for the new approval workflow)
+      const allRequests = await serviceRequestService.getRequests();
+      setServiceRequests(allRequests);
 
       const data = dashboardService.calculateDashboardData(allBookings);
       setDashboardData(data);
@@ -214,64 +213,19 @@ export const ManagerDashboard: React.FC = () => {
     }
   };
 
-  const handleApproveBooking = async (bookingId: number, confirmedSlot: string, comments?: string): Promise<ApprovalResult> => {
-    const approverName = user?.displayName || 'Manager';
-    const approverEmail = user?.email || '';
-
-    try {
-      const result = await bookingService.approveBooking(
-        bookingId,
-        confirmedSlot,
-        comments || '',
-        approverEmail,
-        approverName
-      );
-
-      if (!result.success) {
-        console.error('Booking approval failed:', result.error);
-        showToast(result.error || 'Approval failed', 'error');
-        throw new Error(result.error || 'Approval failed');
-      }
-
-      // Show warnings if any (e.g., calendar event failed but booking was approved)
-      if (result.warnings && result.warnings.length > 0) {
-        result.warnings.forEach(warning => {
-          showToast(warning, 'warning');
-        });
-      }
-
-      return result;
-    } finally {
-      // Always refresh data so the UI updates even if there were partial errors
-      await fetchDashboardData();
-    }
-  };
-
-  const handleRejectBooking = async (bookingId: number, reason: string) => {
-    const rejecterName = user?.displayName || 'Manager';
-    const rejecterEmail = user?.email || '';
-
-    try {
-      const result = await bookingService.rejectBooking(
-        bookingId,
-        reason,
-        rejecterEmail,
-        rejecterName
-      );
-
-      if (!result.success) {
-        console.error('Booking rejection failed:', result.error);
-        throw new Error(result.error || 'Rejection failed');
-      }
-    } finally {
-      // Always refresh data so the UI updates
-      await fetchDashboardData();
-    }
+  // Handle service request updates from RequestsQueue
+  const handleRequestUpdated = (updatedRequest: ServiceRequest) => {
+    setServiceRequests((prev) =>
+      prev.map((r) => (r.Id === updatedRequest.Id ? updatedRequest : r))
+    );
+    showToast('Request updated successfully', 'success');
   };
 
   const accountManagers = dashboardService.getUniqueAccountManagers(bookings);
-  const pendingApprovalsCount = bookings.filter(
-    (b) => b.Status === 'Pending Review' || b.Status === 'Awaiting Approval'
+
+  // Count actionable service requests (not Won/Lost)
+  const pendingRequestsCount = serviceRequests.filter(
+    (r) => r.FunnelStage !== 'Won' && r.FunnelStage !== 'Lost'
   ).length;
 
   const handleBookingClick = (booking: Booking) => {
@@ -345,7 +299,8 @@ export const ManagerDashboard: React.FC = () => {
       }}>
         <span>Logged in: <strong>{user?.email || 'unknown'}</strong></span>
         <span>Manager: <strong>{user?.isManager ? 'Yes' : 'No'}</strong></span>
-        <span>Bookings loaded: <strong>{bookings.length}</strong></span>
+        <span>Service Requests: <strong>{serviceRequests.length}</strong></span>
+        <span>Legacy Bookings: <strong>{bookings.length}</strong></span>
         {error && <span style={{ color: '#d13438' }}>Error: {error}</span>}
       </div>
 
@@ -375,7 +330,7 @@ export const ManagerDashboard: React.FC = () => {
         <Tab value="overview">Overview</Tab>
         <Tab value="pipeline" icon={<TargetRegular />}>Pipeline</Tab>
         <Tab value="approvals">
-          Approvals {pendingApprovalsCount > 0 && `(${pendingApprovalsCount})`}
+          Action Queue {pendingRequestsCount > 0 && `(${pendingRequestsCount})`}
         </Tab>
         <Tab value="calendar" icon={<CalendarMonth24Regular />}>Calendar</Tab>
         <Tab value="timeline" icon={<Timeline24Regular />}>Timeline</Tab>
@@ -383,6 +338,7 @@ export const ManagerDashboard: React.FC = () => {
         <Tab value="clients">Client Activity</Tab>
         <Tab value="commercial" icon={<Money24Regular />}>Commercial</Tab>
         <Tab value="gamification" icon={<Trophy24Regular />}>Gamification</Tab>
+        <Tab value="resources" icon={<DocumentFolder24Regular />}>Resources</Tab>
       </TabList>
 
       {dashboardData && (
@@ -415,15 +371,11 @@ export const ManagerDashboard: React.FC = () => {
             <SalesFunnelDashboard />
           )}
 
-          {/* Approvals Tab */}
+          {/* Action Queue Tab - DWx Service Requests */}
           {selectedTab === 'approvals' && (
-            <ApprovalQueue
-              bookings={bookings}
-              onApprove={handleApproveBooking}
-              onReject={handleRejectBooking}
-              isLoading={isLoading}
-              highlightedBookingId={highlightedBookingId}
-              onHighlightClear={() => setHighlightedBookingId(null)}
+            <RequestsQueue
+              requests={serviceRequests}
+              onRequestUpdated={handleRequestUpdated}
             />
           )}
 
@@ -465,6 +417,11 @@ export const ManagerDashboard: React.FC = () => {
               currentUserEmail={user?.email}
               isManager={true}
             />
+          )}
+
+          {/* Resources Tab */}
+          {selectedTab === 'resources' && (
+            <ResourcesTab />
           )}
         </div>
       )}

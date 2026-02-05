@@ -28,13 +28,13 @@ export interface BookingDocumentConfig {
 // Primary documents are automatically attached based on booking type
 export const BOOKING_DOCUMENTS: Record<'Demo' | 'Deployment', BookingDocumentConfig> = {
   Demo: {
-    fileName: 'License Pulse v2.0 Product Explainer.pdf',
-    path: 'License%20Pulse%20v2.0%20Product%20Explainer.pdf',
+    fileName: 'DWx Service Catalog.pdf',
+    path: 'DWx%20Service%20Catalog.pdf',
     contentType: 'application/pdf',
   },
   Deployment: {
-    fileName: 'First Digital - License Pulse Setup Requirements v2.0.docx',
-    path: 'First%20Digital%20-%20License%20Pulse%20Setup%20Requirements%20v2.0.docx',
+    fileName: 'DWx Setup Requirements.docx',
+    path: 'DWx%20Setup%20Requirements.docx',
     contentType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
   },
 };
@@ -44,8 +44,8 @@ export const BOOKING_DOCUMENTS: Record<'Demo' | 'Deployment', BookingDocumentCon
 export const ADDITIONAL_DOCUMENTS: Record<string, BookingDocumentConfig> = {
   // Example: Add more documents here
   // 'pricing': {
-  //   fileName: 'License Pulse Pricing Guide.pdf',
-  //   path: 'License%20Pulse%20Pricing%20Guide.pdf',
+  //   fileName: 'DWx Pricing Guide.pdf',
+  //   path: 'DWx%20Pricing%20Guide.pdf',
   //   contentType: 'application/pdf',
   // },
 };

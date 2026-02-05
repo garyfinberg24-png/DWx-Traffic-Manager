@@ -899,6 +899,144 @@ export const VIVA_REQUIREMENTS: ServiceRequirementsConfig = {
 };
 
 // ============================================================================
+// Training Requirements (Zero to Hero Programs)
+// ============================================================================
+
+export const TRAINING_REQUIREMENTS: ServiceRequirementsConfig = {
+  category: 'Training',
+  title: 'Training Requirements',
+  subtitle: 'Help us plan your training program effectively',
+  sections: [
+    {
+      title: 'Training Audience',
+      description: 'Tell us about your participants',
+      questions: [
+        {
+          id: 'training_audience_size',
+          question: 'How many participants do you expect?',
+          description: 'Maximum 50 participants per cohort',
+          type: 'select',
+          options: [
+            { value: '1-10', label: '1-10 participants' },
+            { value: '11-25', label: '11-25 participants' },
+            { value: '26-50', label: '26-50 participants' },
+            { value: '50+', label: 'More than 50 (multiple cohorts)' },
+          ],
+          required: true,
+        },
+        {
+          id: 'training_audience_roles',
+          question: 'What roles will be attending?',
+          type: 'multiselect',
+          options: [
+            { value: 'endusers', label: 'End Users' },
+            { value: 'powerusers', label: 'Power Users / Champions' },
+            { value: 'admins', label: 'IT Administrators' },
+            { value: 'managers', label: 'Managers / Team Leads' },
+            { value: 'executives', label: 'Executives / Leadership' },
+          ],
+          required: true,
+        },
+        {
+          id: 'training_experience',
+          question: 'What is the current experience level with Copilot/AI?',
+          type: 'radio',
+          options: [
+            { value: 'none', label: 'No experience with AI tools' },
+            { value: 'basic', label: 'Basic awareness, limited usage' },
+            { value: 'some', label: 'Some experience with ChatGPT or similar' },
+            { value: 'experienced', label: 'Regular users of AI tools' },
+          ],
+          required: true,
+        },
+      ],
+    },
+    {
+      title: 'Training Preferences',
+      description: 'How would you like the training delivered?',
+      questions: [
+        {
+          id: 'training_format',
+          question: 'Preferred training format?',
+          type: 'radio',
+          options: [
+            { value: 'virtual', label: 'Virtual (Teams meetings)' },
+            { value: 'onsite', label: 'On-site at your location' },
+            { value: 'hybrid', label: 'Hybrid (mix of both)' },
+          ],
+          required: true,
+        },
+        {
+          id: 'training_timeline',
+          question: 'When would you like to start the training?',
+          type: 'select',
+          options: [
+            { value: 'asap', label: 'As soon as possible' },
+            { value: '2weeks', label: 'Within 2 weeks' },
+            { value: '1month', label: 'Within 1 month' },
+            { value: '2-3months', label: '2-3 months out' },
+            { value: 'flexible', label: 'Flexible / Planning phase' },
+          ],
+          required: true,
+        },
+        {
+          id: 'training_managed_service',
+          question: 'Are you interested in "The AI Guy" managed service follow-up?',
+          description: '2 hours per month for 4 months of ongoing support',
+          type: 'radio',
+          options: [
+            { value: 'yes', label: 'Yes, include managed service' },
+            { value: 'maybe', label: 'Maybe, tell me more' },
+            { value: 'no', label: 'Training only for now' },
+          ],
+          required: true,
+        },
+      ],
+    },
+    {
+      title: 'Business Goals',
+      description: 'What do you want to achieve?',
+      questions: [
+        {
+          id: 'training_goals',
+          question: 'What are your primary goals for this training?',
+          type: 'multiselect',
+          options: [
+            { value: 'productivity', label: 'Improve employee productivity' },
+            { value: 'adoption', label: 'Increase Copilot adoption rates' },
+            { value: 'roi', label: 'Demonstrate ROI on Copilot investment' },
+            { value: 'champions', label: 'Build internal champion network' },
+            { value: 'specific', label: 'Solve specific business challenges' },
+          ],
+          required: true,
+        },
+        {
+          id: 'training_use_cases',
+          question: 'Which Copilot use cases are most important?',
+          type: 'multiselect',
+          options: [
+            { value: 'meetings', label: 'Meeting summaries & action items' },
+            { value: 'email', label: 'Email drafting & responses' },
+            { value: 'documents', label: 'Document creation & editing' },
+            { value: 'data', label: 'Data analysis & insights' },
+            { value: 'chat', label: 'General Copilot Chat assistance' },
+            { value: 'custom', label: 'Custom agents/plugins' },
+          ],
+          required: false,
+        },
+        {
+          id: 'training_notes',
+          question: 'Any specific topics or challenges you want addressed?',
+          type: 'textarea',
+          placeholder: 'Tell us about any specific scenarios, departments, or challenges...',
+          required: false,
+        },
+      ],
+    },
+  ],
+};
+
+// ============================================================================
 // Service Requirements Map
 // ============================================================================
 
@@ -909,6 +1047,7 @@ export const SERVICE_REQUIREMENTS_MAP: Record<ServiceCategory, ServiceRequiremen
   'M365 Assessment': ASSESSMENT_REQUIREMENTS,
   'Copilot Agents': COPILOT_REQUIREMENTS,
   'MS Viva': VIVA_REQUIREMENTS,
+  'Training': TRAINING_REQUIREMENTS,
 };
 
 /**

@@ -421,7 +421,7 @@ export const UserGuide: React.FC<UserGuideProps> = ({ userName }) => {
                 Welcome
               </Badge>
               <DialogTitle className={styles.title}>
-                {userName ? `Hello, ${userName.split(' ')[0]}!` : 'Welcome to License Pulse Scheduler'}
+                {userName ? `Hello, ${userName.split(' ')[0]}!` : 'Welcome to DWx Traffic Manager'}
               </DialogTitle>
               <Text className={styles.subtitle}>
                 Your guide to booking demos and deployments efficiently
@@ -487,7 +487,7 @@ export const UserGuide: React.FC<UserGuideProps> = ({ userName }) => {
                 <div className={styles.bookingTypeContent}>
                   <Text className={styles.bookingTypeTitle}>Demo</Text>
                   <Text className={styles.bookingTypeDescription}>
-                    Product demonstrations for prospective clients. Showcases License Pulse features, capabilities, and value proposition. Ideal for initial client engagement and sales presentations.
+                    Product demonstrations for prospective clients. Showcases DWx service features, capabilities, and value proposition. Ideal for initial client engagement and sales presentations.
                   </Text>
                   <span className={styles.bookingTypeDuration}>
                     <Clock24Regular style={{ fontSize: '12px' }} />

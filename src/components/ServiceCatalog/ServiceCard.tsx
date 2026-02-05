@@ -146,6 +146,7 @@ const categoryColors: Record<ServiceCategory, string> = {
   'M365 Assessment': '#107c10',
   'Copilot Agents': '#6264a7',
   'MS Viva': '#e5559a',
+  'Training': '#f59e0b',
 };
 
 interface ServiceCardProps {

@@ -5,15 +5,11 @@ import { MsalProvider } from '@azure/msal-react';
 import { PublicClientApplication } from '@azure/msal-browser';
 import * as microsoftTeams from '@microsoft/teams-js';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
-import { BookingProvider } from './contexts/BookingContext';
 import { ToastProvider } from './contexts/ToastContext';
 import { NotificationProvider } from './contexts/NotificationContext';
 import { TemplateProvider } from './contexts/TemplateContext';
-import { BookingForm } from './components/BookingForm';
-import { MyBookings } from './components/MyBookings';
 import { ManagerDashboard } from './components/Dashboard';
 import { AdminPage, AccountManagerManagement } from './components/Admin';
-import { ChecklistPage } from './components/Checklist';
 import { Header, ErrorBoundary, LoadingSpinner, UserGuide } from './components/Common';
 // DWx Traffic Manager - New Components
 import { LandingPage } from './components/LandingPage';
@@ -113,10 +109,7 @@ const AppRoutes: React.FC = () => {
             }
           />
 
-          {/* Legacy LP Booking Routes (for backward compatibility) */}
-          <Route path="/booking" element={<BookingForm />} />
-          <Route path="/bookings" element={<MyBookings />} />
-          <Route path="/checklist/:bookingId" element={<ChecklistPage />} />
+          {/* Manager Dashboard */}
           <Route
             path="/dashboard"
             element={
@@ -176,17 +169,15 @@ const ConfigError: React.FC<{ missing: string[] }> = ({ missing }) => {
 const InnerProviders: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return (
     <AuthProvider>
-      <BookingProvider>
-        <NotificationProvider>
-          <TemplateProvider>
-            <ToastProvider>
-              <BrowserRouter>
-                {children}
-              </BrowserRouter>
-            </ToastProvider>
-          </TemplateProvider>
-        </NotificationProvider>
-      </BookingProvider>
+      <NotificationProvider>
+        <TemplateProvider>
+          <ToastProvider>
+            <BrowserRouter>
+              {children}
+            </BrowserRouter>
+          </ToastProvider>
+        </TemplateProvider>
+      </NotificationProvider>
     </AuthProvider>
   );
 };

@@ -3,7 +3,7 @@
  * Types for DWx Apps, Web Parts, and Adaptive Cards
  */
 
-export type ProductType = 'app' | 'webpart' | 'adaptive-card';
+export type ProductType = 'app' | 'webpart' | 'adaptive-card' | 'agent';
 
 export type ProductCategory =
   | 'Document & Content'
@@ -14,7 +14,8 @@ export type ProductCategory =
   | 'Navigation'
   | 'Utilities'
   | 'Workflows'
-  | 'Productivity';
+  | 'Productivity'
+  | 'AI & Automation';
 
 export interface Product {
   id: string;
@@ -211,6 +212,18 @@ export const DWX_APPS: Product[] = [
     gradient: 'charcoal',
     brand: 'FIRST DIGITAL',
   },
+  {
+    id: 'license-pulse',
+    name: 'License Pulse',
+    subtitle: 'M365 License Analytics & Power BI Reporting',
+    description: 'Comprehensive M365 license analytics with Power BI dashboards, usage insights, cost optimization recommendations, and license allocation tracking.',
+    type: 'app',
+    category: 'Operations & IT',
+    version: 'v1.0.0',
+    icon: '📊',
+    gradient: 'teal',
+    brand: 'FIRST DIGITAL',
+  },
 ];
 
 // SharePoint Web Parts (8 web parts)
@@ -389,9 +402,133 @@ export const ADAPTIVE_CARDS: Product[] = [
   },
 ];
 
+// DWx Agents (Copilot Studio Agents - 10 agents)
+export const DWX_AGENTS: Product[] = [
+  {
+    id: 'it-service-desk-assistant',
+    name: 'IT Service Desk Assistant',
+    subtitle: 'AI-Powered IT Support',
+    description: 'Intelligent IT helpdesk agent that handles common IT queries, troubleshooting, password resets, and ticket creation.',
+    type: 'agent',
+    category: 'Operations & IT',
+    version: 'v1.0.0',
+    icon: '🤖',
+    gradient: 'corporate-blue',
+    brand: 'COPILOT STUDIO',
+  },
+  {
+    id: 'access-identity-requests',
+    name: 'Access & Identity Requests',
+    subtitle: 'Automated Access Management',
+    description: 'Self-service agent for requesting system access, role changes, and identity verification workflows.',
+    type: 'agent',
+    category: 'Operations & IT',
+    version: 'v1.0.0',
+    icon: '🔐',
+    gradient: 'indigo',
+    brand: 'COPILOT STUDIO',
+  },
+  {
+    id: 'hr-policy-leave-advisor',
+    name: 'HR Policy & Leave Advisor',
+    subtitle: 'HR Self-Service Assistant',
+    description: 'Answer HR policy questions, guide leave applications, and provide benefits information to employees.',
+    type: 'agent',
+    category: 'HR & People',
+    version: 'v1.0.0',
+    icon: '👥',
+    gradient: 'pink',
+    brand: 'COPILOT STUDIO',
+  },
+  {
+    id: 'employee-onboarding-concierge',
+    name: 'Employee Onboarding Concierge',
+    subtitle: 'New Hire Welcome Assistant',
+    description: 'Guide new employees through onboarding tasks, document completion, and orientation scheduling.',
+    type: 'agent',
+    category: 'HR & People',
+    version: 'v1.0.0',
+    icon: '🎯',
+    gradient: 'emerald',
+    brand: 'COPILOT STUDIO',
+  },
+  {
+    id: 'procurement-helpdesk',
+    name: 'Procurement Helpdesk',
+    subtitle: 'Purchase Request Assistant',
+    description: 'Assist with purchase requisitions, vendor inquiries, approval status, and procurement policy guidance.',
+    type: 'agent',
+    category: 'Operations & IT',
+    version: 'v1.0.0',
+    icon: '🛒',
+    gradient: 'amber',
+    brand: 'COPILOT STUDIO',
+  },
+  {
+    id: 'supplier-query-assistant',
+    name: 'Supplier Query Assistant',
+    subtitle: 'Vendor Communication Bot',
+    description: 'Handle supplier inquiries, payment status checks, and vendor registration assistance.',
+    type: 'agent',
+    category: 'Operations & IT',
+    version: 'v1.0.0',
+    icon: '🏭',
+    gradient: 'forest-teal',
+    brand: 'COPILOT STUDIO',
+  },
+  {
+    id: 'contract-policy-search',
+    name: 'Contract & Policy Search Copilot',
+    subtitle: 'Document Intelligence Agent',
+    description: 'Search and retrieve information from contracts, policies, and legal documents using natural language.',
+    type: 'agent',
+    category: 'Document & Content',
+    version: 'v1.0.0',
+    icon: '📑',
+    gradient: 'royal-purple',
+    brand: 'COPILOT STUDIO',
+  },
+  {
+    id: 'asset-device-lifecycle',
+    name: 'Asset & Device Lifecycle Assistant',
+    subtitle: 'IT Asset Management Bot',
+    description: 'Track device assignments, request hardware, report issues, and manage asset lifecycle queries.',
+    type: 'agent',
+    category: 'Operations & IT',
+    version: 'v1.0.0',
+    icon: '💻',
+    gradient: 'slate',
+    brand: 'COPILOT STUDIO',
+  },
+  {
+    id: 'travel-expense-policy',
+    name: 'Travel & Expense Policy Guide',
+    subtitle: 'T&E Assistant',
+    description: 'Guide employees on travel policies, expense claim procedures, and per diem rates.',
+    type: 'agent',
+    category: 'Operations & IT',
+    version: 'v1.0.0',
+    icon: '✈️',
+    gradient: 'sky',
+    brand: 'COPILOT STUDIO',
+  },
+  {
+    id: 'internal-knowledge-navigator',
+    name: 'Internal Knowledge Navigator',
+    subtitle: 'Enterprise Search Copilot',
+    description: 'Navigate internal knowledge bases, wikis, and documentation to find answers across the organization.',
+    type: 'agent',
+    category: 'AI & Automation',
+    version: 'v1.0.0',
+    icon: '🧭',
+    gradient: 'teal',
+    brand: 'COPILOT STUDIO',
+  },
+];
+
 // Get all products
 export const getAllProducts = (): Product[] => {
-  return [...DWX_APPS, ...WEBPARTS, ...ADAPTIVE_CARDS];
+  return [...DWX_APPS, ...WEBPARTS, ...ADAPTIVE_CARDS, ...DWX_AGENTS];
 };
 
 // Get products by type

@@ -11,3 +11,4 @@ export { GamificationTab } from './GamificationTab';
 export { CalendarView } from './CalendarView';
 export { TimelineView } from './TimelineView';
 export { CommercialTab } from './CommercialTab';
+export { ResourcesTab } from './ResourcesTab';

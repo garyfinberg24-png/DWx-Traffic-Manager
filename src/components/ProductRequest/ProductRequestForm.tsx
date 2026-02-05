@@ -1,7 +1,7 @@
 /**
  * DWx Traffic Manager - Product Request Form
  * Form for requesting demos or trial deployments of DWx Apps
- * Follows the same pattern as LP Booking App for demos/deployments
+ * Follows the same pattern as DWx Booking Form for demos/deployments
  */
 
 import React, { useState } from 'react';
@@ -33,10 +33,14 @@ import {
   CalendarRegular,
   SendRegular,
   Star24Filled,
+  ClipboardTaskListLtr24Regular,
 } from '@fluentui/react-icons';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
-import { Product, DWX_APPS, WEBPARTS, ADAPTIVE_CARDS } from '../../types/Product';
+import { Product, DWX_APPS, WEBPARTS, ADAPTIVE_CARDS, DWX_AGENTS } from '../../types/Product';
+import { ProductRequirementsStep } from '../ServiceRequest/ProductRequirementsStep';
+import { getProductRequirements, validateProductRequirements } from '../../types/ProductRequirements';
+import { ClientIndustry, CompanySize } from '../../types/ServiceRequest';
 import { addHours, format, setHours, setMinutes } from 'date-fns';
 
 const useStyles = makeStyles({
@@ -274,6 +278,8 @@ interface ProductRequestFormData {
 
   // Client
   clientName: string;
+  industry?: ClientIndustry;
+  companySize?: CompanySize;
   contactName: string;
   contactEmail: string;
   contactPhone?: string;
@@ -295,8 +301,9 @@ interface ProductRequestFormData {
 const STEPS = [
   { id: 1, label: 'Product', icon: Apps24Regular },
   { id: 2, label: 'Client', icon: PersonRegular },
-  { id: 3, label: 'Schedule', icon: CalendarRegular },
-  { id: 4, label: 'Review', icon: CheckmarkRegular },
+  { id: 3, label: 'Requirements', icon: ClipboardTaskListLtr24Regular },
+  { id: 4, label: 'Schedule', icon: CalendarRegular },
+  { id: 5, label: 'Review', icon: CheckmarkRegular },
 ];
 
 const TIME_SLOTS = [
@@ -305,8 +312,23 @@ const TIME_SLOTS = [
   '14:00', '14:30', '15:00', '15:30', '16:00', '16:30', '17:00',
 ];
 
+const INDUSTRIES: ClientIndustry[] = [
+  'Technology',
+  'Finance',
+  'Healthcare',
+  'Manufacturing',
+  'Retail',
+  'Government',
+  'Education',
+  'Legal',
+  'Non-Profit',
+  'Other',
+];
+
+const COMPANY_SIZES: CompanySize[] = ['SMB', 'Medium', 'Large', 'Enterprise'];
+
 // All products combined
-const ALL_PRODUCTS: Product[] = [...DWX_APPS, ...WEBPARTS, ...ADAPTIVE_CARDS];
+const ALL_PRODUCTS: Product[] = [...DWX_APPS, ...WEBPARTS, ...ADAPTIVE_CARDS, ...DWX_AGENTS];
 
 export const ProductRequestForm: React.FC = () => {
   const styles = useStyles();
@@ -322,6 +344,9 @@ export const ProductRequestForm: React.FC = () => {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(preSelectedProduct || null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Product requirements state (separate from react-hook-form for flexibility)
+  const [productRequirements, setProductRequirements] = useState<Record<string, unknown>>({});
 
   const {
     control,
@@ -345,10 +370,19 @@ export const ProductRequestForm: React.FC = () => {
     setValue('productId', product.id);
     setValue('productName', product.name);
     setValue('productType', product.type);
+    // Reset product requirements when product changes
+    setProductRequirements({});
+  };
+
+  const handleProductRequirementChange = (questionId: string, value: unknown) => {
+    setProductRequirements(prev => ({
+      ...prev,
+      [questionId]: value,
+    }));
   };
 
   const handleNext = () => {
-    if (currentStep < 4) {
+    if (currentStep < 5) {
       setCurrentStep(currentStep + 1);
     }
   };
@@ -373,7 +407,7 @@ export const ProductRequestForm: React.FC = () => {
       setSubmitting(true);
       setError(null);
 
-      // This would call a booking service similar to LP Booking App
+      // This would call a booking service similar to DWx Traffic Manager
       // For now, we'll show a success message
       console.log('Product request submitted:', {
         ...data,
@@ -405,8 +439,15 @@ export const ProductRequestForm: React.FC = () => {
       case 2:
         return !!(watchedValues.clientName && watchedValues.contactName && watchedValues.contactEmail);
       case 3:
-        return !!(watchedValues.proposedDate1 && watchedValues.proposedTime1);
+        // Validate product-specific requirements
+        if (selectedProduct?.type) {
+          const validation = validateProductRequirements(selectedProduct.type, productRequirements);
+          return validation.valid;
+        }
+        return true;
       case 4:
+        return !!(watchedValues.proposedDate1 && watchedValues.proposedTime1);
+      case 5:
         return true;
       default:
         return false;
@@ -566,6 +607,54 @@ export const ProductRequestForm: React.FC = () => {
               validationMessage={errors.clientName?.message}
             >
               <Input {...field} placeholder="Enter company name" />
+            </Field>
+          )}
+        />
+
+        <Controller
+          name="industry"
+          control={control}
+          render={({ field }) => (
+            <Field label="Industry">
+              <Dropdown
+                placeholder="Select industry"
+                selectedOptions={field.value ? [field.value] : []}
+                onOptionSelect={(_, data) => field.onChange(data.optionValue)}
+              >
+                {INDUSTRIES.map((industry) => (
+                  <Option key={industry} value={industry}>
+                    {industry}
+                  </Option>
+                ))}
+              </Dropdown>
+            </Field>
+          )}
+        />
+      </div>
+
+      <div className={styles.row}>
+        <Controller
+          name="companySize"
+          control={control}
+          render={({ field }) => (
+            <Field label="Company Size">
+              <Dropdown
+                placeholder="Select company size"
+                selectedOptions={field.value ? [field.value] : []}
+                onOptionSelect={(_, data) => field.onChange(data.optionValue)}
+              >
+                {COMPANY_SIZES.map((size) => (
+                  <Option key={size} value={size}>
+                    {size === 'SMB'
+                      ? 'SMB (<50 employees)'
+                      : size === 'Medium'
+                      ? 'Medium (50-250)'
+                      : size === 'Large'
+                      ? 'Large (250-1000)'
+                      : 'Enterprise (1000+)'}
+                  </Option>
+                ))}
+              </Dropdown>
             </Field>
           )}
         />
@@ -843,6 +932,30 @@ export const ProductRequestForm: React.FC = () => {
           </div>
         </div>
 
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+          {watchedValues.industry && (
+            <div className={styles.previewItem}>
+              <Text className={styles.previewLabel}>Industry</Text>
+              <Text className={styles.previewValue}>{watchedValues.industry}</Text>
+            </div>
+          )}
+
+          {watchedValues.companySize && (
+            <div className={styles.previewItem}>
+              <Text className={styles.previewLabel}>Company Size</Text>
+              <Text className={styles.previewValue}>
+                {watchedValues.companySize === 'SMB'
+                  ? 'SMB (<50 employees)'
+                  : watchedValues.companySize === 'Medium'
+                  ? 'Medium (50-250)'
+                  : watchedValues.companySize === 'Large'
+                  ? 'Large (250-1000)'
+                  : 'Enterprise (1000+)'}
+              </Text>
+            </div>
+          )}
+        </div>
+
         {watchedValues.licenseCount && (
           <div className={styles.previewItem}>
             <Text className={styles.previewLabel}>Users/Licenses</Text>
@@ -884,6 +997,27 @@ export const ProductRequestForm: React.FC = () => {
     );
   };
 
+  const renderProductRequirementsStep = () => {
+    if (!selectedProduct?.type) {
+      return (
+        <div className={styles.form}>
+          <Text>Please select a product first.</Text>
+        </div>
+      );
+    }
+
+    const requirementsConfig = getProductRequirements(selectedProduct.type);
+
+    return (
+      <ProductRequirementsStep
+        config={requirementsConfig}
+        values={productRequirements}
+        onChange={handleProductRequirementChange}
+        productName={selectedProduct.name}
+      />
+    );
+  };
+
   const renderStepContent = () => {
     switch (currentStep) {
       case 1:
@@ -891,8 +1025,10 @@ export const ProductRequestForm: React.FC = () => {
       case 2:
         return renderClientStep();
       case 3:
-        return renderScheduleStep();
+        return renderProductRequirementsStep();
       case 4:
+        return renderScheduleStep();
+      case 5:
         return renderPreviewStep();
       default:
         return null;
@@ -944,7 +1080,7 @@ export const ProductRequestForm: React.FC = () => {
               );
             })}
           </div>
-          <ProgressBar value={(currentStep - 1) / 3} />
+          <ProgressBar value={(currentStep - 1) / 4} />
         </div>
 
         {/* Error Message */}
@@ -981,7 +1117,7 @@ export const ProductRequestForm: React.FC = () => {
           </div>
 
           <div style={{ display: 'flex', gap: '12px' }}>
-            {currentStep < 4 ? (
+            {currentStep < 5 ? (
               <Button
                 appearance="primary"
                 icon={<ArrowRightRegular />}

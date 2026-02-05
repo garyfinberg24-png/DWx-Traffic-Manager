@@ -22,6 +22,7 @@ import {
   Apps24Regular,
   PuzzlePiece24Regular,
   CardUi24Regular,
+  BotRegular,
 } from '@fluentui/react-icons';
 import {
   Product,
@@ -29,6 +30,7 @@ import {
   DWX_APPS,
   WEBPARTS,
   ADAPTIVE_CARDS,
+  DWX_AGENTS,
   getCategoriesForType,
 } from '../../types/Product';
 
@@ -194,6 +196,10 @@ const useStyles = makeStyles({
     backgroundColor: '#e6fffa',
     color: '#0d9488',
   },
+  agentTag: {
+    backgroundColor: '#eef2ff',
+    color: '#6366f1',
+  },
   productTitle: {
     fontSize: '14px',
     fontWeight: '700',
@@ -238,7 +244,7 @@ const useStyles = makeStyles({
   'gradient-lime': { background: 'linear-gradient(135deg, #84cc16 0%, #65a30d 100%)' },
 });
 
-type TabValue = 'apps' | 'webparts' | 'cards';
+type TabValue = 'apps' | 'webparts' | 'cards' | 'agents';
 
 const TAB_CONFIG: Record<TabValue, { label: string; icon: React.ReactNode; products: Product[]; color: string }> = {
   apps: {
@@ -259,6 +265,12 @@ const TAB_CONFIG: Record<TabValue, { label: string; icon: React.ReactNode; produ
     products: ADAPTIVE_CARDS,
     color: '#0d9488',
   },
+  agents: {
+    label: 'DWx Agents',
+    icon: <BotRegular />,
+    products: DWX_AGENTS,
+    color: '#6366f1',
+  },
 };
 
 export const ProductCatalog: React.FC = () => {
@@ -274,6 +286,7 @@ export const ProductCatalog: React.FC = () => {
       apps: 'app',
       webparts: 'webpart',
       cards: 'adaptive-card',
+      agents: 'agent',
     };
     return getCategoriesForType(typeMap[activeTab]);
   }, [activeTab]);
@@ -331,6 +344,8 @@ export const ProductCatalog: React.FC = () => {
         return styles.webpartTag;
       case 'adaptive-card':
         return styles.cardTag;
+      case 'agent':
+        return styles.agentTag;
       default:
         return styles.appTag;
     }
@@ -391,7 +406,7 @@ export const ProductCatalog: React.FC = () => {
             onClick={() => handleCategoryClick('all')}
             style={
               selectedCategory === 'all'
-                ? { backgroundColor: currentConfig.color, borderColor: currentConfig.color }
+                ? { backgroundColor: currentConfig.color, borderColor: currentConfig.color, color: 'white' }
                 : undefined
             }
           >
@@ -404,7 +419,7 @@ export const ProductCatalog: React.FC = () => {
               onClick={() => handleCategoryClick(category)}
               style={
                 selectedCategory === category
-                  ? { backgroundColor: currentConfig.color, borderColor: currentConfig.color }
+                  ? { backgroundColor: currentConfig.color, borderColor: currentConfig.color, color: 'white' }
                   : undefined
               }
             >

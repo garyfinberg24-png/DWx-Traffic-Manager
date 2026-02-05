@@ -1,13 +1,6 @@
-export { MyBookings } from './MyBookings';
-export { BookingCard } from './BookingCard';
+/**
+ * DWx Traffic Manager - MyBookings Components
+ * Exports only the components still needed by the Dashboard
+ */
+
 export { BookingDetails } from './BookingDetails';
-export { BookingFilters } from './BookingFilters';
-export { RescheduleDialog } from './RescheduleDialog';
-export { CancelBookingDialog } from './CancelBookingDialog';
-export { DeleteBookingDialog } from './DeleteBookingDialog';
-export { CloneBookingDialog } from './CloneBookingDialog';
-export { SaveTemplateDialog } from './SaveTemplateDialog';
-export { ClientHistoryDialog } from './ClientHistoryDialog';
-export { AssignSpecialistDialog } from './AssignSpecialistDialog';
-export { RecordFeedbackDialog } from './RecordFeedbackDialog';
-export { PersonalStatsCard } from './PersonalStatsCard';

@@ -277,19 +277,19 @@ export const GuestInvitations: React.FC = () => {
   } | null>(null);
 
   // Default invitation message
-  const defaultMessage = `Welcome to the License Pulse Demo Scheduler!
+  const defaultMessage = `Welcome to DWx Traffic Manager!
 
-Digital Workplace has built this app to make it easy for Account Managers to book License Pulse demos and deployment trials directly within Microsoft Teams.
+Digital Workplace has built this app to make it easy for Account Managers to request services and track pre-sales activities directly within Microsoft Teams.
 
 Key features available to you:
-- Book demos and deployments in just a few clicks
+- Browse our service catalog and request services in just a few clicks
 - Propose up to 3 time slots for flexible scheduling
-- Track your bookings and their status in real time
-- Receive email notifications when bookings are confirmed
-- View your client history and clone previous bookings as templates
+- Track your service requests and their status in real time
+- Receive email notifications when requests are confirmed
+- View your client history and pipeline analytics
 - Access an interactive calendar and timeline view of all scheduled sessions
 
-Once you accept this invitation, you'll be able to log in and start booking demos for your clients right away.
+Once you accept this invitation, you'll be able to log in and start requesting services for your clients right away.
 
 We look forward to working with you!`;
 
@@ -769,7 +769,7 @@ We look forward to working with you!`;
                               <Textarea
                                 value={customMessage}
                                 onChange={(_, data) => setCustomMessage(data.value)}
-                                placeholder={"Welcome to the License Pulse Demo Scheduler!\n\nDigital Workplace has built this app to make it easy for Account Managers to book License Pulse demos and deployment trials directly within Microsoft Teams.\n\nKey features available to you:\n- Book demos and deployments in just a few clicks\n- Propose up to 3 time slots for flexible scheduling\n- Track your bookings and their status in real time\n- Receive email notifications when bookings are confirmed\n- View your client history and clone previous bookings as templates\n- Access an interactive calendar and timeline view of all scheduled sessions\n\nOnce you accept this invitation, you'll be able to log in and start booking demos for your clients right away.\n\nWe look forward to working with you!"}
+                                placeholder={"Welcome to DWx Traffic Manager!\n\nDigital Workplace has built this app to make it easy for Account Managers to request services and track pre-sales activities directly within Microsoft Teams.\n\nKey features available to you:\n- Browse our service catalog and request services in just a few clicks\n- Propose up to 3 time slots for flexible scheduling\n- Track your service requests and their status in real time\n- Receive email notifications when requests are confirmed\n- View your client history and pipeline analytics\n- Access an interactive calendar and timeline view of all scheduled sessions\n\nOnce you accept this invitation, you'll be able to log in and start requesting services for your clients right away.\n\nWe look forward to working with you!"}
                                 rows={6}
                               />
                             </Field>
@@ -894,7 +894,7 @@ We look forward to working with you!`;
                               <Textarea
                                 value={customMessage}
                                 onChange={(_, data) => setCustomMessage(data.value)}
-                                placeholder={"Welcome to the License Pulse Demo Scheduler!\n\nDigital Workplace has built this app to make it easy for Account Managers to book License Pulse demos and deployment trials directly within Microsoft Teams."}
+                                placeholder={"Welcome to DWx Traffic Manager!\n\nDigital Workplace has built this app to make it easy for Account Managers to request services and track pre-sales activities directly within Microsoft Teams."}
                                 rows={4}
                               />
                             </Field>

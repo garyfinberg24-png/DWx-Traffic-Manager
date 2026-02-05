@@ -95,7 +95,7 @@ class NotificationService {
             <!-- Footer -->
             <div style="background: #1a1a1a; padding: 16px 24px; text-align: center;">
               <div style="color: rgba(255,255,255,0.6); font-size: 12px;">
-                LP Demo Scheduler &bull; Automated Notification
+                DWx Traffic Manager &bull; Automated Notification
               </div>
             </div>
           </div>
@@ -283,7 +283,7 @@ class NotificationService {
         '#1e6b7b',
         '<span style="font-size: 26px; color: #f7630c;">&#9203;</span>',
         'Booking Request Submitted',
-        'Pending Review &bull; LP Demo Scheduler',
+        'Pending Review &bull; DWx Traffic Manager',
         contentHtml,
         bandHtml
       );
@@ -518,7 +518,7 @@ class NotificationService {
           '#ede7f6 0%, #d1c4e9 100%', '#6264a7',
           '<span style="color: white; font-size: 18px;">&#9989;</span>',
           'Action Required', '#4527a0',
-          'Please review and approve one of the new proposed time slots in the LP Demo Scheduler dashboard.', '#5e35b1'
+          'Please review and approve one of the new proposed time slots in the DWx Traffic Manager dashboard.', '#5e35b1'
         )}
       `;
 
@@ -756,7 +756,7 @@ class NotificationService {
           '#e8f4f6 0%, #d0ecf0 100%', '#1e6b7b',
           '<span style="color: white; font-size: 18px;">&#128197;</span>',
           'Calendar Invite', '#1e6b7b',
-          `You can view this booking in the LP Demo Scheduler. ${booking.ConfirmedDateTime ? 'A calendar invite has been sent.' : 'You will be notified when the booking is confirmed.'}`, '#2d8a9c'
+          `You can view this booking in the DWx Traffic Manager. ${booking.ConfirmedDateTime ? 'A calendar invite has been sent.' : 'You will be notified when the booking is confirmed.'}`, '#2d8a9c'
         )}
       `;
 
@@ -827,7 +827,7 @@ class NotificationService {
           '#fff3e0 0%, #ffe0b2 100%', headerBg,
           '<span style="color: white; font-size: 18px;">&#9889;</span>',
           'Action Required', '#e65100',
-          'Please complete the checklist in LP Demo Scheduler to ensure a smooth deployment.', '#bf360c'
+          'Please complete the checklist in DWx Traffic Manager to ensure a smooth deployment.', '#bf360c'
         )}
       `;
 
@@ -842,7 +842,7 @@ class NotificationService {
         headerBg,
         `<span style="font-size: 26px; color: ${countdownColor};">&#9200;</span>`,
         'Checklist Reminder',
-        'Deployment Readiness &bull; LP Demo Scheduler',
+        'Deployment Readiness &bull; DWx Traffic Manager',
         contentHtml,
         bandHtml
       );
@@ -895,7 +895,7 @@ class NotificationService {
           '#fde7e9 0%, #f8c9cc 100%', '#d13438',
           '<span style="color: white; font-size: 18px;">&#9888;</span>',
           'Immediate Action Required', '#a4262c',
-          'The deployment may need to be rescheduled if the checklist cannot be completed in time. Please complete the checklist immediately in LP Demo Scheduler.', '#5c2d30'
+          'The deployment may need to be rescheduled if the checklist cannot be completed in time. Please complete the checklist immediately in DWx Traffic Manager.', '#5c2d30'
         )}
       `;
 
@@ -979,7 +979,7 @@ class NotificationService {
           '#e8f4f6 0%, #d0ecf0 100%', '#1e6b7b',
           '<span style="color: white; font-size: 18px;">&#128197;</span>',
           'What to Do Next', '#1e6b7b',
-          'Please log into the LP Demo Scheduler and reschedule this booking with three new proposed time slots. Once submitted, the booking will be reviewed again for approval.', '#2d8a9c'
+          'Please log into the DWx Traffic Manager and reschedule this booking with three new proposed time slots. Once submitted, the booking will be reviewed again for approval.', '#2d8a9c'
         )}
       `;
 
@@ -1149,7 +1149,7 @@ class NotificationService {
           '#fff3e0 0%, #ffe0b2 100%', '#f7630c',
           '<span style="color: white; font-size: 18px;">&#9889;</span>',
           'Action Required', '#e65100',
-          'Click the button above to review this booking in the LP Demo Scheduler.', '#bf360c'
+          'Click the button above to review this booking in the DWx Traffic Manager.', '#bf360c'
         )}
       `;
 

@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DWx Traffic Manager - Wizard Styling Options</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+            padding: 40px;
+            color: #242424;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 40px;
+            color: #1a5a8a;
+        }
+
+        .mockup-container {
+            display: flex;
+            flex-direction: column;
+            gap: 60px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .option-label {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: #333;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #1a5a8a;
+        }
+
+        .option-description {
+            color: #616161;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        /* ========== OPTION 1: Full Blue Header Card ========== */
+        .option1-card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .option1-header {
+            background: linear-gradient(135deg, #1a5a8a 0%, #2873a8 100%);
+            color: white;
+            padding: 20px 24px;
+        }
+
+        .option1-header-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .option1-header-subtitle {
+            font-size: 13px;
+            opacity: 0.9;
+        }
+
+        .option1-body {
+            padding: 24px;
+        }
+
+        .option1-section {
+            margin-bottom: 24px;
+        }
+
+        .option1-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .option1-section-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: #1a5a8a;
+            margin-bottom: 16px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        /* ========== OPTION 2: Compact Header with Accent Bar ========== */
+        .option2-card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            overflow: hidden;
+            border-left: 4px solid #1a5a8a;
+        }
+
+        .option2-header {
+            background: #f8fafc;
+            padding: 16px 20px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .option2-header-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1a5a8a;
+            margin-bottom: 2px;
+        }
+
+        .option2-header-subtitle {
+            font-size: 12px;
+            color: #616161;
+        }
+
+        .option2-body {
+            padding: 20px;
+        }
+
+        .option2-section {
+            background: #fafafa;
+            border-radius: 6px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+
+        .option2-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .option2-section-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .option2-section-icon {
+            width: 20px;
+            height: 20px;
+            background: #1a5a8a;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 11px;
+        }
+
+        /* ========== OPTION 3: Tabbed Sections ========== */
+        .option3-card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .option3-header {
+            background: #1a5a8a;
+            color: white;
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .option3-header-icon {
+            width: 40px;
+            height: 40px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .option3-header-text {
+            flex: 1;
+        }
+
+        .option3-header-title {
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .option3-header-subtitle {
+            font-size: 12px;
+            opacity: 0.85;
+        }
+
+        .option3-tabs {
+            display: flex;
+            background: #0f4d73;
+            padding: 0 16px;
+        }
+
+        .option3-tab {
+            padding: 12px 20px;
+            color: rgba(255,255,255,0.7);
+            font-size: 13px;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+        }
+
+        .option3-tab.active {
+            color: white;
+            border-bottom-color: white;
+        }
+
+        .option3-body {
+            padding: 24px;
+        }
+
+        /* ========== OPTION 4: Stepper-Style Sections ========== */
+        .option4-card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .option4-header {
+            background: linear-gradient(135deg, #1a5a8a 0%, #2873a8 100%);
+            color: white;
+            padding: 20px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .option4-header-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .option4-progress {
+            display: flex;
+            gap: 8px;
+        }
+
+        .option4-progress-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.4);
+        }
+
+        .option4-progress-dot.active {
+            background: white;
+        }
+
+        .option4-body {
+            padding: 24px;
+        }
+
+        .option4-section {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .option4-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .option4-section-indicator {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .option4-section-number {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: #1a5a8a;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .option4-section-line {
+            width: 2px;
+            flex: 1;
+            background: #e0e0e0;
+            margin-top: 8px;
+        }
+
+        .option4-section-content {
+            flex: 1;
+            padding-bottom: 16px;
+        }
+
+        .option4-section-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1a5a8a;
+            margin-bottom: 8px;
+        }
+
+        /* ========== OPTION 5: Floating Labels (Modern Minimal) ========== */
+        .option5-wrapper {
+            background: #f0f4f8;
+            padding: 24px;
+            border-radius: 12px;
+        }
+
+        .option5-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #1a5a8a;
+            margin-bottom: 8px;
+        }
+
+        .option5-subtitle {
+            color: #616161;
+            font-size: 13px;
+            margin-bottom: 24px;
+        }
+
+        .option5-card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+            margin-bottom: 16px;
+        }
+
+        .option5-card:last-child {
+            margin-bottom: 0;
+        }
+
+        .option5-card-header {
+            padding: 14px 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .option5-card-icon {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, #1a5a8a, #2873a8);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 14px;
+        }
+
+        .option5-card-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .option5-card-body {
+            padding: 16px;
+        }
+
+        /* ========== Common Form Elements ========== */
+        .form-field {
+            margin-bottom: 16px;
+        }
+
+        .form-field:last-child {
+            margin-bottom: 0;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 13px;
+            font-weight: 500;
+            color: #333;
+            margin-bottom: 6px;
+        }
+
+        .form-label .required {
+            color: #d13438;
+        }
+
+        .form-hint {
+            font-size: 11px;
+            color: #616161;
+            margin-bottom: 6px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #d0d0d0;
+            border-radius: 4px;
+            font-size: 14px;
+            font-family: inherit;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #1a5a8a;
+            box-shadow: 0 0 0 2px rgba(26, 90, 138, 0.15);
+        }
+
+        .form-select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #d0d0d0;
+            border-radius: 4px;
+            font-size: 14px;
+            font-family: inherit;
+            background: white;
+        }
+
+        .form-textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #d0d0d0;
+            border-radius: 4px;
+            font-size: 14px;
+            font-family: inherit;
+            min-height: 80px;
+            resize: vertical;
+        }
+
+        .checkbox-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+        }
+
+        .checkbox-item input {
+            margin-top: 3px;
+        }
+
+        .checkbox-label {
+            font-size: 13px;
+        }
+
+        .checkbox-desc {
+            font-size: 11px;
+            color: #616161;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        /* Divider */
+        .divider {
+            height: 1px;
+            background: #e0e0e0;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>DWx Traffic Manager - Wizard Styling Options</h1>
+
+    <div class="mockup-container">
+
+        <!-- OPTION 1: Full Blue Header Card -->
+        <div>
+            <div class="option-label">Option 1: Full Blue Header Card</div>
+            <p class="option-description">Matches the standard modal styling with gradient blue header. Clean and professional.</p>
+
+            <div class="option1-card">
+                <div class="option1-header">
+                    <div class="option1-header-title">Power Platform Requirements</div>
+                    <div class="option1-header-subtitle">Help us understand your Power Platform needs to provide the best solution</div>
+                </div>
+                <div class="option1-body">
+                    <div class="option1-section">
+                        <div class="option1-section-title">Current Environment</div>
+
+                        <div class="form-field">
+                            <label class="form-label">Power Platform Licenses <span class="required">*</span></label>
+                            <div class="form-hint">What Power Platform licenses do you currently have?</div>
+                            <div class="checkbox-group">
+                                <label class="checkbox-item">
+                                    <input type="checkbox">
+                                    <div>
+                                        <div class="checkbox-label">Power Apps Premium</div>
+                                        <div class="checkbox-desc">Full access to premium connectors and Dataverse</div>
+                                    </div>
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox">
+                                    <div>
+                                        <div class="checkbox-label">Power Automate Premium</div>
+                                        <div class="checkbox-desc">Advanced workflow capabilities</div>
+                                    </div>
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox">
+                                    <div>
+                                        <div class="checkbox-label">Power BI Pro</div>
+                                        <div class="checkbox-desc">Business intelligence and reporting</div>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="divider"></div>
+
+                    <div class="option1-section">
+                        <div class="option1-section-title">Project Scope</div>
+
+                        <div class="form-row">
+                            <div class="form-field">
+                                <label class="form-label">Expected Number of Users <span class="required">*</span></label>
+                                <select class="form-select">
+                                    <option>Select range...</option>
+                                    <option>1-25 users</option>
+                                    <option>26-100 users</option>
+                                    <option>100+ users</option>
+                                </select>
+                            </div>
+                            <div class="form-field">
+                                <label class="form-label">Project Timeline</label>
+                                <select class="form-select">
+                                    <option>Select timeline...</option>
+                                    <option>Immediate (< 1 month)</option>
+                                    <option>Short-term (1-3 months)</option>
+                                    <option>Planning phase</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-field">
+                            <label class="form-label">Use Case Description <span class="required">*</span></label>
+                            <div class="form-hint">Describe the business problem you're trying to solve</div>
+                            <textarea class="form-textarea" placeholder="e.g., We need to automate our expense approval process..."></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- OPTION 2: Compact Header with Accent Bar -->
+        <div>
+            <div class="option-label">Option 2: Accent Bar with Sections</div>
+            <p class="option-description">Left accent bar with subtle gray section cards. More compact and understated.</p>
+
+            <div class="option2-card">
+                <div class="option2-header">
+                    <div class="option2-header-title">Power Platform Requirements</div>
+                    <div class="option2-header-subtitle">Help us understand your Power Platform needs</div>
+                </div>
+                <div class="option2-body">
+                    <div class="option2-section">
+                        <div class="option2-section-title">
+                            <span class="option2-section-icon">1</span>
+                            Current Environment
+                        </div>
+
+                        <div class="form-field">
+                            <label class="form-label">Power Platform Licenses <span class="required">*</span></label>
+                            <div class="checkbox-group">
+                                <label class="checkbox-item">
+                                    <input type="checkbox">
+                                    <div class="checkbox-label">Power Apps Premium</div>
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox">
+                                    <div class="checkbox-label">Power Automate Premium</div>
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox">
+                                    <div class="checkbox-label">Power BI Pro</div>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="option2-section">
+                        <div class="option2-section-title">
+                            <span class="option2-section-icon">2</span>
+                            Project Scope
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-field">
+                                <label class="form-label">Expected Users <span class="required">*</span></label>
+                                <select class="form-select">
+                                    <option>Select range...</option>
+                                </select>
+                            </div>
+                            <div class="form-field">
+                                <label class="form-label">Timeline</label>
+                                <select class="form-select">
+                                    <option>Select timeline...</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- OPTION 3: Tabbed Sections -->
+        <div>
+            <div class="option-label">Option 3: Header with Section Tabs</div>
+            <p class="option-description">Blue header with integrated navigation tabs. Good for multi-section questionnaires.</p>
+
+            <div class="option3-card">
+                <div class="option3-header">
+                    <div class="option3-header-icon">&#9881;</div>
+                    <div class="option3-header-text">
+                        <div class="option3-header-title">Power Platform Requirements</div>
+                        <div class="option3-header-subtitle">Complete all sections to proceed</div>
+                    </div>
+                </div>
+                <div class="option3-tabs">
+                    <div class="option3-tab active">Environment</div>
+                    <div class="option3-tab">Scope</div>
+                    <div class="option3-tab">Integration</div>
+                    <div class="option3-tab">Budget</div>
+                </div>
+                <div class="option3-body">
+                    <div class="form-field">
+                        <label class="form-label">Power Platform Licenses <span class="required">*</span></label>
+                        <div class="form-hint">What Power Platform licenses do you currently have?</div>
+                        <div class="checkbox-group">
+                            <label class="checkbox-item">
+                                <input type="checkbox">
+                                <div>
+                                    <div class="checkbox-label">Power Apps Premium</div>
+                                    <div class="checkbox-desc">Full access to premium connectors and Dataverse</div>
+                                </div>
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="checkbox">
+                                <div>
+                                    <div class="checkbox-label">Power Automate Premium</div>
+                                    <div class="checkbox-desc">Advanced workflow capabilities</div>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-field">
+                        <label class="form-label">Existing Solutions</label>
+                        <textarea class="form-textarea" placeholder="Describe any existing Power Platform solutions..."></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- OPTION 4: Stepper-Style Sections -->
+        <div>
+            <div class="option-label">Option 4: Vertical Stepper Layout</div>
+            <p class="option-description">Step-by-step visual flow with numbered sections. Emphasizes progression.</p>
+
+            <div class="option4-card">
+                <div class="option4-header">
+                    <div class="option4-header-title">Power Platform Requirements</div>
+                    <div class="option4-progress">
+                        <div class="option4-progress-dot active"></div>
+                        <div class="option4-progress-dot active"></div>
+                        <div class="option4-progress-dot"></div>
+                        <div class="option4-progress-dot"></div>
+                    </div>
+                </div>
+                <div class="option4-body">
+                    <div class="option4-section">
+                        <div class="option4-section-indicator">
+                            <div class="option4-section-number">1</div>
+                            <div class="option4-section-line"></div>
+                        </div>
+                        <div class="option4-section-content">
+                            <div class="option4-section-title">Current Environment</div>
+                            <div class="form-field">
+                                <label class="form-label">Power Platform Licenses</label>
+                                <div class="checkbox-group">
+                                    <label class="checkbox-item">
+                                        <input type="checkbox">
+                                        <div class="checkbox-label">Power Apps Premium</div>
+                                    </label>
+                                    <label class="checkbox-item">
+                                        <input type="checkbox">
+                                        <div class="checkbox-label">Power Automate Premium</div>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="option4-section">
+                        <div class="option4-section-indicator">
+                            <div class="option4-section-number">2</div>
+                            <div class="option4-section-line"></div>
+                        </div>
+                        <div class="option4-section-content">
+                            <div class="option4-section-title">Project Scope</div>
+                            <div class="form-row">
+                                <div class="form-field">
+                                    <label class="form-label">Expected Users</label>
+                                    <select class="form-select">
+                                        <option>Select range...</option>
+                                    </select>
+                                </div>
+                                <div class="form-field">
+                                    <label class="form-label">Timeline</label>
+                                    <select class="form-select">
+                                        <option>Select timeline...</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="option4-section">
+                        <div class="option4-section-indicator">
+                            <div class="option4-section-number">3</div>
+                        </div>
+                        <div class="option4-section-content">
+                            <div class="option4-section-title">Use Case</div>
+                            <div class="form-field">
+                                <label class="form-label">Description</label>
+                                <textarea class="form-textarea" placeholder="Describe your use case..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- OPTION 5: Modern Minimal with Icon Cards -->
+        <div>
+            <div class="option-label">Option 5: Modern Minimal with Icon Cards</div>
+            <p class="option-description">Light background with floating section cards. Clean and modern feel.</p>
+
+            <div class="option5-wrapper">
+                <div class="option5-title">Power Platform Requirements</div>
+                <div class="option5-subtitle">Help us understand your Power Platform needs to provide the best solution</div>
+
+                <div class="option5-card">
+                    <div class="option5-card-header">
+                        <div class="option5-card-icon">&#128187;</div>
+                        <div class="option5-card-title">Current Environment</div>
+                    </div>
+                    <div class="option5-card-body">
+                        <div class="form-field">
+                            <label class="form-label">Power Platform Licenses <span class="required">*</span></label>
+                            <div class="checkbox-group">
+                                <label class="checkbox-item">
+                                    <input type="checkbox">
+                                    <div>
+                                        <div class="checkbox-label">Power Apps Premium</div>
+                                        <div class="checkbox-desc">Full access to premium connectors</div>
+                                    </div>
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox">
+                                    <div>
+                                        <div class="checkbox-label">Power Automate Premium</div>
+                                        <div class="checkbox-desc">Advanced workflow capabilities</div>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="option5-card">
+                    <div class="option5-card-header">
+                        <div class="option5-card-icon">&#128202;</div>
+                        <div class="option5-card-title">Project Scope</div>
+                    </div>
+                    <div class="option5-card-body">
+                        <div class="form-row">
+                            <div class="form-field">
+                                <label class="form-label">Expected Users <span class="required">*</span></label>
+                                <select class="form-select">
+                                    <option>Select range...</option>
+                                    <option>1-25 users</option>
+                                    <option>26-100 users</option>
+                                </select>
+                            </div>
+                            <div class="form-field">
+                                <label class="form-label">Timeline</label>
+                                <select class="form-select">
+                                    <option>Select timeline...</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-field">
+                            <label class="form-label">Use Case Description</label>
+                            <textarea class="form-textarea" placeholder="Describe your use case..."></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</body>
+</html>
