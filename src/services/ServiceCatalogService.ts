@@ -80,7 +80,7 @@ class ServiceCatalogService {
     try {
       const graphService = getGraphService();
 
-      const itemData = {
+      const itemData: Record<string, unknown> = {
         Title: data.Title,
         Description: data.Description,
         ShortDescription: data.ShortDescription,
@@ -94,6 +94,12 @@ class ServiceCatalogService {
         IsActive: data.IsActive,
         SortOrder: data.SortOrder,
         IconName: data.IconName,
+        // Rich content fields (JSON-serialized)
+        WhatsIncluded_JSON: data.WhatsIncluded ? JSON.stringify(data.WhatsIncluded) : null,
+        EngagementPhases_JSON: data.EngagementPhases ? JSON.stringify(data.EngagementPhases) : null,
+        KeyBenefits_JSON: data.KeyBenefits ? JSON.stringify(data.KeyBenefits) : null,
+        IdealFor_JSON: data.IdealFor ? JSON.stringify(data.IdealFor) : null,
+        RelatedCategories_JSON: data.RelatedCategories ? JSON.stringify(data.RelatedCategories) : null,
       };
 
       const result = await graphService.createListItem(this.listName, itemData);
@@ -127,6 +133,12 @@ class ServiceCatalogService {
       if (data.IsActive !== undefined) itemData.IsActive = data.IsActive;
       if (data.SortOrder !== undefined) itemData.SortOrder = data.SortOrder;
       if (data.IconName !== undefined) itemData.IconName = data.IconName;
+      // Rich content fields
+      if (data.WhatsIncluded !== undefined) itemData.WhatsIncluded_JSON = JSON.stringify(data.WhatsIncluded);
+      if (data.EngagementPhases !== undefined) itemData.EngagementPhases_JSON = JSON.stringify(data.EngagementPhases);
+      if (data.KeyBenefits !== undefined) itemData.KeyBenefits_JSON = JSON.stringify(data.KeyBenefits);
+      if (data.IdealFor !== undefined) itemData.IdealFor_JSON = JSON.stringify(data.IdealFor);
+      if (data.RelatedCategories !== undefined) itemData.RelatedCategories_JSON = JSON.stringify(data.RelatedCategories);
 
       const result = await graphService.updateListItem(this.listName, id, itemData);
 
@@ -146,6 +158,19 @@ class ServiceCatalogService {
       await graphService.updateListItem(this.listName, id, { IsActive: false });
     } catch (error) {
       console.error('Error deactivating service:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Delete a service (hard delete)
+   */
+  async deleteService(id: number): Promise<void> {
+    try {
+      const graphService = getGraphService();
+      await graphService.deleteListItem(this.listName, id);
+    } catch (error) {
+      console.error('Error deleting service:', error);
       throw error;
     }
   }
@@ -213,7 +238,22 @@ class ServiceCatalogService {
 
     const title = (item.fields as Record<string, unknown>)?.Title as string || item.Title as string || '';
 
-    // Merge rich content fields from DEFAULT_SERVICES (client-side only, not in SharePoint)
+    // Try to read rich content from SharePoint JSON columns first
+    const parseJson = <T>(fieldName: string): T | undefined => {
+      try {
+        const json = this.getFieldValue(item, fieldName, '');
+        if (json) return JSON.parse(json as string) as T;
+      } catch { /* ignore parse errors */ }
+      return undefined;
+    };
+
+    const whatsIncluded = parseJson<string[]>('WhatsIncluded_JSON');
+    const engagementPhases = parseJson<{ name: string; description: string }[]>('EngagementPhases_JSON');
+    const keyBenefits = parseJson<string[]>('KeyBenefits_JSON');
+    const idealFor = parseJson<string[]>('IdealFor_JSON');
+    const relatedCategories = parseJson<ServiceCategory[]>('RelatedCategories_JSON');
+
+    // Fall back to DEFAULT_SERVICES if SharePoint doesn't have rich content
     const defaultMatch = DEFAULT_SERVICES.find(s => s.Title === title);
 
     return {
@@ -231,11 +271,11 @@ class ServiceCatalogService {
       IsActive: this.getFieldValue(item, 'IsActive', true),
       SortOrder: this.getFieldValue(item, 'SortOrder', 0),
       IconName: this.getFieldValue(item, 'IconName', ''),
-      WhatsIncluded: defaultMatch?.WhatsIncluded,
-      EngagementPhases: defaultMatch?.EngagementPhases,
-      RelatedCategories: defaultMatch?.RelatedCategories,
-      KeyBenefits: defaultMatch?.KeyBenefits,
-      IdealFor: defaultMatch?.IdealFor,
+      WhatsIncluded: whatsIncluded || defaultMatch?.WhatsIncluded,
+      EngagementPhases: engagementPhases || defaultMatch?.EngagementPhases,
+      RelatedCategories: relatedCategories || defaultMatch?.RelatedCategories,
+      KeyBenefits: keyBenefits || defaultMatch?.KeyBenefits,
+      IdealFor: idealFor || defaultMatch?.IdealFor,
       Created: this.getFieldValue(item, 'Created', ''),
       Modified: this.getFieldValue(item, 'Modified', ''),
     };

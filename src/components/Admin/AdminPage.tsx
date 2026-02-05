@@ -19,6 +19,7 @@ import {
   CheckboxChecked24Regular,
   FolderOpen24Regular,
   Database24Regular,
+  Apps24Regular,
 } from '@fluentui/react-icons';
 import { TeamMemberList } from './TeamMemberList';
 import { ClientList } from './ClientList';
@@ -28,6 +29,7 @@ import { GuestInvitations } from './GuestInvitations';
 import { ChecklistManagement } from './ChecklistManagement';
 import { DocumentManagement } from './DocumentManagement';
 import { DWxSharePointProvisioning } from './DWxSharePointProvisioning';
+import { ServiceManagement } from './ServiceManagement';
 
 const useStyles = makeStyles({
   container: {
@@ -68,7 +70,7 @@ const useStyles = makeStyles({
   },
 });
 
-type TabValue = 'team' | 'clients' | 'account-managers' | 'managers' | 'guests' | 'checklist' | 'documents' | 'provisioning';
+type TabValue = 'team' | 'clients' | 'account-managers' | 'services' | 'managers' | 'guests' | 'checklist' | 'documents' | 'provisioning';
 
 export const AdminPage: React.FC = () => {
   const styles = useStyles();
@@ -111,6 +113,9 @@ export const AdminPage: React.FC = () => {
           <Tab value="clients" icon={<Building24Regular />}>
             Clients
           </Tab>
+          <Tab value="services" icon={<Apps24Regular />}>
+            Services
+          </Tab>
           <Tab value="managers" icon={<Shield24Regular />}>
             Manager Access
           </Tab>
@@ -134,6 +139,7 @@ export const AdminPage: React.FC = () => {
             <AccountManagerManagement onNavigateToGuestInvitations={handleNavigateToGuestInvitations} />
           )}
           {selectedTab === 'clients' && <ClientList />}
+          {selectedTab === 'services' && <ServiceManagement />}
           {selectedTab === 'managers' && <ManagerSettings />}
           {selectedTab === 'guests' && <GuestInvitations />}
           {selectedTab === 'checklist' && <ChecklistManagement />}

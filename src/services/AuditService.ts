@@ -23,7 +23,8 @@ export type AuditEntity =
   | 'Checklist'
   | 'User'
   | 'AccountManager'
-  | 'ServiceRequest';
+  | 'ServiceRequest'
+  | 'Service';
 
 export interface AuditLogEntry {
   Id?: number;

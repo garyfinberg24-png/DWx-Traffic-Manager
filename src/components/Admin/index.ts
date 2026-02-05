@@ -11,3 +11,6 @@ export { ManagerSettings } from './ManagerSettings';
 export { GuestInvitations } from './GuestInvitations';
 export { ChecklistManagement } from './ChecklistManagement';
 export { DocumentManagement } from './DocumentManagement';
+export { ServiceManagement } from './ServiceManagement';
+export { ServiceForm } from './ServiceForm';
+export { ImportServicesDialog } from './ImportServicesDialog';

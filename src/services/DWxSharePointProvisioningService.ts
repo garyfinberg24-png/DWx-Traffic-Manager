@@ -6,7 +6,7 @@
 import { Client } from '@microsoft/microsoft-graph-client';
 import { getAuthService, getGraphService } from './serviceFactory';
 import { config } from '../config/environmentConfig';
-import { DW_SERVICES_SEED_DATA } from '../types/ServiceRequest';
+import { DW_SERVICES_SEED_DATA, DEFAULT_SERVICES } from '../types/ServiceRequest';
 
 // Get the appropriate auth service based on test mode
 const authService = getAuthService();
@@ -264,7 +264,7 @@ class DWxSharePointProvisioningService {
           displayName: 'Category',
           type: 'Choice',
           required: true,
-          choices: ['Power Platform', 'SPFx', 'Migrations', 'Assessment', 'Copilot', 'Viva'],
+          choices: ['Power Platform', 'SPFx Development', 'SharePoint Migration', 'M365 Assessment', 'Copilot Agents', 'MS Viva', 'Training'],
         },
         {
           internalName: 'TypicalDuration',
@@ -290,6 +290,12 @@ class DWxSharePointProvisioningService {
         { internalName: 'IsActive', displayName: 'Is Active', type: 'Boolean', defaultValue: '1' },
         { internalName: 'SortOrder', displayName: 'Sort Order', type: 'Number' },
         { internalName: 'IconName', displayName: 'Icon Name', type: 'Text' },
+        // Rich content fields (stored as JSON strings)
+        { internalName: 'WhatsIncluded_JSON', displayName: 'Whats Included (JSON)', type: 'Note' },
+        { internalName: 'EngagementPhases_JSON', displayName: 'Engagement Phases (JSON)', type: 'Note' },
+        { internalName: 'KeyBenefits_JSON', displayName: 'Key Benefits (JSON)', type: 'Note' },
+        { internalName: 'IdealFor_JSON', displayName: 'Ideal For (JSON)', type: 'Note' },
+        { internalName: 'RelatedCategories_JSON', displayName: 'Related Categories (JSON)', type: 'Note' },
       ],
     };
   }
@@ -769,6 +775,9 @@ class DWxSharePointProvisioningService {
 
       for (const service of DW_SERVICES_SEED_DATA) {
         try {
+          // Find matching DEFAULT_SERVICES entry for rich content
+          const richContent = DEFAULT_SERVICES.find(s => s.Title === service.Title);
+
           await graphService.createListItem('DWxServices', {
             Title: service.Title,
             Description: service.Description,
@@ -783,6 +792,12 @@ class DWxSharePointProvisioningService {
             IsActive: true,
             SortOrder: service.SortOrder,
             IconName: service.IconName,
+            // Rich content fields (JSON-serialized)
+            WhatsIncluded_JSON: richContent?.WhatsIncluded ? JSON.stringify(richContent.WhatsIncluded) : null,
+            EngagementPhases_JSON: richContent?.EngagementPhases ? JSON.stringify(richContent.EngagementPhases) : null,
+            KeyBenefits_JSON: richContent?.KeyBenefits ? JSON.stringify(richContent.KeyBenefits) : null,
+            IdealFor_JSON: richContent?.IdealFor ? JSON.stringify(richContent.IdealFor) : null,
+            RelatedCategories_JSON: richContent?.RelatedCategories ? JSON.stringify(richContent.RelatedCategories) : null,
           });
 
           results.push({ service: service.Title, success: true, message: 'Created successfully' });
