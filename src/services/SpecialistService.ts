@@ -23,14 +23,19 @@ class SpecialistService {
   async getSpecialists(activeOnly: boolean = true): Promise<Specialist[]> {
     try {
       const graphService = getGraphService();
-      const filter = activeOnly ? "IsActive eq 1" : undefined;
 
-      const items = await graphService.getListItems(this.listName, {
-        filter,
-        orderBy: "fields/Title",
-      }) as Record<string, unknown>[];
+      // Fetch all items and filter/sort client-side (IsActive is not indexed in SharePoint)
+      const items = await graphService.getListItems(this.listName) as Record<string, unknown>[];
 
-      return items.map(this.mapToSpecialist);
+      let specialists = items.map(this.mapToSpecialist);
+
+      if (activeOnly) {
+        specialists = specialists.filter(s => s.IsActive);
+      }
+
+      specialists.sort((a, b) => a.Title.localeCompare(b.Title));
+
+      return specialists;
     } catch (error) {
       console.error('Error fetching specialists:', error);
       return [];
@@ -60,15 +65,14 @@ class SpecialistService {
   async getSpecialistByEmail(email: string): Promise<Specialist | null> {
     try {
       const graphService = getGraphService();
-      const filter = `Email eq '${email}'`;
 
-      const items = await graphService.getListItems(this.listName, {
-        filter,
-      }) as Record<string, unknown>[];
+      // Fetch all and filter client-side (Email is not indexed in SharePoint)
+      const items = await graphService.getListItems(this.listName) as Record<string, unknown>[];
 
-      if (items.length === 0) return null;
+      const specialists = items.map(this.mapToSpecialist);
+      const match = specialists.find(s => s.Email.toLowerCase() === email.toLowerCase());
 
-      return this.mapToSpecialist(items[0]);
+      return match || null;
     } catch (error) {
       console.error('Error fetching specialist by email:', error);
       return null;
