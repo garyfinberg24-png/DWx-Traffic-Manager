@@ -6,7 +6,7 @@
 
 **Project Origin**: Cloned from LP Booking App (v1.7.5) - a production Teams app for License Pulse demo scheduling.
 
-**Current Version**: v2.2.0 (February 2026) - Deep Dive R1-R3 complete
+**Current Version**: v2.5.0 (February 2026) - AI-powered Session Preparation
 
 ## Critical Configuration Values
 
@@ -35,6 +35,7 @@
 | **Managers List** | `DWxManagers` |
 | **Audit Log List** | `DWxAuditLog` |
 | **Product Requests List** | `DWxProductRequests` |
+| **Session Prep List** | `DWxSessionPrep` |
 | **Document Library** | `DWxSupportingDocuments` |
 | **Pre-Sales Calendar Email** | `presales@digitalworkplace.com` |
 
@@ -62,6 +63,11 @@
 - **Data Storage**: SharePoint Online via Microsoft Graph API
 - **Calendar Operations**: Microsoft Graph API
 - **Email**: Microsoft Graph API
+- **AI**: Azure OpenAI (GPT-4o) for session preparation content generation
+
+### Infrastructure
+- **IaC**: Bicep templates for Azure resource provisioning
+- **AI Resources**: Azure OpenAI deployed via `infrastructure/azure-openai.bicep`
 
 ## Service Offerings (6 Categories)
 
@@ -247,13 +253,31 @@ const STAGE_TRANSITIONS = {
 | AddedBy | Text | Who added this manager |
 | AddedDate | DateTime | When added |
 
+### DWxSessionPrep (NEW v2.5.0)
+
+| Column | Type | Description |
+|--------|------|-------------|
+| Title | Text | Auto: "Prep - {ClientName} - {Date}" |
+| ServiceRequestId | Number | Link to DWxServiceRequests |
+| SpecialistEmail | Text | Assigned specialist email |
+| SpecialistName | Text | Assigned specialist name |
+| Status | Choice | Not Started, In Progress, Ready |
+| ClientProfile_JSON | Note | AI-generated client profile JSON |
+| TalkingPoints_JSON | Note | AI-generated talking points JSON array |
+| SuggestedResources_JSON | Note | AI-suggested resources JSON array |
+| MeetingAgenda_JSON | Note | AI-generated meeting agenda JSON |
+| ChecklistItems_JSON | Note | Preparation checklist JSON array |
+| AIGeneratedAt | DateTime | When AI content was generated |
+| CompletedAt | DateTime | When prep marked as Ready |
+| ReminderSent | Yes/No | Whether reminder email sent |
+
 ### DWxAuditLog
 
 | Column | Type | Description |
 |--------|------|-------------|
 | Title | Text | Action summary |
 | Action | Choice | CREATE, UPDATE, DELETE, VIEW, APPROVE, REJECT, RESCHEDULE, LOGIN, LOGOUT |
-| EntityType | Text | Booking, TeamMember, Client, Checklist, User, AccountManager, ServiceRequest, Service, Specialist, ProductRequest |
+| EntityType | Text | Booking, TeamMember, Client, Checklist, User, AccountManager, ServiceRequest, Service, Specialist, ProductRequest, SessionPrep |
 | EntityId | Text | ID of affected entity |
 | EntityName | Text | Human-readable entity name |
 | PerformedBy | Text | User display name |
@@ -347,6 +371,14 @@ DWx-Traffic-Manager/
 │   │   │   ├── SetTargetsDialog.tsx      # Target setting
 │   │   │   ├── TeamStatsCard.tsx         # Team statistics
 │   │   │   └── index.ts
+│   │   ├── SessionPrep/
+│   │   │   ├── SessionPrepDialog.tsx     # Main session prep dialog with tabs
+│   │   │   ├── ClientProfileView.tsx     # AI-generated client profile display
+│   │   │   ├── TalkingPointsEditor.tsx   # Editable talking points by category
+│   │   │   ├── ResourcePicker.tsx        # Suggested resources selector
+│   │   │   ├── MeetingAgendaView.tsx     # AI-generated meeting agenda timeline
+│   │   │   ├── PrepChecklist.tsx         # Pre-meeting checklist with completion tracking
+│   │   │   └── index.ts
 │   │   ├── Common/
 │   │   │   ├── Header.tsx                # Navigation header
 │   │   │   ├── ConfirmDialog.tsx         # Reusable confirm dialog
@@ -368,7 +400,9 @@ DWx-Traffic-Manager/
 │   │   ├── PipelineService.ts            # Dashboard metrics + analytics
 │   │   ├── CommercialService.ts          # Commercial metrics
 │   │   ├── GamificationService.ts        # Gamification logic
-│   │   ├── DWxNotificationService.ts     # DW-branded notifications (16 methods)
+│   │   ├── DWxNotificationService.ts     # DW-branded notifications (18 methods)
+│   │   ├── SessionPrepService.ts         # Session preparation CRUD + checklist management
+│   │   ├── AIPreparationService.ts       # Azure OpenAI integration for AI content generation
 │   │   ├── AuthService.ts                # MSAL authentication + Teams SSO
 │   │   ├── GraphService.ts               # Microsoft Graph API
 │   │   ├── AuditService.ts               # Change tracking (10 entity types)
@@ -382,7 +416,7 @@ DWx-Traffic-Manager/
 │   │   ├── GuestInvitationService.ts     # Guest user management
 │   │   ├── DWxSharePointProvisioningService.ts # DWx list provisioning (Graph API)
 │   │   ├── SharePointService.ts          # SharePoint REST API
-│   │   ├── EmailTemplates.ts             # Email template strings (20 templates)
+│   │   ├── EmailTemplates.ts             # Email template strings (22 templates)
 │   │   ├── PowerAutomateService.ts       # Power Automate with retry/circuit breaker
 │   │   ├── MockAuthService.ts            # Mock auth for E2E testing
 │   │   ├── MockGraphService.ts           # Mock Graph for E2E testing
@@ -396,7 +430,8 @@ DWx-Traffic-Manager/
 │   │   └── index.ts
 │   ├── types/
 │   │   ├── ServiceRequest.ts             # Core DWx types (DWService, DWServiceInput, ServiceCategory, FunnelStage, etc.)
-│   │   ├── ProductRequest.ts             # Product request entity types (NEW)
+│   │   ├── ProductRequest.ts             # Product request entity types
+│   │   ├── SessionPreparation.ts         # Session prep types (NEW v2.5.0)
 │   │   ├── Product.ts                    # Product catalog types (29 products)
 │   │   ├── ProductRequirements.ts        # Product requirements form types
 │   │   ├── ServiceRequirements.ts        # Service requirements types
@@ -613,6 +648,39 @@ Service integrations: ProductRequestService (N1, N2, N3, N5, N6), ServiceRequest
 - [ ] H6: Product request status workflow UI
 - [ ] H5: Quick-action context menus on cards
 
+### Phase 8: AI-Powered Session Preparation (COMPLETE - v2.5.0)
+
+When a discovery meeting is confirmed, the system automatically creates a session preparation record and guides specialists through meeting preparation using AI-generated content.
+
+- [x] **SessionPreparation types** - Created `src/types/SessionPreparation.ts` with full type definitions
+- [x] **SessionPrepService** - CRUD operations for DWxSessionPrep SharePoint list with checklist management
+- [x] **AIPreparationService** - Azure OpenAI (GPT-4o) integration for generating:
+  - Client profiles (industry context, engagement history, key stakeholders)
+  - Talking points (opening, discovery, value proposition, objection handling, closing)
+  - Suggested resources (slide decks, case studies, datasheets, demo scripts)
+  - Meeting agendas (time-boxed items with descriptions)
+- [x] **Session Prep UI Components**:
+  - `SessionPrepDialog.tsx` - Main tabbed dialog (Profile, Talking Points, Resources, Agenda, Checklist)
+  - `ClientProfileView.tsx` - AI-generated client profile display
+  - `TalkingPointsEditor.tsx` - Editable talking points organized by category
+  - `ResourcePicker.tsx` - Suggested resources with relevance scores and selection
+  - `MeetingAgendaView.tsx` - Timeline view of meeting agenda items
+  - `PrepChecklist.tsx` - Pre-meeting checklist with completion tracking
+- [x] **Email notifications** - Added `sessionPrepCreated` and `sessionPrepReminder` templates
+- [x] **Discovery integration** - `confirmDiscovery()` auto-creates session prep record
+- [x] **Audit logging** - SessionPrep entity added to AuditService
+- [x] **Infrastructure** - Bicep template for Azure OpenAI deployment (`infrastructure/azure-openai.bicep`)
+
+**Session Prep Workflow:**
+
+1. Manager confirms discovery slot → SessionPrep record created automatically
+2. Specialist receives notification with link to prep dialog
+3. Specialist clicks "Generate AI Content" → Azure OpenAI generates all content
+4. Specialist reviews/edits talking points, selects resources, customizes agenda
+5. Specialist completes checklist items (review client history, prepare demo, test equipment, etc.)
+6. Status progresses: Not Started → In Progress → Ready
+7. Reminder sent 24h before meeting if prep not complete
+
 ### Pending / Round 4
 
 - [ ] Round 4: Medium-priority enhancements (M1-M10)
@@ -761,8 +829,11 @@ The app supports Account Managers from an external partner tenant:
 | `src/services/SpecialistService.ts` | Specialist management, availability, audit |
 | `src/services/PipelineService.ts` | Dashboard metrics and analytics |
 | `src/services/AuditService.ts` | Audit logging (10 entity types) |
-| `src/services/DWxNotificationService.ts` | 16 notification methods (service + product request events) |
-| `src/services/EmailTemplates.ts` | 20 DW-branded email templates |
+| `src/services/DWxNotificationService.ts` | 18 notification methods (service + product + session prep events) |
+| `src/services/EmailTemplates.ts` | 22 DW-branded email templates |
+| `src/services/SessionPrepService.ts` | Session prep CRUD + checklist management + completion tracking |
+| `src/services/AIPreparationService.ts` | Azure OpenAI integration for AI content generation |
+| `src/types/SessionPreparation.ts` | Session prep types (status, checklist, talking points, resources, agenda) |
 | `src/services/GraphService.ts` | Graph API + calendar conflict detection with error flag |
 | `src/services/DWxSharePointProvisioningService.ts` | All DWx list provisioning via Graph API |
 | `src/config/environmentConfig.ts` | Environment config with all 10 DWx list names |
@@ -882,6 +953,7 @@ DWxSupportingDocuments/
 ## Recent Commit History
 
 ```
+824fb9a feat: AI-powered session preparation with Azure OpenAI integration (v2.5.0)
 835fd53 feat: Deep dive R1-R3 — data integrity fixes, notifications, product request details modal (v2.2.0)
 0f96927 feat: Fix broken chains, add product request notifications, frost grey accordion style (v2.1.0)
 6c4d547 feat: 13-issue process remediation - fix dead ends, add specialist admin, cleanup legacy code
