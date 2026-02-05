@@ -476,6 +476,15 @@ export const DWxSharePointProvisioning: React.FC = () => {
           </Button>
         )}
 
+        <Button
+          appearance="subtle"
+          icon={<Database24Regular />}
+          onClick={provisionAllLists}
+          disabled={isProvisioning || isChecking}
+        >
+          {isProvisioning ? 'Provisioning...' : 'Provision All Lists'}
+        </Button>
+
         {allListsExist && (
           <Badge appearance="filled" color="success" size="large">
             All lists are provisioned
