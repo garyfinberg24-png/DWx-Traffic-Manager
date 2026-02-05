@@ -39,6 +39,7 @@ import { referenceDataService } from '../../services/ReferenceDataService';
 import { TeamMemberForm } from './TeamMemberForm';
 import { useToast } from '../../contexts/ToastContext';
 import { ConfirmDialog } from '../Common/ConfirmDialog';
+import { Pagination, usePagination } from '../Common/Pagination';
 
 const useStyles = makeStyles({
   container: {
@@ -197,6 +198,16 @@ export const TeamMemberList: React.FC = () => {
     setFilteredMembers(result);
   }, [teamMembers, searchQuery, roleFilter]);
 
+  // Pagination
+  const {
+    currentPage,
+    pageSize,
+    paginatedItems: paginatedMembers,
+    totalItems,
+    setCurrentPage,
+    setPageSize,
+  } = usePagination(filteredMembers, 20);
+
   const handleCreate = async (data: TeamMemberInput) => {
     try {
       setIsSaving(true);
@@ -307,20 +318,21 @@ export const TeamMemberList: React.FC = () => {
           </Text>
         </Card>
       ) : (
-        <Table className={styles.table}>
-          <TableHeader>
-            <TableRow>
-              <TableHeaderCell className={styles.colName}>Name</TableHeaderCell>
-              <TableHeaderCell className={styles.colEmail}>Email</TableHeaderCell>
-              <TableHeaderCell className={styles.colPhone}>Mobile</TableHeaderCell>
-              <TableHeaderCell className={styles.colRole}>Role</TableHeaderCell>
-              <TableHeaderCell className={styles.colDepartment}>Department</TableHeaderCell>
-              <TableHeaderCell className={styles.colStatus}>Status</TableHeaderCell>
-              <TableHeaderCell className={styles.colActions}>Actions</TableHeaderCell>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {filteredMembers.map((member) => (
+        <>
+          <Table className={styles.table}>
+            <TableHeader>
+              <TableRow>
+                <TableHeaderCell className={styles.colName}>Name</TableHeaderCell>
+                <TableHeaderCell className={styles.colEmail}>Email</TableHeaderCell>
+                <TableHeaderCell className={styles.colPhone}>Mobile</TableHeaderCell>
+                <TableHeaderCell className={styles.colRole}>Role</TableHeaderCell>
+                <TableHeaderCell className={styles.colDepartment}>Department</TableHeaderCell>
+                <TableHeaderCell className={styles.colStatus}>Status</TableHeaderCell>
+                <TableHeaderCell className={styles.colActions}>Actions</TableHeaderCell>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {paginatedMembers.map((member) => (
               <TableRow key={member.Id}>
                 <TableCell className={styles.colName}>
                   <TableCellLayout
@@ -411,9 +423,17 @@ export const TeamMemberList: React.FC = () => {
                   </Menu>
                 </TableCell>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+              ))}
+            </TableBody>
+          </Table>
+          <Pagination
+            currentPage={currentPage}
+            totalItems={totalItems}
+            pageSize={pageSize}
+            onPageChange={setCurrentPage}
+            onPageSizeChange={setPageSize}
+          />
+        </>
       )}
 
       <TeamMemberForm

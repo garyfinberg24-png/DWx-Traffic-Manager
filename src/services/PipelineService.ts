@@ -370,6 +370,56 @@ class PipelineService {
   }
 
   /**
+   * Calculate period-over-period comparison
+   * Compares current period metrics to previous period
+   */
+  calculatePeriodComparison(requests: ServiceRequest[], periodDays: number = 30): {
+    currentPeriod: PipelineMetrics;
+    previousPeriod: PipelineMetrics;
+    changes: {
+      pipelineValue: number;
+      weightedPipeline: number;
+      openRequests: number;
+      avgDealSize: number;
+    };
+  } {
+    const now = new Date();
+    const currentStart = new Date(now.getTime() - periodDays * 24 * 60 * 60 * 1000);
+    const previousStart = new Date(currentStart.getTime() - periodDays * 24 * 60 * 60 * 1000);
+
+    // Filter requests by creation date
+    const currentPeriodRequests = requests.filter(r => {
+      const created = new Date(r.Created);
+      return created >= currentStart && created <= now;
+    });
+
+    const previousPeriodRequests = requests.filter(r => {
+      const created = new Date(r.Created);
+      return created >= previousStart && created < currentStart;
+    });
+
+    const currentMetrics = this.calculatePipelineMetrics(currentPeriodRequests);
+    const previousMetrics = this.calculatePipelineMetrics(previousPeriodRequests);
+
+    // Calculate percentage changes
+    const calcChange = (current: number, previous: number): number => {
+      if (previous === 0) return current > 0 ? 100 : 0;
+      return Math.round(((current - previous) / previous) * 100);
+    };
+
+    return {
+      currentPeriod: currentMetrics,
+      previousPeriod: previousMetrics,
+      changes: {
+        pipelineValue: calcChange(currentMetrics.totalPipelineValue, previousMetrics.totalPipelineValue),
+        weightedPipeline: calcChange(currentMetrics.weightedPipelineValue, previousMetrics.weightedPipelineValue),
+        openRequests: calcChange(currentMetrics.openRequests, previousMetrics.openRequests),
+        avgDealSize: calcChange(currentMetrics.averageDealSize, previousMetrics.averageDealSize),
+      },
+    };
+  }
+
+  /**
    * Format currency for display
    */
   formatCurrency(value: number): string {

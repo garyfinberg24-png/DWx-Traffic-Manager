@@ -32,7 +32,9 @@ import {
   Person24Regular,
   Mail24Regular,
   Phone24Regular,
+  ArrowDownload24Regular,
 } from '@fluentui/react-icons';
+import { downloadSpecialistsExcel } from '../../utils/excelExport';
 import { Specialist, SpecialistInput, SpecialistRole } from '../../types/ServiceRequest';
 import { specialistService } from '../../services/SpecialistService';
 import { auditService } from '../../services/AuditService';
@@ -40,6 +42,7 @@ import { serviceRequestService } from '../../services/ServiceRequestService';
 import { SpecialistForm } from './SpecialistForm';
 import { useToast } from '../../contexts/ToastContext';
 import { ConfirmDialog } from '../Common/ConfirmDialog';
+import { Pagination, usePagination } from '../Common/Pagination';
 
 const SPECIALIST_ROLES: SpecialistRole[] = ['Solution Architect', 'Technical Specialist', 'Consultant'];
 
@@ -195,6 +198,16 @@ export const SpecialistManagement: React.FC = () => {
     setFilteredSpecialists(result);
   }, [specialists, searchQuery, roleFilter]);
 
+  // Pagination
+  const {
+    currentPage,
+    pageSize,
+    paginatedItems: paginatedSpecialists,
+    totalItems,
+    setCurrentPage,
+    setPageSize,
+  } = usePagination(filteredSpecialists, 20);
+
   const handleCreate = async (data: SpecialistInput) => {
     try {
       setIsSaving(true);
@@ -344,9 +357,19 @@ export const SpecialistManagement: React.FC = () => {
             ))}
           </Dropdown>
         </div>
-        <Button appearance="primary" icon={<Add24Regular />} onClick={openCreateForm}>
-          Add Specialist
-        </Button>
+        <div style={{ display: 'flex', gap: '8px' }}>
+          <Button
+            appearance="outline"
+            icon={<ArrowDownload24Regular />}
+            onClick={() => downloadSpecialistsExcel(filteredSpecialists)}
+            disabled={filteredSpecialists.length === 0}
+          >
+            Export
+          </Button>
+          <Button appearance="primary" icon={<Add24Regular />} onClick={openCreateForm}>
+            Add Specialist
+          </Button>
+        </div>
       </div>
 
       {filteredSpecialists.length === 0 ? (
@@ -367,20 +390,21 @@ export const SpecialistManagement: React.FC = () => {
           )}
         </Card>
       ) : (
-        <Table className={styles.table}>
-          <TableHeader>
-            <TableRow>
-              <TableHeaderCell className={styles.colName}>Name</TableHeaderCell>
-              <TableHeaderCell className={styles.colEmail}>Email</TableHeaderCell>
-              <TableHeaderCell className={styles.colRole}>Role</TableHeaderCell>
-              <TableHeaderCell className={styles.colSpecializations}>Specializations</TableHeaderCell>
-              <TableHeaderCell className={styles.colWorkload}>Workload</TableHeaderCell>
-              <TableHeaderCell className={styles.colStatus}>Status</TableHeaderCell>
-              <TableHeaderCell className={styles.colActions}>Actions</TableHeaderCell>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {filteredSpecialists.map((specialist) => (
+        <>
+          <Table className={styles.table}>
+            <TableHeader>
+              <TableRow>
+                <TableHeaderCell className={styles.colName}>Name</TableHeaderCell>
+                <TableHeaderCell className={styles.colEmail}>Email</TableHeaderCell>
+                <TableHeaderCell className={styles.colRole}>Role</TableHeaderCell>
+                <TableHeaderCell className={styles.colSpecializations}>Specializations</TableHeaderCell>
+                <TableHeaderCell className={styles.colWorkload}>Workload</TableHeaderCell>
+                <TableHeaderCell className={styles.colStatus}>Status</TableHeaderCell>
+                <TableHeaderCell className={styles.colActions}>Actions</TableHeaderCell>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {paginatedSpecialists.map((specialist) => (
               <TableRow key={specialist.Id}>
                 <TableCell className={styles.colName}>
                   <TableCellLayout
@@ -472,9 +496,17 @@ export const SpecialistManagement: React.FC = () => {
                   </Menu>
                 </TableCell>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+              ))}
+            </TableBody>
+          </Table>
+          <Pagination
+            currentPage={currentPage}
+            totalItems={totalItems}
+            pageSize={pageSize}
+            onPageChange={setCurrentPage}
+            onPageSizeChange={setPageSize}
+          />
+        </>
       )}
 
       <SpecialistForm

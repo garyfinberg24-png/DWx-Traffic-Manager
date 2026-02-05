@@ -11,6 +11,8 @@ import {
   TargetRegular,
   PeopleRegular,
   CheckmarkCircleRegular,
+  ArrowUpRegular,
+  ArrowDownRegular,
 } from '@fluentui/react-icons';
 import { PipelineMetrics, WinRateData } from '../../types/ServiceRequest';
 
@@ -74,11 +76,41 @@ const useStyles = makeStyles({
   neutral: {
     color: '#616161',
   },
+  trendIndicator: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '2px',
+    fontSize: '11px',
+    fontWeight: '600',
+    padding: '2px 6px',
+    borderRadius: '4px',
+    marginLeft: '4px',
+  },
+  trendUp: {
+    backgroundColor: 'rgba(16, 124, 16, 0.1)',
+    color: '#107c10',
+  },
+  trendDown: {
+    backgroundColor: 'rgba(209, 52, 56, 0.1)',
+    color: '#d13438',
+  },
+  trendNeutral: {
+    backgroundColor: 'rgba(97, 97, 97, 0.1)',
+    color: '#616161',
+  },
 });
+
+interface PeriodChanges {
+  pipelineValue: number;
+  weightedPipeline: number;
+  openRequests: number;
+  avgDealSize: number;
+}
 
 interface PipelineKPIsProps {
   metrics: PipelineMetrics;
   winRates: WinRateData;
+  periodChanges?: PeriodChanges;
 }
 
 const formatCurrency = (value: number): string => {
@@ -100,7 +132,26 @@ const formatLargeCurrency = (value: number): string => {
   }).format(value);
 };
 
-export const PipelineKPIs: React.FC<PipelineKPIsProps> = ({ metrics, winRates }) => {
+// Trend indicator component
+const TrendIndicator: React.FC<{ change: number; styles: ReturnType<typeof useStyles> }> = ({
+  change,
+  styles,
+}) => {
+  if (change === 0) return null;
+
+  const isPositive = change > 0;
+  const Icon = isPositive ? ArrowUpRegular : ArrowDownRegular;
+  const trendClass = isPositive ? styles.trendUp : styles.trendDown;
+
+  return (
+    <span className={`${styles.trendIndicator} ${trendClass}`} aria-label={`${isPositive ? 'Up' : 'Down'} ${Math.abs(change)}% vs last period`}>
+      <Icon style={{ width: '10px', height: '10px' }} aria-hidden="true" />
+      {Math.abs(change)}%
+    </span>
+  );
+};
+
+export const PipelineKPIs: React.FC<PipelineKPIsProps> = ({ metrics, winRates, periodChanges }) => {
   const styles = useStyles();
 
   const kpiCards = [
@@ -112,6 +163,7 @@ export const PipelineKPIs: React.FC<PipelineKPIsProps> = ({ metrics, winRates })
       iconBg: '#e8f4f6',
       iconColor: '#1e6b7b',
       tooltip: formatLargeCurrency(metrics.totalPipelineValue),
+      trend: periodChanges?.pipelineValue,
     },
     {
       label: 'Weighted Pipeline',
@@ -121,6 +173,7 @@ export const PipelineKPIs: React.FC<PipelineKPIsProps> = ({ metrics, winRates })
       iconBg: '#e8f6e8',
       iconColor: '#107c10',
       tooltip: formatLargeCurrency(metrics.weightedPipelineValue),
+      trend: periodChanges?.weightedPipeline,
     },
     {
       label: 'Win Rate',
@@ -139,6 +192,7 @@ export const PipelineKPIs: React.FC<PipelineKPIsProps> = ({ metrics, winRates })
       iconBg: '#f5eefa',
       iconColor: '#8b5cf6',
       tooltip: formatLargeCurrency(metrics.averageDealSize),
+      trend: periodChanges?.avgDealSize,
     },
     {
       label: 'Open Requests',
@@ -147,6 +201,7 @@ export const PipelineKPIs: React.FC<PipelineKPIsProps> = ({ metrics, winRates })
       icon: PeopleRegular,
       iconBg: '#fff4e5',
       iconColor: '#f59e0b',
+      trend: periodChanges?.openRequests,
     },
     {
       label: 'Forecasted Revenue',
@@ -173,7 +228,10 @@ export const PipelineKPIs: React.FC<PipelineKPIsProps> = ({ metrics, winRates })
                 <card.icon style={{ width: '20px', height: '20px' }} />
               </div>
             </div>
-            <Text className={styles.cardValue}>{card.value}</Text>
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+              <Text className={styles.cardValue}>{card.value}</Text>
+              {card.trend !== undefined && <TrendIndicator change={card.trend} styles={styles} />}
+            </div>
             <Text
               className={`${styles.cardSubtext} ${
                 card.subtextType === 'positive'

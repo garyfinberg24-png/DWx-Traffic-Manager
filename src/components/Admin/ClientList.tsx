@@ -48,6 +48,7 @@ import { ClientForm } from './ClientForm';
 import { ImportClientsDialog } from './ImportClientsDialog';
 import { useToast } from '../../contexts/ToastContext';
 import { ConfirmDialog } from '../Common/ConfirmDialog';
+import { Pagination, usePagination } from '../Common/Pagination';
 
 const useStyles = makeStyles({
   container: {
@@ -203,6 +204,16 @@ export const ClientList: React.FC = () => {
     setFilteredClients(result);
   }, [clients, searchQuery, statusFilter]);
 
+  // Pagination
+  const {
+    currentPage,
+    pageSize,
+    paginatedItems: paginatedClients,
+    totalItems,
+    setCurrentPage,
+    setPageSize,
+  } = usePagination(filteredClients, 20);
+
   const handleCreate = async (data: ClientInput, accountManagerName?: string) => {
     try {
       setIsSaving(true);
@@ -333,19 +344,20 @@ export const ClientList: React.FC = () => {
           </Text>
         </Card>
       ) : (
-        <Table className={styles.table}>
-          <TableHeader>
-            <TableRow>
-              <TableHeaderCell>Company</TableHeaderCell>
-              <TableHeaderCell>Primary Contact</TableHeaderCell>
-              <TableHeaderCell>Industry</TableHeaderCell>
-              <TableHeaderCell>Account Manager</TableHeaderCell>
-              <TableHeaderCell>Status</TableHeaderCell>
-              <TableHeaderCell>Actions</TableHeaderCell>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {filteredClients.map((client) => (
+        <>
+          <Table className={styles.table}>
+            <TableHeader>
+              <TableRow>
+                <TableHeaderCell>Company</TableHeaderCell>
+                <TableHeaderCell>Primary Contact</TableHeaderCell>
+                <TableHeaderCell>Industry</TableHeaderCell>
+                <TableHeaderCell>Account Manager</TableHeaderCell>
+                <TableHeaderCell>Status</TableHeaderCell>
+                <TableHeaderCell>Actions</TableHeaderCell>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {paginatedClients.map((client) => (
               <TableRow key={client.Id}>
                 <TableCell>
                   <TableCellLayout
@@ -427,9 +439,17 @@ export const ClientList: React.FC = () => {
                   </Menu>
                 </TableCell>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+              ))}
+            </TableBody>
+          </Table>
+          <Pagination
+            currentPage={currentPage}
+            totalItems={totalItems}
+            pageSize={pageSize}
+            onPageChange={setCurrentPage}
+            onPageSizeChange={setPageSize}
+          />
+        </>
       )}
 
       <ClientForm

@@ -150,7 +150,15 @@ export const StageProgressBar: React.FC<StageProgressBarProps> = ({
 
   if (compact) {
     return (
-      <div className={styles.compactContainer}>
+      <div
+        className={styles.compactContainer}
+        role="progressbar"
+        aria-label={`Sales funnel progress: ${currentStage}`}
+        aria-valuemin={0}
+        aria-valuemax={STAGES.length}
+        aria-valuenow={isLost ? 0 : currentIndex + 1}
+        aria-valuetext={`${currentStage} stage`}
+      >
         {STAGES.slice(0, -1).map((stage, index) => {
           const status = getStageStatus(stage, index);
           return (
@@ -202,7 +210,15 @@ export const StageProgressBar: React.FC<StageProgressBarProps> = ({
 
   return (
     <div className={styles.container}>
-      <div className={styles.progressBar}>
+      <div
+        className={styles.progressBar}
+        role="progressbar"
+        aria-label={`Sales funnel progress: ${currentStage}`}
+        aria-valuemin={0}
+        aria-valuemax={STAGES.length}
+        aria-valuenow={isLost ? 0 : currentIndex + 1}
+        aria-valuetext={`${currentStage} stage`}
+      >
         {STAGES.map((stage, index) => {
           const status = getStageStatus(stage, index);
           const isTerminal = stage === 'Won';

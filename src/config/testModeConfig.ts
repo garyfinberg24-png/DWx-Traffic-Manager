@@ -13,6 +13,8 @@
 import type { User } from '../types/User';
 import type { Booking } from '../types/Booking';
 import type { Client, TeamMember, AccountManager } from '../types/ReferenceData';
+import type { ServiceRequest, Specialist } from '../types/ServiceRequest';
+import type { ProductRequest } from '../types/ProductRequest';
 
 // Check if test mode is enabled
 export const isTestMode = import.meta.env.VITE_TEST_MODE === 'true';
@@ -390,13 +392,514 @@ export const mockBookings: Booking[] = [
   },
 ];
 
+// Mock Specialists
+export const mockSpecialists: Specialist[] = [
+  {
+    Id: 1,
+    Title: 'Alice van der Merwe',
+    Email: 'alice.vdm@firsttech.digital',
+    Role: 'Solution Architect',
+    Specializations: ['Power Platform', 'Copilot Agents', 'M365 Assessment'],
+    MaxConcurrentDeals: 4,
+    CurrentDealCount: 2,
+    IsActive: true,
+    CalendarEmail: 'alice.vdm@firsttech.digital',
+    Phone: '+27-21-555-0001',
+    Created: new Date(Date.now() - 400 * 24 * 60 * 60 * 1000).toISOString(),
+  },
+  {
+    Id: 2,
+    Title: 'James Naidoo',
+    Email: 'james.n@firsttech.digital',
+    Role: 'Technical Specialist',
+    Specializations: ['SPFx Development', 'SharePoint Migration'],
+    MaxConcurrentDeals: 3,
+    CurrentDealCount: 3,
+    IsActive: true,
+    CalendarEmail: 'james.n@firsttech.digital',
+    Phone: '+27-21-555-0002',
+    Created: new Date(Date.now() - 300 * 24 * 60 * 60 * 1000).toISOString(),
+  },
+  {
+    Id: 3,
+    Title: 'Priya Govender',
+    Email: 'priya.g@firsttech.digital',
+    Role: 'Consultant',
+    Specializations: ['MS Viva', 'Training', 'M365 Assessment'],
+    MaxConcurrentDeals: 5,
+    CurrentDealCount: 1,
+    IsActive: true,
+    CalendarEmail: 'priya.g@firsttech.digital',
+    Phone: '+27-11-555-0003',
+    Created: new Date(Date.now() - 250 * 24 * 60 * 60 * 1000).toISOString(),
+  },
+  {
+    Id: 4,
+    Title: 'David Botha',
+    Email: 'david.b@firsttech.digital',
+    Role: 'Technical Specialist',
+    Specializations: ['Power Platform', 'SPFx Development', 'Copilot Agents'],
+    MaxConcurrentDeals: 3,
+    CurrentDealCount: 0,
+    IsActive: true,
+    CalendarEmail: 'david.b@firsttech.digital',
+    Phone: '+27-21-555-0004',
+    Created: new Date(Date.now() - 180 * 24 * 60 * 60 * 1000).toISOString(),
+  },
+  {
+    Id: 5,
+    Title: 'Sarah Chen',
+    Email: 'sarah.c@firsttech.digital',
+    Role: 'Solution Architect',
+    Specializations: ['SharePoint Migration', 'M365 Assessment'],
+    MaxConcurrentDeals: 4,
+    CurrentDealCount: 2,
+    IsActive: false,
+    CalendarEmail: 'sarah.c@firsttech.digital',
+    Phone: '+44-20-555-0005',
+    Created: new Date(Date.now() - 500 * 24 * 60 * 60 * 1000).toISOString(),
+  },
+];
+
+// Mock Service Requests (across all funnel stages)
+export const mockServiceRequests: ServiceRequest[] = [
+  {
+    Id: 101,
+    Title: 'Acme Corporation - Power Platform Development',
+    ServiceId: 1,
+    ServiceName: 'Power Platform Development',
+    AccountManagerName: 'Test Account Manager',
+    AccountManagerEmail: 'test.am@example.com',
+    AccountManagerTenant: 'Internal',
+    ClientName: 'Acme Corporation',
+    ClientId: 1,
+    ContactName: 'John Smith',
+    ContactEmail: 'john.smith@acme.com',
+    ContactPhone: '+1-555-0100',
+    Industry: 'Technology',
+    CompanySize: 'Enterprise',
+    FunnelStage: 'Discovery',
+    InterestLevel: 'Hot',
+    DealValue: 120000,
+    DealProbability: 60,
+    WeightedPipeline: 72000,
+    ExpectedCloseDate: getFutureDate(30),
+    ProposedSlot1: getFutureDate(5, 10),
+    ProposedSlot2: getFutureDate(6, 14),
+    ProposedSlot3: getFutureDate(7, 10),
+    AssignedSpecialistName: 'Alice van der Merwe',
+    AssignedSpecialistEmail: 'alice.vdm@firsttech.digital',
+    AssignedSpecialistRole: 'Solution Architect',
+    Requirements: 'Custom Power App for field service management with offline capabilities.',
+    Comments: 'Key account — CEO personally involved.',
+    Created: new Date(Date.now() - 12 * 24 * 60 * 60 * 1000).toISOString(),
+  },
+  {
+    Id: 102,
+    Title: 'TechStart Inc - SPFx Development',
+    ServiceId: 2,
+    ServiceName: 'SPFx Development',
+    AccountManagerName: 'Test Account Manager',
+    AccountManagerEmail: 'test.am@example.com',
+    AccountManagerTenant: 'Internal',
+    ClientName: 'TechStart Inc',
+    ClientId: 2,
+    ContactName: 'Sarah Johnson',
+    ContactEmail: 'sarah@techstart.io',
+    Industry: 'Technology',
+    CompanySize: 'SMB',
+    FunnelStage: 'Lead',
+    InterestLevel: 'Warm',
+    DealValue: 35000,
+    DealProbability: 20,
+    WeightedPipeline: 7000,
+    ProposedSlot1: getFutureDate(10, 11),
+    ProposedSlot2: getFutureDate(11, 15),
+    ProposedSlot3: getFutureDate(12, 10),
+    Comments: 'Initial inquiry through website contact form.',
+    Created: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+  },
+  {
+    Id: 103,
+    Title: 'Global Finance Ltd - M365 Tenant Assessment',
+    ServiceId: 4,
+    ServiceName: 'M365 Tenant Assessment',
+    AccountManagerName: 'Other Account Manager',
+    AccountManagerEmail: 'other.am@example.com',
+    AccountManagerTenant: 'Internal',
+    ClientName: 'Global Finance Ltd',
+    ClientId: 3,
+    ContactName: 'Michael Chen',
+    ContactEmail: 'mchen@globalfinance.com',
+    ContactPhone: '+1-555-0300',
+    Industry: 'Finance',
+    CompanySize: 'Large',
+    FunnelStage: 'Proposal',
+    InterestLevel: 'Hot',
+    DealValue: 75000,
+    DealProbability: 70,
+    WeightedPipeline: 52500,
+    ExpectedCloseDate: getFutureDate(21),
+    ProposedSlot1: getFutureDate(14, 9),
+    ProposedSlot2: getFutureDate(15, 9),
+    ProposedSlot3: getFutureDate(16, 9),
+    AssignedSpecialistName: 'Alice van der Merwe',
+    AssignedSpecialistEmail: 'alice.vdm@firsttech.digital',
+    AssignedSpecialistRole: 'Solution Architect',
+    Requirements: 'Full tenant security and compliance assessment. POPIA focus.',
+    Created: new Date(Date.now() - 20 * 24 * 60 * 60 * 1000).toISOString(),
+  },
+  {
+    Id: 104,
+    Title: 'HealthCare Plus - SharePoint Migration',
+    ServiceId: 3,
+    ServiceName: 'SharePoint Migration',
+    AccountManagerName: 'Test Account Manager',
+    AccountManagerEmail: 'test.am@example.com',
+    AccountManagerTenant: 'Internal',
+    ClientName: 'HealthCare Plus',
+    ClientId: 4,
+    ContactName: 'Emily Davis',
+    ContactEmail: 'edavis@healthcareplus.org',
+    ContactPhone: '+1-555-0400',
+    Industry: 'Healthcare',
+    CompanySize: 'Medium',
+    FunnelStage: 'Qualified',
+    InterestLevel: 'Warm',
+    DealValue: 95000,
+    DealProbability: 40,
+    WeightedPipeline: 38000,
+    ExpectedCloseDate: getFutureDate(45),
+    ProposedSlot1: getFutureDate(8, 10),
+    ProposedSlot2: getFutureDate(9, 14),
+    ProposedSlot3: getFutureDate(10, 10),
+    Requirements: 'Migrate from SP 2016 on-prem to SPO. ~2TB content, 500 users.',
+    Comments: 'Compliance-heavy — HIPAA considerations.',
+    Created: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000).toISOString(),
+  },
+  {
+    Id: 105,
+    Title: 'RetailMax - Enterprise Copilot Agents',
+    ServiceId: 5,
+    ServiceName: 'Enterprise Copilot Agents',
+    AccountManagerName: 'Test Account Manager',
+    AccountManagerEmail: 'test.am@example.com',
+    AccountManagerTenant: 'Internal',
+    ClientName: 'RetailMax',
+    ClientId: 5,
+    ContactName: 'David Wilson',
+    ContactEmail: 'dwilson@retailmax.com',
+    Industry: 'Retail',
+    CompanySize: 'Large',
+    FunnelStage: 'Negotiation',
+    InterestLevel: 'Hot',
+    DealValue: 180000,
+    DealProbability: 80,
+    WeightedPipeline: 144000,
+    ExpectedCloseDate: getFutureDate(14),
+    ProposedSlot1: getFutureDate(3, 10),
+    ProposedSlot2: getFutureDate(4, 14),
+    ProposedSlot3: getFutureDate(5, 10),
+    ConfirmedDateTime: getFutureDate(3, 10),
+    CalendarEventId: 'mock-dwx-event-001',
+    AssignedSpecialistName: 'David Botha',
+    AssignedSpecialistEmail: 'david.b@firsttech.digital',
+    AssignedSpecialistRole: 'Technical Specialist',
+    Requirements: 'Customer service Copilot agent with CRM integration.',
+    Comments: 'Final contract terms under review by legal.',
+    Created: new Date(Date.now() - 35 * 24 * 60 * 60 * 1000).toISOString(),
+  },
+  {
+    Id: 106,
+    Title: 'Acme Corporation - Microsoft Viva Suite',
+    ServiceId: 6,
+    ServiceName: 'Microsoft Viva Suite',
+    AccountManagerName: 'Test Account Manager',
+    AccountManagerEmail: 'test.am@example.com',
+    AccountManagerTenant: 'Internal',
+    ClientName: 'Acme Corporation',
+    ClientId: 1,
+    ContactName: 'John Smith',
+    ContactEmail: 'john.smith@acme.com',
+    Industry: 'Technology',
+    CompanySize: 'Enterprise',
+    FunnelStage: 'Won',
+    InterestLevel: 'Hot',
+    DealValue: 60000,
+    DealProbability: 100,
+    WeightedPipeline: 60000,
+    ExpectedCloseDate: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
+    ProposedSlot1: new Date(Date.now() - 20 * 24 * 60 * 60 * 1000).toISOString(),
+    ProposedSlot2: new Date(Date.now() - 19 * 24 * 60 * 60 * 1000).toISOString(),
+    ProposedSlot3: new Date(Date.now() - 18 * 24 * 60 * 60 * 1000).toISOString(),
+    ConfirmedDateTime: new Date(Date.now() - 20 * 24 * 60 * 60 * 1000).toISOString(),
+    AssignedSpecialistName: 'Priya Govender',
+    AssignedSpecialistEmail: 'priya.g@firsttech.digital',
+    AssignedSpecialistRole: 'Consultant',
+    WinLossReason: 'Strong relationship + competitive pricing.',
+    Created: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toISOString(),
+  },
+  {
+    Id: 107,
+    Title: 'Global Finance Ltd - Power Platform Development',
+    ServiceId: 1,
+    ServiceName: 'Power Platform Development',
+    AccountManagerName: 'Other Account Manager',
+    AccountManagerEmail: 'other.am@example.com',
+    AccountManagerTenant: 'Internal',
+    ClientName: 'Global Finance Ltd',
+    ClientId: 3,
+    ContactName: 'Michael Chen',
+    ContactEmail: 'mchen@globalfinance.com',
+    Industry: 'Finance',
+    CompanySize: 'Large',
+    FunnelStage: 'Lost',
+    InterestLevel: 'Cold',
+    DealValue: 50000,
+    DealProbability: 0,
+    WeightedPipeline: 0,
+    ProposedSlot1: new Date(Date.now() - 40 * 24 * 60 * 60 * 1000).toISOString(),
+    ProposedSlot2: new Date(Date.now() - 39 * 24 * 60 * 60 * 1000).toISOString(),
+    ProposedSlot3: new Date(Date.now() - 38 * 24 * 60 * 60 * 1000).toISOString(),
+    WinLossReason: 'Budget frozen — will revisit in Q3.',
+    Created: new Date(Date.now() - 50 * 24 * 60 * 60 * 1000).toISOString(),
+  },
+  {
+    Id: 108,
+    Title: 'HealthCare Plus - Zero to AI Copilot Chat Hero',
+    ServiceId: 7,
+    ServiceName: 'Zero to AI Copilot Chat Hero',
+    AccountManagerName: 'Test Account Manager',
+    AccountManagerEmail: 'test.am@example.com',
+    AccountManagerTenant: 'Internal',
+    ClientName: 'HealthCare Plus',
+    ClientId: 4,
+    ContactName: 'Emily Davis',
+    ContactEmail: 'edavis@healthcareplus.org',
+    Industry: 'Healthcare',
+    CompanySize: 'Medium',
+    FunnelStage: 'Lead',
+    InterestLevel: 'Cold',
+    DealValue: 35000,
+    DealProbability: 10,
+    WeightedPipeline: 3500,
+    ProposedSlot1: getFutureDate(20, 9),
+    ProposedSlot2: getFutureDate(21, 9),
+    ProposedSlot3: getFutureDate(22, 9),
+    Comments: 'Expressed interest at webinar — follow up required.',
+    Created: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+  },
+  {
+    Id: 109,
+    Title: 'TechStart Inc - M365 Tenant Assessment',
+    ServiceId: 4,
+    ServiceName: 'M365 Tenant Assessment',
+    AccountManagerName: 'Test Account Manager',
+    AccountManagerEmail: 'test.am@example.com',
+    AccountManagerTenant: 'Internal',
+    ClientName: 'TechStart Inc',
+    ClientId: 2,
+    ContactName: 'Sarah Johnson',
+    ContactEmail: 'sarah@techstart.io',
+    Industry: 'Technology',
+    CompanySize: 'SMB',
+    FunnelStage: 'Discovery',
+    InterestLevel: 'Warm',
+    DealValue: 15000,
+    DealProbability: 50,
+    WeightedPipeline: 7500,
+    ExpectedCloseDate: getFutureDate(28),
+    ProposedSlot1: getFutureDate(7, 10),
+    ProposedSlot2: getFutureDate(8, 14),
+    ProposedSlot3: getFutureDate(9, 10),
+    ConfirmedDateTime: getFutureDate(7, 10),
+    CalendarEventId: 'mock-dwx-event-002',
+    AssignedSpecialistName: 'James Naidoo',
+    AssignedSpecialistEmail: 'james.n@firsttech.digital',
+    AssignedSpecialistRole: 'Technical Specialist',
+    Requirements: 'Basic tenant health check and license review.',
+    Created: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString(),
+  },
+  {
+    Id: 110,
+    Title: 'RetailMax - SharePoint Migration',
+    ServiceId: 3,
+    ServiceName: 'SharePoint Migration',
+    AccountManagerName: 'UK Account Manager',
+    AccountManagerEmail: 'uk.am@example.com',
+    AccountManagerTenant: 'External',
+    ClientName: 'RetailMax',
+    ClientId: 5,
+    ContactName: 'David Wilson',
+    ContactEmail: 'dwilson@retailmax.com',
+    Industry: 'Retail',
+    CompanySize: 'Large',
+    FunnelStage: 'Qualified',
+    InterestLevel: 'Warm',
+    DealValue: 110000,
+    DealProbability: 35,
+    WeightedPipeline: 38500,
+    ExpectedCloseDate: getFutureDate(60),
+    ProposedSlot1: getFutureDate(12, 9),
+    ProposedSlot2: getFutureDate(13, 14),
+    ProposedSlot3: getFutureDate(14, 9),
+    Requirements: 'Migrate 5TB file share + SP 2013 intranet to SPO.',
+    Created: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString(),
+  },
+];
+
+// Mock Product Requests
+export const mockProductRequests: ProductRequest[] = [
+  {
+    Id: 201,
+    Title: 'Acme Corporation - DWx Insights (Demo)',
+    ProductId: 'dwx-insights-001',
+    ProductName: 'DWx Insights Dashboard',
+    ProductType: 'Web Part',
+    ProductCategory: 'Analytics',
+    RequestType: 'Demo',
+    AccountManagerName: 'Test Account Manager',
+    AccountManagerEmail: 'test.am@example.com',
+    ClientName: 'Acme Corporation',
+    ContactName: 'John Smith',
+    ContactEmail: 'john.smith@acme.com',
+    ContactPhone: '+1-555-0100',
+    Industry: 'Technology',
+    CompanySize: 'Enterprise',
+    IsPremiumClient: true,
+    Status: 'Pending Review',
+    LicenseCount: 500,
+    EstimatedValue: 45000,
+    ProposedSlot1: getFutureDate(5, 10),
+    ProposedSlot2: getFutureDate(6, 14),
+    ProposedSlot3: getFutureDate(7, 10),
+    ProductRequirements: 'Integration with existing Power BI dashboards.',
+    Comments: 'High priority — CEO wants to see analytics capabilities.',
+    Created: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+  },
+  {
+    Id: 202,
+    Title: 'TechStart Inc - Copilot Agent (Trial Deployment)',
+    ProductId: 'copilot-agent-002',
+    ProductName: 'IT Help Desk Copilot',
+    ProductType: 'Agent',
+    ProductCategory: 'AI',
+    RequestType: 'Trial Deployment',
+    AccountManagerName: 'Test Account Manager',
+    AccountManagerEmail: 'test.am@example.com',
+    ClientName: 'TechStart Inc',
+    ContactName: 'Sarah Johnson',
+    ContactEmail: 'sarah@techstart.io',
+    Industry: 'Technology',
+    CompanySize: 'SMB',
+    IsPremiumClient: false,
+    Status: 'Awaiting Approval',
+    LicenseCount: 50,
+    EstimatedValue: 12000,
+    ProposedSlot1: getFutureDate(10, 11),
+    ProposedSlot2: getFutureDate(11, 15),
+    ProposedSlot3: getFutureDate(12, 10),
+    AssignedSpecialistName: 'David Botha',
+    AssignedSpecialistEmail: 'david.b@firsttech.digital',
+    AssignedSpecialistRole: 'Technical Specialist',
+    ProductRequirements: 'Knowledge base for internal IT FAQs and ticket creation.',
+    Created: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
+  },
+  {
+    Id: 203,
+    Title: 'Global Finance Ltd - Compliance App (Demo)',
+    ProductId: 'compliance-app-003',
+    ProductName: 'DWx Compliance Tracker',
+    ProductType: 'App',
+    ProductCategory: 'Governance',
+    RequestType: 'Demo',
+    AccountManagerName: 'Other Account Manager',
+    AccountManagerEmail: 'other.am@example.com',
+    ClientName: 'Global Finance Ltd',
+    ContactName: 'Michael Chen',
+    ContactEmail: 'mchen@globalfinance.com',
+    Industry: 'Finance',
+    CompanySize: 'Large',
+    IsPremiumClient: true,
+    Status: 'Confirmed',
+    LicenseCount: 200,
+    EstimatedValue: 30000,
+    ProposedSlot1: getFutureDate(3, 9),
+    ProposedSlot2: getFutureDate(4, 9),
+    ProposedSlot3: getFutureDate(5, 9),
+    ConfirmedDateTime: getFutureDate(3, 9),
+    CalendarEventId: 'mock-product-event-001',
+    AssignedSpecialistName: 'Alice van der Merwe',
+    AssignedSpecialistEmail: 'alice.vdm@firsttech.digital',
+    AssignedSpecialistRole: 'Solution Architect',
+    ProductRequirements: 'POPIA and GDPR compliance tracking with audit trails.',
+    Created: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
+  },
+  {
+    Id: 204,
+    Title: 'HealthCare Plus - Viva Card (Demo)',
+    ProductId: 'viva-card-004',
+    ProductName: 'Employee Wellness Card',
+    ProductType: 'Adaptive Card',
+    ProductCategory: 'Employee Experience',
+    RequestType: 'Demo',
+    AccountManagerName: 'Test Account Manager',
+    AccountManagerEmail: 'test.am@example.com',
+    ClientName: 'HealthCare Plus',
+    ContactName: 'Emily Davis',
+    ContactEmail: 'edavis@healthcareplus.org',
+    Industry: 'Healthcare',
+    IsPremiumClient: false,
+    Status: 'Completed',
+    LicenseCount: 100,
+    EstimatedValue: 8000,
+    ProposedSlot1: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString(),
+    ConfirmedDateTime: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString(),
+    AssignedSpecialistName: 'Priya Govender',
+    AssignedSpecialistEmail: 'priya.g@firsttech.digital',
+    AssignedSpecialistRole: 'Consultant',
+    Outcome: 'Client impressed — proceeding to trial.',
+    NextSteps: 'Prepare trial deployment proposal.',
+    Created: new Date(Date.now() - 21 * 24 * 60 * 60 * 1000).toISOString(),
+  },
+  {
+    Id: 205,
+    Title: 'RetailMax - Inventory Agent (Trial Deployment)',
+    ProductId: 'inventory-agent-005',
+    ProductName: 'Smart Inventory Agent',
+    ProductType: 'Agent',
+    ProductCategory: 'Operations',
+    RequestType: 'Trial Deployment',
+    AccountManagerName: 'Test Account Manager',
+    AccountManagerEmail: 'test.am@example.com',
+    ClientName: 'RetailMax',
+    ContactName: 'David Wilson',
+    ContactEmail: 'dwilson@retailmax.com',
+    Industry: 'Retail',
+    CompanySize: 'Large',
+    IsPremiumClient: false,
+    Status: 'Cancelled',
+    LicenseCount: 75,
+    EstimatedValue: 20000,
+    ProposedSlot1: new Date(Date.now() - 25 * 24 * 60 * 60 * 1000).toISOString(),
+    Comments: 'Client postponed — budget constraints.',
+    Created: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
+  },
+];
+
 // In-memory storage for test mode (allows CRUD operations during tests)
 let testBookings = [...mockBookings];
 let testClients = [...mockClients];
 let testTeamMembers = [...mockTeamMembers];
 let testAccountManagers = [...mockAccountManagers];
+let testServiceRequests = [...mockServiceRequests];
+let testProductRequests = [...mockProductRequests];
+let testSpecialists = [...mockSpecialists];
 let nextBookingId = Math.max(...mockBookings.map((b) => b.Id)) + 1;
 let nextClientId = Math.max(...mockClients.map((c) => c.Id)) + 1;
+let nextServiceRequestId = Math.max(...mockServiceRequests.map((r) => r.Id)) + 1;
+let nextProductRequestId = Math.max(...mockProductRequests.map((r) => r.Id)) + 1;
+let nextSpecialistId = Math.max(...mockSpecialists.map((s) => s.Id)) + 1;
 
 // Reset test data to initial state (useful between test runs)
 export const resetTestData = (): void => {
@@ -404,8 +907,14 @@ export const resetTestData = (): void => {
   testClients = [...mockClients];
   testTeamMembers = [...mockTeamMembers];
   testAccountManagers = [...mockAccountManagers];
+  testServiceRequests = [...mockServiceRequests];
+  testProductRequests = [...mockProductRequests];
+  testSpecialists = [...mockSpecialists];
   nextBookingId = Math.max(...mockBookings.map((b) => b.Id)) + 1;
   nextClientId = Math.max(...mockClients.map((c) => c.Id)) + 1;
+  nextServiceRequestId = Math.max(...mockServiceRequests.map((r) => r.Id)) + 1;
+  nextProductRequestId = Math.max(...mockProductRequests.map((r) => r.Id)) + 1;
+  nextSpecialistId = Math.max(...mockSpecialists.map((s) => s.Id)) + 1;
   console.log('[TestMode] Test data reset to initial state');
 };
 
@@ -459,6 +968,70 @@ export const createTestClient = (client: Omit<Client, 'Id'>): Client => {
 export const getTestTeamMembers = (): TeamMember[] => [...testTeamMembers];
 export const getTestAccountManagers = (): AccountManager[] => [...testAccountManagers];
 
+// CRUD operations for test service requests
+export const getTestServiceRequests = (): ServiceRequest[] => [...testServiceRequests];
+
+export const getTestServiceRequestById = (id: number): ServiceRequest | undefined =>
+  testServiceRequests.find((r) => r.Id === id);
+
+export const createTestServiceRequest = (request: Omit<ServiceRequest, 'Id'>): ServiceRequest => {
+  const newRequest: ServiceRequest = { ...request, Id: nextServiceRequestId++ };
+  testServiceRequests.push(newRequest);
+  return newRequest;
+};
+
+export const updateTestServiceRequest = (id: number, updates: Partial<ServiceRequest>): ServiceRequest | undefined => {
+  const index = testServiceRequests.findIndex((r) => r.Id === id);
+  if (index === -1) return undefined;
+  testServiceRequests[index] = { ...testServiceRequests[index], ...updates };
+  return testServiceRequests[index];
+};
+
+export const deleteTestServiceRequest = (id: number): boolean => {
+  const index = testServiceRequests.findIndex((r) => r.Id === id);
+  if (index === -1) return false;
+  testServiceRequests.splice(index, 1);
+  return true;
+};
+
+// CRUD operations for test product requests
+export const getTestProductRequests = (): ProductRequest[] => [...testProductRequests];
+
+export const getTestProductRequestById = (id: number): ProductRequest | undefined =>
+  testProductRequests.find((r) => r.Id === id);
+
+export const createTestProductRequest = (request: Omit<ProductRequest, 'Id'>): ProductRequest => {
+  const newRequest: ProductRequest = { ...request, Id: nextProductRequestId++ };
+  testProductRequests.push(newRequest);
+  return newRequest;
+};
+
+export const updateTestProductRequest = (id: number, updates: Partial<ProductRequest>): ProductRequest | undefined => {
+  const index = testProductRequests.findIndex((r) => r.Id === id);
+  if (index === -1) return undefined;
+  testProductRequests[index] = { ...testProductRequests[index], ...updates };
+  return testProductRequests[index];
+};
+
+// CRUD operations for test specialists
+export const getTestSpecialists = (): Specialist[] => [...testSpecialists];
+
+export const getTestSpecialistById = (id: number): Specialist | undefined =>
+  testSpecialists.find((s) => s.Id === id);
+
+export const createTestSpecialist = (specialist: Omit<Specialist, 'Id'>): Specialist => {
+  const newSpecialist: Specialist = { ...specialist, Id: nextSpecialistId++ };
+  testSpecialists.push(newSpecialist);
+  return newSpecialist;
+};
+
+export const updateTestSpecialist = (id: number, updates: Partial<Specialist>): Specialist | undefined => {
+  const index = testSpecialists.findIndex((s) => s.Id === id);
+  if (index === -1) return undefined;
+  testSpecialists[index] = { ...testSpecialists[index], ...updates };
+  return testSpecialists[index];
+};
+
 // Console logging for test mode
 if (isTestMode) {
   console.log('========================================');
@@ -471,5 +1044,8 @@ if (isTestMode) {
   console.log(`  - ${mockClients.length} clients`);
   console.log(`  - ${mockTeamMembers.length} team members`);
   console.log(`  - ${mockAccountManagers.length} account managers`);
+  console.log(`  - ${mockServiceRequests.length} service requests`);
+  console.log(`  - ${mockProductRequests.length} product requests`);
+  console.log(`  - ${mockSpecialists.length} specialists`);
   console.log('========================================');
 }

@@ -42,6 +42,8 @@ interface ConfirmDialogProps {
   onConfirm: () => void;
   onCancel: () => void;
   isLoading?: boolean;
+  /** When 'danger', confirm button will have red styling */
+  intent?: 'confirm' | 'danger';
 }
 
 export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
@@ -54,8 +56,14 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   onConfirm,
   onCancel,
   isLoading = false,
+  intent = 'confirm',
 }) => {
   const styles = useStyles();
+
+  const dangerStyle = intent === 'danger' ? {
+    backgroundColor: '#d13438',
+    color: 'white',
+  } : undefined;
 
   return (
     <Dialog open={open} onOpenChange={(_, data) => !data.open && onCancel()}>
@@ -72,7 +80,12 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
             <Button appearance="secondary" onClick={onCancel} disabled={isLoading}>
               {cancelLabel}
             </Button>
-            <Button appearance={confirmAppearance} onClick={onConfirm} disabled={isLoading}>
+            <Button
+              appearance={confirmAppearance}
+              onClick={onConfirm}
+              disabled={isLoading}
+              style={dangerStyle}
+            >
               {isLoading ? 'Processing...' : confirmLabel}
             </Button>
           </DialogActions>

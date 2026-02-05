@@ -9,6 +9,12 @@ import {
   Spinner,
   Tab,
   TabList,
+  Button,
+  Menu,
+  MenuTrigger,
+  MenuPopover,
+  MenuList,
+  MenuItem,
   makeStyles,
   MessageBar,
   MessageBarBody,
@@ -19,7 +25,15 @@ import {
   PeopleQueueRegular,
   TargetRegular,
   BoxRegular,
+  ArrowDownloadRegular,
 } from '@fluentui/react-icons';
+import {
+  downloadServiceRequestsExcel,
+  downloadServiceRequestsCSV,
+  downloadProductRequestsExcel,
+  downloadProductRequestsCSV,
+} from '../../utils/excelExport';
+import { KPICardSkeleton } from '../Common/CardSkeleton';
 import { useAuth } from '../../contexts/AuthContext';
 import {
   ServiceRequest,
@@ -179,6 +193,11 @@ export const SalesFunnelDashboard: React.FC<SalesFunnelDashboardProps> = ({
     return pipelineService.calculateConversionRates(requests);
   }, [requests]);
 
+  // Period-over-period comparison (last 30 days vs previous 30 days)
+  const periodComparison = useMemo(() => {
+    return pipelineService.calculatePeriodComparison(requests, 30);
+  }, [requests]);
+
   const handleRequestUpdated = (updatedRequest: ServiceRequest) => {
     setRequests((prev) =>
       prev.map((r) => (r.Id === updatedRequest.Id ? updatedRequest : r))
@@ -199,9 +218,20 @@ export const SalesFunnelDashboard: React.FC<SalesFunnelDashboardProps> = ({
   if (loading) {
     return (
       <div className={styles.container}>
-        <div className={styles.loadingContainer}>
-          <Spinner size="large" />
-          <Text>Loading pipeline data...</Text>
+        <div className={styles.headerLeft}>
+          <Text className={styles.title}>Sales Pipeline</Text>
+          <Text className={styles.subtitle}>Loading pipeline data...</Text>
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px' }}>
+          <KPICardSkeleton count={4} />
+        </div>
+        <div className={styles.grid}>
+          <div className={styles.card} style={{ minHeight: '300px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Spinner size="medium" />
+          </div>
+          <div className={styles.card} style={{ minHeight: '300px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Spinner size="medium" />
+          </div>
         </div>
       </div>
     );
@@ -217,6 +247,37 @@ export const SalesFunnelDashboard: React.FC<SalesFunnelDashboardProps> = ({
             {isManager ? 'Organization-wide' : 'Your'} pre-sales pipeline and performance metrics
           </Text>
         </div>
+        <Menu>
+          <MenuTrigger disableButtonEnhancement>
+            <Button
+              appearance="outline"
+              icon={<ArrowDownloadRegular />}
+              size="small"
+            >
+              Export
+            </Button>
+          </MenuTrigger>
+          <MenuPopover>
+            <MenuList>
+              <MenuItem onClick={() => downloadServiceRequestsExcel(requests)}>
+                Service Requests (.xls)
+              </MenuItem>
+              <MenuItem onClick={() => downloadServiceRequestsCSV(requests)}>
+                Service Requests (.csv)
+              </MenuItem>
+              {productRequests.length > 0 && (
+                <MenuItem onClick={() => downloadProductRequestsExcel(productRequests)}>
+                  Product Requests (.xls)
+                </MenuItem>
+              )}
+              {productRequests.length > 0 && (
+                <MenuItem onClick={() => downloadProductRequestsCSV(productRequests)}>
+                  Product Requests (.csv)
+                </MenuItem>
+              )}
+            </MenuList>
+          </MenuPopover>
+        </Menu>
       </div>
 
       {/* Error Message */}
@@ -258,7 +319,7 @@ export const SalesFunnelDashboard: React.FC<SalesFunnelDashboardProps> = ({
         {activeTab === 'overview' && (
           <>
             {/* KPI Cards */}
-            <PipelineKPIs metrics={metrics} winRates={winRates} />
+            <PipelineKPIs metrics={metrics} winRates={winRates} periodChanges={periodComparison.changes} />
 
             {/* Funnel + Conversion Rates */}
             <div className={styles.grid}>

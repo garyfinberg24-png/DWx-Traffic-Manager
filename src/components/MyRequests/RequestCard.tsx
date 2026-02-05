@@ -257,11 +257,22 @@ export const RequestCard: React.FC<RequestCardProps> = ({ request, onClick, onQu
 
   const transitions = STAGE_TRANSITIONS[request.FunnelStage] || [];
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      onClick(request);
+    }
+  };
+
   return (
     <Card
       className={styles.card}
       style={{ borderLeftColor: stageColor.border }}
       onClick={() => onClick(request)}
+      onKeyDown={handleKeyDown}
+      tabIndex={0}
+      role="article"
+      aria-label={`${request.ClientName} - ${request.ServiceName}, Stage: ${request.FunnelStage}, Value: ${formatCurrency(request.DealValue)}`}
     >
       <div className={styles.cardTop}>
         <div className={styles.cardHeader}>
@@ -275,26 +286,34 @@ export const RequestCard: React.FC<RequestCardProps> = ({ request, onClick, onQu
               backgroundColor: stageColor.bg,
               color: stageColor.text,
             }}
+            role="status"
+            aria-label={`Stage: ${request.FunnelStage}`}
           >
             {request.FunnelStage}
           </span>
         </div>
 
-        <div className={styles.badgeRow}>
-          <span className={`${styles.interestBadge} ${getInterestStyle(request.InterestLevel, styles)}`}>
-            {request.InterestLevel === 'Hot' ? '🔥' : request.InterestLevel === 'Warm' ? '☀️' : '❄️'}{' '}
+        <div className={styles.badgeRow} role="list" aria-label="Request attributes">
+          <span
+            className={`${styles.interestBadge} ${getInterestStyle(request.InterestLevel, styles)}`}
+            role="listitem"
+            aria-label={`Interest level: ${request.InterestLevel}`}
+          >
+            <span aria-hidden="true">
+              {request.InterestLevel === 'Hot' ? '🔥' : request.InterestLevel === 'Warm' ? '☀️' : '❄️'}
+            </span>{' '}
             {request.InterestLevel}
           </span>
 
           {request.AssignedSpecialistName ? (
-            <span className={styles.specialistBadge}>
-              <PersonRegular style={{ width: '12px', height: '12px' }} />
+            <span className={styles.specialistBadge} role="listitem" aria-label={`Assigned specialist: ${request.AssignedSpecialistName}`}>
+              <PersonRegular style={{ width: '12px', height: '12px' }} aria-hidden="true" />
               {request.AssignedSpecialistName}
             </span>
           ) : (
             request.FunnelStage !== 'Lead' && (
-              <span className={styles.unassignedBadge}>
-                <PersonRegular style={{ width: '12px', height: '12px' }} />
+              <span className={styles.unassignedBadge} role="listitem" aria-label="No specialist assigned">
+                <PersonRegular style={{ width: '12px', height: '12px' }} aria-hidden="true" />
                 Unassigned
               </span>
             )
@@ -344,6 +363,7 @@ export const RequestCard: React.FC<RequestCardProps> = ({ request, onClick, onQu
                   icon={<MoreHorizontalRegular />}
                   size="small"
                   onClick={(e) => e.stopPropagation()}
+                  aria-label={`Quick actions for ${request.ClientName}`}
                   title="Quick actions"
                 />
               </MenuTrigger>

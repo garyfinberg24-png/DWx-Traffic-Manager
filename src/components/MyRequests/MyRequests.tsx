@@ -28,7 +28,9 @@ import {
   FilterRegular,
   GridRegular,
   Apps24Regular,
+  ArrowDownloadRegular,
 } from '@fluentui/react-icons';
+import { downloadServiceRequestsExcel, downloadProductRequestsExcel } from '../../utils/excelExport';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
 import {
@@ -43,6 +45,10 @@ import { ProductRequest } from '../../types/ProductRequest';
 import { RequestCard } from './RequestCard';
 import { RequestDetails } from './RequestDetails';
 import { ProductRequestDetails } from './ProductRequestDetails';
+import { ConfirmDialog } from '../Common/ConfirmDialog';
+import { RequestCardSkeleton } from '../Common/CardSkeleton';
+import { Pagination, usePagination } from '../Common/Pagination';
+import { AdvancedFilterPanel, useAdvancedFilters, FilterConfig } from '../Common/AdvancedFilterPanel';
 
 const useStyles = makeStyles({
   container: {
@@ -270,6 +276,40 @@ const SORT_OPTIONS = [
   { value: 'probability-desc', label: 'Highest Probability' },
 ];
 
+// Advanced filter configuration
+const ADVANCED_FILTER_CONFIG: FilterConfig[] = [
+  {
+    key: 'serviceName',
+    label: 'Service',
+    type: 'text',
+    placeholder: 'Filter by service name...',
+  },
+  {
+    key: 'minValue',
+    label: 'Min Deal Value',
+    type: 'number',
+    placeholder: '0',
+  },
+  {
+    key: 'maxValue',
+    label: 'Max Deal Value',
+    type: 'number',
+    placeholder: '0',
+  },
+  {
+    key: 'dateRange',
+    label: 'Created Date',
+    type: 'daterange',
+  },
+  {
+    key: 'hasSpecialist',
+    label: 'Has Assigned Specialist',
+    type: 'checkbox',
+  },
+];
+
+type AdvancedFilterValues = Record<string, string | number | boolean | string[] | [string | null, string | null] | null>;
+
 interface MyRequestsProps {
   onNewRequest?: () => void;
 }
@@ -293,6 +333,24 @@ export const MyRequests: React.FC<MyRequestsProps> = ({ onNewRequest }) => {
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [selectedProductRequest, setSelectedProductRequest] = useState<ProductRequest | null>(null);
   const [isProductDetailsOpen, setIsProductDetailsOpen] = useState(false);
+  const [confirmAction, setConfirmAction] = useState<{
+    request: ServiceRequest;
+    stage: FunnelStage;
+  } | null>(null);
+  const [confirmLoading, setConfirmLoading] = useState(false);
+
+  // Advanced filters
+  const {
+    filters: advancedFilters,
+    setFilter: setAdvancedFilter,
+    clearFilters: clearAdvancedFilters,
+  } = useAdvancedFilters<AdvancedFilterValues>({
+    serviceName: null,
+    minValue: null,
+    maxValue: null,
+    dateRange: [null, null],
+    hasSpecialist: false,
+  });
 
   // Load requests on mount
   useEffect(() => {
@@ -392,6 +450,41 @@ export const MyRequests: React.FC<MyRequestsProps> = ({ onNewRequest }) => {
       );
     }
 
+    // Advanced filters
+    const serviceName = advancedFilters.serviceName as string | null;
+    const minValue = advancedFilters.minValue as number | null;
+    const maxValue = advancedFilters.maxValue as number | null;
+    const dateRange = (advancedFilters.dateRange as [string | null, string | null]) || [null, null];
+    const hasSpecialist = advancedFilters.hasSpecialist as boolean;
+
+    if (serviceName) {
+      const serviceSearch = serviceName.toLowerCase();
+      filtered = filtered.filter((r) => r.ServiceName.toLowerCase().includes(serviceSearch));
+    }
+
+    if (minValue !== null && minValue > 0) {
+      filtered = filtered.filter((r) => (r.DealValue || 0) >= minValue);
+    }
+
+    if (maxValue !== null && maxValue > 0) {
+      filtered = filtered.filter((r) => (r.DealValue || 0) <= maxValue);
+    }
+
+    if (dateRange[0]) {
+      const fromDate = new Date(dateRange[0]);
+      filtered = filtered.filter((r) => new Date(r.Created) >= fromDate);
+    }
+
+    if (dateRange[1]) {
+      const toDate = new Date(dateRange[1]);
+      toDate.setHours(23, 59, 59, 999); // Include the entire day
+      filtered = filtered.filter((r) => new Date(r.Created) <= toDate);
+    }
+
+    if (hasSpecialist) {
+      filtered = filtered.filter((r) => r.AssignedSpecialistEmail);
+    }
+
     // Sort
     filtered.sort((a, b) => {
       switch (sortBy) {
@@ -410,7 +503,27 @@ export const MyRequests: React.FC<MyRequestsProps> = ({ onNewRequest }) => {
     });
 
     return filtered;
-  }, [requests, selectedStage, selectedInterest, searchText, sortBy]);
+  }, [requests, selectedStage, selectedInterest, searchText, sortBy, advancedFilters]);
+
+  // Pagination for service requests
+  const {
+    currentPage: serviceCurrentPage,
+    pageSize: servicePageSize,
+    paginatedItems: paginatedServiceRequests,
+    totalItems: serviceTotalItems,
+    setCurrentPage: setServiceCurrentPage,
+    setPageSize: setServicePageSize,
+  } = usePagination(filteredRequests, 20);
+
+  // Pagination for product requests
+  const {
+    currentPage: productCurrentPage,
+    pageSize: productPageSize,
+    paginatedItems: paginatedProductRequests,
+    totalItems: productTotalItems,
+    setCurrentPage: setProductCurrentPage,
+    setPageSize: setProductPageSize,
+  } = usePagination(productRequests, 20);
 
   const handleRequestClick = (request: ServiceRequest) => {
     setSelectedRequest(request);
@@ -429,7 +542,17 @@ export const MyRequests: React.FC<MyRequestsProps> = ({ onNewRequest }) => {
     setSelectedRequest(updatedRequest);
   };
 
-  const handleQuickAction = async (request: ServiceRequest, newStage: FunnelStage) => {
+  const handleQuickAction = (request: ServiceRequest, newStage: FunnelStage) => {
+    if (!user) return;
+    // Require confirmation for terminal stages
+    if (newStage === 'Won' || newStage === 'Lost') {
+      setConfirmAction({ request, stage: newStage });
+      return;
+    }
+    executeStageTransition(request, newStage);
+  };
+
+  const executeStageTransition = async (request: ServiceRequest, newStage: FunnelStage) => {
     if (!user) return;
     try {
       const result = await serviceRequestService.updateStage(
@@ -450,6 +573,14 @@ export const MyRequests: React.FC<MyRequestsProps> = ({ onNewRequest }) => {
       console.error('Error in quick action:', err);
       showToast('Failed to update stage', 'error');
     }
+  };
+
+  const handleConfirmStageAction = async () => {
+    if (!confirmAction) return;
+    setConfirmLoading(true);
+    await executeStageTransition(confirmAction.request, confirmAction.stage);
+    setConfirmLoading(false);
+    setConfirmAction(null);
   };
 
   const handleProductRequestClick = (pr: ProductRequest) => {
@@ -481,9 +612,11 @@ export const MyRequests: React.FC<MyRequestsProps> = ({ onNewRequest }) => {
   if (loading) {
     return (
       <div className={styles.container}>
-        <div className={styles.loadingContainer}>
-          <Spinner size="large" />
-          <Text>Loading your service requests...</Text>
+        <div className={styles.headerLeft}>
+          <Text className={styles.title}>My Requests</Text>
+        </div>
+        <div className={styles.grid}>
+          <RequestCardSkeleton count={4} />
         </div>
       </div>
     );
@@ -499,16 +632,31 @@ export const MyRequests: React.FC<MyRequestsProps> = ({ onNewRequest }) => {
             Manage and track your pre-sales service requests
           </Text>
         </div>
-        {onNewRequest && (
+        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
           <Button
-            className={styles.newRequestBtn}
-            appearance="primary"
-            icon={<AddRegular />}
-            onClick={onNewRequest}
+            appearance="outline"
+            icon={<ArrowDownloadRegular />}
+            size="small"
+            onClick={() =>
+              activeTab === 'service'
+                ? downloadServiceRequestsExcel(filteredRequests)
+                : downloadProductRequestsExcel(productRequests)
+            }
+            disabled={activeTab === 'service' ? filteredRequests.length === 0 : productRequests.length === 0}
           >
-            New Request
+            Export
           </Button>
-        )}
+          {onNewRequest && (
+            <Button
+              className={styles.newRequestBtn}
+              appearance="primary"
+              icon={<AddRegular />}
+              onClick={onNewRequest}
+            >
+              New Request
+            </Button>
+          )}
+        </div>
       </div>
 
       {/* Tab Navigation */}
@@ -546,66 +694,75 @@ export const MyRequests: React.FC<MyRequestsProps> = ({ onNewRequest }) => {
               <Text>Loading product requests...</Text>
             </div>
           ) : productRequests.length > 0 ? (
-            <div className={styles.productGrid}>
-              {productRequests.map((pr) => (
-                <div key={pr.Id} className={styles.productCard} onClick={() => handleProductRequestClick(pr)}>
-                  <div className={styles.productCardHeader}>
-                    <Text className={styles.productCardTitle}>{pr.ProductName}</Text>
-                    <Badge
-                      appearance="filled"
-                      color={
-                        pr.Status === 'Confirmed' ? 'success' :
-                        pr.Status === 'Completed' ? 'success' :
-                        pr.Status === 'Cancelled' ? 'danger' :
-                        pr.Status === 'Awaiting Approval' ? 'warning' :
-                        'informative'
-                      }
-                    >
-                      {pr.Status}
-                    </Badge>
-                  </div>
-                  <div className={styles.productCardMeta}>
-                    <Badge appearance="outline" size="small">{pr.RequestType}</Badge>
-                    <Badge appearance="outline" size="small">{pr.ProductType}</Badge>
-                    {pr.IsPremiumClient && (
-                      <Badge appearance="outline" size="small" color="warning">Premium</Badge>
+            <>
+              <div className={styles.productGrid}>
+                {paginatedProductRequests.map((pr) => (
+                  <div key={pr.Id} className={styles.productCard} onClick={() => handleProductRequestClick(pr)}>
+                    <div className={styles.productCardHeader}>
+                      <Text className={styles.productCardTitle}>{pr.ProductName}</Text>
+                      <Badge
+                        appearance="filled"
+                        color={
+                          pr.Status === 'Confirmed' ? 'success' :
+                          pr.Status === 'Completed' ? 'success' :
+                          pr.Status === 'Cancelled' ? 'danger' :
+                          pr.Status === 'Awaiting Approval' ? 'warning' :
+                          'informative'
+                        }
+                      >
+                        {pr.Status}
+                      </Badge>
+                    </div>
+                    <div className={styles.productCardMeta}>
+                      <Badge appearance="outline" size="small">{pr.RequestType}</Badge>
+                      <Badge appearance="outline" size="small">{pr.ProductType}</Badge>
+                      {pr.IsPremiumClient && (
+                        <Badge appearance="outline" size="small" color="warning">Premium</Badge>
+                      )}
+                    </div>
+                    <Text className={styles.productCardDetail}>
+                      Client: {pr.ClientName} &middot; Contact: {pr.ContactName}
+                    </Text>
+                    {pr.AssignedSpecialistName && (
+                      <Text className={styles.productCardDetail}>
+                        Specialist: {pr.AssignedSpecialistName}
+                      </Text>
                     )}
+                    {pr.ConfirmedDateTime ? (
+                      <Text className={styles.productCardDetail} style={{ color: '#107c10' }}>
+                        Confirmed: {new Date(pr.ConfirmedDateTime).toLocaleDateString('en-ZA', {
+                          weekday: 'short',
+                          year: 'numeric',
+                          month: 'short',
+                          day: 'numeric',
+                          hour: 'numeric',
+                          minute: '2-digit',
+                        })}
+                      </Text>
+                    ) : pr.ProposedSlot1 ? (
+                      <Text className={styles.productCardDetail}>
+                        Proposed: {new Date(pr.ProposedSlot1).toLocaleDateString('en-ZA', {
+                          weekday: 'short',
+                          year: 'numeric',
+                          month: 'short',
+                          day: 'numeric',
+                        })}
+                      </Text>
+                    ) : null}
+                    <Text className={styles.productCardDetail} style={{ fontSize: '11px', color: '#8a8886' }}>
+                      Created: {new Date(pr.Created).toLocaleDateString('en-ZA')}
+                    </Text>
                   </div>
-                  <Text className={styles.productCardDetail}>
-                    Client: {pr.ClientName} &middot; Contact: {pr.ContactName}
-                  </Text>
-                  {pr.AssignedSpecialistName && (
-                    <Text className={styles.productCardDetail}>
-                      Specialist: {pr.AssignedSpecialistName}
-                    </Text>
-                  )}
-                  {pr.ConfirmedDateTime ? (
-                    <Text className={styles.productCardDetail} style={{ color: '#107c10' }}>
-                      Confirmed: {new Date(pr.ConfirmedDateTime).toLocaleDateString('en-ZA', {
-                        weekday: 'short',
-                        year: 'numeric',
-                        month: 'short',
-                        day: 'numeric',
-                        hour: 'numeric',
-                        minute: '2-digit',
-                      })}
-                    </Text>
-                  ) : pr.ProposedSlot1 ? (
-                    <Text className={styles.productCardDetail}>
-                      Proposed: {new Date(pr.ProposedSlot1).toLocaleDateString('en-ZA', {
-                        weekday: 'short',
-                        year: 'numeric',
-                        month: 'short',
-                        day: 'numeric',
-                      })}
-                    </Text>
-                  ) : null}
-                  <Text className={styles.productCardDetail} style={{ fontSize: '11px', color: '#8a8886' }}>
-                    Created: {new Date(pr.Created).toLocaleDateString('en-ZA')}
-                  </Text>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+              <Pagination
+                currentPage={productCurrentPage}
+                totalItems={productTotalItems}
+                pageSize={productPageSize}
+                onPageChange={setProductCurrentPage}
+                onPageSizeChange={setProductPageSize}
+              />
+            </>
           ) : (
             <div className={styles.emptyState}>
               <Apps24Regular className={styles.emptyIcon} />
@@ -643,20 +800,30 @@ export const MyRequests: React.FC<MyRequestsProps> = ({ onNewRequest }) => {
 
       {/* Stage Filters */}
       <div className={styles.filterSection}>
-        <div className={styles.stageFilters}>
+        <div className={styles.stageFilters} role="group" aria-label="Filter by stage">
           {STAGE_OPTIONS.map((stage) => (
             <span
               key={stage}
               className={`${styles.stageChip} ${selectedStage === stage ? styles.stageChipActive : ''}`}
               onClick={() => setSelectedStage(stage)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  setSelectedStage(stage);
+                }
+              }}
               style={
                 stage !== 'All' && selectedStage !== stage
                   ? { borderColor: STAGE_METADATA[stage as FunnelStage]?.color }
                   : {}
               }
+              role="button"
+              tabIndex={0}
+              aria-pressed={selectedStage === stage}
+              aria-label={`${stage}: ${stageCounts[stage] || 0} requests`}
             >
               {stage}
-              <span className={styles.stageCount}>{stageCounts[stage] || 0}</span>
+              <span className={styles.stageCount} aria-hidden="true">{stageCounts[stage] || 0}</span>
             </span>
           ))}
         </div>
@@ -706,13 +873,30 @@ export const MyRequests: React.FC<MyRequestsProps> = ({ onNewRequest }) => {
         </span>
       </div>
 
+      {/* Advanced Filter Panel */}
+      <AdvancedFilterPanel
+        filters={ADVANCED_FILTER_CONFIG}
+        values={advancedFilters}
+        onChange={(key, value) => setAdvancedFilter(key as keyof AdvancedFilterValues, value)}
+        onClear={clearAdvancedFilters}
+      />
+
       {/* Request Grid */}
       {filteredRequests.length > 0 ? (
-        <div className={styles.grid}>
-          {filteredRequests.map((request) => (
-            <RequestCard key={request.Id} request={request} onClick={handleRequestClick} onQuickAction={handleQuickAction} />
-          ))}
-        </div>
+        <>
+          <div className={styles.grid}>
+            {paginatedServiceRequests.map((request) => (
+              <RequestCard key={request.Id} request={request} onClick={handleRequestClick} onQuickAction={handleQuickAction} />
+            ))}
+          </div>
+          <Pagination
+            currentPage={serviceCurrentPage}
+            totalItems={serviceTotalItems}
+            pageSize={servicePageSize}
+            onPageChange={setServiceCurrentPage}
+            onPageSizeChange={setServicePageSize}
+          />
+        </>
       ) : (
         <div className={styles.emptyState}>
           <FilterRegular className={styles.emptyIcon} />
@@ -758,6 +942,21 @@ export const MyRequests: React.FC<MyRequestsProps> = ({ onNewRequest }) => {
           isManager={isManager}
         />
       )}
+
+      {/* Stage Transition Confirmation */}
+      <ConfirmDialog
+        open={!!confirmAction}
+        title={confirmAction?.stage === 'Won' ? 'Mark as Won' : 'Mark as Lost'}
+        message={
+          confirmAction?.stage === 'Won'
+            ? `Are you sure you want to mark "${confirmAction.request.ClientName} — ${confirmAction.request.ServiceName}" as Won? This will update the client lifetime value and close the deal.`
+            : `Are you sure you want to mark "${confirmAction?.request.ClientName} — ${confirmAction?.request.ServiceName}" as Lost? This will cancel any associated calendar events and close the deal.`
+        }
+        confirmLabel={confirmAction?.stage === 'Won' ? 'Mark as Won' : 'Mark as Lost'}
+        onConfirm={handleConfirmStageAction}
+        onCancel={() => setConfirmAction(null)}
+        isLoading={confirmLoading}
+      />
     </div>
   );
 };

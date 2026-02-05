@@ -1,9 +1,9 @@
 /**
  * DWx Traffic Manager - Product Requests Queue
- * Manager view for approving/managing product demo and trial requests
+ * Manager view for approving/managing product demo and trial requests with bulk operations
  */
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   Text,
   Button,
@@ -12,6 +12,8 @@ import {
   Dropdown,
   Option,
   Badge,
+  Checkbox,
+  Tooltip,
 } from '@fluentui/react-components';
 import {
   PersonRegular,
@@ -20,6 +22,7 @@ import {
   ArrowRightRegular,
   CalendarRegular,
   BoxRegular,
+  DismissCircleRegular,
 } from '@fluentui/react-icons';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
@@ -157,6 +160,47 @@ const useStyles = makeStyles({
     fontSize: '11px',
     fontWeight: '500',
   },
+  // Bulk selection styles
+  bulkToolbar: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '12px',
+    padding: '12px 20px',
+    backgroundColor: '#e8f4f6',
+    borderBottom: '1px solid #1e6b7b',
+  },
+  bulkToolbarText: {
+    fontSize: '13px',
+    fontWeight: '600',
+    color: '#1e6b7b',
+    flex: 1,
+  },
+  bulkActions: {
+    display: 'flex',
+    gap: '8px',
+    alignItems: 'center',
+  },
+  selectAllCheckbox: {
+    marginRight: '8px',
+  },
+  requestItemWithCheckbox: {
+    display: 'flex',
+    alignItems: 'flex-start',
+    gap: '12px',
+  },
+  requestCheckbox: {
+    marginTop: '2px',
+    flexShrink: 0,
+  },
+  requestContent: {
+    flex: 1,
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '12px',
+  },
+  bulkDropdown: {
+    minWidth: '160px',
+  },
 });
 
 // Status colors
@@ -195,10 +239,44 @@ export const ProductRequestsQueue: React.FC<ProductRequestsQueueProps> = ({
   const [processingId, setProcessingId] = useState<number | null>(null);
   const [selectedSpecialists, setSelectedSpecialists] = useState<Record<number, string>>({});
 
+  // Bulk selection state
+  const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
+  const [bulkProcessing, setBulkProcessing] = useState(false);
+  const [bulkSpecialist, setBulkSpecialist] = useState<string>('');
+
   // Filter to actionable requests (not Completed/Cancelled)
   const actionableRequests = requests.filter(
     (r) => r.Status !== 'Completed' && r.Status !== 'Cancelled'
   );
+
+  // Selection helpers
+  const isAllSelected = actionableRequests.length > 0 && selectedIds.size === actionableRequests.length;
+  const isSomeSelected = selectedIds.size > 0 && selectedIds.size < actionableRequests.length;
+  const selectedRequests = actionableRequests.filter(r => selectedIds.has(r.Id));
+
+  const handleSelectAll = useCallback(() => {
+    if (isAllSelected) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(actionableRequests.map(r => r.Id)));
+    }
+  }, [isAllSelected, actionableRequests]);
+
+  const handleSelectOne = useCallback((id: number, checked: boolean) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      if (checked) {
+        next.add(id);
+      } else {
+        next.delete(id);
+      }
+      return next;
+    });
+  }, []);
+
+  const clearSelection = useCallback(() => {
+    setSelectedIds(new Set());
+  }, []);
 
   // Load specialists on mount
   React.useEffect(() => {
@@ -316,16 +394,211 @@ export const ProductRequestsQueue: React.FC<ProductRequestsQueueProps> = ({
     }
   };
 
+  // Bulk operation: Update status for all selected
+  const handleBulkStatusChange = async (newStatus: ProductRequestStatus) => {
+    if (!user || selectedRequests.length === 0) return;
+
+    setBulkProcessing(true);
+    let successCount = 0;
+    let failCount = 0;
+
+    for (const request of selectedRequests) {
+      // Check if transition is allowed
+      const allowedTransitions = STATUS_TRANSITIONS[request.Status];
+      if (!allowedTransitions.includes(newStatus)) {
+        failCount++;
+        continue;
+      }
+
+      try {
+        const result = await productRequestService.updateStatus(
+          request.Id,
+          newStatus,
+          user.email,
+          user.displayName
+        );
+
+        if (result.success && result.request) {
+          onRequestUpdated(result.request);
+          successCount++;
+        } else {
+          failCount++;
+        }
+      } catch (err) {
+        console.error(`Error updating ${request.Id}:`, err);
+        failCount++;
+      }
+    }
+
+    if (successCount > 0) {
+      showToast(`${successCount} request(s) updated to ${newStatus}`, 'success');
+    }
+    if (failCount > 0) {
+      showToast(`${failCount} request(s) failed or skipped (invalid transition)`, 'error');
+    }
+
+    clearSelection();
+    setBulkProcessing(false);
+  };
+
+  // Bulk operation: Assign specialist to all selected
+  const handleBulkAssignSpecialist = async () => {
+    if (!user || !bulkSpecialist || selectedRequests.length === 0) return;
+
+    const specialist = specialists.find(s => s.Email === bulkSpecialist);
+    if (!specialist) return;
+
+    setBulkProcessing(true);
+    let successCount = 0;
+    let failCount = 0;
+
+    for (const request of selectedRequests) {
+      // Skip if already has same specialist
+      if (request.AssignedSpecialistEmail === specialist.Email) {
+        continue;
+      }
+
+      try {
+        const result = await productRequestService.assignSpecialist(
+          request.Id,
+          specialist,
+          user.email,
+          user.displayName
+        );
+
+        if (result.success && result.request) {
+          onRequestUpdated(result.request);
+          successCount++;
+        } else {
+          failCount++;
+        }
+      } catch (err) {
+        console.error(`Error assigning specialist to ${request.Id}:`, err);
+        failCount++;
+      }
+    }
+
+    if (successCount > 0) {
+      showToast(`${specialist.Title} assigned to ${successCount} request(s)`, 'success');
+    }
+    if (failCount > 0) {
+      showToast(`${failCount} request(s) failed to update`, 'error');
+    }
+
+    clearSelection();
+    setBulkSpecialist('');
+    setBulkProcessing(false);
+  };
+
   return (
     <div className={styles.container}>
       <div className={styles.header}>
         <div style={{ display: 'flex', alignItems: 'center' }}>
+          {actionableRequests.length > 0 && (
+            <Tooltip content={isAllSelected ? 'Deselect all' : 'Select all'} relationship="label">
+              <Checkbox
+                className={styles.selectAllCheckbox}
+                checked={isAllSelected ? true : isSomeSelected ? 'mixed' : false}
+                onChange={() => handleSelectAll()}
+                aria-label={isAllSelected ? 'Deselect all requests' : 'Select all requests'}
+              />
+            </Tooltip>
+          )}
           <Text className={styles.title}>Product Request Queue</Text>
           {actionableRequests.length > 0 && (
             <span className={styles.badge}>{actionableRequests.length}</span>
           )}
         </div>
+        {selectedIds.size > 0 && (
+          <Button
+            appearance="subtle"
+            size="small"
+            icon={<DismissCircleRegular />}
+            onClick={clearSelection}
+          >
+            Clear
+          </Button>
+        )}
       </div>
+
+      {/* Bulk Actions Toolbar */}
+      {selectedIds.size > 0 && (
+        <div className={styles.bulkToolbar}>
+          <Text className={styles.bulkToolbarText}>
+            {selectedIds.size} request{selectedIds.size !== 1 ? 's' : ''} selected
+          </Text>
+          <div className={styles.bulkActions}>
+            {bulkProcessing ? (
+              <Spinner size="tiny" label="Processing..." />
+            ) : (
+              <>
+                {/* Bulk Specialist Assignment */}
+                <Dropdown
+                  className={styles.bulkDropdown}
+                  placeholder="Assign specialist..."
+                  selectedOptions={bulkSpecialist ? [bulkSpecialist] : []}
+                  onOptionSelect={(_, data) => setBulkSpecialist(data.optionValue as string)}
+                  disabled={loadingSpecialists}
+                >
+                  {specialists.map((s) => (
+                    <Option key={s.Email} value={s.Email} text={s.Title}>
+                      {s.Title}
+                    </Option>
+                  ))}
+                </Dropdown>
+                {bulkSpecialist && (
+                  <Button
+                    appearance="secondary"
+                    icon={<PersonRegular />}
+                    onClick={handleBulkAssignSpecialist}
+                    size="small"
+                  >
+                    Assign
+                  </Button>
+                )}
+
+                {/* Bulk Status Transitions */}
+                <Tooltip content="Advance to Awaiting Approval" relationship="label">
+                  <Button
+                    appearance="primary"
+                    icon={<ArrowRightRegular />}
+                    onClick={() => handleBulkStatusChange('Awaiting Approval')}
+                    size="small"
+                    style={{ backgroundColor: '#1e6b7b' }}
+                  >
+                    Approve
+                  </Button>
+                </Tooltip>
+
+                <Tooltip content="Mark all selected as Completed" relationship="label">
+                  <Button
+                    appearance="secondary"
+                    icon={<CheckmarkRegular />}
+                    onClick={() => handleBulkStatusChange('Completed')}
+                    size="small"
+                    style={{ color: '#107c10' }}
+                  >
+                    Complete
+                  </Button>
+                </Tooltip>
+
+                <Tooltip content="Cancel all selected requests" relationship="label">
+                  <Button
+                    appearance="secondary"
+                    icon={<DismissRegular />}
+                    onClick={() => handleBulkStatusChange('Cancelled')}
+                    size="small"
+                    style={{ color: '#d13438' }}
+                  >
+                    Cancel
+                  </Button>
+                </Tooltip>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
       <div className={styles.content}>
         {actionableRequests.length === 0 ? (
           <div className={styles.emptyState}>
@@ -341,24 +614,37 @@ export const ProductRequestsQueue: React.FC<ProductRequestsQueueProps> = ({
               request.Status === 'Awaiting Approval' &&
               request.AssignedSpecialistEmail &&
               !request.ConfirmedDateTime;
+            const isSelected = selectedIds.has(request.Id);
 
             return (
-              <div key={request.Id} className={styles.requestItem}>
-                {/* Header row: client + status */}
-                <div className={styles.requestHeader}>
-                  <div className={styles.requestInfo}>
-                    <Text className={styles.clientName}>{request.ClientName}</Text>
-                    <Text className={styles.productName}>
-                      {request.ProductName} ({request.ProductType})
-                    </Text>
-                  </div>
-                  <span
-                    className={styles.statusBadge}
-                    style={{ backgroundColor: statusColor.bg, color: statusColor.text }}
-                  >
-                    {request.Status}
-                  </span>
-                </div>
+              <div
+                key={request.Id}
+                className={styles.requestItem}
+                style={isSelected ? { backgroundColor: 'rgba(30, 107, 123, 0.05)' } : undefined}
+              >
+                <div className={styles.requestItemWithCheckbox}>
+                  <Checkbox
+                    className={styles.requestCheckbox}
+                    checked={isSelected}
+                    onChange={(_, data) => handleSelectOne(request.Id, data.checked === true)}
+                    aria-label={`Select ${request.ClientName} - ${request.ProductName}`}
+                  />
+                  <div className={styles.requestContent}>
+                    {/* Header row: client + status */}
+                    <div className={styles.requestHeader}>
+                      <div className={styles.requestInfo}>
+                        <Text className={styles.clientName}>{request.ClientName}</Text>
+                        <Text className={styles.productName}>
+                          {request.ProductName} ({request.ProductType})
+                        </Text>
+                      </div>
+                      <span
+                        className={styles.statusBadge}
+                        style={{ backgroundColor: statusColor.bg, color: statusColor.text }}
+                      >
+                        {request.Status}
+                      </span>
+                    </div>
 
                 {/* Meta row: AM, type, value, premium */}
                 <div className={styles.requestMeta}>
@@ -528,6 +814,8 @@ export const ProductRequestsQueue: React.FC<ProductRequestsQueueProps> = ({
                       })}
                     </>
                   )}
+                </div>
+                  </div>
                 </div>
               </div>
             );

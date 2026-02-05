@@ -1,13 +1,15 @@
 import { Booking } from '../types/Booking';
+import { ServiceRequest, Specialist } from '../types/ServiceRequest';
+import { ProductRequest } from '../types/ProductRequest';
 import { format } from 'date-fns';
 
-interface ExportColumn {
+interface ExportColumn<T = Booking> {
   header: string;
-  accessor: (booking: Booking) => string | number;
+  accessor: (item: T) => string | number;
   width?: number;
 }
 
-const BOOKING_COLUMNS: ExportColumn[] = [
+const BOOKING_COLUMNS: ExportColumn<Booking>[] = [
   { header: 'ID', accessor: (b) => b.Id, width: 10 },
   { header: 'Client Name', accessor: (b) => b.ClientName, width: 30 },
   { header: 'Booking Type', accessor: (b) => b.BookingType, width: 15 },
@@ -189,4 +191,219 @@ export function downloadBookingsExcel(bookings: Booking[], filename?: string): v
   link.click();
   document.body.removeChild(link);
   URL.revokeObjectURL(url);
+}
+
+// ============================================================================
+// Generic Excel/CSV Export
+// ============================================================================
+
+/**
+ * Generic function to convert any array of items to CSV
+ */
+function itemsToCSV<T>(items: T[], columns: ExportColumn<T>[]): string {
+  const headerRow = columns.map((col) => escapeCSV(col.header)).join(',');
+  const dataRows = items.map((item) =>
+    columns.map((col) => escapeCSV(col.accessor(item))).join(',')
+  );
+  return [headerRow, ...dataRows].join('\n');
+}
+
+/**
+ * Generic function to convert any array of items to Excel XML
+ */
+function itemsToExcelXML<T>(
+  items: T[],
+  columns: ExportColumn<T>[],
+  sheetName: string,
+  getRowStyle?: (item: T, colHeader: string) => string
+): string {
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<?mso-application progid="Excel.Sheet"?>
+<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
+  xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">
+  <Styles>
+    <Style ss:ID="Header">
+      <Font ss:Bold="1" ss:Color="#FFFFFF"/>
+      <Interior ss:Color="#1E6B7B" ss:Pattern="Solid"/>
+      <Alignment ss:Horizontal="Center" ss:Vertical="Center"/>
+    </Style>
+    <Style ss:ID="Data">
+      <Alignment ss:Vertical="Center"/>
+    </Style>
+    <Style ss:ID="Won">
+      <Font ss:Color="#107C10"/>
+      <Interior ss:Color="#DFF6DD" ss:Pattern="Solid"/>
+    </Style>
+    <Style ss:ID="Lost">
+      <Font ss:Color="#D13438"/>
+      <Interior ss:Color="#FDE7E9" ss:Pattern="Solid"/>
+    </Style>
+    <Style ss:ID="Hot">
+      <Font ss:Color="#D13438"/>
+      <Interior ss:Color="#FDE7E9" ss:Pattern="Solid"/>
+    </Style>
+    <Style ss:ID="Premium">
+      <Font ss:Color="#8B6914"/>
+      <Interior ss:Color="#FFF4CE" ss:Pattern="Solid"/>
+    </Style>
+    <Style ss:ID="Confirmed">
+      <Font ss:Color="#107C10"/>
+      <Interior ss:Color="#DFF6DD" ss:Pattern="Solid"/>
+    </Style>
+    <Style ss:ID="Cancelled">
+      <Font ss:Color="#D13438"/>
+      <Interior ss:Color="#FDE7E9" ss:Pattern="Solid"/>
+    </Style>
+  </Styles>
+  <Worksheet ss:Name="${escapeXML(sheetName)}">
+    <Table>
+      ${columns.map((col) => `<Column ss:Width="${(col.width || 15) * 6}"/>`).join('\n      ')}
+      <Row>
+        ${columns.map((col) => `<Cell ss:StyleID="Header"><Data ss:Type="String">${escapeXML(col.header)}</Data></Cell>`).join('\n        ')}
+      </Row>
+      ${items
+        .map(
+          (item) => `<Row>
+        ${columns
+          .map((col) => {
+            const value = col.accessor(item);
+            const type = typeof value === 'number' ? 'Number' : 'String';
+            const styleId = getRowStyle ? getRowStyle(item, col.header) : 'Data';
+            return `<Cell ss:StyleID="${styleId}"><Data ss:Type="${type}">${escapeXML(String(value))}</Data></Cell>`;
+          })
+          .join('\n        ')}
+      </Row>`
+        )
+        .join('\n      ')}
+    </Table>
+  </Worksheet>
+</Workbook>`;
+}
+
+/**
+ * Generic download helper
+ */
+function downloadExcel(xml: string, defaultName: string, filename?: string): void {
+  const blob = new Blob([xml], { type: 'application/vnd.ms-excel' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = filename || defaultName;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+}
+
+function downloadCSV(csv: string, defaultName: string, filename?: string): void {
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = filename || defaultName;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+}
+
+// ============================================================================
+// Service Request Export
+// ============================================================================
+
+const SERVICE_REQUEST_COLUMNS: ExportColumn<ServiceRequest>[] = [
+  { header: 'ID', accessor: (r) => r.Id, width: 8 },
+  { header: 'Client', accessor: (r) => r.ClientName, width: 25 },
+  { header: 'Service', accessor: (r) => r.ServiceName, width: 30 },
+  { header: 'Stage', accessor: (r) => r.FunnelStage, width: 15 },
+  { header: 'Interest', accessor: (r) => r.InterestLevel, width: 10 },
+  { header: 'Deal Value', accessor: (r) => r.DealValue || 0, width: 15 },
+  { header: 'Probability', accessor: (r) => r.DealProbability ? `${r.DealProbability}%` : '-', width: 12 },
+  { header: 'Weighted Pipeline', accessor: (r) => r.WeightedPipeline || 0, width: 18 },
+  { header: 'Account Manager', accessor: (r) => r.AccountManagerName, width: 25 },
+  { header: 'Contact', accessor: (r) => r.ContactName, width: 20 },
+  { header: 'Contact Email', accessor: (r) => r.ContactEmail, width: 25 },
+  { header: 'Industry', accessor: (r) => r.Industry || '-', width: 15 },
+  { header: 'Company Size', accessor: (r) => r.CompanySize || '-', width: 12 },
+  { header: 'Specialist', accessor: (r) => r.AssignedSpecialistName || 'Unassigned', width: 22 },
+  { header: 'Expected Close', accessor: (r) => r.ExpectedCloseDate ? format(new Date(r.ExpectedCloseDate), 'yyyy-MM-dd') : '-', width: 15 },
+  { header: 'Created', accessor: (r) => format(new Date(r.Created), 'yyyy-MM-dd'), width: 12 },
+];
+
+export function downloadServiceRequestsExcel(requests: ServiceRequest[], filename?: string): void {
+  const xml = itemsToExcelXML(requests, SERVICE_REQUEST_COLUMNS, 'Service Requests', (r, col) => {
+    if (col === 'Stage' && r.FunnelStage === 'Won') return 'Won';
+    if (col === 'Stage' && r.FunnelStage === 'Lost') return 'Lost';
+    if (col === 'Interest' && r.InterestLevel === 'Hot') return 'Hot';
+    return 'Data';
+  });
+  downloadExcel(xml, `DWx_ServiceRequests_${format(new Date(), 'yyyy-MM-dd_HHmm')}.xls`, filename);
+}
+
+export function downloadServiceRequestsCSV(requests: ServiceRequest[], filename?: string): void {
+  const csv = itemsToCSV(requests, SERVICE_REQUEST_COLUMNS);
+  downloadCSV(csv, `DWx_ServiceRequests_${format(new Date(), 'yyyy-MM-dd_HHmm')}.csv`, filename);
+}
+
+// ============================================================================
+// Product Request Export
+// ============================================================================
+
+const PRODUCT_REQUEST_COLUMNS: ExportColumn<ProductRequest>[] = [
+  { header: 'ID', accessor: (r) => r.Id, width: 8 },
+  { header: 'Client', accessor: (r) => r.ClientName, width: 25 },
+  { header: 'Product', accessor: (r) => r.ProductName, width: 25 },
+  { header: 'Type', accessor: (r) => r.RequestType, width: 18 },
+  { header: 'Product Type', accessor: (r) => r.ProductType, width: 15 },
+  { header: 'Status', accessor: (r) => r.Status, width: 18 },
+  { header: 'Premium', accessor: (r) => r.IsPremiumClient ? 'Yes' : 'No', width: 10 },
+  { header: 'Licenses', accessor: (r) => r.LicenseCount || 0, width: 10 },
+  { header: 'Est. Value', accessor: (r) => r.EstimatedValue || 0, width: 15 },
+  { header: 'Account Manager', accessor: (r) => r.AccountManagerName, width: 25 },
+  { header: 'Contact', accessor: (r) => r.ContactName, width: 20 },
+  { header: 'Specialist', accessor: (r) => r.AssignedSpecialistName || 'Unassigned', width: 22 },
+  { header: 'Confirmed Date', accessor: (r) => r.ConfirmedDateTime ? format(new Date(r.ConfirmedDateTime), 'yyyy-MM-dd HH:mm') : '-', width: 18 },
+  { header: 'Created', accessor: (r) => format(new Date(r.Created), 'yyyy-MM-dd'), width: 12 },
+];
+
+export function downloadProductRequestsExcel(requests: ProductRequest[], filename?: string): void {
+  const xml = itemsToExcelXML(requests, PRODUCT_REQUEST_COLUMNS, 'Product Requests', (r, col) => {
+    if (col === 'Status' && r.Status === 'Confirmed') return 'Confirmed';
+    if (col === 'Status' && r.Status === 'Cancelled') return 'Cancelled';
+    if (col === 'Premium' && r.IsPremiumClient) return 'Premium';
+    return 'Data';
+  });
+  downloadExcel(xml, `DWx_ProductRequests_${format(new Date(), 'yyyy-MM-dd_HHmm')}.xls`, filename);
+}
+
+export function downloadProductRequestsCSV(requests: ProductRequest[], filename?: string): void {
+  const csv = itemsToCSV(requests, PRODUCT_REQUEST_COLUMNS);
+  downloadCSV(csv, `DWx_ProductRequests_${format(new Date(), 'yyyy-MM-dd_HHmm')}.csv`, filename);
+}
+
+// ============================================================================
+// Specialist Export
+// ============================================================================
+
+const SPECIALIST_COLUMNS: ExportColumn<Specialist>[] = [
+  { header: 'ID', accessor: (s) => s.Id, width: 8 },
+  { header: 'Name', accessor: (s) => s.Title, width: 25 },
+  { header: 'Email', accessor: (s) => s.Email, width: 30 },
+  { header: 'Role', accessor: (s) => s.Role, width: 20 },
+  { header: 'Specializations', accessor: (s) => s.Specializations.join(', '), width: 40 },
+  { header: 'Current Deals', accessor: (s) => s.CurrentDealCount, width: 12 },
+  { header: 'Max Deals', accessor: (s) => s.MaxConcurrentDeals, width: 12 },
+  { header: 'Capacity', accessor: (s) => `${s.CurrentDealCount}/${s.MaxConcurrentDeals}`, width: 12 },
+  { header: 'Active', accessor: (s) => s.IsActive ? 'Yes' : 'No', width: 10 },
+  { header: 'Phone', accessor: (s) => s.Phone || '-', width: 18 },
+];
+
+export function downloadSpecialistsExcel(specialists: Specialist[], filename?: string): void {
+  const xml = itemsToExcelXML(specialists, SPECIALIST_COLUMNS, 'Specialists');
+  downloadExcel(xml, `DWx_Specialists_${format(new Date(), 'yyyy-MM-dd_HHmm')}.xls`, filename);
+}
+
+export function downloadSpecialistsCSV(specialists: Specialist[], filename?: string): void {
+  const csv = itemsToCSV(specialists, SPECIALIST_COLUMNS);
+  downloadCSV(csv, `DWx_Specialists_${format(new Date(), 'yyyy-MM-dd_HHmm')}.csv`, filename);
 }
