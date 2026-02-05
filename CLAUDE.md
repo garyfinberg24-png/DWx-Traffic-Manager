@@ -6,6 +6,8 @@
 
 **Project Origin**: Cloned from LP Booking App (v1.7.5) - a production Teams app for License Pulse demo scheduling.
 
+**Current Version**: February 2026 - Service CRUD Management + Spreadsheet Import complete
+
 ## Critical Configuration Values
 
 ### Azure AD App Registration
@@ -28,6 +30,11 @@
 | **Services Catalog List** | `DWxServices` |
 | **Clients List** | `DWxClients` |
 | **Specialists List** | `DWxSpecialists` |
+| **Team Members List** | `DWxTeamMembers` |
+| **Account Managers List** | `DWxAccountManagers` |
+| **Managers List** | `DWxManagers` |
+| **Audit Log List** | `DWxAuditLog` |
+| **Product Requests List** | `DWxProductRequests` |
 | **Document Library** | `DWxSupportingDocuments` |
 | **Pre-Sales Calendar Email** | `presales@digitalworkplace.com` |
 
@@ -47,6 +54,8 @@
 - **Teams Integration**: Microsoft Teams JavaScript SDK (@microsoft/teams-js)
 - **Build Tool**: Vite
 - **Charts**: Recharts
+- **Form Validation**: Yup + @hookform/resolvers
+- **Spreadsheet**: xlsx (v0.18.5) for import/export
 
 ### Backend/Integration
 - **Authentication**: MSAL (Microsoft Authentication Library) + Teams SSO
@@ -158,7 +167,7 @@ const STAGE_TRANSITIONS = {
 | Title | Text | Service name |
 | Description | Multi-line | Full description |
 | ShortDescription | Text | 50-char tagline |
-| Category | Choice | Power Platform, SPFx, Migrations, Assessment, Copilot, Viva |
+| Category | Choice | Power Platform, SPFx Development, SharePoint Migration, M365 Assessment, Copilot Agents, MS Viva, Training |
 | TypicalDuration | Choice | 30min, 1hr, 2hr, Half-day, Full-day, Multi-day |
 | ComplexityLevel | Choice | Low, Medium, High, Enterprise |
 | PricingModel | Choice | Fixed, Hourly, Project-based, TBD |
@@ -168,6 +177,13 @@ const STAGE_TRANSITIONS = {
 | IsActive | Yes/No | Currently offered |
 | SortOrder | Number | Display order |
 | IconName | Text | Fluent UI icon name |
+| **WhatsIncluded_JSON** | Note | JSON array of included items |
+| **EngagementPhases_JSON** | Note | JSON array of {name, description} phases |
+| **KeyBenefits_JSON** | Note | JSON array of benefits |
+| **IdealFor_JSON** | Note | JSON array of ideal client profiles |
+| **RelatedCategories_JSON** | Note | JSON array of related ServiceCategory values |
+
+> **Note**: The 5 JSON columns (WhatsIncluded_JSON through RelatedCategories_JSON) store rich content for service detail pages. If empty, the app falls back to DEFAULT_SERVICES data in `src/types/ServiceRequest.ts`.
 
 ### DWxClients (Client Master Data)
 
@@ -198,68 +214,258 @@ const STAGE_TRANSITIONS = {
 | IsActive | Yes/No | Available for assignment |
 | CalendarEmail | Text | Calendar for availability |
 
+### DWxTeamMembers
+
+| Column | Type | Description |
+|--------|------|-------------|
+| Title | Text | Full name |
+| Email | Text | Email address |
+| Role | Text | Team role |
+| Roles | Multi-line | JSON array of multiple roles |
+| IsActive | Yes/No | Active status |
+| Phone | Text | Phone number |
+
+### DWxAccountManagers
+
+| Column | Type | Description |
+|--------|------|-------------|
+| Title | Text | Full name |
+| Email | Text | Email address |
+| Region | Choice | Western Cape, Gauteng, KZN, UK |
+| Status | Choice | Active, Inactive, On Leave |
+| Source | Choice | Internal, External, Guest |
+| EntraUserId | Text | Azure AD Object ID |
+| Department | Text | Department |
+| JobTitle | Text | Job title |
+
+### DWxManagers (Access Control)
+
+| Column | Type | Description |
+|--------|------|-------------|
+| Title | Text | Display name |
+| Email | Text | Manager email |
+| AddedBy | Text | Who added this manager |
+| AddedDate | DateTime | When added |
+
+### DWxAuditLog
+
+| Column | Type | Description |
+|--------|------|-------------|
+| Title | Text | Action summary |
+| Action | Choice | CREATE, UPDATE, DELETE, VIEW, APPROVE, REJECT, RESCHEDULE, LOGIN, LOGOUT |
+| EntityType | Text | Booking, TeamMember, Client, Checklist, User, AccountManager, ServiceRequest, Service |
+| EntityId | Text | ID of affected entity |
+| EntityName | Text | Human-readable entity name |
+| PerformedBy | Text | User display name |
+| PerformedByEmail | Text | User email |
+| Timestamp | DateTime | When action occurred |
+| Details | Multi-line | Action details |
+| OldValues | Multi-line | JSON of previous values |
+| NewValues | Multi-line | JSON of new values |
+
 ## Project Structure
 
 ```text
 DWx-Traffic-Manager/
 ├── src/
 │   ├── components/
-│   │   ├── LandingPage/             # NEW - Main entry point
-│   │   │   ├── LandingPage.tsx      # Services/Products entry cards
+│   │   ├── LandingPage/
+│   │   │   ├── LandingPage.tsx          # Main entry with Services/Products cards
 │   │   │   └── index.ts
-│   │   ├── ProductCatalog/          # NEW - DWx Product browsing
-│   │   │   ├── ProductCatalog.tsx   # Tabbed view (Apps/WebParts/Cards)
+│   │   ├── ProductCatalog/
+│   │   │   ├── ProductCatalog.tsx        # Tabbed view (Apps/WebParts/Cards)
 │   │   │   └── index.ts
-│   │   ├── ServiceCatalog/          # Service browsing
-│   │   │   ├── ServiceCatalog.tsx   # Grid view of services
-│   │   │   ├── ServiceCard.tsx      # Service display card
-│   │   │   └── ServiceDetails.tsx   # Service modal
-│   │   ├── ServiceRequest/          # Request creation (adapted from BookingForm)
-│   │   │   └── ServiceRequestForm.tsx # Multi-step wizard
-│   │   ├── MyRequests/              # Request list (adapted from MyBookings)
-│   │   │   ├── MyRequests.tsx       # List with stage filtering
-│   │   │   ├── RequestCard.tsx      # Request card with stage badge
-│   │   │   └── RequestDetails.tsx   # Full request modal
-│   │   ├── SalesFunnel/             # Sales funnel dashboard
-│   │   │   ├── SalesFunnelDashboard.tsx
-│   │   │   ├── FunnelChart.tsx
-│   │   │   ├── PipelineKPIs.tsx
-│   │   │   └── ConversionRatesCard.tsx
-│   │   ├── Admin/                   # EXTENDED from LP Booking
-│   │   │   ├── SharePointProvisioning.tsx # DWx list provisioning
-│   │   │   └── ... (reused admin components)
-│   │   ├── Common/                  # REUSED from LP Booking
-│   │   └── LoginPage/               # REUSED from LP Booking
+│   │   ├── ProductRequest/
+│   │   │   ├── ProductRequestForm.tsx    # Product demo/trial request form
+│   │   │   └── index.ts
+│   │   ├── ServiceCatalog/
+│   │   │   ├── ServiceCatalog.tsx        # Grid view of services
+│   │   │   ├── ServiceCard.tsx           # Service display card
+│   │   │   ├── ServiceDetails.tsx        # Service quick-view modal
+│   │   │   ├── ServiceDetailPage.tsx     # Full-page rich service detail view
+│   │   │   └── index.ts
+│   │   ├── ServiceRequest/
+│   │   │   ├── ServiceRequestForm.tsx    # Multi-step request wizard
+│   │   │   ├── ServiceRequirementsStep.tsx
+│   │   │   ├── ProductRequirementsStep.tsx
+│   │   │   └── index.ts
+│   │   ├── MyRequests/
+│   │   │   ├── MyRequests.tsx            # Request list with stage filtering
+│   │   │   ├── RequestCard.tsx           # Request card with stage badge
+│   │   │   ├── RequestDetails.tsx        # Full request modal
+│   │   │   ├── StageProgressBar.tsx      # Visual funnel stage progress
+│   │   │   └── index.ts
+│   │   ├── SalesFunnel/
+│   │   │   ├── SalesFunnelDashboard.tsx  # Dashboard container
+│   │   │   ├── FunnelChart.tsx           # Funnel visualization
+│   │   │   ├── PipelineKPIs.tsx          # Pipeline metrics cards
+│   │   │   ├── ConversionRatesCard.tsx   # Stage conversion metrics
+│   │   │   ├── RequestsQueue.tsx         # Manager request queue
+│   │   │   └── index.ts
+│   │   ├── Dashboard/
+│   │   │   ├── ManagerDashboard.tsx      # Dashboard with tabs
+│   │   │   ├── KPICards.tsx              # KPI metric cards
+│   │   │   ├── StatusChart.tsx           # Status pie chart
+│   │   │   ├── TypeChart.tsx             # Type distribution
+│   │   │   ├── TrendsChart.tsx           # Trends over time
+│   │   │   ├── AccountManagerTable.tsx   # AM performance
+│   │   │   ├── ClientTable.tsx           # Client bookings
+│   │   │   ├── ApprovalQueue.tsx         # Manager approvals
+│   │   │   ├── DashboardFilters.tsx      # Filter controls
+│   │   │   ├── CalendarView.tsx          # Calendar (react-big-calendar)
+│   │   │   ├── TimelineView.tsx          # Chronological timeline
+│   │   │   ├── CommercialTab.tsx         # Commercial metrics
+│   │   │   ├── ResourcesTab.tsx          # Resource allocation
+│   │   │   ├── GamificationTab.tsx       # Gamification dashboard
+│   │   │   └── index.ts
+│   │   ├── Admin/
+│   │   │   ├── AdminPage.tsx             # Admin tabbed container (9 tabs)
+│   │   │   ├── TeamMemberList.tsx        # Team member CRUD
+│   │   │   ├── TeamMemberForm.tsx        # Team member form dialog
+│   │   │   ├── ClientList.tsx            # Client management
+│   │   │   ├── ClientForm.tsx            # Client form dialog
+│   │   │   ├── ImportClientsDialog.tsx   # XLSX client import
+│   │   │   ├── ServiceManagement.tsx     # Service CRUD list (NEW)
+│   │   │   ├── ServiceForm.tsx           # 4-tab service form dialog (NEW)
+│   │   │   ├── ImportServicesDialog.tsx  # XLSX service import (NEW)
+│   │   │   ├── AccountManagerManagement.tsx # AM CRUD with Entra ID
+│   │   │   ├── EntraUserPicker.tsx       # Entra ID user search
+│   │   │   ├── ManagerSettings.tsx       # Manager access control
+│   │   │   ├── GuestInvitations.tsx      # Guest user management
+│   │   │   ├── ChecklistManagement.tsx   # Checklist management
+│   │   │   ├── DocumentManagement.tsx    # Document management
+│   │   │   ├── SharePointProvisioning.tsx     # Legacy LP provisioning
+│   │   │   ├── DWxSharePointProvisioning.tsx  # DWx list provisioning (Graph API)
+│   │   │   └── index.ts
+│   │   ├── Gamification/
+│   │   │   ├── BadgeGrid.tsx             # Badge display
+│   │   │   ├── BadgeIcon.tsx             # Badge icon component
+│   │   │   ├── LeaderboardTable.tsx      # Leaderboard
+│   │   │   ├── PointsTooltip.tsx         # Points explanation
+│   │   │   ├── SetTargetsDialog.tsx      # Target setting
+│   │   │   ├── TeamStatsCard.tsx         # Team statistics
+│   │   │   └── index.ts
+│   │   ├── Common/
+│   │   │   ├── Header.tsx                # Navigation header
+│   │   │   ├── ConfirmDialog.tsx         # Reusable confirm dialog
+│   │   │   ├── ErrorBoundary.tsx         # Error boundary
+│   │   │   ├── LoadingSpinner.tsx        # Loading indicator
+│   │   │   ├── NotificationCenter.tsx    # Notifications
+│   │   │   ├── UserGuide.tsx             # Onboarding guide
+│   │   │   └── index.ts
+│   │   ├── LoginPage/
+│   │   │   ├── LoginPage.tsx             # Branded login
+│   │   │   └── index.ts
+│   │   └── MyBookings/
+│   │       ├── BookingDetails.tsx        # Legacy booking details
+│   │       └── index.ts
 │   ├── services/
-│   │   ├── ServiceCatalogService.ts     # NEW - Service CRUD
-│   │   ├── ServiceRequestService.ts     # NEW - Funnel orchestration
-│   │   ├── SpecialistService.ts         # NEW - Specialist management
-│   │   ├── PipelineService.ts           # NEW - Analytics calculations
-│   │   ├── AuthService.ts               # REUSED
-│   │   ├── GraphService.ts              # EXTENDED for new lists
-│   │   ├── AuditService.ts              # REUSED
-│   │   ├── ManagerService.ts            # REUSED
-│   │   ├── GuestInvitationService.ts    # REUSED
-│   │   ├── NotificationService.ts       # EXTENDED for DW branding
-│   │   └── ... (other reused services)
+│   │   ├── ServiceCatalogService.ts      # Service CRUD with rich content JSON persistence
+│   │   ├── ServiceRequestService.ts      # Funnel orchestration + stage transitions
+│   │   ├── SpecialistService.ts          # Specialist management + availability
+│   │   ├── PipelineService.ts            # Dashboard metrics + analytics
+│   │   ├── CommercialService.ts          # Commercial metrics
+│   │   ├── GamificationService.ts        # Gamification logic
+│   │   ├── DWxNotificationService.ts     # DW-branded notifications
+│   │   ├── AuthService.ts                # MSAL authentication + Teams SSO
+│   │   ├── GraphService.ts               # Microsoft Graph API
+│   │   ├── AuditService.ts               # Change tracking (entities: Booking, TeamMember, Client, Checklist, User, AccountManager, ServiceRequest, Service)
+│   │   ├── ManagerService.ts             # Manager access CRUD
+│   │   ├── AccountManagerService.ts      # AM CRUD operations
+│   │   ├── ReferenceDataService.ts       # Clients/team members
+│   │   ├── DashboardService.ts           # Dashboard metrics
+│   │   ├── BookingService.ts             # Legacy booking orchestration
+│   │   ├── NotificationService.ts        # Email notifications
+│   │   ├── DocumentService.ts            # Document library operations
+│   │   ├── GuestInvitationService.ts     # Guest user management
+│   │   ├── DWxSharePointProvisioningService.ts # DWx list provisioning (Graph API)
+│   │   ├── SharePointProvisioningService.ts    # Legacy LP provisioning
+│   │   ├── SharePointService.ts          # SharePoint REST API
+│   │   ├── EmailTemplates.ts             # Email template strings
+│   │   ├── PowerAutomateService.ts       # Power Automate with retry/circuit breaker
+│   │   ├── MockAuthService.ts            # Mock auth for E2E testing
+│   │   ├── MockGraphService.ts           # Mock Graph for E2E testing
+│   │   ├── serviceFactory.ts             # Conditional service injection (test/prod)
+│   │   └── index.ts
 │   ├── contexts/
-│   │   ├── AuthContext.tsx              # REUSED
-│   │   ├── ServiceRequestContext.tsx    # NEW
-│   │   └── ... (other reused contexts)
+│   │   ├── AuthContext.tsx               # Authentication state
+│   │   ├── NotificationContext.tsx        # Notification state
+│   │   ├── TemplateContext.tsx            # Template management
+│   │   ├── ToastContext.tsx              # Toast notifications
+│   │   └── index.ts
 │   ├── types/
-│   │   ├── ServiceRequest.ts            # Core DWx types
-│   │   ├── Product.ts                   # NEW - Product catalog types (29 products)
-│   │   └── ... (reused types)
+│   │   ├── ServiceRequest.ts             # Core DWx types (DWService, DWServiceInput, ServiceCategory, FunnelStage, etc.)
+│   │   ├── Product.ts                    # Product catalog types (29 products)
+│   │   ├── ProductRequirements.ts        # Product request types
+│   │   ├── ServiceRequirements.ts        # Service requirements types
+│   │   ├── Commercial.ts                 # Commercial metrics types
+│   │   ├── Gamification.ts               # Gamification types
+│   │   ├── Dashboard.ts                  # Dashboard types
+│   │   ├── Booking.ts                    # Legacy booking types
+│   │   ├── User.ts                       # User types + FALLBACK_MANAGER_EMAILS
+│   │   ├── ReferenceData.ts              # Team members, clients, AM types
+│   │   ├── Checklist.ts                  # Checklist types
+│   │   ├── Notification.ts               # Notification types
+│   │   ├── Template.ts                   # Template types
+│   │   ├── ApiResponses.ts               # API response types
+│   │   └── index.ts
 │   ├── config/
-│   │   ├── environmentConfig.ts         # UPDATED for DWx
-│   │   └── msalConfig.ts                # REUSED
-│   └── App.tsx                          # UPDATED with new routes
-├── appPackage/
-│   └── manifest.json                    # DWx Traffic Manager manifest
-├── .env.local                           # DW tenant configuration
-├── package.json                         # Updated app name
-└── CLAUDE.md                            # This file
+│   │   ├── environmentConfig.ts          # Environment config with all DWx list names
+│   │   ├── msalConfig.ts                 # MSAL configuration
+│   │   ├── testModeConfig.ts             # Mock data for E2E testing
+│   │   └── index.ts
+│   ├── utils/
+│   │   ├── excelExport.ts                # Excel export utility
+│   │   └── timezone.ts                   # Timezone utilities
+│   ├── App.tsx                           # Main app with routes
+│   ├── main.tsx                          # React entry point
+│   └── vite-env.d.ts
+├── docs/
+│   ├── E2E_TEST_PLAN.md
+│   ├── POWER_AUTOMATE_FLOW.md
+│   ├── SHAREPOINT_CHECKLIST_COLUMNS.md
+│   ├── SHAREPOINT_REFERENCE_LISTS.md
+│   ├── SHAREPOINT_VIEW_FORMATTING.md
+│   └── TEST_MODE.md
+├── e2e/
+│   └── MANUAL_E2E_TEST_PLAN.md
+├── scripts/
+│   └── MANUAL_COLUMNS.md
+├── .env.local                            # DW tenant configuration (gitignored)
+├── package.json
+├── tsconfig.json
+└── CLAUDE.md                             # This file
 ```
+
+## Application Routes
+
+| Route | Component | Access |
+|-------|-----------|--------|
+| `/` | LandingPage | All users |
+| `/services` | ServiceCatalog | All users |
+| `/services/:serviceId` | ServiceDetailPage | All users |
+| `/products` | ProductCatalog | All users |
+| `/request` | ServiceRequestForm | All users |
+| `/product-request` | ProductRequestForm | All users |
+| `/requests` | MyRequests | All users (own only) |
+| `/pipeline` | SalesFunnelDashboard | Managers only |
+| `/dashboard` | ManagerDashboard | Managers only |
+| `/admin` | AdminPage | Managers only |
+| `/admin/account-managers` | AccountManagerManagement | Managers only |
+
+## Admin Panel Tabs (9 Tabs)
+
+| Tab | Component | Description |
+|-----|-----------|-------------|
+| Team Members | TeamMemberList | Team member CRUD with roles |
+| Account Managers | AccountManagerManagement | AM CRUD with Entra ID picker |
+| Clients | ClientList | Client management with XLSX import |
+| **Services** | **ServiceManagement** | **Service CRUD with rich content editing + XLSX import (NEW)** |
+| Manager Access | ManagerSettings | Manager access control |
+| Guest Invitations | GuestInvitations | Guest user management |
+| Checklist | ChecklistManagement | Checklist management |
+| Documents | DocumentManagement | Document management |
+| SP Provisioning | DWxSharePointProvisioning | SharePoint list provisioning via Graph API |
 
 ## Environment Variables Template
 
@@ -276,6 +482,11 @@ VITE_LIST_NAME=DWxServiceRequests
 VITE_SERVICES_LIST=DWxServices
 VITE_CLIENTS_LIST=DWxClients
 VITE_SPECIALISTS_LIST=DWxSpecialists
+VITE_TEAM_MEMBERS_LIST=DWxTeamMembers
+VITE_ACCOUNT_MANAGERS_LIST=DWxAccountManagers
+VITE_MANAGERS_LIST=DWxManagers
+VITE_AUDIT_LOG_LIST=DWxAuditLog
+VITE_PRODUCT_REQUESTS_LIST=DWxProductRequests
 VITE_DOCUMENT_LIBRARY=DWxSupportingDocuments
 
 # Calendar
@@ -307,14 +518,13 @@ VITE_ENV=development
 
 ### Phase 1: Foundation - COMPLETE
 - [x] Clone LP Booking App to new project folder
-- [x] Initialize git repository
-- [x] Create GitHub remote repository
+- [x] Initialize git repository and GitHub remote
 - [x] Rebrand: App name to "DWx Traffic Manager"
 - [x] Create TypeScript types (ServiceRequest.ts)
-- [x] Update environment configuration
+- [x] Update environment configuration with all DWx list names
 
 ### Phase 2: Core Services - COMPLETE
-- [x] ServiceCatalogService.ts - Service catalog CRUD with fallback defaults
+- [x] ServiceCatalogService.ts - Service catalog CRUD with rich content JSON persistence + fallback defaults
 - [x] ServiceRequestService.ts - Funnel orchestration with stage transitions
 - [x] SpecialistService.ts - Specialist management and availability checking
 - [x] PipelineService.ts - Dashboard metrics, win rates, conversion rates, forecasting
@@ -323,17 +533,21 @@ VITE_ENV=development
 - [x] LandingPage - Main entry point with Services/Products options
 - [x] ProductCatalog - Tabbed view of DWx Apps (15), Web Parts (8), Adaptive Cards (6)
 - [x] ServiceCatalog components (ServiceCatalog.tsx, ServiceCard.tsx, ServiceDetails.tsx)
+- [x] ServiceDetailPage - Full-page rich service detail view with all content sections
 - [x] ServiceRequestForm.tsx - 5-step wizard (Service → Client → Requirements → Schedule → Review)
+- [x] ProductRequestForm.tsx - Product demo/trial request form
 - [x] MyRequests components (MyRequests.tsx, RequestCard.tsx, RequestDetails.tsx, StageProgressBar.tsx)
 - [x] SalesFunnelDashboard (FunnelChart.tsx, PipelineKPIs.tsx, ConversionRatesCard.tsx, RequestsQueue.tsx)
-- [ ] Admin components (ServiceManagement, SpecialistManagement) - PENDING
+- [x] ServiceManagement - Admin service CRUD list with search and category filter
+- [x] ServiceForm - 4-tab form (Basic Info, Content, Engagement Phases, Relations)
+- [x] ImportServicesDialog - XLSX/CSV import with template download and preview
 
 ### Phase 4: Integration - COMPLETE
-- [x] Update App.tsx with new routes (/, /services, /products, /request, /requests, /pipeline)
-- [x] Update Header with new navigation (Services, New Request, My Requests, Pipeline)
-- [x] SharePoint list provisioning UI for DWx lists (Admin → SharePoint Provisioning)
-- [ ] Test mode configuration for E2E testing - PENDING
-- [ ] Email notification templates (DW branding) - PENDING
+- [x] Update App.tsx with all DWx routes
+- [x] Update Header with navigation (Services, New Request, My Requests, Pipeline)
+- [x] SharePoint list provisioning UI for all DWx lists via Graph API
+- [x] Re-provision individual lists capability in admin UI
+- [x] Service CRUD with audit logging in Admin panel
 
 ### Phase 5: Deployment - IN PROGRESS
 - [x] Azure Static Web Apps deployment configured
@@ -341,6 +555,8 @@ VITE_ENV=development
 - [ ] Azure AD app registration - PENDING
 - [ ] SharePoint site and list provisioning in production - PENDING
 - [ ] Teams app manifest and package - PENDING
+- [ ] Test mode configuration for E2E testing - PENDING
+- [ ] Email notification templates (DW branding) - PENDING
 
 ## Key Type Definitions
 
@@ -353,6 +569,21 @@ type ServiceCategory =
   | 'M365 Assessment'
   | 'Copilot Agents'
   | 'MS Viva';
+```
+
+### Service Durations
+```typescript
+type ServiceDuration = '30min' | '1hr' | '2hr' | 'Half-day' | 'Full-day' | 'Multi-day';
+```
+
+### Service Complexity
+```typescript
+type ServiceComplexity = 'Low' | 'Medium' | 'High' | 'Enterprise';
+```
+
+### Pricing Models
+```typescript
+type PricingModel = 'Fixed' | 'Hourly' | 'Project-based' | 'TBD';
 ```
 
 ### Funnel Stages
@@ -377,6 +608,48 @@ type InterestLevel = 'Hot' | 'Warm' | 'Cold';
 type SpecialistRole = 'Solution Architect' | 'Technical Specialist' | 'Consultant';
 ```
 
+### Audit Entities
+```typescript
+type AuditEntity =
+  | 'Booking'
+  | 'TeamMember'
+  | 'Client'
+  | 'Checklist'
+  | 'User'
+  | 'AccountManager'
+  | 'ServiceRequest'
+  | 'Service';
+```
+
+## Service CRUD Architecture
+
+### Rich Content Persistence
+
+Services have rich content stored as JSON in SharePoint Note columns:
+
+| TypeScript Field | SP Column | Format |
+|-----------------|-----------|--------|
+| `WhatsIncluded` | `WhatsIncluded_JSON` | `string[]` |
+| `EngagementPhases` | `EngagementPhases_JSON` | `{name: string, description: string}[]` |
+| `KeyBenefits` | `KeyBenefits_JSON` | `string[]` |
+| `IdealFor` | `IdealFor_JSON` | `string[]` |
+| `RelatedCategories` | `RelatedCategories_JSON` | `ServiceCategory[]` |
+
+**Fallback Strategy**: If SP JSON columns are empty, `ServiceCatalogService.mapToService()` falls back to matching entry from `DEFAULT_SERVICES` constant in `ServiceRequest.ts`.
+
+### ServiceForm Tabs
+
+1. **Basic Info** - Title, descriptions, category, duration, complexity, pricing, prerequisites, active toggle
+2. **Content** - WhatsIncluded, KeyBenefits, IdealFor (textarea, one item per line)
+3. **Engagement Phases** - Repeater with useFieldArray (name + description per phase)
+4. **Relations** - RequiredRoles multi-select, RelatedCategories multi-select
+
+### Import Format (XLSX/CSV)
+
+- Basic columns: Title, ShortDescription, Description, Category, TypicalDuration, ComplexityLevel, PricingModel, BasePrice, IconName, SortOrder, IsActive, Prerequisites
+- Array columns use pipe delimiter: `"item1|item2|item3"`
+- Engagement phases: `"Discovery:Requirements|Design:Architecture|Build:Development"`
+
 ## External Tenant Support
 
 The app supports Account Managers from an external partner tenant:
@@ -390,73 +663,33 @@ The app supports Account Managers from an external partner tenant:
 
 | File | Purpose |
 |------|---------|
-| `src/types/ServiceRequest.ts` | Core type definitions for all DWx entities |
+| `src/types/ServiceRequest.ts` | Core type definitions + DEFAULT_SERVICES with rich content |
 | `src/types/Product.ts` | Product catalog types and data (29 products) |
-| `src/services/ServiceCatalogService.ts` | Service catalog CRUD operations |
+| `src/services/ServiceCatalogService.ts` | Service catalog CRUD with JSON persistence |
 | `src/services/ServiceRequestService.ts` | Funnel workflow orchestration |
 | `src/services/SpecialistService.ts` | Specialist management and availability |
 | `src/services/PipelineService.ts` | Dashboard metrics and analytics |
-| `src/config/environmentConfig.ts` | Environment configuration with DWx lists |
-| `src/App.tsx` | Main app with DWx routes |
-| `src/components/LandingPage/` | Main entry with Services/Products cards |
-| `src/components/ProductCatalog/` | Tabbed product catalog (Apps, WebParts, Cards) |
-| `src/components/ServiceCatalog/` | Service catalog UI (ServiceCatalog, ServiceCard, ServiceDetails) |
-| `src/components/ServiceRequest/` | Request wizard (ServiceRequestForm) |
-| `src/components/MyRequests/` | Request list (MyRequests, RequestCard, RequestDetails, StageProgressBar) |
-| `src/components/SalesFunnel/` | Dashboard (SalesFunnelDashboard, FunnelChart, PipelineKPIs, ConversionRatesCard, RequestsQueue) |
-| `src/components/Common/Header.tsx` | Navigation header with DWx branding |
-| `mockups/` | HTML mockups for design reference |
+| `src/services/AuditService.ts` | Audit logging (8 entity types) |
+| `src/services/DWxSharePointProvisioningService.ts` | All DWx list provisioning via Graph API |
+| `src/config/environmentConfig.ts` | Environment config with all 10 DWx list names |
+| `src/App.tsx` | Main app with all routes |
+| `src/components/Admin/AdminPage.tsx` | Admin container with 9 tabs |
+| `src/components/Admin/ServiceManagement.tsx` | Service CRUD list UI |
+| `src/components/Admin/ServiceForm.tsx` | 4-tab service form dialog |
+| `src/components/Admin/ImportServicesDialog.tsx` | XLSX/CSV service import |
+| `src/components/ServiceCatalog/ServiceDetailPage.tsx` | Full-page service detail view |
 
 ## Confirmed Design Decisions
 
 | Decision | Answer |
 |----------|--------|
 | **Partner Tenant** | Same as LP Booking (hallofd.com) - reuse guest invitation system |
-| **Service Catalog** | 6 services: Power Platform, SPFx, Migrations, Assessment, Copilot, Viva |
+| **Service Catalog** | 6 categories: Power Platform, SPFx, Migrations, Assessment, Copilot, Viva |
 | **Specialist Assignment** | Manager assigns only - specialists cannot self-assign |
 | **Document Upload** | Full upload support - RFPs, requirements, proposals to SharePoint |
 | **Currency** | ZAR (South African Rand) |
-
-## Document Upload Feature
-
-Documents are uploaded to `DWxSupportingDocuments` library:
-
-```
-DWxSupportingDocuments/
-├── {RequestId}/
-│   ├── RFPs/
-│   ├── Requirements/
-│   ├── Proposals/
-│   └── Other/
-```
-
-**Supported file types**: PDF, DOCX, XLSX, PPTX
-
-## Dashboard KPIs
-
-| KPI | Calculation |
-|-----|-------------|
-| Total Pipeline | SUM(DealValue) where stage not Won/Lost |
-| Weighted Pipeline | SUM(DealValue × Probability) |
-| Win Rate | Won / (Won + Lost) × 100 |
-| Avg Deal Size | Total Won Revenue / Won Count |
-| Avg Sales Cycle | AVG(Days from Lead to Won) |
-| Lead → Qualified | Qualified Count / Lead Count × 100 |
-| Hot Leads | COUNT where InterestLevel = Hot |
-
-## Application Routes
-
-| Route | Component | Access |
-|-------|-----------|--------|
-| `/` | LandingPage | All users |
-| `/services` | ServiceCatalog | All users |
-| `/products` | ProductCatalog | All users |
-| `/request` | ServiceRequestForm | All users |
-| `/requests` | MyRequests | All users (own only) |
-| `/pipeline` | SalesFunnelDashboard | Managers only |
-| `/admin` | AdminPage | Managers only |
-| `/admin/services` | ServiceManagement | Managers only |
-| `/admin/specialists` | SpecialistManagement | Managers only |
+| **Rich Content Storage** | JSON Note columns in SharePoint with DEFAULT_SERVICES fallback |
+| **Service Import Format** | XLSX/CSV with pipe-delimited arrays |
 
 ## Product Catalog
 
@@ -522,4 +755,46 @@ interface Product {
   icon: string;
   gradient: string;  // CSS gradient name
 }
+```
+
+## Dashboard KPIs
+
+| KPI | Calculation |
+|-----|-------------|
+| Total Pipeline | SUM(DealValue) where stage not Won/Lost |
+| Weighted Pipeline | SUM(DealValue × Probability) |
+| Win Rate | Won / (Won + Lost) × 100 |
+| Avg Deal Size | Total Won Revenue / Won Count |
+| Avg Sales Cycle | AVG(Days from Lead to Won) |
+| Lead → Qualified | Qualified Count / Lead Count × 100 |
+| Hot Leads | COUNT where InterestLevel = Hot |
+
+## Document Upload Feature
+
+Documents are uploaded to `DWxSupportingDocuments` library:
+
+```
+DWxSupportingDocuments/
+├── {RequestId}/
+│   ├── RFPs/
+│   ├── Requirements/
+│   ├── Proposals/
+│   └── Other/
+```
+
+**Supported file types**: PDF, DOCX, XLSX, PPTX
+
+## Recent Commit History
+
+```
+432e0e3 feat: Add Service CRUD management with spreadsheet import to Admin panel
+af822fc fix: Role selector validation not triggering on selection
+b841a82 feat: Add Re-provision button for individual lists in admin UI
+519244e fix: Always show Provision All Lists button in admin UI
+2da7cd7 fix: Rename LPManagers to DWxManagers and add to provisioning
+9c42bb0 fix: Add DWxTeamMembers and DWxAccountManagers to provisioning UI
+b16887c fix: Use DWx-prefixed list names and add missing list provisioning
+4e9a861 feat: Add full-page service detail view with rich content
+8450fc0 fix: Rewrite SP provisioning to use Graph API, reinstate admin tab
+e425dbd style: Standardize page layout with 64px horizontal padding
 ```
