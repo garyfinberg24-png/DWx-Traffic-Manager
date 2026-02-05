@@ -549,6 +549,18 @@ class DWxSharePointProvisioningService {
     };
   }
 
+  private get managersListDefinition(): ListDefinition {
+    return {
+      title: 'DWxManagers',
+      description: 'DWx Managers - Users with manager access to Dashboard, Approvals, and Admin',
+      fields: [
+        { internalName: 'Email', displayName: 'Email', type: 'Text', required: true },
+        { internalName: 'AddedBy', displayName: 'Added By', type: 'Text' },
+        { internalName: 'AddedDate', displayName: 'Added Date', type: 'DateTime' },
+      ],
+    };
+  }
+
   private get teamMembersListDefinition(): ListDefinition {
     return {
       title: 'DWxTeamMembers',
@@ -614,7 +626,7 @@ class DWxSharePointProvisioningService {
    * Check which DWx lists exist
    */
   async checkListsStatus(): Promise<ListStatus[]> {
-    const listNames = ['DWxServices', 'DWxServiceRequests', 'DWxProductRequests', 'DWxClients', 'DWxSpecialists', 'DWxAuditLog', 'DWxTeamMembers', 'DWxAccountManagers'];
+    const listNames = ['DWxServices', 'DWxServiceRequests', 'DWxProductRequests', 'DWxClients', 'DWxSpecialists', 'DWxManagers', 'DWxTeamMembers', 'DWxAccountManagers', 'DWxAuditLog'];
     const results: ListStatus[] = [];
 
     for (const name of listNames) {
@@ -676,6 +688,13 @@ class DWxSharePointProvisioningService {
   }
 
   /**
+   * Provision the DWxManagers list
+   */
+  async provisionManagersList(): Promise<ProvisionResult> {
+    return this.provisionList(this.managersListDefinition);
+  }
+
+  /**
    * Provision the DWxTeamMembers list
    */
   async provisionTeamMembersList(): Promise<ProvisionResult> {
@@ -724,6 +743,7 @@ class DWxSharePointProvisioningService {
       { name: 'DWxProductRequests', provision: () => this.provisionProductRequestsList() },
       { name: 'DWxClients', provision: () => this.provisionClientsList() },
       { name: 'DWxSpecialists', provision: () => this.provisionSpecialistsList() },
+      { name: 'DWxManagers', provision: () => this.provisionManagersList() },
       { name: 'DWxTeamMembers', provision: () => this.provisionTeamMembersList() },
       { name: 'DWxAccountManagers', provision: () => this.provisionAccountManagersList() },
       { name: 'DWxAuditLog', provision: () => this.provisionAuditLogList() },

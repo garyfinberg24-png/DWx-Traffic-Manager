@@ -1,5 +1,6 @@
 import { getGraphService } from './serviceFactory';
 import { FALLBACK_MANAGER_EMAILS } from '../types/User';
+import { config } from '../config/environmentConfig';
 
 // Get the appropriate graph service based on test mode
 const graphService = getGraphService();
@@ -17,7 +18,7 @@ export interface ManagerInput {
   displayName: string;
 }
 
-const MANAGERS_LIST_NAME = 'LPManagers';
+const MANAGERS_LIST_NAME = config.sharepoint.managersListName;
 
 class ManagerService {
   // Get all managers from SharePoint list via Graph API
@@ -107,11 +108,11 @@ class ManagerService {
       // Provide helpful error message
       const message = error instanceof Error ? error.message : 'Unknown error';
       if (message.includes('403') || message.includes('Access denied')) {
-        throw new Error('Permission denied. You may not have write access to the LPManagers list.');
+        throw new Error(`Permission denied. You may not have write access to the ${MANAGERS_LIST_NAME} list.`);
       } else if (message.includes('401') || message.includes('Unauthorized')) {
         throw new Error('Authentication failed. Please sign out and sign back in.');
       } else if (message.includes('404') || message.includes('not found')) {
-        throw new Error('The LPManagers list was not found. Please create it in SharePoint.');
+        throw new Error(`The ${MANAGERS_LIST_NAME} list was not found. Please provision it from Admin > SP Provisioning.`);
       } else {
         throw new Error(`Failed to add manager: ${message}`);
       }

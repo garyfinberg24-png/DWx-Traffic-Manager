@@ -17,6 +17,8 @@ export const config = {
     teamMembersListName: import.meta.env.VITE_TEAM_MEMBERS_LIST || 'DWxTeamMembers',
     // Account Managers list
     accountManagersListName: import.meta.env.VITE_ACCOUNT_MANAGERS_LIST || 'DWxAccountManagers',
+    // Managers list (access control)
+    managersListName: import.meta.env.VITE_MANAGERS_LIST || 'DWxManagers',
     // Audit Log list
     auditLogListName: import.meta.env.VITE_AUDIT_LOG_LIST || 'DWxAuditLog',
     // Product Requests list

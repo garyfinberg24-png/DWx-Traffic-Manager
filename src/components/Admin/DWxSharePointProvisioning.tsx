@@ -32,6 +32,7 @@ import {
   Info24Regular,
   Rocket24Regular,
   Apps24Regular,
+  ShieldKeyhole24Regular,
 } from '@fluentui/react-icons';
 import { dwxSharePointProvisioningService } from '../../services/DWxSharePointProvisioningService';
 
@@ -193,6 +194,10 @@ const LIST_INFO: Record<string, { description: string; icon: React.ReactElement 
     description: 'Pre-sales team members with roles, specializations, and availability',
     icon: <People24Regular />,
   },
+  DWxManagers: {
+    description: 'Manager access control for Dashboard, Approvals, and Admin',
+    icon: <ShieldKeyhole24Regular />,
+  },
   DWxTeamMembers: {
     description: 'Internal team members for specialist assignments',
     icon: <People24Regular />,
@@ -286,6 +291,9 @@ export const DWxSharePointProvisioning: React.FC = () => {
         case 'DWxSpecialists':
           result = await dwxSharePointProvisioningService.provisionSpecialistsList();
           break;
+        case 'DWxManagers':
+          result = await dwxSharePointProvisioningService.provisionManagersList();
+          break;
         case 'DWxTeamMembers':
           result = await dwxSharePointProvisioningService.provisionTeamMembersList();
           break;
@@ -340,7 +348,7 @@ export const DWxSharePointProvisioning: React.FC = () => {
   };
 
   const allLists = [...listStatuses, docLibraryStatus].filter(Boolean) as ListStatus[];
-  const allListsExist = allLists.length === 9 && allLists.every((s) => s.exists);
+  const allListsExist = allLists.length === 10 && allLists.every((s) => s.exists);
   const missingLists = allLists.filter((s) => !s.exists);
   const servicesExists = getStatusForList('DWxServices');
 
@@ -370,7 +378,7 @@ export const DWxSharePointProvisioning: React.FC = () => {
       {/* Stats */}
       <div className={styles.statsContainer}>
         <div className={styles.statCard}>
-          <Text className={styles.statValue}>{allLists.filter(l => l.exists).length}/9</Text>
+          <Text className={styles.statValue}>{allLists.filter(l => l.exists).length}/10</Text>
           <Text className={styles.statLabel}>Lists Ready</Text>
         </div>
         <div className={styles.statCard}>
