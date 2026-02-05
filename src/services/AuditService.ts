@@ -26,7 +26,8 @@ export type AuditEntity =
   | 'ServiceRequest'
   | 'Service'
   | 'Specialist'
-  | 'ProductRequest';
+  | 'ProductRequest'
+  | 'SessionPrep';
 
 export interface AuditLogEntry {
   Id?: number;

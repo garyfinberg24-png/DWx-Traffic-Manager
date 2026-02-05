@@ -6,6 +6,7 @@
 import { getGraphService } from './serviceFactory';
 import { ServiceRequest, FunnelStage, DWService } from '../types/ServiceRequest';
 import { ProductRequest } from '../types/ProductRequest';
+import { SessionPreparation } from '../types/SessionPreparation';
 import { config } from '../config/environmentConfig';
 import { EmailTemplates } from './EmailTemplates';
 
@@ -391,6 +392,40 @@ class DWxNotificationService {
       request, specialistName, confirmedSlot
     );
     return this.sendEmail([specialistEmail], subject, body);
+  }
+
+  // ==========================================================================
+  // Session Preparation Notifications
+  // ==========================================================================
+
+  /**
+   * Notify specialist that session preparation has been created
+   */
+  async notifySessionPrepCreated(
+    request: ServiceRequest,
+    sessionPrep: SessionPreparation,
+    confirmedSlot: string
+  ): Promise<NotificationResult> {
+    const { subject, body } = EmailTemplates.sessionPrepCreated(request, sessionPrep, confirmedSlot);
+    return this.sendEmail([sessionPrep.SpecialistEmail], subject, body);
+  }
+
+  /**
+   * Send session preparation reminder to specialist
+   */
+  async notifySessionPrepReminder(
+    request: ServiceRequest,
+    sessionPrep: SessionPreparation,
+    confirmedSlot: string,
+    hoursUntilMeeting: number
+  ): Promise<NotificationResult> {
+    const { subject, body } = EmailTemplates.sessionPrepReminder(
+      request,
+      sessionPrep,
+      confirmedSlot,
+      hoursUntilMeeting
+    );
+    return this.sendEmail([sessionPrep.SpecialistEmail], subject, body);
   }
 }
 

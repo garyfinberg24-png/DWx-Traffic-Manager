@@ -164,6 +164,10 @@ export interface ServiceRequest {
   ContactName: string;
   ContactEmail: string;
   ContactPhone?: string;
+  ClientIndustry?: ClientIndustry;
+  ClientCompanySize?: CompanySize;
+  IsPremiumClient?: boolean;
+  // Deprecated aliases (use ClientIndustry/ClientCompanySize instead)
   Industry?: ClientIndustry;
   CompanySize?: CompanySize;
 
@@ -190,6 +194,12 @@ export interface ServiceRequest {
   AssignedSpecialistName?: string;
   AssignedSpecialistEmail?: string;
   AssignedSpecialistRole?: SpecialistRole;
+
+  // Service Metadata (from DWService)
+  ServiceCategory?: ServiceCategory;
+  Prerequisites?: string;
+  EngagementPhases?: string;
+  DefaultDuration?: number;
 
   // Additional Info
   Requirements?: string;

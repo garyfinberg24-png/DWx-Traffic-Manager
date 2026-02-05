@@ -8,6 +8,7 @@ import { getGraphService } from './serviceFactory';
 import { auditService } from './AuditService';
 import { dwxNotificationService } from './DWxNotificationService';
 import { specialistService } from './SpecialistService';
+import { sessionPrepService } from './SessionPrepService';
 import {
   ServiceRequest,
   CreateServiceRequestInput,
@@ -515,6 +516,37 @@ class ServiceRequestService {
       } catch (notifError) {
         console.error('Failed to send discovery confirmation notifications:', notifError);
         warnings.push('Meeting confirmed but notifications failed to send');
+      }
+
+      // Create session preparation record for the specialist
+      if (updatedRequest.AssignedSpecialistEmail) {
+        try {
+          const prepResult = await sessionPrepService.createSessionPrep(
+            {
+              serviceRequestId: requestId,
+              specialistEmail: updatedRequest.AssignedSpecialistEmail,
+              specialistName: updatedRequest.AssignedSpecialistName || 'Specialist',
+            },
+            updatedRequest.ClientName,
+            confirmedSlot
+          );
+
+          if (prepResult.success) {
+            // Send prep notification to specialist
+            try {
+              await dwxNotificationService.notifySessionPrepCreated(
+                updatedRequest,
+                prepResult.sessionPrep!,
+                confirmedSlot
+              );
+            } catch (prepNotifError) {
+              console.error('Failed to send session prep notification:', prepNotifError);
+            }
+          }
+        } catch (prepError) {
+          console.error('Failed to create session preparation:', prepError);
+          warnings.push('Session preparation could not be created');
+        }
       }
 
       return {

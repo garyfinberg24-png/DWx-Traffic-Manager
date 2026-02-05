@@ -23,6 +23,8 @@ export const config = {
     auditLogListName: import.meta.env.VITE_AUDIT_LOG_LIST || 'DWxAuditLog',
     // Product Requests list
     productRequestsListName: import.meta.env.VITE_PRODUCT_REQUESTS_LIST || 'DWxProductRequests',
+    // Session Preparation list (AI-powered meeting prep)
+    sessionPrepListName: import.meta.env.VITE_SESSION_PREP_LIST || 'DWxSessionPrep',
     // Document library for uploads
     documentLibrary: import.meta.env.VITE_DOCUMENT_LIBRARY || 'DWxSupportingDocuments',
   },
@@ -55,6 +57,13 @@ export const config = {
     name: import.meta.env.VITE_APP_NAME || 'DWx Traffic Manager',
     environment: import.meta.env.VITE_ENV || 'development',
     isDevelopment: import.meta.env.VITE_ENV === 'development',
+  },
+  // Azure OpenAI Configuration (for AI-powered session preparation)
+  azureOpenAI: {
+    endpoint: import.meta.env.VITE_AZURE_OPENAI_ENDPOINT || '',
+    apiKey: import.meta.env.VITE_AZURE_OPENAI_API_KEY || '',
+    deploymentName: import.meta.env.VITE_AZURE_OPENAI_DEPLOYMENT || 'gpt-4o',
+    apiVersion: import.meta.env.VITE_AZURE_OPENAI_API_VERSION || '2024-02-15-preview',
   },
 };
 

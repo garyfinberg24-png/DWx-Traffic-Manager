@@ -626,13 +626,42 @@ class DWxSharePointProvisioningService {
     };
   }
 
+  private get sessionPrepListDefinition(): ListDefinition {
+    return {
+      title: 'DWxSessionPrep',
+      description: 'DWx Session Preparation - AI-powered preparation for client sessions',
+      fields: [
+        { internalName: 'ServiceRequestId', displayName: 'Service Request ID', type: 'Number', required: true },
+        { internalName: 'SpecialistEmail', displayName: 'Specialist Email', type: 'Text', required: true },
+        { internalName: 'SpecialistName', displayName: 'Specialist Name', type: 'Text' },
+        {
+          internalName: 'Status',
+          displayName: 'Status',
+          type: 'Choice',
+          choices: ['Not Started', 'In Progress', 'Ready'],
+          defaultValue: 'Not Started',
+        },
+        // AI-generated content (stored as JSON)
+        { internalName: 'ClientProfile_JSON', displayName: 'Client Profile (JSON)', type: 'Note' },
+        { internalName: 'TalkingPoints_JSON', displayName: 'Talking Points (JSON)', type: 'Note' },
+        { internalName: 'SuggestedResources_JSON', displayName: 'Suggested Resources (JSON)', type: 'Note' },
+        { internalName: 'MeetingAgenda_JSON', displayName: 'Meeting Agenda (JSON)', type: 'Note' },
+        { internalName: 'ChecklistItems_JSON', displayName: 'Checklist Items (JSON)', type: 'Note' },
+        // Metadata
+        { internalName: 'AIGeneratedAt', displayName: 'AI Generated At', type: 'DateTime' },
+        { internalName: 'CompletedAt', displayName: 'Completed At', type: 'DateTime' },
+        { internalName: 'ReminderSent', displayName: 'Reminder Sent', type: 'Boolean', defaultValue: '0' },
+      ],
+    };
+  }
+
   // ==================== PUBLIC METHODS ====================
 
   /**
    * Check which DWx lists exist
    */
   async checkListsStatus(): Promise<ListStatus[]> {
-    const listNames = ['DWxServices', 'DWxServiceRequests', 'DWxProductRequests', 'DWxClients', 'DWxSpecialists', 'DWxManagers', 'DWxTeamMembers', 'DWxAccountManagers', 'DWxAuditLog'];
+    const listNames = ['DWxServices', 'DWxServiceRequests', 'DWxProductRequests', 'DWxClients', 'DWxSpecialists', 'DWxManagers', 'DWxTeamMembers', 'DWxAccountManagers', 'DWxAuditLog', 'DWxSessionPrep'];
     const results: ListStatus[] = [];
 
     for (const name of listNames) {
@@ -715,6 +744,13 @@ class DWxSharePointProvisioningService {
   }
 
   /**
+   * Provision the DWxSessionPrep list
+   */
+  async provisionSessionPrepList(): Promise<ProvisionResult> {
+    return this.provisionList(this.sessionPrepListDefinition);
+  }
+
+  /**
    * Create the DWxSupportingDocuments document library
    */
   async provisionDocumentLibrary(): Promise<ProvisionResult> {
@@ -753,6 +789,7 @@ class DWxSharePointProvisioningService {
       { name: 'DWxTeamMembers', provision: () => this.provisionTeamMembersList() },
       { name: 'DWxAccountManagers', provision: () => this.provisionAccountManagersList() },
       { name: 'DWxAuditLog', provision: () => this.provisionAuditLogList() },
+      { name: 'DWxSessionPrep', provision: () => this.provisionSessionPrepList() },
       { name: 'DWxSupportingDocuments', provision: () => this.provisionDocumentLibrary() },
     ];
 

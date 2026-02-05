@@ -5,6 +5,7 @@
 
 import { ServiceRequest, FunnelStage, DWService } from '../types/ServiceRequest';
 import { ProductRequest } from '../types/ProductRequest';
+import { SessionPreparation } from '../types/SessionPreparation';
 import { format } from 'date-fns';
 
 // DW Brand Colors
@@ -1194,6 +1195,144 @@ export const productDemoConfirmedSpecialist = (
   };
 };
 
+// ============================================================================
+// Session Preparation Email Templates
+// ============================================================================
+
+/**
+ * Session preparation created - sent to specialist
+ */
+export const sessionPrepCreated = (
+  request: ServiceRequest,
+  sessionPrep: SessionPreparation,
+  confirmedSlot: string
+): { subject: string; body: string } => {
+  const content = `
+    <h2>Session Preparation Ready</h2>
+    <p>Hi ${sessionPrep.SpecialistName},</p>
+    <p>A session preparation has been created for your upcoming discovery meeting with <strong>${request.ClientName}</strong>. Use the preparation tools to research the client and prepare for a successful meeting.</p>
+
+    <div class="info-box" style="border-left: 4px solid ${DW_COLORS.primary};">
+      <div class="info-row">
+        <span class="info-label">Meeting Date:</span>
+        <span class="info-value"><strong>${formatDateTime(confirmedSlot)}</strong></span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Service:</span>
+        <span class="info-value">${request.ServiceName}</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Client:</span>
+        <span class="info-value">${request.ClientName}${request.IsPremiumClient ? ' ⭐ Premium' : ''}</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Contact:</span>
+        <span class="info-value">${request.ContactName} (${request.ContactEmail})</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Interest Level:</span>
+        <span class="info-value interest-${request.InterestLevel.toLowerCase()}">${request.InterestLevel === 'Hot' ? '🔥 ' : request.InterestLevel === 'Warm' ? '☀️ ' : '❄️ '}${request.InterestLevel}</span>
+      </div>
+      ${request.DealValue ? `
+      <div class="info-row">
+        <span class="info-label">Deal Value:</span>
+        <span class="info-value deal-value">${formatCurrency(request.DealValue)}</span>
+      </div>` : ''}
+    </div>
+
+    <h3>🤖 AI-Powered Preparation Tools</h3>
+    <p>Access the Session Preparation panel in DWx Traffic Manager to:</p>
+    <ul>
+      <li><strong>Client Profile:</strong> AI-generated overview of the client, key stakeholders, and pain points</li>
+      <li><strong>Talking Points:</strong> Customizable conversation guide with discovery questions and value propositions</li>
+      <li><strong>Resource Suggestions:</strong> AI-recommended slide decks, case studies, and materials</li>
+      <li><strong>Meeting Agenda:</strong> Suggested timeline and structure for the discovery session</li>
+      <li><strong>Prep Checklist:</strong> Track your preparation progress</li>
+    </ul>
+
+    ${request.Requirements ? `
+    <h3>Client Requirements</h3>
+    <p style="background-color: ${DW_COLORS.background}; padding: 12px; border-radius: 6px;">${request.Requirements}</p>
+    ` : ''}
+
+    <p style="margin-top: 20px;"><strong>Account Manager:</strong> ${request.AccountManagerName} (<a href="mailto:${request.AccountManagerEmail}">${request.AccountManagerEmail}</a>)</p>
+  `;
+
+  return {
+    subject: `[DWx] 📋 Session Preparation Ready: ${request.ServiceName} - ${request.ClientName}`,
+    body: wrapEmail('Session Preparation', 'Prepare for your discovery meeting', content),
+  };
+};
+
+/**
+ * Session preparation reminder - sent to specialist before meeting
+ */
+export const sessionPrepReminder = (
+  request: ServiceRequest,
+  sessionPrep: SessionPreparation,
+  confirmedSlot: string,
+  hoursUntilMeeting: number
+): { subject: string; body: string } => {
+  const completedItems = sessionPrep.ChecklistItems.filter(item => item.completed).length;
+  const totalItems = sessionPrep.ChecklistItems.length;
+  const completionPercentage = totalItems > 0 ? Math.round((completedItems / totalItems) * 100) : 0;
+
+  const isReady = sessionPrep.Status === 'Ready';
+  const statusColor = isReady ? DW_COLORS.accent : DW_COLORS.warning;
+  const statusLabel = isReady ? '✅ Ready' : '⚠️ Incomplete';
+
+  const content = `
+    <h2>Meeting Reminder: ${hoursUntilMeeting} Hours Away</h2>
+    <p>Hi ${sessionPrep.SpecialistName},</p>
+    <p>This is a reminder that your discovery meeting with <strong>${request.ClientName}</strong> is scheduled for <strong>${formatDateTime(confirmedSlot)}</strong>.</p>
+
+    <div class="info-box" style="border-left: 4px solid ${statusColor};">
+      <div class="info-row">
+        <span class="info-label">Preparation Status:</span>
+        <span class="info-value"><strong style="color: ${statusColor};">${statusLabel}</strong></span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Checklist Progress:</span>
+        <span class="info-value">${completedItems} of ${totalItems} items (${completionPercentage}%)</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">AI Content:</span>
+        <span class="info-value">${sessionPrep.AIGeneratedAt ? '✅ Generated' : '❌ Not generated'}</span>
+      </div>
+    </div>
+
+    <div class="info-box">
+      <div class="info-row">
+        <span class="info-label">Service:</span>
+        <span class="info-value">${request.ServiceName}</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Client:</span>
+        <span class="info-value">${request.ClientName}</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Contact:</span>
+        <span class="info-value">${request.ContactName} (${request.ContactEmail})</span>
+      </div>
+    </div>
+
+    ${!isReady ? `
+    <p style="background-color: #fef3c7; padding: 12px; border-radius: 6px; border-left: 4px solid ${DW_COLORS.warning};">
+      <strong>⚠️ Action Required:</strong> Your session preparation is not yet complete. Please review and complete your checklist items before the meeting.
+    </p>
+    ` : `
+    <p style="background-color: #d1fae5; padding: 12px; border-radius: 6px; border-left: 4px solid ${DW_COLORS.accent};">
+      <strong>✅ You're all set!</strong> Your session preparation is complete. Good luck with your meeting!
+    </p>
+    `}
+  `;
+
+  return {
+    subject: `[DWx] ⏰ Meeting in ${hoursUntilMeeting}h: ${request.ClientName} - ${sessionPrep.Status === 'Ready' ? 'Ready' : 'Prep Incomplete'}`,
+    body: wrapEmail('Meeting Reminder', `${hoursUntilMeeting} hours until your discovery meeting`, content),
+  };
+};
+
 export const EmailTemplates = {
   requestCreatedAM,
   requestCreatedManager,
@@ -1214,4 +1353,6 @@ export const EmailTemplates = {
   dealValueChanged,
   calendarEventFailed,
   productDemoConfirmedSpecialist,
+  sessionPrepCreated,
+  sessionPrepReminder,
 };
