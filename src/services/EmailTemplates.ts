@@ -792,6 +792,408 @@ export const productRequestStatusChanged = (
   };
 };
 
+// ============================================================================
+// Product Request Specialist Assignment Templates
+// ============================================================================
+
+/**
+ * Product request specialist assigned - sent to AM
+ */
+export const productSpecialistAssignedAM = (
+  request: ProductRequest,
+  specialistName: string,
+  specialistEmail: string,
+  specialistRole: string
+): { subject: string; body: string } => {
+  const content = `
+    <h2>Specialist Assigned to Your Product Request</h2>
+    <p>Hi ${request.AccountManagerName},</p>
+    <p>A specialist has been assigned to your ${request.RequestType.toLowerCase()} request for <strong>${request.ProductName}</strong>.</p>
+
+    <div class="info-box">
+      <div class="info-row">
+        <span class="info-label">Specialist:</span>
+        <span class="info-value"><strong>${specialistName}</strong></span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Role:</span>
+        <span class="info-value">${specialistRole}</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Email:</span>
+        <span class="info-value"><a href="mailto:${specialistEmail}">${specialistEmail}</a></span>
+      </div>
+    </div>
+
+    <div class="info-box">
+      <div class="info-row">
+        <span class="info-label">Product:</span>
+        <span class="info-value">${request.ProductName} (${request.ProductType})</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Request Type:</span>
+        <span class="info-value">${request.RequestType}</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Client:</span>
+        <span class="info-value">${request.ClientName}</span>
+      </div>
+    </div>
+
+    <p>The specialist will coordinate with you to schedule the ${request.RequestType.toLowerCase()}.</p>
+  `;
+
+  return {
+    subject: `[DWx] Specialist Assigned: ${specialistName} for ${request.ProductName} (${request.ClientName})`,
+    body: wrapEmail('Specialist Assigned', `${request.RequestType} Request`, content),
+  };
+};
+
+/**
+ * Product request specialist assigned - sent to specialist
+ */
+export const productSpecialistAssignedSpecialist = (
+  request: ProductRequest,
+  specialistName: string
+): { subject: string; body: string } => {
+  const content = `
+    <h2>You've Been Assigned a Product ${request.RequestType} Request</h2>
+    <p>Hi ${specialistName},</p>
+    <p>You have been assigned to a product ${request.RequestType.toLowerCase()} request. Please review the details below.</p>
+
+    <div class="info-box">
+      <div class="info-row">
+        <span class="info-label">Product:</span>
+        <span class="info-value"><strong>${request.ProductName}</strong> (${request.ProductType})</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Request Type:</span>
+        <span class="info-value">${request.RequestType}</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Client:</span>
+        <span class="info-value">${request.ClientName}${request.IsPremiumClient ? ' ⭐ Premium' : ''}</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Contact:</span>
+        <span class="info-value">${request.ContactName} (<a href="mailto:${request.ContactEmail}">${request.ContactEmail}</a>)</span>
+      </div>
+      ${request.ContactPhone ? `
+      <div class="info-row">
+        <span class="info-label">Phone:</span>
+        <span class="info-value">${request.ContactPhone}</span>
+      </div>` : ''}
+      ${request.LicenseCount ? `
+      <div class="info-row">
+        <span class="info-label">Licenses:</span>
+        <span class="info-value">${request.LicenseCount}</span>
+      </div>` : ''}
+      ${request.EstimatedValue ? `
+      <div class="info-row">
+        <span class="info-label">Estimated Value:</span>
+        <span class="info-value deal-value">${formatCurrency(request.EstimatedValue)}</span>
+      </div>` : ''}
+    </div>
+
+    <p><strong>Account Manager:</strong> ${request.AccountManagerName} (<a href="mailto:${request.AccountManagerEmail}">${request.AccountManagerEmail}</a>)</p>
+
+    ${request.ProposedSlot1 ? `
+    <h3>Proposed Time Slots</h3>
+    <div class="time-slots">
+      <div class="time-slot">📅 Slot 1: ${formatDateTime(request.ProposedSlot1)}</div>
+      ${request.ProposedSlot2 ? `<div class="time-slot">📅 Slot 2: ${formatDateTime(request.ProposedSlot2)}</div>` : ''}
+      ${request.ProposedSlot3 ? `<div class="time-slot">📅 Slot 3: ${formatDateTime(request.ProposedSlot3)}</div>` : ''}
+    </div>` : ''}
+
+    <p>Please confirm one of the proposed slots or coordinate with the Account Manager.</p>
+  `;
+
+  return {
+    subject: `[DWx] 📋 New Assignment: ${request.ProductName} ${request.RequestType} for ${request.ClientName}`,
+    body: wrapEmail('New Assignment', 'Action Required', content),
+  };
+};
+
+// ============================================================================
+// Specialist Reassignment Template
+// ============================================================================
+
+/**
+ * Specialist unassigned/reassigned notification - sent to previous specialist
+ */
+export const specialistReassigned = (
+  entityType: 'Service Request' | 'Product Request',
+  entityTitle: string,
+  clientName: string,
+  previousSpecialistName: string,
+  newSpecialistName: string
+): { subject: string; body: string } => {
+  const content = `
+    <h2>Assignment Update</h2>
+    <p>Hi ${previousSpecialistName},</p>
+    <p>You have been unassigned from the following ${entityType.toLowerCase()}. A different specialist has been assigned to continue.</p>
+
+    <div class="info-box">
+      <div class="info-row">
+        <span class="info-label">${entityType}:</span>
+        <span class="info-value">${entityTitle}</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Client:</span>
+        <span class="info-value">${clientName}</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">New Specialist:</span>
+        <span class="info-value">${newSpecialistName}</span>
+      </div>
+    </div>
+
+    <p>Your workload has been updated accordingly. No further action is needed on this request.</p>
+  `;
+
+  return {
+    subject: `[DWx] Assignment Update: ${clientName} — reassigned to ${newSpecialistName}`,
+    body: wrapEmail('Assignment Update', 'DWx Traffic Manager', content),
+  };
+};
+
+// ============================================================================
+// Product Request Status Change - Manager Notification
+// ============================================================================
+
+/**
+ * Product request status changed - sent to managers
+ */
+export const productRequestStatusChangedManager = (
+  request: ProductRequest,
+  previousStatus: string,
+  newStatus: string
+): { subject: string; body: string } => {
+  const statusColors: Record<string, string> = {
+    'Pending Review': 'stage-lead',
+    'Awaiting Approval': 'stage-qualified',
+    'Confirmed': 'stage-won',
+    'Completed': 'stage-discovery',
+    'Cancelled': 'stage-lost',
+  };
+
+  const content = `
+    <h2>Product Request Status Update</h2>
+    <p>A product request status has changed and may require your attention.</p>
+
+    <div class="info-box">
+      <div class="info-row">
+        <span class="info-label">Product:</span>
+        <span class="info-value">${request.ProductName} (${request.ProductType})</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Client:</span>
+        <span class="info-value">${request.ClientName}${request.IsPremiumClient ? ' ⭐ Premium' : ''}</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Account Manager:</span>
+        <span class="info-value">${request.AccountManagerName}</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Previous Status:</span>
+        <span class="info-value"><span class="stage-badge ${statusColors[previousStatus] || 'stage-lead'}">${previousStatus}</span></span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">New Status:</span>
+        <span class="info-value"><span class="stage-badge ${statusColors[newStatus] || 'stage-lead'}">${newStatus}</span></span>
+      </div>
+      ${request.AssignedSpecialistName ? `
+      <div class="info-row">
+        <span class="info-label">Specialist:</span>
+        <span class="info-value">${request.AssignedSpecialistName}</span>
+      </div>` : ''}
+    </div>
+  `;
+
+  const emoji = newStatus === 'Confirmed' ? '✅' : newStatus === 'Completed' ? '🎉' : newStatus === 'Cancelled' ? '❌' : '📋';
+
+  return {
+    subject: `[DWx] ${emoji} Product Request ${newStatus}: ${request.ProductName} — ${request.ClientName}`,
+    body: wrapEmail('Product Request Update', `${previousStatus} → ${newStatus}`, content),
+  };
+};
+
+// ============================================================================
+// Deal Value Changed Template
+// ============================================================================
+
+/**
+ * Deal value/probability changed - sent to managers
+ */
+export const dealValueChanged = (
+  request: ServiceRequest,
+  changes: { previousDealValue?: number; newDealValue?: number; previousProbability?: number; newProbability?: number; previousWeightedPipeline?: number; newWeightedPipeline?: number },
+  changedBy: string
+): { subject: string; body: string } => {
+  const content = `
+    <h2>Deal Value Updated</h2>
+    <p>A deal's financial details have been updated in the pipeline.</p>
+
+    <div class="info-box">
+      <div class="info-row">
+        <span class="info-label">Service:</span>
+        <span class="info-value">${request.ServiceName}</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Client:</span>
+        <span class="info-value">${request.ClientName}</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Account Manager:</span>
+        <span class="info-value">${request.AccountManagerName}</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Stage:</span>
+        <span class="info-value"><span class="${getStageBadgeClass(request.FunnelStage)}">${request.FunnelStage}</span></span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Updated By:</span>
+        <span class="info-value">${changedBy}</span>
+      </div>
+    </div>
+
+    <div class="info-box" style="border-left: 4px solid ${DW_COLORS.warning};">
+      ${changes.previousDealValue !== undefined ? `
+      <div class="info-row">
+        <span class="info-label">Deal Value:</span>
+        <span class="info-value"><span style="text-decoration: line-through;">${formatCurrency(changes.previousDealValue)}</span> → <strong>${formatCurrency(changes.newDealValue)}</strong></span>
+      </div>` : ''}
+      ${changes.previousProbability !== undefined ? `
+      <div class="info-row">
+        <span class="info-label">Win Probability:</span>
+        <span class="info-value"><span style="text-decoration: line-through;">${changes.previousProbability}%</span> → <strong>${changes.newProbability}%</strong></span>
+      </div>` : ''}
+      ${changes.newWeightedPipeline !== undefined ? `
+      <div class="info-row">
+        <span class="info-label">Weighted Pipeline:</span>
+        <span class="info-value"><span style="text-decoration: line-through;">${formatCurrency(changes.previousWeightedPipeline)}</span> → <strong class="deal-value">${formatCurrency(changes.newWeightedPipeline)}</strong></span>
+      </div>` : ''}
+    </div>
+  `;
+
+  return {
+    subject: `[DWx] 💰 Deal Value Updated: ${request.ClientName} — ${request.ServiceName}`,
+    body: wrapEmail('Deal Value Update', 'Pipeline Change', content),
+  };
+};
+
+// ============================================================================
+// Calendar Event Failure Template
+// ============================================================================
+
+/**
+ * Calendar event creation failed - sent to managers
+ */
+export const calendarEventFailed = (
+  entityType: 'Service Request' | 'Product Request',
+  entityTitle: string,
+  clientName: string,
+  confirmedSlot: string,
+  accountManagerName: string
+): { subject: string; body: string } => {
+  const content = `
+    <h2>Calendar Event Creation Failed</h2>
+    <p>A calendar event could not be created automatically. Manual intervention may be needed.</p>
+
+    <div class="info-box" style="border-left: 4px solid ${DW_COLORS.warning};">
+      <div class="info-row">
+        <span class="info-label">${entityType}:</span>
+        <span class="info-value">${entityTitle}</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Client:</span>
+        <span class="info-value">${clientName}</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Confirmed Slot:</span>
+        <span class="info-value"><strong>${formatDateTime(confirmedSlot)}</strong></span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Account Manager:</span>
+        <span class="info-value">${accountManagerName}</span>
+      </div>
+    </div>
+
+    <p><strong>Recommended Actions:</strong></p>
+    <ul>
+      <li>Manually create a Teams meeting for the confirmed time slot</li>
+      <li>Ensure all attendees receive the meeting invitation</li>
+      <li>Check that calendar permissions are correctly configured</li>
+    </ul>
+  `;
+
+  return {
+    subject: `[DWx] ⚠️ Calendar Event Failed: ${clientName} — ${formatDateTime(confirmedSlot)}`,
+    body: wrapEmail('Calendar Event Failed', 'Action Required', content),
+  };
+};
+
+// ============================================================================
+// Product Demo Confirmed - Specialist Notification
+// ============================================================================
+
+/**
+ * Product demo/trial confirmed - sent to specialist
+ */
+export const productDemoConfirmedSpecialist = (
+  request: ProductRequest,
+  specialistName: string,
+  confirmedSlot: string
+): { subject: string; body: string } => {
+  const typeLabel = request.RequestType === 'Demo' ? 'Product Demo' : 'Trial Deployment';
+
+  const content = `
+    <h2>${typeLabel} Confirmed</h2>
+    <p>Hi ${specialistName},</p>
+    <p>A ${typeLabel.toLowerCase()} for <strong>${request.ProductName}</strong> has been confirmed. Please ensure you are prepared for the session.</p>
+
+    <div class="info-box" style="border-left: 4px solid ${DW_COLORS.accent};">
+      <div class="info-row">
+        <span class="info-label">Date & Time:</span>
+        <span class="info-value"><strong>${formatDateTime(confirmedSlot)}</strong></span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Product:</span>
+        <span class="info-value">${request.ProductName} (${request.ProductType})</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Request Type:</span>
+        <span class="info-value">${request.RequestType}</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Client:</span>
+        <span class="info-value">${request.ClientName}</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Contact:</span>
+        <span class="info-value">${request.ContactName} (${request.ContactEmail})</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Account Manager:</span>
+        <span class="info-value">${request.AccountManagerName} (<a href="mailto:${request.AccountManagerEmail}">${request.AccountManagerEmail}</a>)</span>
+      </div>
+    </div>
+
+    <p><strong>Preparation Checklist:</strong></p>
+    <ul>
+      <li>Review the product requirements and client background</li>
+      <li>Ensure the ${typeLabel.toLowerCase()} environment is ready</li>
+      <li>Test your audio/video setup</li>
+      <li>Have relevant documentation and pricing ready</li>
+    </ul>
+  `;
+
+  return {
+    subject: `[DWx] ✅ ${typeLabel} Confirmed: ${request.ProductName} for ${request.ClientName}`,
+    body: wrapEmail(`${typeLabel} Confirmed`, 'DWx Traffic Manager', content),
+  };
+};
+
 export const EmailTemplates = {
   requestCreatedAM,
   requestCreatedManager,
@@ -805,4 +1207,11 @@ export const EmailTemplates = {
   productRequestCreatedAM,
   productRequestCreatedManager,
   productRequestStatusChanged,
+  productSpecialistAssignedAM,
+  productSpecialistAssignedSpecialist,
+  specialistReassigned,
+  productRequestStatusChangedManager,
+  dealValueChanged,
+  calendarEventFailed,
+  productDemoConfirmedSpecialist,
 };

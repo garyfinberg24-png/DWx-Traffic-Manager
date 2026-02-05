@@ -324,7 +324,7 @@ class GraphService {
     startTime: Date,
     endTime: Date,
     excludeEventId?: string
-  ): Promise<{ hasConflict: boolean; conflicts: CalendarEvent[] }> {
+  ): Promise<{ hasConflict: boolean; conflicts: CalendarEvent[]; error?: boolean }> {
     try {
       const client = this.getClient();
       const calendarEmail = config.calendar.demoEmail;
@@ -355,9 +355,8 @@ class GraphService {
       };
     } catch (error) {
       console.error('Failed to check calendar conflicts:', error);
-      // Return no conflict on error to not block the workflow
-      // but log the error for investigation
-      return { hasConflict: false, conflicts: [] };
+      // Return error flag so callers can distinguish "no conflicts" from "check failed"
+      return { hasConflict: false, conflicts: [], error: true };
     }
   }
 
@@ -368,7 +367,7 @@ class GraphService {
     startTime: Date,
     endTime: Date,
     excludeEventId?: string
-  ): Promise<{ hasConflict: boolean; conflicts: CalendarEvent[] }> {
+  ): Promise<{ hasConflict: boolean; conflicts: CalendarEvent[]; error?: boolean }> {
     try {
       const client = this.getClient();
 
@@ -396,7 +395,7 @@ class GraphService {
       };
     } catch (error) {
       console.error('Failed to check calendar conflicts:', error);
-      return { hasConflict: false, conflicts: [] };
+      return { hasConflict: false, conflicts: [], error: true };
     }
   }
 
@@ -583,8 +582,8 @@ class GraphService {
    */
   async checkMultipleSlotConflicts(
     slots: Array<{ start: Date; end: Date; label: string }>
-  ): Promise<Map<string, { hasConflict: boolean; conflicts: CalendarEvent[] }>> {
-    const results = new Map<string, { hasConflict: boolean; conflicts: CalendarEvent[] }>();
+  ): Promise<Map<string, { hasConflict: boolean; conflicts: CalendarEvent[]; error?: boolean }>> {
+    const results = new Map<string, { hasConflict: boolean; conflicts: CalendarEvent[]; error?: boolean }>();
 
     // Check all slots in parallel
     const checks = await Promise.all(

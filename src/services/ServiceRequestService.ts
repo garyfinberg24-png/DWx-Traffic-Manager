@@ -113,6 +113,86 @@ class ServiceRequestService {
   }
 
   /**
+   * Update deal value and/or probability, recalculating WeightedPipeline
+   */
+  async updateDealInfo(
+    requestId: number,
+    updates: { DealValue?: number; DealProbability?: number },
+    _userEmail: string,
+    userName: string
+  ): Promise<ServiceRequestResult> {
+    try {
+      const graphService = getGraphService();
+
+      const currentItem = await graphService.getListItemById(this.listName, requestId) as Record<string, unknown> | null;
+      if (!currentItem) {
+        return { success: false, error: 'Request not found' };
+      }
+
+      const currentRequest = this.mapToServiceRequest(currentItem);
+      const previousValues: Record<string, unknown> = {};
+      const updateData: Record<string, unknown> = {};
+
+      const newDealValue = updates.DealValue ?? currentRequest.DealValue;
+      const newDealProbability = updates.DealProbability ?? currentRequest.DealProbability;
+
+      if (updates.DealValue !== undefined) {
+        previousValues.DealValue = currentRequest.DealValue;
+        updateData.DealValue = updates.DealValue;
+      }
+
+      if (updates.DealProbability !== undefined) {
+        previousValues.DealProbability = currentRequest.DealProbability;
+        updateData.DealProbability = updates.DealProbability;
+      }
+
+      // Recalculate WeightedPipeline
+      if (newDealValue && newDealProbability) {
+        previousValues.WeightedPipeline = currentRequest.WeightedPipeline;
+        updateData.WeightedPipeline = Math.round(newDealValue * (newDealProbability / 100));
+      }
+
+      const result = await graphService.updateListItem(this.listName, requestId, updateData);
+      const updatedRequest = this.mapToServiceRequest(result);
+
+      // Audit log
+      await auditService.logUpdate(
+        'ServiceRequest',
+        requestId,
+        currentRequest.Title,
+        previousValues,
+        { ...updateData, changedBy: userName }
+      );
+
+      // Notify managers of deal value change (N4)
+      try {
+        await dwxNotificationService.notifyDealValueChanged(
+          updatedRequest,
+          {
+            previousDealValue: updates.DealValue !== undefined ? currentRequest.DealValue : undefined,
+            newDealValue: updates.DealValue,
+            previousProbability: updates.DealProbability !== undefined ? currentRequest.DealProbability : undefined,
+            newProbability: updates.DealProbability,
+            previousWeightedPipeline: updateData.WeightedPipeline !== undefined ? currentRequest.WeightedPipeline : undefined,
+            newWeightedPipeline: updateData.WeightedPipeline as number | undefined,
+          },
+          userName
+        );
+      } catch (notifError) {
+        console.error('Failed to send deal value change notification:', notifError);
+      }
+
+      return { success: true, request: updatedRequest };
+    } catch (error) {
+      console.error('Error updating deal info:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+      };
+    }
+  }
+
+  /**
    * Update the funnel stage of a request
    */
   async updateStage(
@@ -275,6 +355,22 @@ class ServiceRequestService {
         console.error('Failed to send assignment notifications:', notifError);
       }
 
+      // Notify previous specialist of reassignment (N2)
+      if (previousSpecialistEmail && previousSpecialistEmail !== specialist.Email && currentRequest?.AssignedSpecialistName) {
+        try {
+          await dwxNotificationService.notifySpecialistReassigned(
+            'Service Request',
+            request.Title,
+            request.ClientName,
+            currentRequest.AssignedSpecialistName,
+            previousSpecialistEmail,
+            specialist.Title
+          );
+        } catch (notifError) {
+          console.error('Failed to send specialist reassignment notification:', notifError);
+        }
+      }
+
       return {
         success: true,
         request,
@@ -318,6 +414,15 @@ class ServiceRequestService {
       } catch (calError) {
         console.error('Failed to create calendar event:', calError);
         warnings.push('Calendar event could not be created');
+
+        // Escalate calendar failure to managers (N5)
+        try {
+          await dwxNotificationService.notifyCalendarEventFailed(
+            'Service Request', request.Title, request.ClientName, confirmedSlot, request.AccountManagerName
+          );
+        } catch (escalateError) {
+          console.error('Failed to escalate calendar failure:', escalateError);
+        }
       }
 
       // Update request

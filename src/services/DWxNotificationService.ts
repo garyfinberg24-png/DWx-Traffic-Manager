@@ -284,6 +284,114 @@ class DWxNotificationService {
     const { subject, body } = EmailTemplates.productRequestStatusChanged(request, previousStatus, newStatus);
     return this.sendEmail([request.AccountManagerEmail], subject, body);
   }
+
+  /**
+   * Notify managers of product request status change (N3)
+   */
+  async notifyProductRequestStatusChangedManagers(
+    request: ProductRequest,
+    previousStatus: string,
+    newStatus: string
+  ): Promise<NotificationResult> {
+    const managerEmails = this.getManagerEmails();
+    if (managerEmails.length === 0) {
+      return { success: true };
+    }
+    const { subject, body } = EmailTemplates.productRequestStatusChangedManager(request, previousStatus, newStatus);
+    return this.sendEmail(managerEmails, subject, body);
+  }
+
+  /**
+   * Send specialist assignment notifications for product requests (N1)
+   */
+  async sendProductSpecialistAssignedNotifications(
+    request: ProductRequest,
+    specialistName: string,
+    specialistEmail: string,
+    specialistRole: string
+  ): Promise<NotificationResult[]> {
+    const results: NotificationResult[] = [];
+
+    // Notify AM
+    const amTemplate = EmailTemplates.productSpecialistAssignedAM(
+      request, specialistName, specialistEmail, specialistRole
+    );
+    results.push(await this.sendEmail([request.AccountManagerEmail], amTemplate.subject, amTemplate.body));
+
+    // Notify specialist
+    const specTemplate = EmailTemplates.productSpecialistAssignedSpecialist(request, specialistName);
+    results.push(await this.sendEmail([specialistEmail], specTemplate.subject, specTemplate.body));
+
+    return results;
+  }
+
+  /**
+   * Notify previous specialist they've been reassigned (N2)
+   */
+  async notifySpecialistReassigned(
+    entityType: 'Service Request' | 'Product Request',
+    entityTitle: string,
+    clientName: string,
+    previousSpecialistName: string,
+    previousSpecialistEmail: string,
+    newSpecialistName: string
+  ): Promise<NotificationResult> {
+    const { subject, body } = EmailTemplates.specialistReassigned(
+      entityType, entityTitle, clientName, previousSpecialistName, newSpecialistName
+    );
+    return this.sendEmail([previousSpecialistEmail], subject, body);
+  }
+
+  /**
+   * Notify managers of deal value/probability change (N4)
+   */
+  async notifyDealValueChanged(
+    request: ServiceRequest,
+    changes: { previousDealValue?: number; newDealValue?: number; previousProbability?: number; newProbability?: number; previousWeightedPipeline?: number; newWeightedPipeline?: number },
+    changedBy: string
+  ): Promise<NotificationResult> {
+    const managerEmails = this.getManagerEmails();
+    if (managerEmails.length === 0) {
+      return { success: true };
+    }
+    const { subject, body } = EmailTemplates.dealValueChanged(request, changes, changedBy);
+    return this.sendEmail(managerEmails, subject, body);
+  }
+
+  /**
+   * Notify managers of calendar event creation failure (N5)
+   */
+  async notifyCalendarEventFailed(
+    entityType: 'Service Request' | 'Product Request',
+    entityTitle: string,
+    clientName: string,
+    confirmedSlot: string,
+    accountManagerName: string
+  ): Promise<NotificationResult> {
+    const managerEmails = this.getManagerEmails();
+    if (managerEmails.length === 0) {
+      return { success: true };
+    }
+    const { subject, body } = EmailTemplates.calendarEventFailed(
+      entityType, entityTitle, clientName, confirmedSlot, accountManagerName
+    );
+    return this.sendEmail(managerEmails, subject, body);
+  }
+
+  /**
+   * Notify specialist of confirmed product demo/trial slot (N6)
+   */
+  async notifyProductDemoConfirmedSpecialist(
+    request: ProductRequest,
+    specialistName: string,
+    specialistEmail: string,
+    confirmedSlot: string
+  ): Promise<NotificationResult> {
+    const { subject, body } = EmailTemplates.productDemoConfirmedSpecialist(
+      request, specialistName, confirmedSlot
+    );
+    return this.sendEmail([specialistEmail], subject, body);
+  }
 }
 
 export const dwxNotificationService = new DWxNotificationService();

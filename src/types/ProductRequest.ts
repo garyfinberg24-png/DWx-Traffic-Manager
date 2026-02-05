@@ -70,6 +70,7 @@ export interface ProductRequestResult {
   request?: ProductRequest;
   error?: string;
   warnings?: string[];
+  calendarEventId?: string;
 }
 
 export interface ProductRequestFilters {

@@ -39,6 +39,7 @@ import {
   CalendarSync24Regular,
   CalendarCheckmark20Regular,
   CalendarCancel20Regular,
+  Warning24Regular,
 } from '@fluentui/react-icons';
 import { Booking, BookingStatus } from '../../types/Booking';
 import { TeamMember } from '../../types/ReferenceData';
@@ -583,7 +584,7 @@ export const ApprovalQueue: React.FC<ApprovalQueueProps> = ({
 
   // Conflict detection state
   const [isCheckingConflicts, setIsCheckingConflicts] = useState(false);
-  const [slotConflicts, setSlotConflicts] = useState<Map<string, { hasConflict: boolean; conflicts: CalendarEvent[] }>>(new Map());
+  const [slotConflicts, setSlotConflicts] = useState<Map<string, { hasConflict: boolean; conflicts: CalendarEvent[]; error?: boolean }>>(new Map());
   const [conflictCheckError, setConflictCheckError] = useState<string | null>(null);
 
 
@@ -646,7 +647,7 @@ export const ApprovalQueue: React.FC<ApprovalQueueProps> = ({
       const conflicts = await graphService.checkMultipleSlotConflicts(slots);
 
       // Convert the map to use the actual slot values as keys for easier lookup
-      const slotConflictMap = new Map<string, { hasConflict: boolean; conflicts: CalendarEvent[] }>();
+      const slotConflictMap = new Map<string, { hasConflict: boolean; conflicts: CalendarEvent[]; error?: boolean }>();
       slotConflictMap.set(booking.ProposedSlot1, conflicts.get('slot1') || { hasConflict: false, conflicts: [] });
       slotConflictMap.set(booking.ProposedSlot2, conflicts.get('slot2') || { hasConflict: false, conflicts: [] });
       slotConflictMap.set(booking.ProposedSlot3, conflicts.get('slot3') || { hasConflict: false, conflicts: [] });
@@ -1253,6 +1254,17 @@ export const ApprovalQueue: React.FC<ApprovalQueueProps> = ({
                                     <span className={styles.checkingSpinner}>
                                       <Spinner size="extra-tiny" />
                                     </span>
+                                  ) : conflictInfo?.error ? (
+                                    <Tooltip content="Calendar check failed — proceed with caution" relationship="label">
+                                      <Badge
+                                        appearance="ghost"
+                                        color="warning"
+                                        className={styles.conflictBadge}
+                                      >
+                                        <Warning24Regular style={{ width: '12px', height: '12px' }} />
+                                        Unknown
+                                      </Badge>
+                                    </Tooltip>
                                   ) : hasConflict ? (
                                     <Tooltip content={`Conflicts: ${conflictInfo?.conflicts.map(c => c.subject).join(', ')}`} relationship="label">
                                       <Badge

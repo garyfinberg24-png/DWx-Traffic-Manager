@@ -41,6 +41,7 @@ import { productRequestService } from '../../services/ProductRequestService';
 import { ProductRequest } from '../../types/ProductRequest';
 import { RequestCard } from './RequestCard';
 import { RequestDetails } from './RequestDetails';
+import { ProductRequestDetails } from './ProductRequestDetails';
 
 const useStyles = makeStyles({
   container: {
@@ -219,7 +220,12 @@ const useStyles = makeStyles({
     display: 'flex',
     flexDirection: 'column',
     gap: '12px',
-    cursor: 'default',
+    cursor: 'pointer',
+    transition: 'box-shadow 0.2s ease, border-color 0.2s ease',
+    ':hover': {
+      boxShadow: '0 4px 12px rgba(0,0,0,0.12)',
+      ...shorthands.borderColor('#1e6b7b'),
+    },
   },
   productCardHeader: {
     display: 'flex',
@@ -283,6 +289,8 @@ export const MyRequests: React.FC<MyRequestsProps> = ({ onNewRequest }) => {
   const [sortBy, setSortBy] = useState('created-desc');
   const [selectedRequest, setSelectedRequest] = useState<ServiceRequest | null>(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+  const [selectedProductRequest, setSelectedProductRequest] = useState<ProductRequest | null>(null);
+  const [isProductDetailsOpen, setIsProductDetailsOpen] = useState(false);
 
   // Load requests on mount
   useEffect(() => {
@@ -419,6 +427,23 @@ export const MyRequests: React.FC<MyRequestsProps> = ({ onNewRequest }) => {
     setSelectedRequest(updatedRequest);
   };
 
+  const handleProductRequestClick = (pr: ProductRequest) => {
+    setSelectedProductRequest(pr);
+    setIsProductDetailsOpen(true);
+  };
+
+  const handleCloseProductDetails = () => {
+    setIsProductDetailsOpen(false);
+    setSelectedProductRequest(null);
+  };
+
+  const handleProductRequestUpdated = (updatedRequest: ProductRequest) => {
+    setProductRequests((prev) =>
+      prev.map((r) => (r.Id === updatedRequest.Id ? updatedRequest : r))
+    );
+    setSelectedProductRequest(updatedRequest);
+  };
+
   const formatCurrency = (value: number): string => {
     return new Intl.NumberFormat('en-ZA', {
       style: 'currency',
@@ -498,7 +523,7 @@ export const MyRequests: React.FC<MyRequestsProps> = ({ onNewRequest }) => {
           ) : productRequests.length > 0 ? (
             <div className={styles.productGrid}>
               {productRequests.map((pr) => (
-                <div key={pr.Id} className={styles.productCard}>
+                <div key={pr.Id} className={styles.productCard} onClick={() => handleProductRequestClick(pr)}>
                   <div className={styles.productCardHeader}>
                     <Text className={styles.productCardTitle}>{pr.ProductName}</Text>
                     <Badge
@@ -681,6 +706,16 @@ export const MyRequests: React.FC<MyRequestsProps> = ({ onNewRequest }) => {
         />
       )}
       </>}
+
+      {/* Product Request Details Modal */}
+      {selectedProductRequest && (
+        <ProductRequestDetails
+          request={selectedProductRequest}
+          isOpen={isProductDetailsOpen}
+          onClose={handleCloseProductDetails}
+          onRequestUpdated={handleProductRequestUpdated}
+        />
+      )}
     </div>
   );
 };

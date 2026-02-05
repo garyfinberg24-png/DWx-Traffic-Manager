@@ -177,7 +177,7 @@ class MockGraphService {
     startTime: Date,
     endTime: Date,
     excludeEventId?: string
-  ): Promise<{ hasConflict: boolean; conflicts: CalendarEvent[] }> {
+  ): Promise<{ hasConflict: boolean; conflicts: CalendarEvent[]; error?: boolean }> {
     console.log('[MockGraphService] Checking calendar conflicts', { startTime, endTime });
 
     const conflicts = mockCalendarEvents.filter((event) => {
@@ -200,7 +200,7 @@ class MockGraphService {
     startTime: Date,
     endTime: Date,
     excludeEventId?: string
-  ): Promise<{ hasConflict: boolean; conflicts: CalendarEvent[] }> {
+  ): Promise<{ hasConflict: boolean; conflicts: CalendarEvent[]; error?: boolean }> {
     return this.checkCalendarConflicts(startTime, endTime, excludeEventId);
   }
 
@@ -230,8 +230,8 @@ class MockGraphService {
 
   async checkMultipleSlotConflicts(
     slots: Array<{ start: Date; end: Date; label: string }>
-  ): Promise<Map<string, { hasConflict: boolean; conflicts: CalendarEvent[] }>> {
-    const results = new Map<string, { hasConflict: boolean; conflicts: CalendarEvent[] }>();
+  ): Promise<Map<string, { hasConflict: boolean; conflicts: CalendarEvent[]; error?: boolean }>> {
+    const results = new Map<string, { hasConflict: boolean; conflicts: CalendarEvent[]; error?: boolean }>();
 
     for (const slot of slots) {
       const result = await this.checkCalendarConflicts(slot.start, slot.end);
