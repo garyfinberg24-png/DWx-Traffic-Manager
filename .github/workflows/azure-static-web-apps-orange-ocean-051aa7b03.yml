@@ -32,16 +32,32 @@ jobs:
       - name: Build
         run: npm run build
         env:
+          # Azure AD
           VITE_CLIENT_ID: ${{ secrets.VITE_CLIENT_ID }}
           VITE_TENANT_ID: ${{ secrets.VITE_TENANT_ID }}
+          # SharePoint Lists
           VITE_SHAREPOINT_SITE_URL: ${{ secrets.VITE_SHAREPOINT_SITE_URL }}
           VITE_LIST_NAME: ${{ secrets.VITE_LIST_NAME }}
           VITE_SERVICES_LIST: ${{ secrets.VITE_SERVICES_LIST }}
           VITE_CLIENTS_LIST: ${{ secrets.VITE_CLIENTS_LIST }}
           VITE_SPECIALISTS_LIST: ${{ secrets.VITE_SPECIALISTS_LIST }}
+          VITE_TEAM_MEMBERS_LIST: ${{ secrets.VITE_TEAM_MEMBERS_LIST }}
+          VITE_ACCOUNT_MANAGERS_LIST: ${{ secrets.VITE_ACCOUNT_MANAGERS_LIST }}
+          VITE_MANAGERS_LIST: ${{ secrets.VITE_MANAGERS_LIST }}
+          VITE_AUDIT_LOG_LIST: ${{ secrets.VITE_AUDIT_LOG_LIST }}
+          VITE_PRODUCT_REQUESTS_LIST: ${{ secrets.VITE_PRODUCT_REQUESTS_LIST }}
+          VITE_SESSION_PREP_LIST: ${{ secrets.VITE_SESSION_PREP_LIST }}
           VITE_DOCUMENT_LIBRARY: ${{ secrets.VITE_DOCUMENT_LIBRARY }}
+          # Calendar
           VITE_PRESALES_CALENDAR_EMAIL: ${{ secrets.VITE_PRESALES_CALENDAR_EMAIL }}
+          # Notifications
           VITE_MANAGER_EMAILS: ${{ secrets.VITE_MANAGER_EMAILS }}
+          # Azure OpenAI (Session Preparation)
+          VITE_AZURE_OPENAI_ENDPOINT: ${{ secrets.VITE_AZURE_OPENAI_ENDPOINT }}
+          VITE_AZURE_OPENAI_API_KEY: ${{ secrets.VITE_AZURE_OPENAI_API_KEY }}
+          VITE_AZURE_OPENAI_DEPLOYMENT: ${{ secrets.VITE_AZURE_OPENAI_DEPLOYMENT }}
+          VITE_AZURE_OPENAI_API_VERSION: ${{ secrets.VITE_AZURE_OPENAI_API_VERSION }}
+          # App
           VITE_APP_NAME: DWx Traffic Manager
 
       - name: Deploy to Azure Static Web Apps

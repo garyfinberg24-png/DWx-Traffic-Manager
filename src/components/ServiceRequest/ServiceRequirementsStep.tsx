@@ -337,6 +337,7 @@ export const ServiceRequirementsStep: React.FC<ServiceRequirementsStepProps> = (
           >
             <Dropdown
               placeholder={question.placeholder || 'Select an option'}
+              value={value ? (question.options?.find(o => o.value === value)?.label || (value as string)) : ''}
               selectedOptions={value ? [value as string] : []}
               onOptionSelect={(_, data) => onChange(question.id, data.optionValue)}
             >

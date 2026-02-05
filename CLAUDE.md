@@ -8,6 +8,8 @@
 
 **Current Version**: v2.5.0 (February 2026) - AI-powered Session Preparation
 
+> **IMPORTANT**: We are ONLY working on the DWx Traffic Manager project. We DO NOT make any changes to the LP Booking App. The LP Booking App is a separate production application and must not be modified.
+
 ## Critical Configuration Values
 
 ### Azure AD App Registration
@@ -25,7 +27,7 @@
 
 | Setting | Value |
 |---------|-------|
-| **SharePoint Site URL** | `https://digitalworkplace.sharepoint.com/sites/DWxTrafficManager` |
+| **SharePoint Site URL** | `https://hallofd.sharepoint.com/sites/DWxTrafficManager` |
 | **Service Requests List** | `DWxServiceRequests` |
 | **Services Catalog List** | `DWxServices` |
 | **Clients List** | `DWxClients` |
@@ -37,7 +39,7 @@
 | **Product Requests List** | `DWxProductRequests` |
 | **Session Prep List** | `DWxSessionPrep` |
 | **Document Library** | `DWxSupportingDocuments` |
-| **Pre-Sales Calendar Email** | `presales@digitalworkplace.com` |
+| **Pre-Sales Calendar Email** | `lpbookings@firsttech.digital` |
 
 ### GitHub Repository
 
@@ -515,7 +517,7 @@ VITE_CLIENT_ID=<your-client-id-from-azure-portal>
 VITE_TENANT_ID=<your-tenant-id-from-azure-portal>
 
 # SharePoint Configuration
-VITE_SHAREPOINT_SITE_URL=https://digitalworkplace.sharepoint.com/sites/DWxTrafficManager
+VITE_SHAREPOINT_SITE_URL=https://hallofd.sharepoint.com/sites/DWxTrafficManager
 VITE_LIST_NAME=DWxServiceRequests
 VITE_SERVICES_LIST=DWxServices
 VITE_CLIENTS_LIST=DWxClients
@@ -528,10 +530,10 @@ VITE_PRODUCT_REQUESTS_LIST=DWxProductRequests
 VITE_DOCUMENT_LIBRARY=DWxSupportingDocuments
 
 # Calendar
-VITE_PRESALES_CALENDAR_EMAIL=presales@digitalworkplace.com
+VITE_PRESALES_CALENDAR_EMAIL=lpbookings@firsttech.digital
 
 # Notification Recipients (comma-separated list)
-VITE_MANAGER_EMAILS=manager1@dw.com,manager2@dw.com
+VITE_MANAGER_EMAILS=gary@firsttech.digital
 
 # App Settings
 VITE_APP_NAME=DWx Traffic Manager
@@ -639,14 +641,14 @@ Comprehensive deep dive identified bugs, missing notifications, and enhancement 
 
 Service integrations: ProductRequestService (N1, N2, N3, N5, N6), ServiceRequestService (N2, N4, N5)
 
-#### Round 3: High-Priority Enhancements (H3 partial) - IN PROGRESS
+#### Round 3: High-Priority Enhancements - COMPLETE
 
 - [x] **H3: Product Request Details Modal** - Created `ProductRequestDetails.tsx` with full details, status actions, specialist assignment, demo confirmation flow
 - [x] **Clickable product cards** - Product request cards in MyRequests.tsx now clickable with hover effects, opens ProductRequestDetails modal
-- [ ] H4: Product Request Approval Queue for managers
-- [ ] H1: Request inline editing in RequestDetails.tsx
-- [ ] H6: Product request status workflow UI
-- [ ] H5: Quick-action context menus on cards
+- [x] **H4: Product Request Approval Queue** - `ProductRequestsQueue.tsx` in SalesFunnelDashboard "Product Queue" tab with bulk ops, specialist assignment, demo confirmation
+- [x] **H1: Request inline editing** - `RequestDetails.tsx` has 4 editable sections (contact, deal, requirements, comments) with save/cancel and terminal state lock
+- [x] **H6: Product request status workflow UI** - `ProductRequestDetails.tsx` with status transition buttons, demo confirmation flow, manager-only actions
+- [x] **H5: Quick-action context menus** - `RequestCard.tsx` three-dot menu with stage transitions + `RequestsQueue.tsx` bulk operations
 
 ### Phase 8: AI-Powered Session Preparation (COMPLETE - v2.5.0)
 

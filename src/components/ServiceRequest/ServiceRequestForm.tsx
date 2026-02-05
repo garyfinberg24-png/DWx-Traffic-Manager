@@ -299,7 +299,121 @@ const useStyles = makeStyles({
     backgroundColor: '#e0e0e0',
     margin: '20px 0',
   },
-  // Accordion section styles (V6 two-level pattern)
+});
+
+interface ServiceRequestFormData {
+  // Service
+  serviceId?: number;
+  serviceName: string;
+  serviceCategory?: ServiceCategory;
+
+  // Request Context
+  requestTitle: string;
+  requestDetails?: string;
+
+  // Client
+  clientName: string;
+  contactName: string;
+  contactEmail: string;
+  contactPhone?: string;
+  industry?: ClientIndustry;
+  companySize?: CompanySize;
+
+  // Service-Specific Requirements (dynamic based on service category)
+  serviceRequirements: Record<string, unknown>;
+
+  // Deal
+  interestLevel: InterestLevel;
+  dealValue?: number;
+  dealProbability?: number;
+  expectedCloseDate?: Date;
+  budget?: string;
+  timeline?: string;
+  requirements?: string;
+  serviceHistory?: string;
+  comments?: string;
+
+  // Scheduling
+  proposedDate1?: Date;
+  proposedTime1?: string;
+  proposedDate2?: Date;
+  proposedTime2?: string;
+  proposedDate3?: Date;
+  proposedTime3?: string;
+}
+
+const STEPS = [
+  { id: 1, label: 'Service', icon: DocumentRegular },
+  { id: 2, label: 'Client', icon: PersonRegular },
+  { id: 3, label: 'Discovery', icon: ClipboardTaskListLtr24Regular },
+  { id: 4, label: 'Deal Info', icon: MoneyRegular },
+  { id: 5, label: 'Schedule', icon: CalendarRegular },
+  { id: 6, label: 'Review', icon: CheckmarkRegular },
+];
+
+const INTEREST_LEVELS: InterestLevel[] = ['Hot', 'Warm', 'Cold'];
+
+const INDUSTRIES: ClientIndustry[] = [
+  'Technology',
+  'Finance',
+  'Healthcare',
+  'Retail',
+  'Manufacturing',
+  'Government',
+  'Education',
+  'Legal',
+  'Non-Profit',
+  'Other',
+];
+
+const COMPANY_SIZES: CompanySize[] = ['SMB', 'Medium', 'Large', 'Enterprise'];
+
+const TIME_SLOTS = [
+  '08:00', '08:30', '09:00', '09:30', '10:00', '10:30',
+  '11:00', '11:30', '12:00', '12:30', '13:00', '13:30',
+  '14:00', '14:30', '15:00', '15:30', '16:00', '16:30', '17:00',
+];
+
+// AccordionSection MUST be defined outside the form component to prevent
+// React from re-creating it on every render (which causes input focus loss).
+const AccordionSection: React.FC<{
+  sectionKey: string;
+  icon: React.ReactNode;
+  title: string;
+  description?: string;
+  isLast?: boolean;
+  isOpen: boolean;
+  onToggle: (key: string) => void;
+  children: React.ReactNode;
+}> = ({ sectionKey, icon, title, description, isLast, isOpen, onToggle, children }) => {
+  const styles = useAccordionStyles();
+  return (
+    <div className={`${styles.accordion}${isLast ? ` ${styles.accordionLast}` : ''}`}>
+      <div
+        className={isOpen ? styles.accordionHeaderOpen : styles.accordionHeader}
+        onClick={() => onToggle(sectionKey)}
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => e.key === 'Enter' && onToggle(sectionKey)}
+      >
+        <div className={isOpen ? styles.accordionIcon : styles.accordionIconClosed}>
+          {icon}
+        </div>
+        <div className={styles.accordionInfo}>
+          <div className={styles.accordionTitle}>{title}</div>
+          {description && <div className={styles.accordionDescription}>{description}</div>}
+        </div>
+        <div className={styles.accordionChevron}>
+          {isOpen ? <ChevronDownRegular /> : <ChevronRightRegular />}
+        </div>
+      </div>
+      {isOpen && <div className={styles.accordionBody}>{children}</div>}
+    </div>
+  );
+};
+
+// Separate makeStyles call for AccordionSection (must be at module level)
+const useAccordionStyles = makeStyles({
   accordion: {
     borderRadius: '8px',
     border: '1px solid #e0e0e0',
@@ -388,79 +502,6 @@ const useStyles = makeStyles({
   },
 });
 
-interface ServiceRequestFormData {
-  // Service
-  serviceId?: number;
-  serviceName: string;
-  serviceCategory?: ServiceCategory;
-
-  // Request Context
-  requestTitle: string;
-  requestDetails?: string;
-
-  // Client
-  clientName: string;
-  contactName: string;
-  contactEmail: string;
-  contactPhone?: string;
-  industry?: ClientIndustry;
-  companySize?: CompanySize;
-
-  // Service-Specific Requirements (dynamic based on service category)
-  serviceRequirements: Record<string, unknown>;
-
-  // Deal
-  interestLevel: InterestLevel;
-  dealValue?: number;
-  dealProbability?: number;
-  expectedCloseDate?: Date;
-  budget?: string;
-  timeline?: string;
-  requirements?: string;
-  serviceHistory?: string;
-  comments?: string;
-
-  // Scheduling
-  proposedDate1?: Date;
-  proposedTime1?: string;
-  proposedDate2?: Date;
-  proposedTime2?: string;
-  proposedDate3?: Date;
-  proposedTime3?: string;
-}
-
-const STEPS = [
-  { id: 1, label: 'Service', icon: DocumentRegular },
-  { id: 2, label: 'Client', icon: PersonRegular },
-  { id: 3, label: 'Discovery', icon: ClipboardTaskListLtr24Regular },
-  { id: 4, label: 'Deal Info', icon: MoneyRegular },
-  { id: 5, label: 'Schedule', icon: CalendarRegular },
-  { id: 6, label: 'Review', icon: CheckmarkRegular },
-];
-
-const INTEREST_LEVELS: InterestLevel[] = ['Hot', 'Warm', 'Cold'];
-
-const INDUSTRIES: ClientIndustry[] = [
-  'Technology',
-  'Finance',
-  'Healthcare',
-  'Retail',
-  'Manufacturing',
-  'Government',
-  'Education',
-  'Legal',
-  'Non-Profit',
-  'Other',
-];
-
-const COMPANY_SIZES: CompanySize[] = ['SMB', 'Medium', 'Large', 'Enterprise'];
-
-const TIME_SLOTS = [
-  '08:00', '08:30', '09:00', '09:30', '10:00', '10:30',
-  '11:00', '11:30', '12:00', '12:30', '13:00', '13:30',
-  '14:00', '14:30', '15:00', '15:30', '16:00', '16:30', '17:00',
-];
-
 interface ServiceRequestFormProps {
   preSelectedService?: DWService;
   onSuccess?: () => void;
@@ -540,40 +581,6 @@ export const ServiceRequestForm: React.FC<ServiceRequestFormProps> = ({
 
   const toggleSection = (key: string) => {
     setOpenSections(prev => ({ ...prev, [key]: !prev[key] }));
-  };
-
-  const AccordionSection: React.FC<{
-    sectionKey: string;
-    icon: React.ReactNode;
-    title: string;
-    description?: string;
-    isLast?: boolean;
-    children: React.ReactNode;
-  }> = ({ sectionKey, icon, title, description, isLast, children }) => {
-    const isOpen = openSections[sectionKey] ?? false;
-    return (
-      <div className={`${styles.accordion}${isLast ? ` ${styles.accordionLast}` : ''}`}>
-        <div
-          className={isOpen ? styles.accordionHeaderOpen : styles.accordionHeader}
-          onClick={() => toggleSection(sectionKey)}
-          role="button"
-          tabIndex={0}
-          onKeyDown={(e) => e.key === 'Enter' && toggleSection(sectionKey)}
-        >
-          <div className={isOpen ? styles.accordionIcon : styles.accordionIconClosed}>
-            {icon}
-          </div>
-          <div className={styles.accordionInfo}>
-            <div className={styles.accordionTitle}>{title}</div>
-            {description && <div className={styles.accordionDescription}>{description}</div>}
-          </div>
-          <div className={styles.accordionChevron}>
-            {isOpen ? <ChevronDownRegular /> : <ChevronRightRegular />}
-          </div>
-        </div>
-        {isOpen && <div className={styles.accordionBody}>{children}</div>}
-      </div>
-    );
   };
 
   const handleServiceSelect = (service: DWService) => {
@@ -820,6 +827,8 @@ export const ServiceRequestForm: React.FC<ServiceRequestFormProps> = ({
           icon={<NotepadRegular style={{ width: 18, height: 18 }} />}
           title="Request Context"
           description="Title and details for this service request"
+          isOpen={openSections['client-0'] ?? false}
+          onToggle={toggleSection}
         >
           <div className={styles.form}>
             <Controller
@@ -859,6 +868,8 @@ export const ServiceRequestForm: React.FC<ServiceRequestFormProps> = ({
           icon={<BuildingRegular style={{ width: 18, height: 18 }} />}
           title="Company Details"
           description="Client organization and industry information"
+          isOpen={openSections['client-1'] ?? false}
+          onToggle={toggleSection}
         >
           <div className={styles.form}>
             <div className={styles.row}>
@@ -884,6 +895,7 @@ export const ServiceRequestForm: React.FC<ServiceRequestFormProps> = ({
                   <Field label="Industry">
                     <Dropdown
                       placeholder="Select industry"
+                      value={field.value || ''}
                       selectedOptions={field.value ? [field.value] : []}
                       onOptionSelect={(_, data) => field.onChange(data.optionValue)}
                     >
@@ -905,6 +917,7 @@ export const ServiceRequestForm: React.FC<ServiceRequestFormProps> = ({
                 <Field label="Company Size">
                   <Dropdown
                     placeholder="Select company size"
+                    value={field.value ? (field.value === 'SMB' ? 'SMB (<50 employees)' : field.value === 'Medium' ? 'Medium (50-250)' : field.value === 'Large' ? 'Large (250-1000)' : 'Enterprise (1000+)') : ''}
                     selectedOptions={field.value ? [field.value] : []}
                     onOptionSelect={(_, data) => field.onChange(data.optionValue)}
                   >
@@ -932,6 +945,8 @@ export const ServiceRequestForm: React.FC<ServiceRequestFormProps> = ({
           title="Primary Contact"
           description="Main point of contact at the client organization"
           isLast
+          isOpen={openSections['client-2'] ?? false}
+          onToggle={toggleSection}
         >
           <div className={styles.form}>
             <div className={styles.row}>
@@ -1016,6 +1031,8 @@ export const ServiceRequestForm: React.FC<ServiceRequestFormProps> = ({
           icon={<ScalesRegular style={{ width: 18, height: 18 }} />}
           title="Deal Qualification"
           description="Interest level, deal value, probability, and timeline"
+          isOpen={openSections['deal-0'] ?? false}
+          onToggle={toggleSection}
         >
           <div className={styles.form}>
             <div className={styles.row}>
@@ -1025,6 +1042,7 @@ export const ServiceRequestForm: React.FC<ServiceRequestFormProps> = ({
                 render={({ field }) => (
                   <Field label="Interest Level" required>
                     <Dropdown
+                      value={field.value || 'Warm'}
                       selectedOptions={field.value ? [field.value] : ['Warm']}
                       onOptionSelect={(_, data) => field.onChange(data.optionValue)}
                     >
@@ -1120,6 +1138,8 @@ export const ServiceRequestForm: React.FC<ServiceRequestFormProps> = ({
           title="Additional Context"
           description="Requirements summary and previous engagement history"
           isLast
+          isOpen={openSections['deal-1'] ?? false}
+          onToggle={toggleSection}
         >
           <div className={styles.form}>
             <Controller
@@ -1168,6 +1188,8 @@ export const ServiceRequestForm: React.FC<ServiceRequestFormProps> = ({
           icon={<ClockRegular style={{ width: 18, height: 18 }} />}
           title="Meeting Options"
           description="Propose up to 3 available time slots"
+          isOpen={openSections['schedule-0'] ?? false}
+          onToggle={toggleSection}
         >
           <div className={styles.form}>
             {/* Slot 1 - Required */}
@@ -1198,6 +1220,7 @@ export const ServiceRequestForm: React.FC<ServiceRequestFormProps> = ({
                       <Dropdown
                         className={styles.timeDropdown}
                         placeholder="Time"
+                        value={field.value || ''}
                         selectedOptions={field.value ? [field.value] : []}
                         onOptionSelect={(_, data) => field.onChange(data.optionValue)}
                       >
@@ -1239,6 +1262,7 @@ export const ServiceRequestForm: React.FC<ServiceRequestFormProps> = ({
                       <Dropdown
                         className={styles.timeDropdown}
                         placeholder="Time"
+                        value={field.value || ''}
                         selectedOptions={field.value ? [field.value] : []}
                         onOptionSelect={(_, data) => field.onChange(data.optionValue)}
                       >
@@ -1280,6 +1304,7 @@ export const ServiceRequestForm: React.FC<ServiceRequestFormProps> = ({
                       <Dropdown
                         className={styles.timeDropdown}
                         placeholder="Time"
+                        value={field.value || ''}
                         selectedOptions={field.value ? [field.value] : []}
                         onOptionSelect={(_, data) => field.onChange(data.optionValue)}
                       >
@@ -1303,6 +1328,8 @@ export const ServiceRequestForm: React.FC<ServiceRequestFormProps> = ({
           title="Additional Notes"
           description="Special requirements or comments for the meeting"
           isLast
+          isOpen={openSections['schedule-1'] ?? false}
+          onToggle={toggleSection}
         >
           <Controller
             name="comments"
@@ -1341,6 +1368,8 @@ export const ServiceRequestForm: React.FC<ServiceRequestFormProps> = ({
             icon={<EyeRegular style={{ width: 18, height: 18 }} />}
             title="Request Overview"
             description="Service, client, and contact details"
+            isOpen={openSections['review-0'] ?? false}
+            onToggle={toggleSection}
           >
             <div className={styles.previewSection}>
               <div className={styles.previewItem}>
@@ -1381,6 +1410,8 @@ export const ServiceRequestForm: React.FC<ServiceRequestFormProps> = ({
             icon={<BriefcaseRegular style={{ width: 18, height: 18 }} />}
             title="Deal Information"
             description="Interest level, value, and requirements"
+            isOpen={openSections['review-1'] ?? false}
+            onToggle={toggleSection}
           >
             <div className={styles.previewSection}>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
@@ -1415,6 +1446,8 @@ export const ServiceRequestForm: React.FC<ServiceRequestFormProps> = ({
             title="Schedule & Ownership"
             description="Proposed meeting times and account manager"
             isLast
+            isOpen={openSections['review-2'] ?? false}
+            onToggle={toggleSection}
           >
             <div className={styles.previewSection}>
               <div className={styles.previewItem}>

@@ -98,16 +98,12 @@ type SessionPrepStatus = 'Not Started' | 'In Progress' | 'Ready';
 
 ## What's Still Pending
 
-### Round 3 Remaining (High Priority)
+### Round 3: High-Priority Enhancements — COMPLETE
 
-- [ ] **H4: Product Request Approval Queue** — No manager approval UI for product requests (managers can use ProductRequestDetails modal but no dedicated queue)
-- [ ] **H1: Request inline editing** — RequestDetails.tsx is read-only, needs edit mode for contact info, deal value, probability, requirements
-- [ ] **H6: Product request status workflow UI** — Statuses exist but no dedicated flow UI
-- [ ] **H5: Quick-action context menus** — Limited card interactions on pipeline/request cards
-
-### Round 4: Medium-Priority Enhancements (Not Yet Started)
-
-- [ ] M1-M10 medium-priority items from deep dive assessment
+- [x] **H4: Product Request Approval Queue** — `ProductRequestsQueue.tsx` in SalesFunnelDashboard "Product Queue" tab with bulk ops, specialist assignment, demo confirmation
+- [x] **H1: Request inline editing** — `RequestDetails.tsx` has 4 editable sections (contact, deal, requirements, comments) with save/cancel and terminal state lock
+- [x] **H6: Product request status workflow UI** — `ProductRequestDetails.tsx` with status transition buttons, demo confirmation flow, manager-only actions
+- [x] **H5: Quick-action context menus** — `RequestCard.tsx` three-dot menu with stage transitions + `RequestsQueue.tsx` bulk operations
 
 ### Deferred
 
