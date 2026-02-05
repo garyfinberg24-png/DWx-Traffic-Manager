@@ -33,6 +33,7 @@ import {
   ChatRegular,
   EditRegular,
   SaveRegular,
+  Sparkle24Regular,
 } from '@fluentui/react-icons';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
@@ -43,6 +44,7 @@ import {
 } from '../../types/ServiceRequest';
 import { serviceRequestService } from '../../services/ServiceRequestService';
 import { StageProgressBar } from './StageProgressBar';
+import { SessionPrepDialog } from '../SessionPrep';
 import { format } from 'date-fns';
 
 const useStyles = makeStyles({
@@ -355,6 +357,7 @@ export const RequestDetails: React.FC<RequestDetailsProps> = ({
 
   const [updating, setUpdating] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [showSessionPrep, setShowSessionPrep] = useState(false);
 
   // Edit mode state
   const [editingSection, setEditingSection] = useState<'contact' | 'deal' | 'requirements' | 'comments' | null>(null);
@@ -555,6 +558,7 @@ export const RequestDetails: React.FC<RequestDetailsProps> = ({
   };
 
   return (
+    <>
     <Dialog open={isOpen} onOpenChange={(_, data) => !data.open && onClose()}>
       <DialogSurface className={styles.dialogSurface}>
         <DialogBody style={{ padding: 0 }}>
@@ -597,6 +601,25 @@ export const RequestDetails: React.FC<RequestDetailsProps> = ({
                   {updating && <Spinner size="tiny" />}
                   {availableTransitions.map((stage) => getTransitionButton(stage))}
                 </div>
+              </div>
+            )}
+
+            {/* Session Preparation */}
+            {['Discovery', 'Proposal', 'Negotiation', 'Won'].includes(request.FunnelStage) &&
+              request.AssignedSpecialistEmail && (
+              <div className={styles.section}>
+                <div className={styles.sectionHeader}>
+                  <Sparkle24Regular style={{ width: '14px', height: '14px' }} />
+                  Session Preparation
+                </div>
+                <Button
+                  appearance="primary"
+                  icon={<Sparkle24Regular />}
+                  onClick={() => setShowSessionPrep(true)}
+                  style={{ backgroundColor: '#1e6b7b' }}
+                >
+                  Open Session Prep
+                </Button>
               </div>
             )}
 
@@ -1106,5 +1129,13 @@ export const RequestDetails: React.FC<RequestDetailsProps> = ({
         </DialogBody>
       </DialogSurface>
     </Dialog>
+
+    {/* Session Preparation Dialog */}
+    <SessionPrepDialog
+      open={showSessionPrep}
+      onClose={() => setShowSessionPrep(false)}
+      serviceRequest={request}
+    />
+    </>
   );
 };

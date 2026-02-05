@@ -604,29 +604,28 @@ class ServiceRequestService {
     try {
       const graphService = getGraphService();
 
-      // Build OData filter
-      const filterParts: string[] = [];
+      // Fetch all items and filter client-side (avoids non-indexed column and missing fields/ prefix issues)
+      const items = await graphService.getListItems(this.listName) as Record<string, unknown>[];
 
+      let requests = items.map(this.mapToServiceRequest);
+
+      // Apply filters client-side
       if (filters?.stages && filters.stages.length > 0) {
-        const stageFilters = filters.stages.map(s => `FunnelStage eq '${s}'`);
-        filterParts.push(`(${stageFilters.join(' or ')})`);
+        requests = requests.filter(r => filters.stages!.includes(r.FunnelStage));
       }
 
       if (filters?.accountManagerEmail) {
-        filterParts.push(`AccountManagerEmail eq '${filters.accountManagerEmail}'`);
+        requests = requests.filter(r => r.AccountManagerEmail === filters.accountManagerEmail);
       }
 
       if (filters?.specialistEmail) {
-        filterParts.push(`AssignedSpecialistEmail eq '${filters.specialistEmail}'`);
+        requests = requests.filter(r => r.AssignedSpecialistEmail === filters.specialistEmail);
       }
 
-      const filter = filterParts.length > 0 ? filterParts.join(' and ') : undefined;
-      const items = await graphService.getListItems(this.listName, {
-        filter,
-        orderBy: 'fields/Created desc',
-      }) as Record<string, unknown>[];
+      // Sort by Created descending
+      requests.sort((a, b) => new Date(b.Created).getTime() - new Date(a.Created).getTime());
 
-      return items.map(this.mapToServiceRequest);
+      return requests;
     } catch (error) {
       console.error('Error fetching requests:', error);
       return [];

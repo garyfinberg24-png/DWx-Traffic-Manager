@@ -98,25 +98,24 @@ class ProductRequestService {
     try {
       const graphService = getGraphService();
 
-      const filterParts: string[] = [];
-      if (filters?.accountManagerEmail) {
-        filterParts.push(`fields/AccountManagerEmail eq '${filters.accountManagerEmail}'`);
-      }
-      if (filters?.productType) {
-        filterParts.push(`fields/ProductType eq '${filters.productType}'`);
-      }
-
-      const items = await graphService.getListItems(this.listName, {
-        filter: filterParts.length > 0 ? filterParts.join(' and ') : undefined,
-        orderBy: 'fields/Created desc',
-      }) as Record<string, unknown>[];
+      // Fetch all items and filter client-side (avoids non-indexed column issues)
+      const items = await graphService.getListItems(this.listName) as Record<string, unknown>[];
 
       let requests = items.map((item) => this.mapToProductRequest(item));
 
-      // Client-side status filtering (OData choice filtering can be unreliable)
+      // Apply filters client-side
+      if (filters?.accountManagerEmail) {
+        requests = requests.filter((r) => r.AccountManagerEmail === filters.accountManagerEmail);
+      }
+      if (filters?.productType) {
+        requests = requests.filter((r) => r.ProductType === filters.productType);
+      }
       if (filters?.status && filters.status.length > 0) {
         requests = requests.filter((r) => filters.status!.includes(r.Status));
       }
+
+      // Sort by Created descending
+      requests.sort((a, b) => new Date(b.Created).getTime() - new Date(a.Created).getTime());
 
       return requests;
     } catch (error) {
