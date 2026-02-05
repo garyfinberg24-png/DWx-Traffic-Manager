@@ -193,6 +193,14 @@ const LIST_INFO: Record<string, { description: string; icon: React.ReactElement 
     description: 'Pre-sales team members with roles, specializations, and availability',
     icon: <People24Regular />,
   },
+  DWxTeamMembers: {
+    description: 'Internal team members for specialist assignments',
+    icon: <People24Regular />,
+  },
+  DWxAccountManagers: {
+    description: 'Account managers who submit service requests',
+    icon: <Briefcase24Regular />,
+  },
   DWxAuditLog: {
     description: 'Audit trail for all actions and stage changes',
     icon: <ClipboardTask24Regular />,
@@ -278,6 +286,12 @@ export const DWxSharePointProvisioning: React.FC = () => {
         case 'DWxSpecialists':
           result = await dwxSharePointProvisioningService.provisionSpecialistsList();
           break;
+        case 'DWxTeamMembers':
+          result = await dwxSharePointProvisioningService.provisionTeamMembersList();
+          break;
+        case 'DWxAccountManagers':
+          result = await dwxSharePointProvisioningService.provisionAccountManagersList();
+          break;
         case 'DWxAuditLog':
           result = await dwxSharePointProvisioningService.provisionAuditLogList();
           break;
@@ -326,7 +340,7 @@ export const DWxSharePointProvisioning: React.FC = () => {
   };
 
   const allLists = [...listStatuses, docLibraryStatus].filter(Boolean) as ListStatus[];
-  const allListsExist = allLists.length === 7 && allLists.every((s) => s.exists);
+  const allListsExist = allLists.length === 9 && allLists.every((s) => s.exists);
   const missingLists = allLists.filter((s) => !s.exists);
   const servicesExists = getStatusForList('DWxServices');
 
@@ -356,7 +370,7 @@ export const DWxSharePointProvisioning: React.FC = () => {
       {/* Stats */}
       <div className={styles.statsContainer}>
         <div className={styles.statCard}>
-          <Text className={styles.statValue}>{allLists.filter(l => l.exists).length}/7</Text>
+          <Text className={styles.statValue}>{allLists.filter(l => l.exists).length}/9</Text>
           <Text className={styles.statLabel}>Lists Ready</Text>
         </div>
         <div className={styles.statCard}>
