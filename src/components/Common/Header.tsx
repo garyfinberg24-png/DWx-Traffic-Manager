@@ -31,7 +31,8 @@ const useStyles = makeStyles({
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: `${tokens.spacingVerticalM} ${tokens.spacingHorizontalL}`,
+    padding: `${tokens.spacingVerticalL} ${tokens.spacingHorizontalXL}`,
+    minHeight: '64px',
     backgroundColor: tokens.colorBrandBackground,
     color: tokens.colorNeutralForegroundOnBrand,
     boxShadow: tokens.shadow4,
@@ -43,7 +44,7 @@ const useStyles = makeStyles({
   },
   logoText: {
     fontWeight: tokens.fontWeightSemibold,
-    fontSize: tokens.fontSizeBase500,
+    fontSize: tokens.fontSizeBase600,
   },
   nav: {
     display: 'flex',
