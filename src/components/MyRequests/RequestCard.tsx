@@ -4,14 +4,29 @@
  */
 
 import React from 'react';
-import { Card, Text, makeStyles, Button } from '@fluentui/react-components';
+import {
+  Card,
+  Text,
+  makeStyles,
+  Button,
+  Menu,
+  MenuTrigger,
+  MenuPopover,
+  MenuList,
+  MenuItem,
+  MenuDivider,
+} from '@fluentui/react-components';
 import {
   CalendarLtr24Regular,
   MoneyRegular,
   PersonRegular,
   ArrowRightRegular,
+  MoreHorizontalRegular,
+  CheckmarkRegular,
+  DismissRegular,
+  ArrowForwardRegular,
 } from '@fluentui/react-icons';
-import { ServiceRequest, FunnelStage, InterestLevel } from '../../types/ServiceRequest';
+import { ServiceRequest, FunnelStage, InterestLevel, STAGE_TRANSITIONS } from '../../types/ServiceRequest';
 import { StageProgressBar } from './StageProgressBar';
 import { format } from 'date-fns';
 
@@ -171,6 +186,16 @@ const useStyles = makeStyles({
       color: 'white',
     },
   },
+  moreButton: {
+    minWidth: '28px',
+    height: '28px',
+    padding: '0',
+  },
+  footerActions: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '4px',
+  },
 });
 
 // Stage colors
@@ -187,6 +212,7 @@ const stageColors: Record<FunnelStage, { bg: string; text: string; border: strin
 interface RequestCardProps {
   request: ServiceRequest;
   onClick: (request: ServiceRequest) => void;
+  onQuickAction?: (request: ServiceRequest, action: FunnelStage) => void;
 }
 
 const formatCurrency = (value?: number): string => {
@@ -215,7 +241,7 @@ const getInterestStyle = (
   }
 };
 
-export const RequestCard: React.FC<RequestCardProps> = ({ request, onClick }) => {
+export const RequestCard: React.FC<RequestCardProps> = ({ request, onClick, onQuickAction }) => {
   const styles = useStyles();
 
   const stageColor = stageColors[request.FunnelStage] || stageColors.Lead;
@@ -228,6 +254,8 @@ export const RequestCard: React.FC<RequestCardProps> = ({ request, onClick }) =>
   const expectedClose = request.ExpectedCloseDate
     ? format(new Date(request.ExpectedCloseDate), 'MMM d, yyyy')
     : 'Not set';
+
+  const transitions = STAGE_TRANSITIONS[request.FunnelStage] || [];
 
   return (
     <Card
@@ -306,19 +334,83 @@ export const RequestCard: React.FC<RequestCardProps> = ({ request, onClick }) =>
           <CalendarLtr24Regular style={{ width: '14px', height: '14px' }} />
           Created {createdDate}
         </span>
-        <Button
-          className={styles.viewDetailsBtn}
-          appearance="outline"
-          size="small"
-          icon={<ArrowRightRegular style={{ width: '12px', height: '12px' }} />}
-          iconPosition="after"
-          onClick={(e) => {
-            e.stopPropagation();
-            onClick(request);
-          }}
-        >
-          View
-        </Button>
+        <div className={styles.footerActions}>
+          {onQuickAction && transitions.length > 0 && (
+            <Menu>
+              <MenuTrigger disableButtonEnhancement>
+                <Button
+                  className={styles.moreButton}
+                  appearance="subtle"
+                  icon={<MoreHorizontalRegular />}
+                  size="small"
+                  onClick={(e) => e.stopPropagation()}
+                  title="Quick actions"
+                />
+              </MenuTrigger>
+              <MenuPopover>
+                <MenuList>
+                  {transitions.map((stage) => {
+                    if (stage === 'Won') {
+                      return (
+                        <MenuItem
+                          key={stage}
+                          icon={<CheckmarkRegular />}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onQuickAction(request, stage);
+                          }}
+                        >
+                          Mark as Won
+                        </MenuItem>
+                      );
+                    }
+                    if (stage === 'Lost') {
+                      return (
+                        <React.Fragment key={stage}>
+                          <MenuDivider />
+                          <MenuItem
+                            icon={<DismissRegular />}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onQuickAction(request, stage);
+                            }}
+                          >
+                            Mark as Lost
+                          </MenuItem>
+                        </React.Fragment>
+                      );
+                    }
+                    return (
+                      <MenuItem
+                        key={stage}
+                        icon={<ArrowForwardRegular />}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onQuickAction(request, stage);
+                        }}
+                      >
+                        Move to {stage}
+                      </MenuItem>
+                    );
+                  })}
+                </MenuList>
+              </MenuPopover>
+            </Menu>
+          )}
+          <Button
+            className={styles.viewDetailsBtn}
+            appearance="outline"
+            size="small"
+            icon={<ArrowRightRegular style={{ width: '12px', height: '12px' }} />}
+            iconPosition="after"
+            onClick={(e) => {
+              e.stopPropagation();
+              onClick(request);
+            }}
+          >
+            View
+          </Button>
+        </div>
       </div>
     </Card>
   );

@@ -4,7 +4,7 @@
  * Updated design with colored header
  */
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   Dialog,
   DialogSurface,
@@ -12,6 +12,8 @@ import {
   DialogContent,
   Text,
   Button,
+  Input,
+  Textarea,
   makeStyles,
   Spinner,
 } from '@fluentui/react-components';
@@ -29,6 +31,8 @@ import {
   ClockRegular,
   DocumentRegular,
   ChatRegular,
+  EditRegular,
+  SaveRegular,
 } from '@fluentui/react-icons';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
@@ -299,6 +303,37 @@ const useStyles = makeStyles({
       backgroundColor: '#145a7a',
     },
   },
+  editButton: {
+    minWidth: '32px',
+    height: '28px',
+    padding: '0 8px',
+  },
+  editInput: {
+    width: '100%',
+  },
+  editTextarea: {
+    width: '100%',
+    minHeight: '80px',
+  },
+  editActions: {
+    display: 'flex',
+    gap: '8px',
+    marginTop: '8px',
+  },
+  saveButton: {
+    backgroundColor: '#107c10',
+    ':hover': {
+      backgroundColor: '#0b5a0b',
+    },
+  },
+  editingIndicator: {
+    fontSize: '11px',
+    color: '#b45309',
+    fontWeight: '500',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '4px',
+  },
 });
 
 interface RequestDetailsProps {
@@ -319,8 +354,97 @@ export const RequestDetails: React.FC<RequestDetailsProps> = ({
   const { showToast } = useToast();
 
   const [updating, setUpdating] = useState(false);
+  const [saving, setSaving] = useState(false);
+
+  // Edit mode state
+  const [editingSection, setEditingSection] = useState<'contact' | 'deal' | 'requirements' | 'comments' | null>(null);
+  const [editValues, setEditValues] = useState<Record<string, string | number>>({});
 
   const availableTransitions = STAGE_TRANSITIONS[request.FunnelStage] || [];
+
+  const startEditing = useCallback((section: 'contact' | 'deal' | 'requirements' | 'comments') => {
+    const values: Record<string, string | number> = {};
+    if (section === 'contact') {
+      values.ContactName = request.ContactName || '';
+      values.ContactEmail = request.ContactEmail || '';
+      values.ContactPhone = request.ContactPhone || '';
+      values.Industry = request.Industry || '';
+    } else if (section === 'deal') {
+      values.DealValue = request.DealValue || 0;
+      values.DealProbability = request.DealProbability || 50;
+    } else if (section === 'requirements') {
+      values.Requirements = request.Requirements || '';
+    } else if (section === 'comments') {
+      values.Comments = request.Comments || '';
+    }
+    setEditValues(values);
+    setEditingSection(section);
+  }, [request]);
+
+  const cancelEditing = useCallback(() => {
+    setEditingSection(null);
+    setEditValues({});
+  }, []);
+
+  const handleSaveEdit = async () => {
+    if (!user || !editingSection) return;
+
+    try {
+      setSaving(true);
+
+      if (editingSection === 'deal') {
+        // Use updateDealInfo for deal values (recalculates WeightedPipeline + notifications)
+        const result = await serviceRequestService.updateDealInfo(
+          request.Id,
+          {
+            DealValue: editValues.DealValue as number,
+            DealProbability: editValues.DealProbability as number,
+          },
+          user.email,
+          user.displayName
+        );
+
+        if (result.success && result.request) {
+          showToast('Deal information updated', 'success');
+          onRequestUpdated?.(result.request);
+        } else {
+          throw new Error(result.error || 'Failed to update deal info');
+        }
+      } else {
+        // Use updateRequestFields for contact/requirements/comments
+        const updates: Record<string, string> = {};
+        for (const [key, value] of Object.entries(editValues)) {
+          updates[key] = String(value);
+        }
+
+        const result = await serviceRequestService.updateRequestFields(
+          request.Id,
+          updates,
+          user.email,
+          user.displayName
+        );
+
+        if (result.success && result.request) {
+          const sectionLabel = editingSection === 'contact' ? 'Contact information' :
+            editingSection === 'requirements' ? 'Requirements' : 'Comments';
+          showToast(`${sectionLabel} updated`, 'success');
+          onRequestUpdated?.(result.request);
+        } else {
+          throw new Error(result.error || 'Failed to update');
+        }
+      }
+
+      setEditingSection(null);
+      setEditValues({});
+    } catch (err) {
+      console.error('Error saving edit:', err);
+      showToast('Failed to save changes', 'error');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const isTerminal = request.FunnelStage === 'Won' || request.FunnelStage === 'Lost';
 
   const formatCurrency = (value?: number): string => {
     if (!value) return 'Not specified';
@@ -481,41 +605,117 @@ export const RequestDetails: React.FC<RequestDetailsProps> = ({
               <div className={styles.sectionHeader}>
                 <PersonRegular style={{ width: '14px', height: '14px' }} />
                 Contact Information
-              </div>
-              <div className={styles.grid}>
-                <div className={styles.gridItem}>
-                  <span className={styles.gridLabel}>Contact Name</span>
-                  <span className={styles.gridValue}>
-                    <PersonRegular style={{ width: '14px', height: '14px', color: '#616161' }} />
-                    {request.ContactName}
-                  </span>
-                </div>
-                <div className={styles.gridItem}>
-                  <span className={styles.gridLabel}>Email</span>
-                  <span className={styles.gridValue}>
-                    <MailRegular style={{ width: '14px', height: '14px', color: '#616161' }} />
-                    {request.ContactEmail}
-                  </span>
-                </div>
-                {request.ContactPhone && (
-                  <div className={styles.gridItem}>
-                    <span className={styles.gridLabel}>Phone</span>
-                    <span className={styles.gridValue}>
-                      <PhoneRegular style={{ width: '14px', height: '14px', color: '#616161' }} />
-                      {request.ContactPhone}
-                    </span>
-                  </div>
+                {!isTerminal && editingSection !== 'contact' && (
+                  <Button
+                    className={styles.editButton}
+                    appearance="subtle"
+                    icon={<EditRegular />}
+                    size="small"
+                    onClick={() => startEditing('contact')}
+                    title="Edit contact info"
+                  />
                 )}
-                {request.Industry && (
-                  <div className={styles.gridItem}>
-                    <span className={styles.gridLabel}>Industry</span>
-                    <span className={styles.gridValue}>
-                      <BuildingRegular style={{ width: '14px', height: '14px', color: '#616161' }} />
-                      {request.Industry}
-                    </span>
-                  </div>
+                {editingSection === 'contact' && (
+                  <span className={styles.editingIndicator}>
+                    <EditRegular style={{ width: '12px', height: '12px' }} />
+                    Editing
+                  </span>
                 )}
               </div>
+              {editingSection === 'contact' ? (
+                <>
+                  <div className={styles.grid}>
+                    <div className={styles.gridItem}>
+                      <span className={styles.gridLabel}>Contact Name</span>
+                      <Input
+                        className={styles.editInput}
+                        value={String(editValues.ContactName || '')}
+                        onChange={(_, data) => setEditValues((prev) => ({ ...prev, ContactName: data.value }))}
+                      />
+                    </div>
+                    <div className={styles.gridItem}>
+                      <span className={styles.gridLabel}>Email</span>
+                      <Input
+                        className={styles.editInput}
+                        type="email"
+                        value={String(editValues.ContactEmail || '')}
+                        onChange={(_, data) => setEditValues((prev) => ({ ...prev, ContactEmail: data.value }))}
+                      />
+                    </div>
+                    <div className={styles.gridItem}>
+                      <span className={styles.gridLabel}>Phone</span>
+                      <Input
+                        className={styles.editInput}
+                        value={String(editValues.ContactPhone || '')}
+                        onChange={(_, data) => setEditValues((prev) => ({ ...prev, ContactPhone: data.value }))}
+                      />
+                    </div>
+                    <div className={styles.gridItem}>
+                      <span className={styles.gridLabel}>Industry</span>
+                      <Input
+                        className={styles.editInput}
+                        value={String(editValues.Industry || '')}
+                        onChange={(_, data) => setEditValues((prev) => ({ ...prev, Industry: data.value }))}
+                      />
+                    </div>
+                  </div>
+                  <div className={styles.editActions}>
+                    <Button
+                      className={styles.saveButton}
+                      appearance="primary"
+                      icon={<SaveRegular />}
+                      onClick={handleSaveEdit}
+                      disabled={saving}
+                      size="small"
+                    >
+                      {saving ? 'Saving...' : 'Save'}
+                    </Button>
+                    <Button
+                      appearance="secondary"
+                      onClick={cancelEditing}
+                      disabled={saving}
+                      size="small"
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                </>
+              ) : (
+                <div className={styles.grid}>
+                  <div className={styles.gridItem}>
+                    <span className={styles.gridLabel}>Contact Name</span>
+                    <span className={styles.gridValue}>
+                      <PersonRegular style={{ width: '14px', height: '14px', color: '#616161' }} />
+                      {request.ContactName}
+                    </span>
+                  </div>
+                  <div className={styles.gridItem}>
+                    <span className={styles.gridLabel}>Email</span>
+                    <span className={styles.gridValue}>
+                      <MailRegular style={{ width: '14px', height: '14px', color: '#616161' }} />
+                      {request.ContactEmail}
+                    </span>
+                  </div>
+                  {request.ContactPhone && (
+                    <div className={styles.gridItem}>
+                      <span className={styles.gridLabel}>Phone</span>
+                      <span className={styles.gridValue}>
+                        <PhoneRegular style={{ width: '14px', height: '14px', color: '#616161' }} />
+                        {request.ContactPhone}
+                      </span>
+                    </div>
+                  )}
+                  {request.Industry && (
+                    <div className={styles.gridItem}>
+                      <span className={styles.gridLabel}>Industry</span>
+                      <span className={styles.gridValue}>
+                        <BuildingRegular style={{ width: '14px', height: '14px', color: '#616161' }} />
+                        {request.Industry}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Deal Information */}
@@ -523,64 +723,168 @@ export const RequestDetails: React.FC<RequestDetailsProps> = ({
               <div className={styles.sectionHeader}>
                 <MoneyRegular style={{ width: '14px', height: '14px' }} />
                 Deal Information
-              </div>
-              <div className={styles.grid}>
-                <div className={styles.gridItem}>
-                  <span className={styles.gridLabel}>Interest Level</span>
-                  <span
-                    className={styles.interestBadge}
-                    style={{
-                      backgroundColor:
-                        request.InterestLevel === 'Hot'
-                          ? 'rgba(209, 52, 56, 0.1)'
-                          : request.InterestLevel === 'Warm'
-                          ? 'rgba(247, 99, 12, 0.1)'
-                          : 'rgba(107, 130, 140, 0.1)',
-                      color:
-                        request.InterestLevel === 'Hot'
-                          ? '#d13438'
-                          : request.InterestLevel === 'Warm'
-                          ? '#f7630c'
-                          : '#6b828c',
-                    }}
-                  >
-                    {request.InterestLevel === 'Hot'
-                      ? '🔥'
-                      : request.InterestLevel === 'Warm'
-                      ? '☀️'
-                      : '❄️'}{' '}
-                    {request.InterestLevel}
-                  </span>
-                </div>
-                <div className={styles.gridItem}>
-                  <span className={styles.gridLabel}>Deal Value</span>
-                  <span className={styles.gridValue} style={{ color: '#107c10', fontWeight: '600' }}>
-                    {formatCurrency(request.DealValue)}
-                  </span>
-                </div>
-                <div className={styles.gridItem}>
-                  <span className={styles.gridLabel}>Win Probability</span>
-                  <span className={styles.gridValue}>{request.DealProbability || 50}%</span>
-                </div>
-                <div className={styles.gridItem}>
-                  <span className={styles.gridLabel}>Weighted Value</span>
-                  <span className={styles.gridValue}>
-                    {formatCurrency((request.DealValue || 0) * ((request.DealProbability || 50) / 100))}
-                  </span>
-                </div>
-                {request.Budget && (
-                  <div className={styles.gridItem}>
-                    <span className={styles.gridLabel}>Client Budget</span>
-                    <span className={styles.gridValue}>{request.Budget}</span>
-                  </div>
+                {!isTerminal && editingSection !== 'deal' && (
+                  <Button
+                    className={styles.editButton}
+                    appearance="subtle"
+                    icon={<EditRegular />}
+                    size="small"
+                    onClick={() => startEditing('deal')}
+                    title="Edit deal info"
+                  />
                 )}
-                {request.Timeline && (
-                  <div className={styles.gridItem}>
-                    <span className={styles.gridLabel}>Client Timeline</span>
-                    <span className={styles.gridValue}>{request.Timeline}</span>
-                  </div>
+                {editingSection === 'deal' && (
+                  <span className={styles.editingIndicator}>
+                    <EditRegular style={{ width: '12px', height: '12px' }} />
+                    Editing
+                  </span>
                 )}
               </div>
+              {editingSection === 'deal' ? (
+                <>
+                  <div className={styles.grid}>
+                    <div className={styles.gridItem}>
+                      <span className={styles.gridLabel}>Interest Level</span>
+                      <span
+                        className={styles.interestBadge}
+                        style={{
+                          backgroundColor:
+                            request.InterestLevel === 'Hot'
+                              ? 'rgba(209, 52, 56, 0.1)'
+                              : request.InterestLevel === 'Warm'
+                              ? 'rgba(247, 99, 12, 0.1)'
+                              : 'rgba(107, 130, 140, 0.1)',
+                          color:
+                            request.InterestLevel === 'Hot'
+                              ? '#d13438'
+                              : request.InterestLevel === 'Warm'
+                              ? '#f7630c'
+                              : '#6b828c',
+                        }}
+                      >
+                        {request.InterestLevel === 'Hot'
+                          ? '🔥'
+                          : request.InterestLevel === 'Warm'
+                          ? '☀️'
+                          : '❄️'}{' '}
+                        {request.InterestLevel}
+                      </span>
+                    </div>
+                    <div className={styles.gridItem}>
+                      <span className={styles.gridLabel}>Deal Value (ZAR)</span>
+                      <Input
+                        className={styles.editInput}
+                        type="number"
+                        value={String(editValues.DealValue || 0)}
+                        onChange={(_, data) =>
+                          setEditValues((prev) => ({ ...prev, DealValue: Number(data.value) || 0 }))
+                        }
+                      />
+                    </div>
+                    <div className={styles.gridItem}>
+                      <span className={styles.gridLabel}>Win Probability (%)</span>
+                      <Input
+                        className={styles.editInput}
+                        type="number"
+                        min={0}
+                        max={100}
+                        value={String(editValues.DealProbability || 50)}
+                        onChange={(_, data) => {
+                          const val = Math.min(100, Math.max(0, Number(data.value) || 0));
+                          setEditValues((prev) => ({ ...prev, DealProbability: val }));
+                        }}
+                      />
+                    </div>
+                    <div className={styles.gridItem}>
+                      <span className={styles.gridLabel}>Weighted Value (auto)</span>
+                      <span className={styles.gridValue}>
+                        {formatCurrency(
+                          ((editValues.DealValue as number) || 0) *
+                            (((editValues.DealProbability as number) || 50) / 100)
+                        )}
+                      </span>
+                    </div>
+                  </div>
+                  <div className={styles.editActions}>
+                    <Button
+                      className={styles.saveButton}
+                      appearance="primary"
+                      icon={<SaveRegular />}
+                      onClick={handleSaveEdit}
+                      disabled={saving}
+                      size="small"
+                    >
+                      {saving ? 'Saving...' : 'Save'}
+                    </Button>
+                    <Button
+                      appearance="secondary"
+                      onClick={cancelEditing}
+                      disabled={saving}
+                      size="small"
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                </>
+              ) : (
+                <div className={styles.grid}>
+                  <div className={styles.gridItem}>
+                    <span className={styles.gridLabel}>Interest Level</span>
+                    <span
+                      className={styles.interestBadge}
+                      style={{
+                        backgroundColor:
+                          request.InterestLevel === 'Hot'
+                            ? 'rgba(209, 52, 56, 0.1)'
+                            : request.InterestLevel === 'Warm'
+                            ? 'rgba(247, 99, 12, 0.1)'
+                            : 'rgba(107, 130, 140, 0.1)',
+                        color:
+                          request.InterestLevel === 'Hot'
+                            ? '#d13438'
+                            : request.InterestLevel === 'Warm'
+                            ? '#f7630c'
+                            : '#6b828c',
+                      }}
+                    >
+                      {request.InterestLevel === 'Hot'
+                        ? '🔥'
+                        : request.InterestLevel === 'Warm'
+                        ? '☀️'
+                        : '❄️'}{' '}
+                      {request.InterestLevel}
+                    </span>
+                  </div>
+                  <div className={styles.gridItem}>
+                    <span className={styles.gridLabel}>Deal Value</span>
+                    <span className={styles.gridValue} style={{ color: '#107c10', fontWeight: '600' }}>
+                      {formatCurrency(request.DealValue)}
+                    </span>
+                  </div>
+                  <div className={styles.gridItem}>
+                    <span className={styles.gridLabel}>Win Probability</span>
+                    <span className={styles.gridValue}>{request.DealProbability || 50}%</span>
+                  </div>
+                  <div className={styles.gridItem}>
+                    <span className={styles.gridLabel}>Weighted Value</span>
+                    <span className={styles.gridValue}>
+                      {formatCurrency((request.DealValue || 0) * ((request.DealProbability || 50) / 100))}
+                    </span>
+                  </div>
+                  {request.Budget && (
+                    <div className={styles.gridItem}>
+                      <span className={styles.gridLabel}>Client Budget</span>
+                      <span className={styles.gridValue}>{request.Budget}</span>
+                    </div>
+                  )}
+                  {request.Timeline && (
+                    <div className={styles.gridItem}>
+                      <span className={styles.gridLabel}>Client Timeline</span>
+                      <span className={styles.gridValue}>{request.Timeline}</span>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Assigned Specialist */}
@@ -642,24 +946,126 @@ export const RequestDetails: React.FC<RequestDetailsProps> = ({
             </div>
 
             {/* Requirements */}
-            {request.Requirements && (
+            {(request.Requirements || !isTerminal) && (
               <div className={styles.section}>
                 <div className={styles.sectionHeader}>
                   <DocumentRegular style={{ width: '14px', height: '14px' }} />
                   Requirements
+                  {!isTerminal && editingSection !== 'requirements' && (
+                    <Button
+                      className={styles.editButton}
+                      appearance="subtle"
+                      icon={<EditRegular />}
+                      size="small"
+                      onClick={() => startEditing('requirements')}
+                      title="Edit requirements"
+                    />
+                  )}
+                  {editingSection === 'requirements' && (
+                    <span className={styles.editingIndicator}>
+                      <EditRegular style={{ width: '12px', height: '12px' }} />
+                      Editing
+                    </span>
+                  )}
                 </div>
-                <div className={styles.textBlock}>{request.Requirements}</div>
+                {editingSection === 'requirements' ? (
+                  <>
+                    <Textarea
+                      className={styles.editTextarea}
+                      value={String(editValues.Requirements || '')}
+                      onChange={(_, data) => setEditValues((prev) => ({ ...prev, Requirements: data.value }))}
+                      resize="vertical"
+                    />
+                    <div className={styles.editActions}>
+                      <Button
+                        className={styles.saveButton}
+                        appearance="primary"
+                        icon={<SaveRegular />}
+                        onClick={handleSaveEdit}
+                        disabled={saving}
+                        size="small"
+                      >
+                        {saving ? 'Saving...' : 'Save'}
+                      </Button>
+                      <Button
+                        appearance="secondary"
+                        onClick={cancelEditing}
+                        disabled={saving}
+                        size="small"
+                      >
+                        Cancel
+                      </Button>
+                    </div>
+                  </>
+                ) : (
+                  request.Requirements ? (
+                    <div className={styles.textBlock}>{request.Requirements}</div>
+                  ) : (
+                    <div className={styles.unassigned}>No requirements specified</div>
+                  )
+                )}
               </div>
             )}
 
             {/* Comments */}
-            {request.Comments && (
+            {(request.Comments || !isTerminal) && (
               <div className={styles.section}>
                 <div className={styles.sectionHeader}>
                   <ChatRegular style={{ width: '14px', height: '14px' }} />
                   Additional Comments
+                  {!isTerminal && editingSection !== 'comments' && (
+                    <Button
+                      className={styles.editButton}
+                      appearance="subtle"
+                      icon={<EditRegular />}
+                      size="small"
+                      onClick={() => startEditing('comments')}
+                      title="Edit comments"
+                    />
+                  )}
+                  {editingSection === 'comments' && (
+                    <span className={styles.editingIndicator}>
+                      <EditRegular style={{ width: '12px', height: '12px' }} />
+                      Editing
+                    </span>
+                  )}
                 </div>
-                <div className={styles.textBlock}>{request.Comments}</div>
+                {editingSection === 'comments' ? (
+                  <>
+                    <Textarea
+                      className={styles.editTextarea}
+                      value={String(editValues.Comments || '')}
+                      onChange={(_, data) => setEditValues((prev) => ({ ...prev, Comments: data.value }))}
+                      resize="vertical"
+                    />
+                    <div className={styles.editActions}>
+                      <Button
+                        className={styles.saveButton}
+                        appearance="primary"
+                        icon={<SaveRegular />}
+                        onClick={handleSaveEdit}
+                        disabled={saving}
+                        size="small"
+                      >
+                        {saving ? 'Saving...' : 'Save'}
+                      </Button>
+                      <Button
+                        appearance="secondary"
+                        onClick={cancelEditing}
+                        disabled={saving}
+                        size="small"
+                      >
+                        Cancel
+                      </Button>
+                    </div>
+                  </>
+                ) : (
+                  request.Comments ? (
+                    <div className={styles.textBlock}>{request.Comments}</div>
+                  ) : (
+                    <div className={styles.unassigned}>No comments</div>
+                  )
+                )}
               </div>
             )}
 

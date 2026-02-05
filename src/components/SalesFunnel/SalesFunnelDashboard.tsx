@@ -18,6 +18,7 @@ import {
   ChartMultipleRegular,
   PeopleQueueRegular,
   TargetRegular,
+  BoxRegular,
 } from '@fluentui/react-icons';
 import { useAuth } from '../../contexts/AuthContext';
 import {
@@ -28,12 +29,15 @@ import {
   StageBreakdown,
   FunnelStage,
 } from '../../types/ServiceRequest';
+import { ProductRequest } from '../../types/ProductRequest';
 import { serviceRequestService } from '../../services/ServiceRequestService';
+import { productRequestService } from '../../services/ProductRequestService';
 import { pipelineService } from '../../services/PipelineService';
 import { PipelineKPIs } from './PipelineKPIs';
 import { FunnelChart } from './FunnelChart';
 import { ConversionRatesCard } from './ConversionRatesCard';
 import { RequestsQueue } from './RequestsQueue';
+import { ProductRequestsQueue } from './ProductRequestsQueue';
 
 const useStyles = makeStyles({
   container: {
@@ -111,7 +115,7 @@ const useStyles = makeStyles({
   },
 });
 
-type DashboardTab = 'overview' | 'pipeline' | 'queue';
+type DashboardTab = 'overview' | 'pipeline' | 'queue' | 'productQueue';
 
 interface SalesFunnelDashboardProps {
   onStageClick?: (stage: FunnelStage) => void;
@@ -124,6 +128,7 @@ export const SalesFunnelDashboard: React.FC<SalesFunnelDashboardProps> = ({
   const { user, isManager } = useAuth();
 
   const [requests, setRequests] = useState<ServiceRequest[]>([]);
+  const [productRequests, setProductRequests] = useState<ProductRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<DashboardTab>('overview');
@@ -136,8 +141,14 @@ export const SalesFunnelDashboard: React.FC<SalesFunnelDashboardProps> = ({
         setError(null);
         // Managers see all requests, AMs see their own
         const filters = isManager ? {} : { accountManagerEmail: user?.email };
-        const data = await serviceRequestService.getRequests(filters);
-        setRequests(data);
+        const [serviceData, productData] = await Promise.all([
+          serviceRequestService.getRequests(filters),
+          productRequestService.getRequests(
+            isManager ? undefined : { accountManagerEmail: user?.email }
+          ),
+        ]);
+        setRequests(serviceData);
+        setProductRequests(productData);
       } catch (err) {
         console.error('Error loading requests:', err);
         setError('Failed to load pipeline data');
@@ -173,6 +184,17 @@ export const SalesFunnelDashboard: React.FC<SalesFunnelDashboardProps> = ({
       prev.map((r) => (r.Id === updatedRequest.Id ? updatedRequest : r))
     );
   };
+
+  const handleProductRequestUpdated = (updatedRequest: ProductRequest) => {
+    setProductRequests((prev) =>
+      prev.map((r) => (r.Id === updatedRequest.Id ? updatedRequest : r))
+    );
+  };
+
+  // Count actionable product requests for badge
+  const actionableProductCount = productRequests.filter(
+    (r) => r.Status !== 'Completed' && r.Status !== 'Cancelled'
+  ).length;
 
   if (loading) {
     return (
@@ -222,6 +244,11 @@ export const SalesFunnelDashboard: React.FC<SalesFunnelDashboardProps> = ({
         {isManager && (
           <Tab value="queue" icon={<PeopleQueueRegular />}>
             Action Queue
+          </Tab>
+        )}
+        {isManager && (
+          <Tab value="productQueue" icon={<BoxRegular />}>
+            Product Queue{actionableProductCount > 0 ? ` (${actionableProductCount})` : ''}
           </Tab>
         )}
       </TabList>
@@ -365,6 +392,13 @@ export const SalesFunnelDashboard: React.FC<SalesFunnelDashboardProps> = ({
 
         {activeTab === 'queue' && isManager && (
           <RequestsQueue requests={requests} onRequestUpdated={handleRequestUpdated} />
+        )}
+
+        {activeTab === 'productQueue' && isManager && (
+          <ProductRequestsQueue
+            requests={productRequests}
+            onRequestUpdated={handleProductRequestUpdated}
+          />
         )}
       </div>
     </div>

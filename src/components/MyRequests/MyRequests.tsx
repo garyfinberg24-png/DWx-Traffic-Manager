@@ -30,6 +30,7 @@ import {
   Apps24Regular,
 } from '@fluentui/react-icons';
 import { useAuth } from '../../contexts/AuthContext';
+import { useToast } from '../../contexts/ToastContext';
 import {
   ServiceRequest,
   FunnelStage,
@@ -275,7 +276,8 @@ interface MyRequestsProps {
 
 export const MyRequests: React.FC<MyRequestsProps> = ({ onNewRequest }) => {
   const styles = useStyles();
-  const { user } = useAuth();
+  const { user, isManager } = useAuth();
+  const { showToast } = useToast();
 
   const [activeTab, setActiveTab] = useState<'service' | 'product'>('service');
   const [requests, setRequests] = useState<ServiceRequest[]>([]);
@@ -427,6 +429,29 @@ export const MyRequests: React.FC<MyRequestsProps> = ({ onNewRequest }) => {
     setSelectedRequest(updatedRequest);
   };
 
+  const handleQuickAction = async (request: ServiceRequest, newStage: FunnelStage) => {
+    if (!user) return;
+    try {
+      const result = await serviceRequestService.updateStage(
+        request.Id,
+        newStage,
+        user.email,
+        user.displayName
+      );
+      if (result.success && result.request) {
+        showToast(`Request moved to ${newStage}`, 'success');
+        setRequests((prev) =>
+          prev.map((r) => (r.Id === result.request!.Id ? result.request! : r))
+        );
+      } else {
+        throw new Error(result.error || 'Failed to update stage');
+      }
+    } catch (err) {
+      console.error('Error in quick action:', err);
+      showToast('Failed to update stage', 'error');
+    }
+  };
+
   const handleProductRequestClick = (pr: ProductRequest) => {
     setSelectedProductRequest(pr);
     setIsProductDetailsOpen(true);
@@ -549,7 +574,23 @@ export const MyRequests: React.FC<MyRequestsProps> = ({ onNewRequest }) => {
                   <Text className={styles.productCardDetail}>
                     Client: {pr.ClientName} &middot; Contact: {pr.ContactName}
                   </Text>
-                  {pr.ProposedSlot1 && (
+                  {pr.AssignedSpecialistName && (
+                    <Text className={styles.productCardDetail}>
+                      Specialist: {pr.AssignedSpecialistName}
+                    </Text>
+                  )}
+                  {pr.ConfirmedDateTime ? (
+                    <Text className={styles.productCardDetail} style={{ color: '#107c10' }}>
+                      Confirmed: {new Date(pr.ConfirmedDateTime).toLocaleDateString('en-ZA', {
+                        weekday: 'short',
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric',
+                        hour: 'numeric',
+                        minute: '2-digit',
+                      })}
+                    </Text>
+                  ) : pr.ProposedSlot1 ? (
                     <Text className={styles.productCardDetail}>
                       Proposed: {new Date(pr.ProposedSlot1).toLocaleDateString('en-ZA', {
                         weekday: 'short',
@@ -558,7 +599,7 @@ export const MyRequests: React.FC<MyRequestsProps> = ({ onNewRequest }) => {
                         day: 'numeric',
                       })}
                     </Text>
-                  )}
+                  ) : null}
                   <Text className={styles.productCardDetail} style={{ fontSize: '11px', color: '#8a8886' }}>
                     Created: {new Date(pr.Created).toLocaleDateString('en-ZA')}
                   </Text>
@@ -669,7 +710,7 @@ export const MyRequests: React.FC<MyRequestsProps> = ({ onNewRequest }) => {
       {filteredRequests.length > 0 ? (
         <div className={styles.grid}>
           {filteredRequests.map((request) => (
-            <RequestCard key={request.Id} request={request} onClick={handleRequestClick} />
+            <RequestCard key={request.Id} request={request} onClick={handleRequestClick} onQuickAction={handleQuickAction} />
           ))}
         </div>
       ) : (
@@ -714,6 +755,7 @@ export const MyRequests: React.FC<MyRequestsProps> = ({ onNewRequest }) => {
           isOpen={isProductDetailsOpen}
           onClose={handleCloseProductDetails}
           onRequestUpdated={handleProductRequestUpdated}
+          isManager={isManager}
         />
       )}
     </div>

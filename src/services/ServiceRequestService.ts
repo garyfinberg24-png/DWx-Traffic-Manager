@@ -193,6 +193,68 @@ class ServiceRequestService {
   }
 
   /**
+   * Update editable fields on a service request (contact info, requirements, comments)
+   */
+  async updateRequestFields(
+    requestId: number,
+    updates: {
+      ContactName?: string;
+      ContactEmail?: string;
+      ContactPhone?: string;
+      Industry?: string;
+      Requirements?: string;
+      Comments?: string;
+    },
+    _userEmail: string,
+    userName: string
+  ): Promise<ServiceRequestResult> {
+    try {
+      const graphService = getGraphService();
+
+      const currentItem = await graphService.getListItemById(this.listName, requestId) as Record<string, unknown> | null;
+      if (!currentItem) {
+        return { success: false, error: 'Request not found' };
+      }
+
+      const currentRequest = this.mapToServiceRequest(currentItem);
+      const previousValues: Record<string, unknown> = {};
+      const updateData: Record<string, unknown> = {};
+
+      // Build diff for audit trail
+      for (const [key, value] of Object.entries(updates)) {
+        if (value !== undefined) {
+          previousValues[key] = (currentRequest as unknown as Record<string, unknown>)[key];
+          updateData[key] = value;
+        }
+      }
+
+      if (Object.keys(updateData).length === 0) {
+        return { success: true, request: currentRequest };
+      }
+
+      const result = await graphService.updateListItem(this.listName, requestId, updateData);
+      const updatedRequest = this.mapToServiceRequest(result);
+
+      // Audit log
+      await auditService.logUpdate(
+        'ServiceRequest',
+        requestId,
+        currentRequest.Title,
+        previousValues,
+        { ...updateData, changedBy: userName }
+      );
+
+      return { success: true, request: updatedRequest };
+    } catch (error) {
+      console.error('Error updating request fields:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+      };
+    }
+  }
+
+  /**
    * Update the funnel stage of a request
    */
   async updateStage(
