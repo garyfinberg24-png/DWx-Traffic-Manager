@@ -189,6 +189,11 @@ class ServiceCatalogService {
         IsActive: s.IsActive,
         SortOrder: s.SortOrder,
         IconName: s.IconName,
+        WhatsIncluded: s.WhatsIncluded,
+        EngagementPhases: s.EngagementPhases,
+        RelatedCategories: s.RelatedCategories,
+        KeyBenefits: s.KeyBenefits,
+        IdealFor: s.IdealFor,
       }));
   }
 
@@ -206,9 +211,14 @@ class ServiceCatalogService {
       requiredRoles = [];
     }
 
+    const title = (item.fields as Record<string, unknown>)?.Title as string || item.Title as string || '';
+
+    // Merge rich content fields from DEFAULT_SERVICES (client-side only, not in SharePoint)
+    const defaultMatch = DEFAULT_SERVICES.find(s => s.Title === title);
+
     return {
       Id: item.id as number,
-      Title: (item.fields as Record<string, unknown>)?.Title as string || item.Title as string || '',
+      Title: title,
       Description: this.getFieldValue(item, 'Description', ''),
       ShortDescription: this.getFieldValue(item, 'ShortDescription', ''),
       Category: this.getFieldValue(item, 'Category', 'Power Platform') as ServiceCategory,
@@ -221,6 +231,11 @@ class ServiceCatalogService {
       IsActive: this.getFieldValue(item, 'IsActive', true),
       SortOrder: this.getFieldValue(item, 'SortOrder', 0),
       IconName: this.getFieldValue(item, 'IconName', ''),
+      WhatsIncluded: defaultMatch?.WhatsIncluded,
+      EngagementPhases: defaultMatch?.EngagementPhases,
+      RelatedCategories: defaultMatch?.RelatedCategories,
+      KeyBenefits: defaultMatch?.KeyBenefits,
+      IdealFor: defaultMatch?.IdealFor,
       Created: this.getFieldValue(item, 'Created', ''),
       Modified: this.getFieldValue(item, 'Modified', ''),
     };

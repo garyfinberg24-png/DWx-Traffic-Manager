@@ -14,7 +14,7 @@ import { Header, ErrorBoundary, LoadingSpinner, UserGuide } from './components/C
 // DWx Traffic Manager - New Components
 import { LandingPage } from './components/LandingPage';
 import { ProductCatalog } from './components/ProductCatalog';
-import { ServiceCatalog } from './components/ServiceCatalog';
+import { ServiceCatalog, ServiceDetailPage } from './components/ServiceCatalog';
 import { ServiceRequestForm } from './components/ServiceRequest';
 import { ProductRequestForm } from './components/ProductRequest';
 import { MyRequests } from './components/MyRequests';
@@ -96,6 +96,7 @@ const AppRoutes: React.FC = () => {
           {/* DWx Traffic Manager - Primary Routes */}
           <Route path="/" element={<LandingPage />} />
           <Route path="/services" element={<ServiceCatalog />} />
+          <Route path="/services/:serviceId" element={<ServiceDetailPage />} />
           <Route path="/products" element={<ProductCatalog />} />
           <Route path="/request" element={<ServiceRequestForm />} />
           <Route path="/product-request" element={<ProductRequestForm />} />

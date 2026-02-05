@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Dialog,
   DialogSurface,
@@ -265,6 +266,7 @@ export const ServiceDetails: React.FC<ServiceDetailsProps> = ({
   onRequestService,
 }) => {
   const styles = useStyles();
+  const navigate = useNavigate();
 
   const IconComponent = iconMap[service.IconName || ''] || FlashRegular;
 
@@ -369,6 +371,15 @@ export const ServiceDetails: React.FC<ServiceDetailsProps> = ({
             className={styles.cancelButton}
           >
             Cancel
+          </Button>
+          <Button
+            appearance="subtle"
+            onClick={() => {
+              onClose();
+              navigate(`/services/${service.Id}`);
+            }}
+          >
+            View Full Details
           </Button>
           <Button
             className={styles.submitButton}

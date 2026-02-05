@@ -42,6 +42,12 @@ export interface DWService {
   IsActive: boolean;
   SortOrder: number;
   IconName?: string; // Fluent UI icon name
+  // Rich content fields (client-side only, for detail page)
+  WhatsIncluded?: string[];
+  EngagementPhases?: { name: string; description: string }[];
+  RelatedCategories?: ServiceCategory[];
+  KeyBenefits?: string[];
+  IdealFor?: string[];
   Created?: string;
   Modified?: string;
 }
@@ -63,6 +69,12 @@ export interface DWServiceInput {
   IsActive: boolean;
   SortOrder: number;
   IconName?: string;
+  // Rich content fields (client-side only, for detail page)
+  WhatsIncluded?: string[];
+  EngagementPhases?: { name: string; description: string }[];
+  RelatedCategories?: ServiceCategory[];
+  KeyBenefits?: string[];
+  IdealFor?: string[];
 }
 
 // ============================================================================
@@ -451,6 +463,34 @@ export const DEFAULT_SERVICES: DWServiceInput[] = [
     IsActive: true,
     SortOrder: 1,
     IconName: 'LightningBolt',
+    WhatsIncluded: [
+      'Requirements analysis and solution design',
+      'Custom Power Apps (Canvas or Model-driven)',
+      'Power Automate workflow development',
+      'Power BI dashboard creation',
+      'User acceptance testing and deployment',
+      'Knowledge transfer and documentation',
+    ],
+    EngagementPhases: [
+      { name: 'Discovery', description: 'Requirements gathering and feasibility assessment' },
+      { name: 'Design', description: 'Solution architecture and UI/UX wireframes' },
+      { name: 'Build', description: 'Iterative development with sprint demos' },
+      { name: 'Test', description: 'UAT and performance validation' },
+      { name: 'Deploy', description: 'Go-live support and handover' },
+    ],
+    RelatedCategories: ['SPFx Development', 'Copilot Agents'],
+    KeyBenefits: [
+      'Rapid prototyping with low-code tools',
+      'Seamless M365 ecosystem integration',
+      'Citizen developer enablement',
+      'Reduced development costs vs custom code',
+    ],
+    IdealFor: [
+      'Departmental business process automation',
+      'Self-service reporting and dashboards',
+      'Form-based data collection apps',
+      'Approval workflows and notifications',
+    ],
   },
   {
     Title: 'SPFx Development',
@@ -465,6 +505,34 @@ export const DEFAULT_SERVICES: DWServiceInput[] = [
     IsActive: true,
     SortOrder: 2,
     IconName: 'Code',
+    WhatsIncluded: [
+      'Technical feasibility assessment',
+      'Custom SPFx web part development',
+      'SharePoint Framework extensions (command sets, field customizers)',
+      'Adaptive Card Extensions for Viva Connections',
+      'Teams personal and group tab applications',
+      'Deployment to App Catalog and documentation',
+    ],
+    EngagementPhases: [
+      { name: 'Scoping', description: 'Technical requirements and environment assessment' },
+      { name: 'Architecture', description: 'Component design and API integration planning' },
+      { name: 'Development', description: 'Sprint-based SPFx development with code reviews' },
+      { name: 'Testing', description: 'Cross-browser testing and SharePoint compatibility' },
+      { name: 'Deployment', description: 'App Catalog deployment and tenant-wide rollout' },
+    ],
+    RelatedCategories: ['Power Platform', 'Copilot Agents'],
+    KeyBenefits: [
+      'Native SharePoint and Teams integration',
+      'Enterprise-grade performance and security',
+      'Reusable components across sites',
+      'Full customization with React and TypeScript',
+    ],
+    IdealFor: [
+      'Custom intranet experiences',
+      'Interactive data visualization dashboards',
+      'Teams-embedded business applications',
+      'Document management enhancements',
+    ],
   },
   {
     Title: 'SharePoint Migration',
@@ -479,6 +547,34 @@ export const DEFAULT_SERVICES: DWServiceInput[] = [
     IsActive: true,
     SortOrder: 3,
     IconName: 'CloudArrowUp',
+    WhatsIncluded: [
+      'Source environment discovery and content audit',
+      'Migration strategy and roadmap development',
+      'Content mapping and metadata transformation',
+      'Pilot migration with validation checkpoints',
+      'Full migration execution with rollback plan',
+      'Post-migration verification and user training',
+    ],
+    EngagementPhases: [
+      { name: 'Assessment', description: 'Source inventory, content analysis, and risk identification' },
+      { name: 'Planning', description: 'Migration strategy, timeline, and communication plan' },
+      { name: 'Pilot', description: 'Test migration of representative content subset' },
+      { name: 'Migration', description: 'Phased content migration with validation gates' },
+      { name: 'Cutover', description: 'Final sync, DNS changes, and user redirection' },
+    ],
+    RelatedCategories: ['M365 Assessment', 'MS Viva'],
+    KeyBenefits: [
+      'Minimal business disruption during migration',
+      'Complete metadata and permission preservation',
+      'Reduced on-premises infrastructure costs',
+      'Modern collaboration capabilities unlocked',
+    ],
+    IdealFor: [
+      'On-premises SharePoint to SharePoint Online moves',
+      'File share consolidation to OneDrive/SharePoint',
+      'Third-party platform migrations (Box, Dropbox, Google)',
+      'Tenant-to-tenant migrations during M&A',
+    ],
   },
   {
     Title: 'M365 Tenant Assessment',
@@ -493,6 +589,33 @@ export const DEFAULT_SERVICES: DWServiceInput[] = [
     IsActive: true,
     SortOrder: 4,
     IconName: 'ShieldCheckmark',
+    WhatsIncluded: [
+      'Security posture review and Secure Score analysis',
+      'Compliance and data governance audit',
+      'License optimization recommendations',
+      'Adoption and usage analytics review',
+      'Identity and access management assessment',
+      'Executive summary report with prioritized actions',
+    ],
+    EngagementPhases: [
+      { name: 'Preparation', description: 'Access provisioning and data collection setup' },
+      { name: 'Analysis', description: 'Automated scanning and manual review of tenant configuration' },
+      { name: 'Review', description: 'Findings compilation and severity classification' },
+      { name: 'Report', description: 'Executive presentation and detailed recommendations' },
+    ],
+    RelatedCategories: ['SharePoint Migration', 'MS Viva'],
+    KeyBenefits: [
+      'Identify security vulnerabilities before they are exploited',
+      'Optimize license spend with usage-based insights',
+      'Improve compliance posture for audit readiness',
+      'Actionable roadmap for M365 maturity improvement',
+    ],
+    IdealFor: [
+      'Organizations new to Microsoft 365',
+      'Pre-migration readiness validation',
+      'Annual security and compliance reviews',
+      'Post-acquisition tenant consolidation planning',
+    ],
   },
   {
     Title: 'Enterprise Copilot Agents',
@@ -507,6 +630,34 @@ export const DEFAULT_SERVICES: DWServiceInput[] = [
     IsActive: true,
     SortOrder: 5,
     IconName: 'Bot',
+    WhatsIncluded: [
+      'AI readiness assessment and use case identification',
+      'Custom Copilot agent design and configuration',
+      'Knowledge base setup and grounding data integration',
+      'Custom plugin and connector development',
+      'Prompt engineering and response tuning',
+      'Pilot rollout with user feedback collection',
+    ],
+    EngagementPhases: [
+      { name: 'Assessment', description: 'Use case prioritization and data readiness evaluation' },
+      { name: 'Design', description: 'Agent architecture, knowledge sources, and plugin mapping' },
+      { name: 'Build', description: 'Agent configuration, plugin development, and testing' },
+      { name: 'Pilot', description: 'Limited rollout with feedback iteration' },
+      { name: 'Scale', description: 'Organization-wide deployment and adoption support' },
+    ],
+    RelatedCategories: ['Power Platform', 'SPFx Development'],
+    KeyBenefits: [
+      'Accelerate knowledge discovery across the organization',
+      'Automate repetitive tasks with conversational AI',
+      'Leverage existing M365 data with enterprise security',
+      'Measurable productivity gains from day one',
+    ],
+    IdealFor: [
+      'Enterprise knowledge management and search',
+      'IT help desk and employee self-service',
+      'Sales enablement and CRM integration',
+      'Custom line-of-business process automation',
+    ],
   },
   {
     Title: 'Microsoft Viva Suite',
@@ -521,6 +672,34 @@ export const DEFAULT_SERVICES: DWServiceInput[] = [
     IsActive: true,
     SortOrder: 6,
     IconName: 'PeopleTeam',
+    WhatsIncluded: [
+      'Viva module readiness assessment',
+      'Viva Connections dashboard design and deployment',
+      'Viva Learning content source configuration',
+      'Viva Insights privacy and analytics setup',
+      'Viva Engage community structure planning',
+      'Change management and adoption strategy',
+    ],
+    EngagementPhases: [
+      { name: 'Assessment', description: 'Current employee experience baseline and Viva licensing review' },
+      { name: 'Design', description: 'Module selection, dashboard layout, and content strategy' },
+      { name: 'Configure', description: 'Module deployment, integrations, and branding' },
+      { name: 'Launch', description: 'Phased rollout with champion network activation' },
+      { name: 'Adopt', description: 'Adoption tracking, feedback loops, and continuous improvement' },
+    ],
+    RelatedCategories: ['M365 Assessment', 'SharePoint Migration'],
+    KeyBenefits: [
+      'Unified employee experience within Microsoft Teams',
+      'Data-driven insights into employee wellbeing',
+      'Centralized learning and development platform',
+      'Improved internal communications and engagement',
+    ],
+    IdealFor: [
+      'Organizations investing in employee experience',
+      'Companies with hybrid or remote workforces',
+      'HR-driven digital transformation initiatives',
+      'Intranet modernization projects',
+    ],
   },
   {
     Title: 'Zero to AI Copilot Chat Hero',
@@ -535,6 +714,33 @@ export const DEFAULT_SERVICES: DWServiceInput[] = [
     IsActive: true,
     SortOrder: 7,
     IconName: 'LightningBolt',
+    WhatsIncluded: [
+      'Plan & Setup session (1 hour)',
+      'Zero to Hero training sessions (8 hours across 4 sessions)',
+      'Community and reporting setup (4 hours)',
+      'The AI Guy managed service (8 hours over 4 months)',
+      'Training materials and quick-reference guides',
+      'Post-training assessment and certification',
+    ],
+    EngagementPhases: [
+      { name: 'Plan & Setup', description: 'Environment preparation and participant onboarding' },
+      { name: 'Training', description: 'Interactive sessions covering Copilot Chat fundamentals to advanced topics' },
+      { name: 'Community', description: 'Champion network setup and internal community launch' },
+      { name: 'Support', description: 'Ongoing managed service with The AI Guy for 4 months' },
+    ],
+    RelatedCategories: ['Copilot Agents', 'Power Platform'],
+    KeyBenefits: [
+      'Structured learning path from beginner to proficient',
+      'Hands-on labs with real business scenarios',
+      'Ongoing support ensures knowledge retention',
+      'Internal champions drive organic adoption',
+    ],
+    IdealFor: [
+      'Organizations rolling out Microsoft Copilot',
+      'Teams wanting to maximize AI productivity gains',
+      'Change management programs for AI adoption',
+      'Departments exploring Copilot Studio capabilities',
+    ],
   },
 ];
 
