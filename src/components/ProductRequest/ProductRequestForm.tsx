@@ -45,9 +45,9 @@ import { addHours, format, setHours, setMinutes } from 'date-fns';
 
 const useStyles = makeStyles({
   container: {
-    maxWidth: '900px',
+    maxWidth: '1400px',
     margin: '0 auto',
-    padding: '32px',
+    padding: '24px 64px',
   },
   card: {
     backgroundColor: '#ffffff',

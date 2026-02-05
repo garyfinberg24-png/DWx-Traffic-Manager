@@ -38,7 +38,7 @@ const useStyles = makeStyles({
   container: {
     maxWidth: '1400px',
     margin: '0 auto',
-    ...shorthands.padding('24px'),
+    ...shorthands.padding('24px', '64px'),
   },
   header: {
     display: 'flex',

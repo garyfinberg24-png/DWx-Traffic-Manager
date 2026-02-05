@@ -32,7 +32,7 @@ const useStyles = makeStyles({
     display: 'flex',
     flexDirection: 'column',
     gap: tokens.spacingVerticalL,
-    padding: tokens.spacingHorizontalL,
+    padding: '24px 64px',
     maxWidth: '1400px',
     margin: '0 auto',
     width: '100%',

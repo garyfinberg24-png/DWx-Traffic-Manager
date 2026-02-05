@@ -40,7 +40,7 @@ const useStyles = makeStyles({
   container: {
     maxWidth: '1400px',
     margin: '0 auto',
-    padding: '32px',
+    padding: '24px 64px',
   },
   header: {
     display: 'flex',

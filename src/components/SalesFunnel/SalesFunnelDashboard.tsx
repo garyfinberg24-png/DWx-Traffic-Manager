@@ -40,7 +40,7 @@ const useStyles = makeStyles({
     display: 'flex',
     flexDirection: 'column',
     gap: '24px',
-    padding: '24px',
+    padding: '24px 64px',
     maxWidth: '1400px',
     margin: '0 auto',
   },
