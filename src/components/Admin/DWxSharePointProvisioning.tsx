@@ -31,6 +31,7 @@ import {
   ClipboardTask24Regular,
   Info24Regular,
   Rocket24Regular,
+  Apps24Regular,
 } from '@fluentui/react-icons';
 import { dwxSharePointProvisioningService } from '../../services/DWxSharePointProvisioningService';
 
@@ -180,6 +181,10 @@ const LIST_INFO: Record<string, { description: string; icon: React.ReactElement 
     description: 'Sales funnel tracking - leads, discovery sessions, proposals, wins/losses',
     icon: <DocumentBulletList24Regular />,
   },
+  DWxProductRequests: {
+    description: 'Product demo and deployment requests for DWx Apps, Web Parts, and Agents',
+    icon: <Apps24Regular />,
+  },
   DWxClients: {
     description: 'Client master data with engagement history and contract status',
     icon: <Building24Regular />,
@@ -264,6 +269,9 @@ export const DWxSharePointProvisioning: React.FC = () => {
         case 'DWxServiceRequests':
           result = await dwxSharePointProvisioningService.provisionServiceRequestsList();
           break;
+        case 'DWxProductRequests':
+          result = await dwxSharePointProvisioningService.provisionProductRequestsList();
+          break;
         case 'DWxClients':
           result = await dwxSharePointProvisioningService.provisionClientsList();
           break;
@@ -318,7 +326,7 @@ export const DWxSharePointProvisioning: React.FC = () => {
   };
 
   const allLists = [...listStatuses, docLibraryStatus].filter(Boolean) as ListStatus[];
-  const allListsExist = allLists.length === 6 && allLists.every((s) => s.exists);
+  const allListsExist = allLists.length === 7 && allLists.every((s) => s.exists);
   const missingLists = allLists.filter((s) => !s.exists);
   const servicesExists = getStatusForList('DWxServices');
 
@@ -348,7 +356,7 @@ export const DWxSharePointProvisioning: React.FC = () => {
       {/* Stats */}
       <div className={styles.statsContainer}>
         <div className={styles.statCard}>
-          <Text className={styles.statValue}>{allLists.filter(l => l.exists).length}/6</Text>
+          <Text className={styles.statValue}>{allLists.filter(l => l.exists).length}/7</Text>
           <Text className={styles.statLabel}>Lists Ready</Text>
         </div>
         <div className={styles.statCard}>
@@ -553,6 +561,7 @@ export const DWxSharePointProvisioning: React.FC = () => {
         <ul style={{ fontSize: '12px', color: tokens.colorNeutralForeground3, paddingLeft: '20px', margin: '8px 0' }}>
           <li><strong>DWxServices</strong> - The service catalog (what DW offers)</li>
           <li><strong>DWxServiceRequests</strong> - The sales funnel (leads, opportunities, deals)</li>
+          <li><strong>DWxProductRequests</strong> - Product demo and deployment requests for DWx Apps</li>
           <li><strong>DWxClients</strong> - Client organizations and contacts</li>
           <li><strong>DWxSpecialists</strong> - Pre-sales team members who handle discovery sessions</li>
           <li><strong>DWxAuditLog</strong> - Audit trail for compliance and tracking</li>

@@ -380,7 +380,7 @@ class DWxSharePointProvisioningService {
           displayName: 'Entity Type',
           type: 'Choice',
           required: true,
-          choices: ['ServiceRequest', 'Client', 'Specialist', 'Service', 'User'],
+          choices: ['ServiceRequest', 'ProductRequest', 'Client', 'Specialist', 'Service', 'User'],
         },
         { internalName: 'EntityId', displayName: 'Entity ID', type: 'Text', required: true },
         { internalName: 'EntityName', displayName: 'Entity Name', type: 'Text' },
@@ -394,13 +394,96 @@ class DWxSharePointProvisioningService {
     };
   }
 
+  private get productRequestsListDefinition(): ListDefinition {
+    return {
+      title: 'DWxProductRequests',
+      description: 'DWx Product Requests - Demo and deployment requests for DWx Apps, Web Parts, Adaptive Cards, and Agents',
+      fields: [
+        // Product Info
+        { internalName: 'ProductId', displayName: 'Product ID', type: 'Text' },
+        { internalName: 'ProductName', displayName: 'Product Name', type: 'Text', required: true },
+        {
+          internalName: 'ProductType',
+          displayName: 'Product Type',
+          type: 'Choice',
+          required: true,
+          choices: ['App', 'Web Part', 'Adaptive Card', 'Agent'],
+        },
+        { internalName: 'ProductCategory', displayName: 'Product Category', type: 'Text' },
+        // Request Type
+        {
+          internalName: 'RequestType',
+          displayName: 'Request Type',
+          type: 'Choice',
+          required: true,
+          choices: ['Demo', 'Trial Deployment'],
+        },
+        // Account Manager Info
+        { internalName: 'AccountManagerName', displayName: 'Account Manager Name', type: 'Text', required: true },
+        { internalName: 'AccountManagerEmail', displayName: 'Account Manager Email', type: 'Text', required: true },
+        { internalName: 'AccountManagerTenant', displayName: 'Account Manager Tenant', type: 'Text' },
+        // Client Info
+        { internalName: 'ClientName', displayName: 'Client Name', type: 'Text', required: true },
+        { internalName: 'ContactName', displayName: 'Contact Name', type: 'Text', required: true },
+        { internalName: 'ContactEmail', displayName: 'Contact Email', type: 'Text', required: true },
+        { internalName: 'ContactPhone', displayName: 'Contact Phone', type: 'Text' },
+        {
+          internalName: 'Industry',
+          displayName: 'Industry',
+          type: 'Choice',
+          choices: ['Technology', 'Finance', 'Healthcare', 'Retail', 'Manufacturing', 'Government', 'Education', 'Other'],
+        },
+        {
+          internalName: 'CompanySize',
+          displayName: 'Company Size',
+          type: 'Choice',
+          choices: ['SMB (<50)', 'Medium (50-250)', 'Large (250-1000)', 'Enterprise (1000+)'],
+        },
+        { internalName: 'IsPremiumClient', displayName: 'Is Premium Client', type: 'Boolean', defaultValue: '0' },
+        // Status
+        {
+          internalName: 'Status',
+          displayName: 'Status',
+          type: 'Choice',
+          required: true,
+          choices: ['Pending Review', 'Awaiting Approval', 'Confirmed', 'Completed', 'Cancelled'],
+          defaultValue: 'Pending Review',
+        },
+        // Deal Info
+        { internalName: 'LicenseCount', displayName: 'License Count', type: 'Number' },
+        { internalName: 'EstimatedValue', displayName: 'Estimated Value (ZAR)', type: 'Currency' },
+        // Scheduling
+        { internalName: 'ProposedSlot1', displayName: 'Proposed Slot 1', type: 'DateTime' },
+        { internalName: 'ProposedSlot2', displayName: 'Proposed Slot 2', type: 'DateTime' },
+        { internalName: 'ProposedSlot3', displayName: 'Proposed Slot 3', type: 'DateTime' },
+        { internalName: 'ConfirmedDateTime', displayName: 'Confirmed DateTime', type: 'DateTime' },
+        { internalName: 'CalendarEventId', displayName: 'Calendar Event ID', type: 'Text' },
+        // Specialist Assignment
+        { internalName: 'AssignedSpecialistName', displayName: 'Assigned Specialist Name', type: 'Text' },
+        { internalName: 'AssignedSpecialistEmail', displayName: 'Assigned Specialist Email', type: 'Text' },
+        {
+          internalName: 'AssignedSpecialistRole',
+          displayName: 'Assigned Specialist Role',
+          type: 'Choice',
+          choices: ['Demo Specialist', 'Solution Architect', 'Technical Specialist', 'Consultant'],
+        },
+        // Product-Specific Requirements (stored as JSON)
+        { internalName: 'ProductRequirements', displayName: 'Product Requirements (JSON)', type: 'Note' },
+        // Notes
+        { internalName: 'Comments', displayName: 'Comments', type: 'Note' },
+        { internalName: 'Outcome', displayName: 'Outcome', type: 'Text' },
+        { internalName: 'NextSteps', displayName: 'Next Steps', type: 'Note' },
+      ],
+    };
+  }
+
   // ==================== PUBLIC METHODS ====================
 
   /**
    * Check which DWx lists exist
    */
   async checkListsStatus(): Promise<ListStatus[]> {
-    const listNames = ['DWxServices', 'DWxServiceRequests', 'DWxClients', 'DWxSpecialists', 'DWxAuditLog'];
+    const listNames = ['DWxServices', 'DWxServiceRequests', 'DWxProductRequests', 'DWxClients', 'DWxSpecialists', 'DWxAuditLog'];
     const results: ListStatus[] = [];
 
     for (const name of listNames) {
@@ -452,6 +535,13 @@ class DWxSharePointProvisioningService {
    */
   async provisionAuditLogList(): Promise<ProvisionResult> {
     return this.provisionList(this.auditLogListDefinition);
+  }
+
+  /**
+   * Provision the DWxProductRequests list
+   */
+  async provisionProductRequestsList(): Promise<ProvisionResult> {
+    return this.provisionList(this.productRequestsListDefinition);
   }
 
   /**
@@ -510,6 +600,7 @@ class DWxSharePointProvisioningService {
     const lists = [
       { name: 'DWxServices', provision: () => this.provisionServicesList() },
       { name: 'DWxServiceRequests', provision: () => this.provisionServiceRequestsList() },
+      { name: 'DWxProductRequests', provision: () => this.provisionProductRequestsList() },
       { name: 'DWxClients', provision: () => this.provisionClientsList() },
       { name: 'DWxSpecialists', provision: () => this.provisionSpecialistsList() },
       { name: 'DWxAuditLog', provision: () => this.provisionAuditLogList() },
