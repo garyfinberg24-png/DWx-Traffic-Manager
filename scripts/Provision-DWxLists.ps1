@@ -12,42 +12,15 @@
     - DWxAuditLog (Audit trail)
     - DWxSupportingDocuments (Document library)
 
-.PARAMETER SiteUrl
-    The SharePoint site URL where lists will be created.
-
-.EXAMPLE
-    .\Provision-DWxLists.ps1 -SiteUrl "https://yourcompany.sharepoint.com/sites/DWxTrafficManager"
-
 .NOTES
-    Requires: PnP.PowerShell module
-    Install with: Install-Module -Name PnP.PowerShell -Scope CurrentUser
+    Requires: PnP.PowerShell module and active connection to SharePoint site
+    Connect first with: Connect-PnPOnline -Url "https://yoursite.sharepoint.com/sites/DWxTrafficManager" -Interactive
 #>
-
-param(
-    [Parameter(Mandatory=$true)]
-    [string]$SiteUrl
-)
-
-# Check if PnP.PowerShell is installed
-if (-not (Get-Module -ListAvailable -Name PnP.PowerShell)) {
-    Write-Error "PnP.PowerShell module is required. Install with: Install-Module -Name PnP.PowerShell -Scope CurrentUser"
-    exit 1
-}
 
 Write-Host "============================================" -ForegroundColor Cyan
 Write-Host "DWx Traffic Manager - SharePoint Provisioning" -ForegroundColor Cyan
 Write-Host "============================================" -ForegroundColor Cyan
 Write-Host ""
-
-# Connect to SharePoint
-Write-Host "Connecting to SharePoint site: $SiteUrl" -ForegroundColor Yellow
-try {
-    Connect-PnPOnline -Url $SiteUrl -Interactive
-    Write-Host "Connected successfully!" -ForegroundColor Green
-} catch {
-    Write-Error "Failed to connect to SharePoint: $_"
-    exit 1
-}
 
 # Function to create a list if it doesn't exist
 function New-DWxList {
@@ -319,6 +292,3 @@ Write-Host "  1. Go to SharePoint site and verify the lists"
 Write-Host "  2. Run the seed script to populate DWxServices with default services"
 Write-Host "  3. Add specialists to DWxSpecialists list"
 Write-Host ""
-
-# Disconnect
-Disconnect-PnPOnline

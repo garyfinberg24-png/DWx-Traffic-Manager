@@ -2,26 +2,15 @@
 .SYNOPSIS
     Seeds the DWxServices list with default service catalog data.
 
-.PARAMETER SiteUrl
-    The SharePoint site URL.
-
-.EXAMPLE
-    .\Seed-DWxServices.ps1 -SiteUrl "https://yourcompany.sharepoint.com/sites/DWxTrafficManager"
+.NOTES
+    Requires: PnP.PowerShell module and active connection to SharePoint site
+    Connect first with: Connect-PnPOnline -Url "https://yoursite.sharepoint.com/sites/DWxTrafficManager" -Interactive
 #>
-
-param(
-    [Parameter(Mandatory=$true)]
-    [string]$SiteUrl
-)
 
 Write-Host "============================================" -ForegroundColor Cyan
 Write-Host "DWx Traffic Manager - Seed Services Data" -ForegroundColor Cyan
 Write-Host "============================================" -ForegroundColor Cyan
 Write-Host ""
-
-# Connect to SharePoint
-Write-Host "Connecting to SharePoint site: $SiteUrl" -ForegroundColor Yellow
-Connect-PnPOnline -Url $SiteUrl -Interactive
 
 # Service catalog data
 $services = @(
@@ -161,5 +150,3 @@ Write-Host "  4. M365 Assessment"
 Write-Host "  5. Copilot Agents"
 Write-Host "  6. MS Viva Implementation"
 Write-Host ""
-
-Disconnect-PnPOnline

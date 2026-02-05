@@ -1,9 +1,10 @@
 /**
  * DWx Traffic Manager - SharePoint Provisioning Service
- * Provisions DWx-specific SharePoint lists for the Traffic Manager application
+ * Provisions DWx-specific SharePoint lists using Microsoft Graph API
  */
 
-import { getAuthService } from './serviceFactory';
+import { Client } from '@microsoft/microsoft-graph-client';
+import { getAuthService, getGraphService } from './serviceFactory';
 import { config } from '../config/environmentConfig';
 import { DW_SERVICES_SEED_DATA } from '../types/ServiceRequest';
 
@@ -23,6 +24,7 @@ interface ListDefinition {
   title: string;
   description: string;
   fields: FieldDefinition[];
+  template?: 'genericList' | 'documentLibrary';
 }
 
 interface ProvisionResult {
@@ -36,126 +38,192 @@ interface ListStatus {
 }
 
 class DWxSharePointProvisioningService {
-  private get siteUrl(): string {
-    return config.sharepoint.siteUrl;
-  }
+  // Cache for site ID
+  private siteIdCache: string | null = null;
+  private siteIdPromise: Promise<string> | null = null;
 
-  private async getRequestDigest(): Promise<string> {
-    const token = await authService.getGraphToken();
-    const response = await fetch(`${this.siteUrl}/_api/contextinfo`, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${token}`,
-        Accept: 'application/json;odata=verbose',
+  private getClient(): Client {
+    return Client.init({
+      authProvider: async (done) => {
+        try {
+          const token = await authService.getGraphToken();
+          done(null, token);
+        } catch (error) {
+          done(error as Error, null);
+        }
       },
     });
-    const data = await response.json();
-    return data.d.GetContextWebInformation.FormDigestValue;
   }
 
+  private async getSiteId(): Promise<string> {
+    if (this.siteIdCache) {
+      return this.siteIdCache;
+    }
+
+    if (this.siteIdPromise) {
+      return this.siteIdPromise;
+    }
+
+    this.siteIdPromise = this.fetchSiteId();
+
+    try {
+      this.siteIdCache = await this.siteIdPromise;
+      return this.siteIdCache;
+    } finally {
+      this.siteIdPromise = null;
+    }
+  }
+
+  private async fetchSiteId(): Promise<string> {
+    const client = this.getClient();
+    const siteUrl = config.sharepoint.siteUrl;
+
+    const url = new URL(siteUrl);
+    const hostname = url.hostname;
+    const sitePath = url.pathname;
+
+    const response = await client
+      .api(`/sites/${hostname}:${sitePath}`)
+      .select('id')
+      .get();
+
+    return response.id;
+  }
+
+  /**
+   * Check if a list exists via Graph API
+   */
   private async listExists(listTitle: string): Promise<boolean> {
     try {
-      const token = await authService.getGraphToken();
-      const response = await fetch(
-        `${this.siteUrl}/_api/web/lists/getbytitle('${listTitle}')`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            Accept: 'application/json;odata=verbose',
-          },
-        }
-      );
-      return response.ok;
+      const client = this.getClient();
+      const siteId = await this.getSiteId();
+      const encodedName = encodeURIComponent(listTitle);
+
+      await client
+        .api(`/sites/${siteId}/lists/${encodedName}`)
+        .select('id')
+        .get();
+
+      return true;
     } catch {
       return false;
     }
   }
 
-  private async createList(title: string, description: string): Promise<void> {
-    const token = await authService.getGraphToken();
-    const digest = await this.getRequestDigest();
+  /**
+   * Create a list via Graph API
+   */
+  private async createList(title: string, description: string, template: 'genericList' | 'documentLibrary' = 'genericList'): Promise<string> {
+    const client = this.getClient();
+    const siteId = await this.getSiteId();
 
-    const response = await fetch(`${this.siteUrl}/_api/web/lists`, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${token}`,
-        Accept: 'application/json;odata=verbose',
-        'Content-Type': 'application/json;odata=verbose',
-        'X-RequestDigest': digest,
-      },
-      body: JSON.stringify({
-        __metadata: { type: 'SP.List' },
-        Title: title,
-        Description: description,
-        BaseTemplate: 100, // Generic List
-        AllowContentTypes: false,
-      }),
-    });
+    const response = await client
+      .api(`/sites/${siteId}/lists`)
+      .post({
+        displayName: title,
+        description: description,
+        list: {
+          template: template,
+        },
+      });
 
-    if (!response.ok) {
-      const error = await response.text();
-      throw new Error(`Failed to create list ${title}: ${error}`);
-    }
+    return response.id;
   }
 
-  private async addField(listTitle: string, field: FieldDefinition): Promise<void> {
-    const token = await authService.getGraphToken();
-    const digest = await this.getRequestDigest();
+  /**
+   * Add a column to a list via Graph API
+   */
+  private async addColumn(listTitle: string, field: FieldDefinition): Promise<void> {
+    const client = this.getClient();
+    const siteId = await this.getSiteId();
+    const encodedListName = encodeURIComponent(listTitle);
 
-    let fieldXml = '';
+    // Build the column definition based on type
+    const columnDef: Record<string, unknown> = {
+      name: field.internalName,
+      displayName: field.displayName,
+      enforceUniqueValues: false,
+    };
+
+    // Required field handling - Graph API uses 'required' at the column level
+    if (field.required) {
+      columnDef.required = true;
+    }
 
     switch (field.type) {
       case 'Text':
-        fieldXml = `<Field Type="Text" DisplayName="${field.displayName}" Name="${field.internalName}" Required="${field.required ? 'TRUE' : 'FALSE'}" />`;
+        columnDef.text = {
+          allowMultipleLines: false,
+          maxLength: 255,
+        };
         break;
+
       case 'Note':
-        fieldXml = `<Field Type="Note" DisplayName="${field.displayName}" Name="${field.internalName}" Required="${field.required ? 'TRUE' : 'FALSE'}" NumLines="6" RichText="FALSE" />`;
+        columnDef.text = {
+          allowMultipleLines: true,
+        };
         break;
+
       case 'Number':
-        fieldXml = `<Field Type="Number" DisplayName="${field.displayName}" Name="${field.internalName}" Required="${field.required ? 'TRUE' : 'FALSE'}" />`;
+        columnDef.number = {
+          decimalPlaces: 'automatic',
+        };
         break;
+
       case 'Currency':
-        fieldXml = `<Field Type="Currency" DisplayName="${field.displayName}" Name="${field.internalName}" Required="${field.required ? 'TRUE' : 'FALSE'}" LCID="7177" />`;
+        columnDef.currency = {
+          locale: 'en-za',
+        };
         break;
+
       case 'DateTime':
-        fieldXml = `<Field Type="DateTime" DisplayName="${field.displayName}" Name="${field.internalName}" Required="${field.required ? 'TRUE' : 'FALSE'}" Format="DateTime" />`;
+        columnDef.dateTime = {
+          format: 'dateTime',
+        };
         break;
+
       case 'Boolean':
-        fieldXml = `<Field Type="Boolean" DisplayName="${field.displayName}" Name="${field.internalName}" Required="${field.required ? 'TRUE' : 'FALSE'}"><Default>${field.defaultValue || '0'}</Default></Field>`;
+        columnDef.boolean = {};
+        if (field.defaultValue) {
+          columnDef.defaultValue = {
+            value: field.defaultValue === '1' ? 'true' : 'false',
+          };
+        }
         break;
+
       case 'Choice':
-        const choicesXml = field.choices?.map((c) => `<CHOICE>${c}</CHOICE>`).join('') || '';
-        const defaultXml = field.defaultValue ? `<Default>${field.defaultValue}</Default>` : '';
-        fieldXml = `<Field Type="Choice" DisplayName="${field.displayName}" Name="${field.internalName}" Required="${field.required ? 'TRUE' : 'FALSE'}"><CHOICES>${choicesXml}</CHOICES>${defaultXml}</Field>`;
+        columnDef.choice = {
+          allowTextEntry: false,
+          choices: field.choices || [],
+          displayAs: 'dropDownMenu',
+        };
+        if (field.defaultValue) {
+          columnDef.defaultValue = {
+            value: field.defaultValue,
+          };
+        }
         break;
     }
 
-    const response = await fetch(
-      `${this.siteUrl}/_api/web/lists/getbytitle('${listTitle}')/fields/createfieldasxml`,
-      {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          Accept: 'application/json;odata=verbose',
-          'Content-Type': 'application/json;odata=verbose',
-          'X-RequestDigest': digest,
-        },
-        body: JSON.stringify({
-          parameters: {
-            __metadata: { type: 'SP.XmlSchemaFieldCreationInformation' },
-            SchemaXml: fieldXml,
-          },
-        }),
+    try {
+      await client
+        .api(`/sites/${siteId}/lists/${encodedListName}/columns`)
+        .post(columnDef);
+    } catch (error) {
+      const err = error as { statusCode?: number; message?: string };
+      // Column might already exist - log but don't throw
+      if (err.statusCode === 409 || (err.message && err.message.includes('already exists'))) {
+        console.log(`[DWx Provisioning] Column '${field.internalName}' already exists in '${listTitle}' - skipping`);
+      } else {
+        console.error(`[DWx Provisioning] Failed to add column '${field.internalName}' to '${listTitle}':`, err.message);
+        // Don't throw - continue with other fields
       }
-    );
-
-    if (!response.ok) {
-      const error = await response.text();
-      console.error(`[DWx Provisioning] Failed to add field ${field.internalName}:`, error);
-      // Don't throw - field might already exist
     }
   }
 
+  /**
+   * Provision a list with all its fields
+   */
   private async provisionList(definition: ListDefinition): Promise<ProvisionResult> {
     try {
       // Check if list already exists
@@ -165,11 +233,12 @@ class DWxSharePointProvisioningService {
       }
 
       // Create the list
-      await this.createList(definition.title, definition.description);
+      const template = definition.template || 'genericList';
+      await this.createList(definition.title, definition.description, template);
 
       // Add fields
       for (const field of definition.fields) {
-        await this.addField(definition.title, field);
+        await this.addColumn(definition.title, field);
       }
 
       return { success: true, message: `List "${definition.title}" created successfully` };
@@ -233,6 +302,9 @@ class DWxSharePointProvisioningService {
         // Service Info
         { internalName: 'ServiceId', displayName: 'Service ID', type: 'Number' },
         { internalName: 'ServiceName', displayName: 'Service Name', type: 'Text' },
+        // Request Context
+        { internalName: 'RequestTitle', displayName: 'Request Title', type: 'Text' },
+        { internalName: 'RequestDetails', displayName: 'Request Details', type: 'Note' },
         // Account Manager Info
         { internalName: 'AccountManagerName', displayName: 'Account Manager Name', type: 'Text', required: true },
         { internalName: 'AccountManagerEmail', displayName: 'Account Manager Email', type: 'Text', required: true },
@@ -551,36 +623,12 @@ class DWxSharePointProvisioningService {
     try {
       const libraryName = 'DWxSupportingDocuments';
 
-      // Check if library already exists
       const exists = await this.listExists(libraryName);
       if (exists) {
         return { success: true, message: `Document library "${libraryName}" already exists` };
       }
 
-      const token = await authService.getGraphToken();
-      const digest = await this.getRequestDigest();
-
-      const response = await fetch(`${this.siteUrl}/_api/web/lists`, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          Accept: 'application/json;odata=verbose',
-          'Content-Type': 'application/json;odata=verbose',
-          'X-RequestDigest': digest,
-        },
-        body: JSON.stringify({
-          __metadata: { type: 'SP.List' },
-          Title: libraryName,
-          Description: 'Supporting documents for DWx service requests (RFPs, requirements, proposals)',
-          BaseTemplate: 101, // Document Library
-          AllowContentTypes: false,
-        }),
-      });
-
-      if (!response.ok) {
-        const error = await response.text();
-        throw new Error(`Failed to create document library: ${error}`);
-      }
+      await this.createList(libraryName, 'Supporting documents for DWx service requests (RFPs, requirements, proposals)', 'documentLibrary');
 
       return { success: true, message: `Document library "${libraryName}" created successfully` };
     } catch (error) {
@@ -622,46 +670,27 @@ class DWxSharePointProvisioningService {
     const results: Array<{ service: string; success: boolean; message: string }> = [];
 
     try {
-      const token = await authService.getGraphToken();
-      const digest = await this.getRequestDigest();
+      const graphService = getGraphService();
 
       for (const service of DW_SERVICES_SEED_DATA) {
         try {
-          const response = await fetch(
-            `${this.siteUrl}/_api/web/lists/getbytitle('DWxServices')/items`,
-            {
-              method: 'POST',
-              headers: {
-                Authorization: `Bearer ${token}`,
-                Accept: 'application/json;odata=verbose',
-                'Content-Type': 'application/json;odata=verbose',
-                'X-RequestDigest': digest,
-              },
-              body: JSON.stringify({
-                __metadata: { type: 'SP.Data.DWxServicesListItem' },
-                Title: service.Title,
-                Description: service.Description,
-                ShortDescription: service.ShortDescription,
-                Category: service.Category,
-                TypicalDuration: service.TypicalDuration,
-                ComplexityLevel: service.ComplexityLevel,
-                PricingModel: service.PricingModel,
-                BasePrice: service.BasePrice,
-                RequiredRoles: JSON.stringify(service.RequiredRoles),
-                Prerequisites: service.Prerequisites,
-                IsActive: true,
-                SortOrder: service.SortOrder,
-                IconName: service.IconName,
-              }),
-            }
-          );
+          await graphService.createListItem('DWxServices', {
+            Title: service.Title,
+            Description: service.Description,
+            ShortDescription: service.ShortDescription,
+            Category: service.Category,
+            TypicalDuration: service.TypicalDuration,
+            ComplexityLevel: service.ComplexityLevel,
+            PricingModel: service.PricingModel,
+            BasePrice: service.BasePrice,
+            RequiredRoles: JSON.stringify(service.RequiredRoles),
+            Prerequisites: service.Prerequisites,
+            IsActive: true,
+            SortOrder: service.SortOrder,
+            IconName: service.IconName,
+          });
 
-          if (!response.ok) {
-            const error = await response.text();
-            results.push({ service: service.Title, success: false, message: error });
-          } else {
-            results.push({ service: service.Title, success: true, message: 'Created successfully' });
-          }
+          results.push({ service: service.Title, success: true, message: 'Created successfully' });
         } catch (err) {
           results.push({
             service: service.Title,
@@ -690,28 +719,19 @@ class DWxSharePointProvisioningService {
     typeAsString: string;
   }>> {
     try {
-      const token = await authService.getGraphToken();
+      const client = this.getClient();
+      const siteId = await this.getSiteId();
+      const encodedListName = encodeURIComponent(listTitle);
 
-      const response = await fetch(
-        `${this.siteUrl}/_api/web/lists/getbytitle('${listTitle}')/fields?$filter=Hidden eq false&$select=InternalName,Title,TypeAsString&$orderby=Title`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            Accept: 'application/json;odata=verbose',
-          },
-        }
-      );
+      const response = await client
+        .api(`/sites/${siteId}/lists/${encodedListName}/columns`)
+        .select('name,displayName,text,choice,dateTime,boolean,number,currency')
+        .get();
 
-      if (!response.ok) {
-        console.error('Failed to get list fields:', await response.text());
-        return [];
-      }
-
-      const data = await response.json();
-      return data.d.results.map((f: { InternalName: string; Title: string; TypeAsString: string }) => ({
-        internalName: f.InternalName,
-        title: f.Title,
-        typeAsString: f.TypeAsString,
+      return response.value.map((col: { name: string; displayName: string; text?: object; choice?: object; dateTime?: object; boolean?: object; number?: object; currency?: object }) => ({
+        internalName: col.name,
+        title: col.displayName,
+        typeAsString: col.text ? 'Text' : col.choice ? 'Choice' : col.dateTime ? 'DateTime' : col.boolean ? 'Boolean' : col.number ? 'Number' : col.currency ? 'Currency' : 'Other',
       }));
     } catch (error) {
       console.error('Failed to get list fields:', error);
@@ -724,24 +744,9 @@ class DWxSharePointProvisioningService {
    */
   async getListItemCount(listTitle: string): Promise<number> {
     try {
-      const token = await authService.getGraphToken();
-
-      const response = await fetch(
-        `${this.siteUrl}/_api/web/lists/getbytitle('${listTitle}')/ItemCount`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            Accept: 'application/json;odata=verbose',
-          },
-        }
-      );
-
-      if (!response.ok) {
-        return 0;
-      }
-
-      const data = await response.json();
-      return data.d.ItemCount || 0;
+      const graphService = getGraphService();
+      const items = await graphService.getListItems(listTitle);
+      return items.length;
     } catch {
       return 0;
     }
