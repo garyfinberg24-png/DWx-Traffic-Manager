@@ -295,6 +295,10 @@ interface ServiceRequestFormData {
   serviceName: string;
   serviceCategory?: ServiceCategory;
 
+  // Request Context
+  requestTitle: string;
+  requestDetails?: string;
+
   // Client
   clientName: string;
   contactName: string;
@@ -399,6 +403,8 @@ export const ServiceRequestForm: React.FC<ServiceRequestFormProps> = ({
       serviceName: preSelectedService?.Title || '',
       serviceId: preSelectedService?.Id,
       serviceCategory: preSelectedService?.Category,
+      requestTitle: '',
+      requestDetails: '',
       serviceRequirements: {},
       interestLevel: 'Warm',
       dealProbability: 50,
@@ -571,7 +577,7 @@ export const ServiceRequestForm: React.FC<ServiceRequestFormProps> = ({
       case 1:
         return selectedService !== null;
       case 2:
-        return !!(watchedValues.clientName && watchedValues.contactName && watchedValues.contactEmail);
+        return !!(watchedValues.requestTitle && watchedValues.clientName && watchedValues.contactName && watchedValues.contactEmail);
       case 3:
         // Validate service-specific requirements
         if (selectedService?.Category) {
@@ -662,6 +668,45 @@ export const ServiceRequestForm: React.FC<ServiceRequestFormProps> = ({
         <div className={styles.stepHeaderSubtitle}>Enter the client details for this service request</div>
       </div>
       <div className={styles.stepBody}>
+        {/* Request Context Section */}
+        <div className={styles.stepSection}>
+          <Text className={styles.stepSectionTitle} block>Request Context</Text>
+          <div className={styles.form}>
+            <Controller
+              name="requestTitle"
+              control={control}
+              rules={{ required: 'Request title is required' }}
+              render={({ field }) => (
+                <Field
+                  label="Request Title"
+                  required
+                  validationMessage={errors.requestTitle?.message}
+                >
+                  <Input {...field} placeholder="Brief title for this request (e.g., 'Power Platform Assessment for Contoso')" />
+                </Field>
+              )}
+            />
+
+            <Controller
+              name="requestDetails"
+              control={control}
+              render={({ field }) => (
+                <Field label="Request Details">
+                  <Textarea
+                    {...field}
+                    placeholder="Describe the context and specific needs for this service request..."
+                    resize="vertical"
+                    style={{ minHeight: '100px' }}
+                  />
+                </Field>
+              )}
+            />
+          </div>
+        </div>
+
+        <div className={styles.stepDivider} />
+
+        {/* Company Details Section */}
         <div className={styles.stepSection}>
           <Text className={styles.stepSectionTitle} block>Company Details</Text>
           <div className={styles.form}>
@@ -1124,8 +1169,20 @@ export const ServiceRequestForm: React.FC<ServiceRequestFormProps> = ({
         </div>
         <div className={styles.stepBody}>
           <div className={styles.stepSection}>
-            <Text className={styles.stepSectionTitle} block>Service & Client</Text>
+            <Text className={styles.stepSectionTitle} block>Request Overview</Text>
             <div className={styles.previewSection}>
+              <div className={styles.previewItem}>
+                <Text className={styles.previewLabel}>Request Title</Text>
+                <Text className={styles.previewValue}>{watchedValues.requestTitle}</Text>
+              </div>
+
+              {watchedValues.requestDetails && (
+                <div className={styles.previewItem}>
+                  <Text className={styles.previewLabel}>Request Details</Text>
+                  <Text className={styles.previewValue}>{watchedValues.requestDetails}</Text>
+                </div>
+              )}
+
               <div className={styles.previewItem}>
                 <Text className={styles.previewLabel}>Service</Text>
                 <Text className={styles.previewValue}>{selectedService?.Title}</Text>

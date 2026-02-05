@@ -21,6 +21,7 @@ import {
   AddRegular,
   DocumentBulletListRegular,
   ArrowTrendingRegular,
+  Apps24Regular,
 } from '@fluentui/react-icons';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -31,8 +32,8 @@ const useStyles = makeStyles({
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: `${tokens.spacingVerticalL} ${tokens.spacingHorizontalXL}`,
-    minHeight: '64px',
+    padding: `${tokens.spacingVerticalXL} ${tokens.spacingHorizontalXXL}`,
+    minHeight: '72px',
     backgroundColor: tokens.colorBrandBackground,
     color: tokens.colorNeutralForegroundOnBrand,
     boxShadow: tokens.shadow4,
@@ -104,6 +105,14 @@ export const Header: React.FC = () => {
           icon={<GridRegular />}
         >
           Services
+        </Button>
+        <Button
+          appearance="subtle"
+          className={`${styles.navButton} ${isActive('/products') ? styles.navButtonActive : ''}`}
+          onClick={() => navigate('/products')}
+          icon={<Apps24Regular />}
+        >
+          Products
         </Button>
         <Button
           appearance="subtle"
