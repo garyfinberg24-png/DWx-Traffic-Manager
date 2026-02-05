@@ -1,6 +1,6 @@
 /**
  * DWx Traffic Manager - SharePoint Provisioning Component
- * Admin UI for provisioning DWx SharePoint lists
+ * Admin UI for provisioning DWx SharePoint lists and seeding sample data
  */
 
 import React, { useState, useEffect } from 'react';
@@ -228,13 +228,21 @@ export const DWxSharePointProvisioning: React.FC = () => {
   const [isChecking, setIsChecking] = useState(false);
   const [isProvisioning, setIsProvisioning] = useState(false);
   const [isSeeding, setIsSeeding] = useState(false);
+  const [isSeedingAll, setIsSeedingAll] = useState(false);
+  const [seedAllProgress, setSeedAllProgress] = useState<string>('');
   const [provisionResults, setProvisionResults] = useState<ProvisionResult[] | null>(null);
   const [seedResults, setSeedResults] = useState<ProvisionResult[] | null>(null);
   const [error, setError] = useState<string | null>(null);
+  // Counts
   const [servicesCount, setServicesCount] = useState<number>(0);
   const [teamMembersCount, setTeamMembersCount] = useState<number>(0);
   const [clientsCount, setClientsCount] = useState<number>(0);
   const [accountManagersCount, setAccountManagersCount] = useState<number>(0);
+  const [specialistsCount, setSpecialistsCount] = useState<number>(0);
+  const [managersCount, setManagersCount] = useState<number>(0);
+  const [serviceRequestsCount, setServiceRequestsCount] = useState<number>(0);
+  const [productRequestsCount, setProductRequestsCount] = useState<number>(0);
+  const [sessionPrepCount, setSessionPrepCount] = useState<number>(0);
 
   const checkListStatus = async () => {
     setIsChecking(true);
@@ -253,11 +261,16 @@ export const DWxSharePointProvisioning: React.FC = () => {
         { listName: 'DWxTeamMembers', setter: setTeamMembersCount },
         { listName: 'DWxClients', setter: setClientsCount },
         { listName: 'DWxAccountManagers', setter: setAccountManagersCount },
+        { listName: 'DWxSpecialists', setter: setSpecialistsCount },
+        { listName: 'DWxManagers', setter: setManagersCount },
+        { listName: 'DWxServiceRequests', setter: setServiceRequestsCount },
+        { listName: 'DWxProductRequests', setter: setProductRequestsCount },
+        { listName: 'DWxSessionPrep', setter: setSessionPrepCount },
       ];
 
       await Promise.all(
         countChecks.map(async ({ listName, setter }) => {
-          const status = statuses.find(s => s.list === listName);
+          const status = [...statuses, docLibStatus].find(s => s?.list === listName);
           if (status?.exists) {
             const count = await dwxSharePointProvisioningService.getListItemCount(listName);
             setter(count);
@@ -280,7 +293,6 @@ export const DWxSharePointProvisioning: React.FC = () => {
     try {
       const { results } = await dwxSharePointProvisioningService.provisionAllLists();
       setProvisionResults(results);
-      // Refresh status after provisioning
       await checkListStatus();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to provision lists');
@@ -340,6 +352,7 @@ export const DWxSharePointProvisioning: React.FC = () => {
     }
   };
 
+  // Individual seed handlers
   const seedServices = async () => {
     setIsSeeding(true);
     setError(null);
@@ -347,7 +360,6 @@ export const DWxSharePointProvisioning: React.FC = () => {
     try {
       const { results } = await dwxSharePointProvisioningService.seedServicesData();
       setSeedResults(results.map(r => ({ service: r.service, success: r.success, message: r.message })));
-      // Refresh count
       const count = await dwxSharePointProvisioningService.getListItemCount('DWxServices');
       setServicesCount(count);
     } catch (err) {
@@ -405,6 +417,110 @@ export const DWxSharePointProvisioning: React.FC = () => {
     }
   };
 
+  const seedSpecialists = async () => {
+    setIsSeeding(true);
+    setError(null);
+    setSeedResults(null);
+    try {
+      const { results } = await dwxSharePointProvisioningService.seedSpecialistsData();
+      setSeedResults(results.map(r => ({ service: r.name, success: r.success, message: r.message })));
+      const count = await dwxSharePointProvisioningService.getListItemCount('DWxSpecialists');
+      setSpecialistsCount(count);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to seed specialists');
+    } finally {
+      setIsSeeding(false);
+    }
+  };
+
+  const seedManagers = async () => {
+    setIsSeeding(true);
+    setError(null);
+    setSeedResults(null);
+    try {
+      const { results } = await dwxSharePointProvisioningService.seedManagersData();
+      setSeedResults(results.map(r => ({ service: r.name, success: r.success, message: r.message })));
+      const count = await dwxSharePointProvisioningService.getListItemCount('DWxManagers');
+      setManagersCount(count);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to seed managers');
+    } finally {
+      setIsSeeding(false);
+    }
+  };
+
+  const seedServiceRequests = async () => {
+    setIsSeeding(true);
+    setError(null);
+    setSeedResults(null);
+    try {
+      const { results } = await dwxSharePointProvisioningService.seedServiceRequestsData();
+      setSeedResults(results.map(r => ({ service: r.name, success: r.success, message: r.message })));
+      const count = await dwxSharePointProvisioningService.getListItemCount('DWxServiceRequests');
+      setServiceRequestsCount(count);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to seed service requests');
+    } finally {
+      setIsSeeding(false);
+    }
+  };
+
+  const seedProductRequests = async () => {
+    setIsSeeding(true);
+    setError(null);
+    setSeedResults(null);
+    try {
+      const { results } = await dwxSharePointProvisioningService.seedProductRequestsData();
+      setSeedResults(results.map(r => ({ service: r.name, success: r.success, message: r.message })));
+      const count = await dwxSharePointProvisioningService.getListItemCount('DWxProductRequests');
+      setProductRequestsCount(count);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to seed product requests');
+    } finally {
+      setIsSeeding(false);
+    }
+  };
+
+  const seedSessionPrep = async () => {
+    setIsSeeding(true);
+    setError(null);
+    setSeedResults(null);
+    try {
+      const { results } = await dwxSharePointProvisioningService.seedSessionPrepData();
+      setSeedResults(results.map(r => ({ service: r.name, success: r.success, message: r.message })));
+      const count = await dwxSharePointProvisioningService.getListItemCount('DWxSessionPrep');
+      setSessionPrepCount(count);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to seed session prep');
+    } finally {
+      setIsSeeding(false);
+    }
+  };
+
+  const seedAllData = async () => {
+    setIsSeedingAll(true);
+    setError(null);
+    setSeedResults(null);
+    try {
+      const { results } = await dwxSharePointProvisioningService.seedAllSampleData(
+        (step, current, total) => {
+          setSeedAllProgress(`${step} (${current}/${total})`);
+        }
+      );
+      setSeedResults(results.map(r => ({
+        service: r.list,
+        success: r.success,
+        message: r.message,
+      })));
+      await checkListStatus();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to seed all data');
+    } finally {
+      setIsSeedingAll(false);
+      setSeedAllProgress('');
+    }
+  };
+
   useEffect(() => {
     checkListStatus();
   }, []);
@@ -424,6 +540,15 @@ export const DWxSharePointProvisioning: React.FC = () => {
   const teamMembersExists = getStatusForList('DWxTeamMembers');
   const clientsExists = getStatusForList('DWxClients');
   const accountManagersExists = getStatusForList('DWxAccountManagers');
+  const specialistsExists = getStatusForList('DWxSpecialists');
+  const managersExists = getStatusForList('DWxManagers');
+  const serviceRequestsExists = getStatusForList('DWxServiceRequests');
+  const productRequestsExists = getStatusForList('DWxProductRequests');
+  const sessionPrepExists = getStatusForList('DWxSessionPrep');
+  const anySeeding = isSeeding || isSeedingAll;
+
+  const totalSeedItems = servicesCount + teamMembersCount + clientsCount + accountManagersCount +
+    specialistsCount + managersCount + serviceRequestsCount + productRequestsCount + sessionPrepCount;
 
   return (
     <div className={styles.container}>
@@ -459,16 +584,28 @@ export const DWxSharePointProvisioning: React.FC = () => {
           <Text className={styles.statLabel}>Services</Text>
         </div>
         <div className={styles.statCard}>
-          <Text className={styles.statValue}>{teamMembersCount}</Text>
-          <Text className={styles.statLabel}>Team Members</Text>
-        </div>
-        <div className={styles.statCard}>
           <Text className={styles.statValue}>{clientsCount}</Text>
           <Text className={styles.statLabel}>Clients</Text>
         </div>
         <div className={styles.statCard}>
+          <Text className={styles.statValue}>{specialistsCount}</Text>
+          <Text className={styles.statLabel}>Specialists</Text>
+        </div>
+        <div className={styles.statCard}>
           <Text className={styles.statValue}>{accountManagersCount}</Text>
           <Text className={styles.statLabel}>Account Mgrs</Text>
+        </div>
+        <div className={styles.statCard}>
+          <Text className={styles.statValue}>{serviceRequestsCount}</Text>
+          <Text className={styles.statLabel}>Requests</Text>
+        </div>
+        <div className={styles.statCard}>
+          <Text className={styles.statValue}>{productRequestsCount}</Text>
+          <Text className={styles.statLabel}>Product Reqs</Text>
+        </div>
+        <div className={styles.statCard}>
+          <Text className={styles.statValue}>{sessionPrepCount}</Text>
+          <Text className={styles.statLabel}>Session Preps</Text>
         </div>
       </div>
 
@@ -598,47 +735,97 @@ export const DWxSharePointProvisioning: React.FC = () => {
 
       <Divider />
 
-      {/* Seed Data Section */}
-      <div className={styles.seedSection}>
+      {/* ===== SEED ALL SAMPLE DATA ===== */}
+      <div className={styles.seedSection} style={{ borderLeft: '4px solid #1e6b7b' }}>
         <div className={styles.sectionHeader}>
           <Rocket24Regular className={styles.sectionIcon} />
+          <Text size={500} weight="semibold">
+            Seed All Sample Data
+          </Text>
+        </div>
+        <Text className={styles.description}>
+          Populate all lists with realistic South African enterprise sample data in dependency order.
+          Includes 12 SA companies, 14 service requests across all funnel stages, 8 product requests,
+          5 specialists, and AI-powered session prep records.
+        </Text>
+        <Text className={styles.infoText} block>
+          Order: Clients &rarr; Team Members &rarr; Account Managers &rarr; Specialists &rarr; Managers &rarr; Services &rarr; Service Requests &rarr; Product Requests &rarr; Session Prep
+        </Text>
+
+        {isSeedingAll && seedAllProgress && (
+          <MessageBar intent="info" style={{ marginTop: '8px' }}>
+            <MessageBarBody>{seedAllProgress}</MessageBarBody>
+          </MessageBar>
+        )}
+
+        <div style={{ marginTop: tokens.spacingVerticalM }}>
+          <Button
+            appearance="primary"
+            icon={<Rocket24Regular />}
+            onClick={seedAllData}
+            disabled={anySeeding || !allListsExist}
+            style={{ backgroundColor: '#1e6b7b' }}
+          >
+            {isSeedingAll ? (
+              <>
+                <Spinner size="tiny" style={{ marginRight: '8px' }} />
+                {seedAllProgress || 'Seeding...'}
+              </>
+            ) : totalSeedItems > 0 ? (
+              `Seed All Sample Data (${totalSeedItems} items exist)`
+            ) : (
+              'Seed All Sample Data'
+            )}
+          </Button>
+
+          {!allListsExist && (
+            <Text className={styles.infoText} block style={{ marginTop: '4px' }}>
+              All lists must be provisioned before seeding sample data
+            </Text>
+          )}
+        </div>
+      </div>
+
+      <Divider />
+
+      {/* ===== INDIVIDUAL SEED SECTIONS ===== */}
+
+      {/* Seed Services */}
+      <div className={styles.seedSection}>
+        <div className={styles.sectionHeader}>
+          <Briefcase24Regular className={styles.sectionIcon} />
           <Text size={400} weight="semibold">
             Seed Service Catalog
           </Text>
         </div>
         <Text className={styles.description}>
-          Populate the DWxServices list with Digital Workplace's 6 core service offerings
+          Populate DWxServices with 7 core service offerings (Power Platform, SPFx, Migrations, M365, Copilot, Viva, Training)
         </Text>
-        <Text className={styles.infoText}>
-          Services: Power Platform, SPFx Development, SharePoint Migrations, M365 Assessment, Copilot Agents, MS Viva
-        </Text>
-
         <div style={{ marginTop: tokens.spacingVerticalM }}>
-          <Button
-            appearance="outline"
-            icon={<Add24Regular />}
-            onClick={seedServices}
-            disabled={!servicesExists || isSeeding || servicesCount > 0}
-          >
-            {isSeeding ? (
-              <>
-                <Spinner size="tiny" style={{ marginRight: '8px' }} />
-                Seeding...
-              </>
-            ) : servicesCount > 0 ? (
-              `Services Already Seeded (${servicesCount})`
-            ) : (
-              'Seed 6 Default Services'
-            )}
+          <Button appearance="outline" icon={<Add24Regular />} onClick={seedServices} disabled={!servicesExists || anySeeding || servicesCount > 0}>
+            {anySeeding && !isSeedingAll ? (<><Spinner size="tiny" style={{ marginRight: '8px' }} />Seeding...</>) : servicesCount > 0 ? (`Services Already Seeded (${servicesCount})`) : ('Seed 7 Default Services')}
           </Button>
-
-          {!servicesExists && (
-            <Text className={styles.infoText} block style={{ marginTop: '4px' }}>
-              Create the DWxServices list first before seeding data
-            </Text>
-          )}
+          {!servicesExists && <Text className={styles.infoText} block style={{ marginTop: '4px' }}>Create the DWxServices list first</Text>}
         </div>
+      </div>
 
+      {/* Seed Clients */}
+      <div className={styles.seedSection}>
+        <div className={styles.sectionHeader}>
+          <Building24Regular className={styles.sectionIcon} />
+          <Text size={400} weight="semibold">
+            Seed SA Clients
+          </Text>
+        </div>
+        <Text className={styles.description}>
+          Populate DWxClients with 12 South African enterprise clients (Nedbank, Discovery, Sasol, MTN, Woolworths, Sanlam, Capitec, Shoprite, Old Mutual, Anglo American, Standard Bank, Pick n Pay)
+        </Text>
+        <div style={{ marginTop: tokens.spacingVerticalM }}>
+          <Button appearance="outline" icon={<Add24Regular />} onClick={seedClients} disabled={!clientsExists || anySeeding || clientsCount > 0}>
+            {anySeeding && !isSeedingAll ? (<><Spinner size="tiny" style={{ marginRight: '8px' }} />Seeding...</>) : clientsCount > 0 ? (`Clients Already Seeded (${clientsCount})`) : ('Seed 12 SA Clients')}
+          </Button>
+          {!clientsExists && <Text className={styles.infoText} block style={{ marginTop: '4px' }}>Create the DWxClients list first</Text>}
+        </div>
       </div>
 
       {/* Seed Team Members */}
@@ -650,72 +837,13 @@ export const DWxSharePointProvisioning: React.FC = () => {
           </Text>
         </div>
         <Text className={styles.description}>
-          Populate the DWxTeamMembers list with 6 team members (Solution Architects, Consultants, Specialists)
+          Populate DWxTeamMembers with 6 team members (Solution Architects, Consultants, Specialists)
         </Text>
-
         <div style={{ marginTop: tokens.spacingVerticalM }}>
-          <Button
-            appearance="outline"
-            icon={<Add24Regular />}
-            onClick={seedTeamMembers}
-            disabled={!teamMembersExists || isSeeding || teamMembersCount > 0}
-          >
-            {isSeeding ? (
-              <>
-                <Spinner size="tiny" style={{ marginRight: '8px' }} />
-                Seeding...
-              </>
-            ) : teamMembersCount > 0 ? (
-              `Team Members Already Seeded (${teamMembersCount})`
-            ) : (
-              'Seed 6 Team Members'
-            )}
+          <Button appearance="outline" icon={<Add24Regular />} onClick={seedTeamMembers} disabled={!teamMembersExists || anySeeding || teamMembersCount > 0}>
+            {anySeeding && !isSeedingAll ? (<><Spinner size="tiny" style={{ marginRight: '8px' }} />Seeding...</>) : teamMembersCount > 0 ? (`Team Members Already Seeded (${teamMembersCount})`) : ('Seed 6 Team Members')}
           </Button>
-
-          {!teamMembersExists && (
-            <Text className={styles.infoText} block style={{ marginTop: '4px' }}>
-              Create the DWxTeamMembers list first before seeding data
-            </Text>
-          )}
-        </div>
-      </div>
-
-      {/* Seed Clients */}
-      <div className={styles.seedSection}>
-        <div className={styles.sectionHeader}>
-          <Building24Regular className={styles.sectionIcon} />
-          <Text size={400} weight="semibold">
-            Seed Clients
-          </Text>
-        </div>
-        <Text className={styles.description}>
-          Populate the DWxClients list with 8 sample client organizations
-        </Text>
-
-        <div style={{ marginTop: tokens.spacingVerticalM }}>
-          <Button
-            appearance="outline"
-            icon={<Add24Regular />}
-            onClick={seedClients}
-            disabled={!clientsExists || isSeeding || clientsCount > 0}
-          >
-            {isSeeding ? (
-              <>
-                <Spinner size="tiny" style={{ marginRight: '8px' }} />
-                Seeding...
-              </>
-            ) : clientsCount > 0 ? (
-              `Clients Already Seeded (${clientsCount})`
-            ) : (
-              'Seed 8 Sample Clients'
-            )}
-          </Button>
-
-          {!clientsExists && (
-            <Text className={styles.infoText} block style={{ marginTop: '4px' }}>
-              Create the DWxClients list first before seeding data
-            </Text>
-          )}
+          {!teamMembersExists && <Text className={styles.infoText} block style={{ marginTop: '4px' }}>Create the DWxTeamMembers list first</Text>}
         </div>
       </div>
 
@@ -728,33 +856,112 @@ export const DWxSharePointProvisioning: React.FC = () => {
           </Text>
         </div>
         <Text className={styles.description}>
-          Populate the DWxAccountManagers list with 5 account managers across regions
+          Populate DWxAccountManagers with 5 account managers across SA regions
         </Text>
-
         <div style={{ marginTop: tokens.spacingVerticalM }}>
-          <Button
-            appearance="outline"
-            icon={<Add24Regular />}
-            onClick={seedAccountManagers}
-            disabled={!accountManagersExists || isSeeding || accountManagersCount > 0}
-          >
-            {isSeeding ? (
-              <>
-                <Spinner size="tiny" style={{ marginRight: '8px' }} />
-                Seeding...
-              </>
-            ) : accountManagersCount > 0 ? (
-              `Account Managers Already Seeded (${accountManagersCount})`
-            ) : (
-              'Seed 5 Account Managers'
-            )}
+          <Button appearance="outline" icon={<Add24Regular />} onClick={seedAccountManagers} disabled={!accountManagersExists || anySeeding || accountManagersCount > 0}>
+            {anySeeding && !isSeedingAll ? (<><Spinner size="tiny" style={{ marginRight: '8px' }} />Seeding...</>) : accountManagersCount > 0 ? (`Account Managers Already Seeded (${accountManagersCount})`) : ('Seed 5 Account Managers')}
           </Button>
+          {!accountManagersExists && <Text className={styles.infoText} block style={{ marginTop: '4px' }}>Create the DWxAccountManagers list first</Text>}
+        </div>
+      </div>
 
-          {!accountManagersExists && (
-            <Text className={styles.infoText} block style={{ marginTop: '4px' }}>
-              Create the DWxAccountManagers list first before seeding data
-            </Text>
-          )}
+      {/* Seed Specialists */}
+      <div className={styles.seedSection}>
+        <div className={styles.sectionHeader}>
+          <People24Regular className={styles.sectionIcon} />
+          <Text size={400} weight="semibold">
+            Seed Specialists
+          </Text>
+        </div>
+        <Text className={styles.description}>
+          Populate DWxSpecialists with 5 pre-sales specialists with roles, specializations, and capacity
+        </Text>
+        <div style={{ marginTop: tokens.spacingVerticalM }}>
+          <Button appearance="outline" icon={<Add24Regular />} onClick={seedSpecialists} disabled={!specialistsExists || anySeeding || specialistsCount > 0}>
+            {anySeeding && !isSeedingAll ? (<><Spinner size="tiny" style={{ marginRight: '8px' }} />Seeding...</>) : specialistsCount > 0 ? (`Specialists Already Seeded (${specialistsCount})`) : ('Seed 5 Specialists')}
+          </Button>
+          {!specialistsExists && <Text className={styles.infoText} block style={{ marginTop: '4px' }}>Create the DWxSpecialists list first</Text>}
+        </div>
+      </div>
+
+      {/* Seed Managers */}
+      <div className={styles.seedSection}>
+        <div className={styles.sectionHeader}>
+          <ShieldKeyhole24Regular className={styles.sectionIcon} />
+          <Text size={400} weight="semibold">
+            Seed Managers
+          </Text>
+        </div>
+        <Text className={styles.description}>
+          Populate DWxManagers with 2 manager access entries (Gary Finberg, James Peterson)
+        </Text>
+        <div style={{ marginTop: tokens.spacingVerticalM }}>
+          <Button appearance="outline" icon={<Add24Regular />} onClick={seedManagers} disabled={!managersExists || anySeeding || managersCount > 0}>
+            {anySeeding && !isSeedingAll ? (<><Spinner size="tiny" style={{ marginRight: '8px' }} />Seeding...</>) : managersCount > 0 ? (`Managers Already Seeded (${managersCount})`) : ('Seed 2 Managers')}
+          </Button>
+          {!managersExists && <Text className={styles.infoText} block style={{ marginTop: '4px' }}>Create the DWxManagers list first</Text>}
+        </div>
+      </div>
+
+      {/* Seed Service Requests */}
+      <div className={styles.seedSection}>
+        <div className={styles.sectionHeader}>
+          <DocumentBulletList24Regular className={styles.sectionIcon} />
+          <Text size={400} weight="semibold">
+            Seed Service Requests
+          </Text>
+        </div>
+        <Text className={styles.description}>
+          Populate DWxServiceRequests with 14 requests across all 7 funnel stages (Lead, Qualified, Discovery, Proposal, Negotiation, Won, Lost)
+        </Text>
+        <div style={{ marginTop: tokens.spacingVerticalM }}>
+          <Button appearance="outline" icon={<Add24Regular />} onClick={seedServiceRequests} disabled={!serviceRequestsExists || anySeeding || serviceRequestsCount > 0}>
+            {anySeeding && !isSeedingAll ? (<><Spinner size="tiny" style={{ marginRight: '8px' }} />Seeding...</>) : serviceRequestsCount > 0 ? (`Service Requests Already Seeded (${serviceRequestsCount})`) : ('Seed 14 Service Requests')}
+          </Button>
+          {!serviceRequestsExists && <Text className={styles.infoText} block style={{ marginTop: '4px' }}>Create the DWxServiceRequests list first</Text>}
+        </div>
+      </div>
+
+      {/* Seed Product Requests */}
+      <div className={styles.seedSection}>
+        <div className={styles.sectionHeader}>
+          <Apps24Regular className={styles.sectionIcon} />
+          <Text size={400} weight="semibold">
+            Seed Product Requests
+          </Text>
+        </div>
+        <Text className={styles.description}>
+          Populate DWxProductRequests with 8 requests across all 5 statuses (Pending Review, Awaiting Approval, Confirmed, Completed, Cancelled)
+        </Text>
+        <div style={{ marginTop: tokens.spacingVerticalM }}>
+          <Button appearance="outline" icon={<Add24Regular />} onClick={seedProductRequests} disabled={!productRequestsExists || anySeeding || productRequestsCount > 0}>
+            {anySeeding && !isSeedingAll ? (<><Spinner size="tiny" style={{ marginRight: '8px' }} />Seeding...</>) : productRequestsCount > 0 ? (`Product Requests Already Seeded (${productRequestsCount})`) : ('Seed 8 Product Requests')}
+          </Button>
+          {!productRequestsExists && <Text className={styles.infoText} block style={{ marginTop: '4px' }}>Create the DWxProductRequests list first</Text>}
+        </div>
+      </div>
+
+      {/* Seed Session Prep */}
+      <div className={styles.seedSection}>
+        <div className={styles.sectionHeader}>
+          <Sparkle24Regular className={styles.sectionIcon} />
+          <Text size={400} weight="semibold">
+            Seed Session Preparations
+          </Text>
+        </div>
+        <Text className={styles.description}>
+          Populate DWxSessionPrep with 3 AI-powered session prep records (Ready, In Progress, Not Started)
+        </Text>
+        <Text className={styles.infoText} block>
+          Requires service requests to be seeded first (links to Discovery-stage requests)
+        </Text>
+        <div style={{ marginTop: tokens.spacingVerticalM }}>
+          <Button appearance="outline" icon={<Add24Regular />} onClick={seedSessionPrep} disabled={!sessionPrepExists || anySeeding || sessionPrepCount > 0 || serviceRequestsCount === 0}>
+            {anySeeding && !isSeedingAll ? (<><Spinner size="tiny" style={{ marginRight: '8px' }} />Seeding...</>) : sessionPrepCount > 0 ? (`Session Preps Already Seeded (${sessionPrepCount})`) : ('Seed 3 Session Preps')}
+          </Button>
+          {!sessionPrepExists && <Text className={styles.infoText} block style={{ marginTop: '4px' }}>Create the DWxSessionPrep list first</Text>}
+          {sessionPrepExists && serviceRequestsCount === 0 && <Text className={styles.infoText} block style={{ marginTop: '4px' }}>Seed service requests first (session preps link to Discovery requests)</Text>}
         </div>
       </div>
 
@@ -796,6 +1003,8 @@ export const DWxSharePointProvisioning: React.FC = () => {
           <li><strong>DWxProductRequests</strong> - Product demo and deployment requests for DWx Apps</li>
           <li><strong>DWxClients</strong> - Client organizations and contacts</li>
           <li><strong>DWxSpecialists</strong> - Pre-sales team members who handle discovery sessions</li>
+          <li><strong>DWxManagers</strong> - Users with admin and dashboard access</li>
+          <li><strong>DWxSessionPrep</strong> - AI-powered session preparation for meetings</li>
           <li><strong>DWxAuditLog</strong> - Audit trail for compliance and tracking</li>
           <li><strong>DWxSupportingDocuments</strong> - Document library for RFPs and proposals</li>
         </ul>

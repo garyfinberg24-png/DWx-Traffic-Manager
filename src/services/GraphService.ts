@@ -1056,6 +1056,11 @@ class GraphService {
         request = request.orderby(options.orderBy);
       }
 
+      // Allow filtering/sorting on non-indexed columns (required for small lists like DWxServices)
+      if (options?.filter || options?.orderBy) {
+        request = request.header('Prefer', 'HonorNonIndexedQueriesWarningMayFailRandomly');
+      }
+
       if (options?.top) {
         request = request.top(options.top);
       }

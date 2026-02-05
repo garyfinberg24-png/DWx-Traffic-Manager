@@ -81,13 +81,13 @@ class SpecialistService {
   async getSpecialistsByRole(role: SpecialistRole): Promise<Specialist[]> {
     try {
       const graphService = getGraphService();
-      const filter = `fields/Role eq '${role}' and fields/IsActive eq true`;
 
-      const items = await graphService.getListItems(this.listName, {
-        filter,
-      }) as Record<string, unknown>[];
+      // Fetch all and filter client-side (IsActive & Role may not be indexed)
+      const items = await graphService.getListItems(this.listName) as Record<string, unknown>[];
 
-      return items.map(this.mapToSpecialist);
+      return items
+        .map(this.mapToSpecialist)
+        .filter(s => s.IsActive && s.Role === role);
     } catch (error) {
       console.error('Error fetching specialists by role:', error);
       return [];

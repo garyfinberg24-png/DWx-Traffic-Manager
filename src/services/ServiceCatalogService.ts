@@ -22,14 +22,19 @@ class ServiceCatalogService {
   async getServices(activeOnly: boolean = true): Promise<DWService[]> {
     try {
       const graphService = getGraphService();
-      const filter = activeOnly ? "fields/IsActive eq true" : undefined;
 
-      const items = await graphService.getListItems(this.listName, {
-        filter,
-        orderBy: "fields/SortOrder",
-      }) as Record<string, unknown>[];
+      // Fetch all items and filter/sort client-side (IsActive & SortOrder are not indexed in SharePoint)
+      const items = await graphService.getListItems(this.listName) as Record<string, unknown>[];
 
-      return items.map(this.mapToService);
+      let services = items.map(this.mapToService);
+
+      if (activeOnly) {
+        services = services.filter(s => s.IsActive);
+      }
+
+      services.sort((a, b) => (a.SortOrder ?? 999) - (b.SortOrder ?? 999));
+
+      return services;
     } catch (error) {
       console.error('Error fetching services:', error);
       // Return default services as fallback
@@ -60,13 +65,13 @@ class ServiceCatalogService {
   async getServicesByCategory(category: ServiceCategory): Promise<DWService[]> {
     try {
       const graphService = getGraphService();
-      const filter = `fields/Category eq '${category}' and fields/IsActive eq true`;
 
-      const items = await graphService.getListItems(this.listName, {
-        filter,
-      }) as Record<string, unknown>[];
+      // Fetch all and filter client-side (IsActive & Category may not be indexed)
+      const items = await graphService.getListItems(this.listName) as Record<string, unknown>[];
 
-      return items.map(this.mapToService);
+      return items
+        .map(this.mapToService)
+        .filter(s => s.IsActive && s.Category === category);
     } catch (error) {
       console.error('Error fetching services by category:', error);
       return [];

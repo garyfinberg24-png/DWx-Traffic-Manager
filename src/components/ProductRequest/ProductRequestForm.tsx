@@ -4,7 +4,7 @@
  * Follows the same pattern as DWx Booking Form for demos/deployments
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useForm, Controller } from 'react-hook-form';
 import {
@@ -34,6 +34,7 @@ import {
   SendRegular,
   Star24Filled,
   ClipboardTaskListLtr24Regular,
+  SaveRegular,
 } from '@fluentui/react-icons';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
@@ -346,6 +347,7 @@ export const ProductRequestForm: React.FC = () => {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(preSelectedProduct || null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showDraftBanner, setShowDraftBanner] = useState(false);
 
   // Product requirements state (separate from react-hook-form for flexibility)
   const [productRequirements, setProductRequirements] = useState<Record<string, unknown>>({});
@@ -374,6 +376,94 @@ export const ProductRequestForm: React.FC = () => {
     setValue('productType', product.type);
     // Reset product requirements when product changes
     setProductRequirements({});
+  };
+
+  // --- Draft Save/Restore ---
+  const DRAFT_KEY = 'dwx_product_request_draft';
+  const DRAFT_MAX_AGE = 7 * 24 * 60 * 60 * 1000; // 7 days
+  const DATE_FIELDS = ['proposedDate1', 'proposedDate2', 'proposedDate3'] as const;
+
+  // Check for existing draft on mount
+  useEffect(() => {
+    if (!preSelectedProduct) {
+      try {
+        const stored = localStorage.getItem(DRAFT_KEY);
+        if (stored) {
+          const draft = JSON.parse(stored);
+          const age = Date.now() - new Date(draft.timestamp).getTime();
+          if (age < DRAFT_MAX_AGE && draft.version === 1) {
+            setShowDraftBanner(true);
+          } else {
+            localStorage.removeItem(DRAFT_KEY);
+          }
+        }
+      } catch {
+        localStorage.removeItem(DRAFT_KEY);
+      }
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const saveDraft = () => {
+    try {
+      const formData = watch();
+      const serializedFormData: Record<string, unknown> = { ...formData };
+      DATE_FIELDS.forEach(field => {
+        const val = serializedFormData[field];
+        if (val instanceof Date) {
+          serializedFormData[field] = val.toISOString();
+        }
+      });
+
+      const draft = {
+        version: 1,
+        timestamp: new Date().toISOString(),
+        currentStep,
+        selectedProduct,
+        productRequirements,
+        formData: serializedFormData,
+      };
+      localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
+      showToast('Draft saved successfully', 'success');
+    } catch (err) {
+      console.error('Failed to save draft:', err);
+      showToast('Failed to save draft', 'error');
+    }
+  };
+
+  const restoreDraft = () => {
+    try {
+      const stored = localStorage.getItem(DRAFT_KEY);
+      if (!stored) return;
+      const draft = JSON.parse(stored);
+
+      setCurrentStep(draft.currentStep || 1);
+      if (draft.selectedProduct) setSelectedProduct(draft.selectedProduct);
+      if (draft.productRequirements) setProductRequirements(draft.productRequirements);
+
+      if (draft.formData) {
+        const formData = { ...draft.formData };
+        DATE_FIELDS.forEach(field => {
+          if (typeof formData[field] === 'string' && formData[field]) {
+            formData[field] = new Date(formData[field]);
+          }
+        });
+        Object.entries(formData).forEach(([key, value]) => {
+          setValue(key as keyof ProductRequestFormData, value as never);
+        });
+      }
+
+      setShowDraftBanner(false);
+      showToast('Draft restored successfully', 'success');
+    } catch (err) {
+      console.error('Failed to restore draft:', err);
+      showToast('Failed to restore draft', 'error');
+    }
+  };
+
+  const discardDraft = () => {
+    localStorage.removeItem(DRAFT_KEY);
+    setShowDraftBanner(false);
   };
 
   const handleProductRequirementChange = (questionId: string, value: unknown) => {
@@ -440,6 +530,7 @@ export const ProductRequestForm: React.FC = () => {
       );
 
       if (result.success) {
+        localStorage.removeItem(DRAFT_KEY);
         showToast(`${data.requestType} request for ${selectedProduct.name} submitted successfully!`, 'success');
         navigate('/requests');
       } else {
@@ -1119,12 +1210,32 @@ export const ProductRequestForm: React.FC = () => {
           </div>
         )}
 
+        {/* Draft Restore Banner */}
+        {showDraftBanner && (
+          <div style={{ padding: '16px 24px 0' }}>
+            <MessageBar intent="info">
+              <MessageBarBody>
+                <MessageBarTitle>Resume your work</MessageBarTitle>
+                You have a saved draft. Continue where you left off?
+                <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
+                  <Button appearance="primary" size="small" onClick={restoreDraft}>
+                    Restore Draft
+                  </Button>
+                  <Button appearance="outline" size="small" onClick={discardDraft}>
+                    Start Fresh
+                  </Button>
+                </div>
+              </MessageBarBody>
+            </MessageBar>
+          </div>
+        )}
+
         {/* Body */}
         <div className={styles.cardBody}>{renderStepContent()}</div>
 
         {/* Footer */}
         <div className={styles.cardFooter}>
-          <div>
+          <div style={{ display: 'flex', gap: '8px' }}>
             {currentStep === 1 ? (
               <Button appearance="secondary" onClick={() => navigate(-1)}>
                 Cancel
@@ -1138,6 +1249,13 @@ export const ProductRequestForm: React.FC = () => {
                 Back
               </Button>
             )}
+            <Button
+              appearance="outline"
+              icon={<SaveRegular />}
+              onClick={saveDraft}
+            >
+              Save Draft
+            </Button>
           </div>
 
           <div style={{ display: 'flex', gap: '12px' }}>
