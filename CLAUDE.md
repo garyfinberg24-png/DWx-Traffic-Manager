@@ -6,7 +6,7 @@
 
 **Project Origin**: Cloned from LP Booking App (v1.7.5) - a production Teams app for License Pulse demo scheduling.
 
-**Current Version**: v2.8.0 (February 2026) - Landing Page Content Management + Knowledge Base Consumer & Admin UI
+**Current Version**: v2.9.0 (February 2026) - Proposal Management System with AI Generation + Internal Approval
 
 > **IMPORTANT**: We are ONLY working on the DWx Traffic Manager project. We DO NOT make any changes to the LP Booking App. The LP Booking App is a separate production application and must not be modified.
 
@@ -40,6 +40,7 @@
 | **Session Prep List** | `DWxSessionPrep` |
 | **Landing Page Content List** | `DWxLandingPageContent` |
 | **Knowledge Base List** | `DWxKnowledgeBase` |
+| **Proposals List** | `DWxProposals` |
 | **Document Library** | `DWxSupportingDocuments` |
 | **Pre-Sales Calendar Email** | `lpbookings@firsttech.digital` |
 
@@ -296,13 +297,47 @@ const STAGE_TRANSITIONS = {
 | SortOrder | Number | Display order |
 | IsActive | Boolean | Published or draft |
 
+### DWxProposals (v2.9.0)
+
+| Column | Type | Description |
+|--------|------|-------------|
+| Title | Text | Auto: "{Client} - {Service} Proposal" |
+| ServiceRequestId | Number | Link to parent DWxServiceRequests |
+| Status | Choice | Draft, Internal Review, Revision Requested, Approved, Sent to Client, Accepted, Declined |
+| Version | Number | Auto-incrementing (1, 2, 3...) |
+| ProposalType | Choice | Standard, Custom, Enterprise |
+| TemplateName | Text | Selected Word template name |
+| ExecutiveSummary_JSON | Note | JSON: overview, objectives[], successCriteria[] |
+| SolutionOverview_JSON | Note | JSON: description, approach, differentiators[] |
+| TechnologyStack_JSON | Note | JSON: technologies[{name, role, justification}] |
+| ScopeOfWork_JSON | Note | JSON: deliverables[{title, description, hours}], exclusions[] |
+| PricingBreakdown_JSON | Note | JSON: lineItems[], subtotal, tax, discount, grandTotal |
+| Timeline_JSON | Note | JSON: phases[{name, startWeek, endWeek, milestones}], totalWeeks |
+| TeamComposition_JSON | Note | JSON: members[{role, name, responsibility}] |
+| TermsAndConditions_JSON | Note | JSON: paymentTerms, warranty, liability, confidentiality, ip, termination |
+| ChangeControl_JSON | Note | JSON: process, approvalLevels[], pricingImpact |
+| Assumptions_JSON | Note | JSON: string[] |
+| RisksAndMitigations_JSON | Note | JSON: [{risk, impact, mitigation, likelihood}] |
+| SigningPage_JSON | Note | JSON: clientSignatory, clientTitle, dwSignatory, dwTitle, proposedDate |
+| ValidUntil | DateTime | Proposal expiry date (default: 30 days) |
+| SentDate | DateTime | When sent to AM/client |
+| ClientResponseDate | DateTime | When client responded |
+| ClientFeedback | Note | Client's revision notes |
+| InternalNotes | Note | Manager review notes |
+| DocumentUrl | Text | Link to generated/uploaded proposal doc |
+| CreatedByEmail | Text | Proposal author |
+| CreatedByName | Text | Author name |
+| ApprovedByEmail | Text | Manager who approved |
+| ApprovedByName | Text | Approver name |
+| ApprovedDate | DateTime | When internally approved |
+
 ### DWxAuditLog
 
 | Column | Type | Description |
 |--------|------|-------------|
 | Title | Text | Action summary |
 | Action | Choice | CREATE, UPDATE, DELETE, VIEW, APPROVE, REJECT, RESCHEDULE, LOGIN, LOGOUT |
-| EntityType | Text | Booking, TeamMember, Client, Checklist, User, AccountManager, ServiceRequest, Service, Specialist, ProductRequest, SessionPrep, LandingPageContent, KnowledgeBase |
+| EntityType | Text | Booking, TeamMember, Client, Checklist, User, AccountManager, ServiceRequest, Service, Specialist, ProductRequest, SessionPrep, LandingPageContent, KnowledgeBase, Proposal |
 | EntityId | Text | ID of affected entity |
 | EntityName | Text | Human-readable entity name |
 | PerformedBy | Text | User display name |
@@ -413,6 +448,21 @@ DWx-Traffic-Manager/
 │   │   │   ├── MeetingAgendaView.tsx     # AI-generated meeting agenda timeline
 │   │   │   ├── PrepChecklist.tsx         # Pre-meeting checklist with completion tracking
 │   │   │   └── index.ts
+│   │   ├── Proposal/
+│   │   │   ├── ProposalBuilder.tsx       # Main proposal dialog (11 tabs + AI generation) (v2.9.0)
+│   │   │   ├── ProposalTracker.tsx       # Status card for RequestDetails (v2.9.0)
+│   │   │   ├── ExecutiveSummaryEditor.tsx # Proposal section editor
+│   │   │   ├── SolutionOverviewEditor.tsx
+│   │   │   ├── TechStackEditor.tsx
+│   │   │   ├── ScopeOfWorkEditor.tsx
+│   │   │   ├── PricingEditor.tsx
+│   │   │   ├── TimelineEditor.tsx
+│   │   │   ├── TeamCompositionEditor.tsx
+│   │   │   ├── TermsEditor.tsx
+│   │   │   ├── ChangeControlEditor.tsx
+│   │   │   ├── RisksEditor.tsx
+│   │   │   ├── SigningPageEditor.tsx
+│   │   │   └── index.ts
 │   │   ├── Common/
 │   │   │   ├── Header.tsx                # Navigation header
 │   │   │   ├── ConfirmDialog.tsx         # Reusable confirm dialog
@@ -434,14 +484,15 @@ DWx-Traffic-Manager/
 │   │   ├── PipelineService.ts            # Dashboard metrics + analytics
 │   │   ├── CommercialService.ts          # Commercial metrics
 │   │   ├── GamificationService.ts        # Gamification logic
-│   │   ├── DWxNotificationService.ts     # DW-branded notifications (18 methods)
+│   │   ├── DWxNotificationService.ts     # DW-branded notifications (25 methods)
 │   │   ├── SessionPrepService.ts         # Session preparation CRUD + checklist management
 │   │   ├── AIPreparationService.ts       # Azure OpenAI integration for AI content generation
+│   │   ├── ProposalService.ts            # Proposal CRUD + status workflow + section persistence (v2.9.0)
 │   │   ├── LandingPageContentService.ts  # Landing page content CRUD (v2.8.0)
 │   │   ├── KnowledgeBaseService.ts       # Knowledge base CRUD (v2.8.0)
 │   │   ├── AuthService.ts                # MSAL authentication + Teams SSO
 │   │   ├── GraphService.ts               # Microsoft Graph API
-│   │   ├── AuditService.ts               # Change tracking (12 entity types)
+│   │   ├── AuditService.ts               # Change tracking (13 entity types)
 │   │   ├── ProductRequestService.ts      # Product request CRUD + confirmProductDemo + specialist assignment
 │   │   ├── ManagerService.ts             # Manager access CRUD
 │   │   ├── AccountManagerService.ts      # AM CRUD operations
@@ -452,7 +503,7 @@ DWx-Traffic-Manager/
 │   │   ├── GuestInvitationService.ts     # Guest user management
 │   │   ├── DWxSharePointProvisioningService.ts # DWx list provisioning (Graph API)
 │   │   ├── SharePointService.ts          # SharePoint REST API
-│   │   ├── EmailTemplates.ts             # Email template strings (22 templates)
+│   │   ├── EmailTemplates.ts             # Email template strings (29 templates)
 │   │   ├── PowerAutomateService.ts       # Power Automate with retry/circuit breaker
 │   │   ├── MockAuthService.ts            # Mock auth for E2E testing
 │   │   ├── MockGraphService.ts           # Mock Graph for E2E testing
@@ -470,6 +521,7 @@ DWx-Traffic-Manager/
 │   │   ├── SessionPreparation.ts         # Session prep types (NEW v2.5.0)
 │   │   ├── LandingPageContent.ts         # Landing page content types + DEFAULT_LANDING_PAGE_CONTENT fallback (v2.8.0)
 │   │   ├── KnowledgeBase.ts              # KB/FAQ/Glossary types (KBEntry, KBType, KBCategory) (v2.8.0)
+│   │   ├── Proposal.ts                   # Proposal types, 11 section interfaces, defaults, templates (v2.9.0)
 │   │   ├── Product.ts                    # Product catalog types (29 products)
 │   │   ├── ProductRequirements.ts        # Product requirements form types
 │   │   ├── ServiceRequirements.ts        # Service requirements types
@@ -581,6 +633,7 @@ VITE_PRODUCT_REQUESTS_LIST=DWxProductRequests
 VITE_DOCUMENT_LIBRARY=DWxSupportingDocuments
 VITE_LANDING_PAGE_CONTENT_LIST=DWxLandingPageContent
 VITE_KNOWLEDGE_BASE_LIST=DWxKnowledgeBase
+VITE_PROPOSALS_LIST=DWxProposals
 
 # Calendar
 VITE_PRESALES_CALENDAR_EMAIL=lpbookings@firsttech.digital
@@ -769,6 +822,34 @@ Landing page redesigned with V4 Magazine editorial layout. Dynamic content loade
 - [x] Update `DWxSharePointProvisioning.tsx` UI with stat cards + provisioning for 2 new lists
 - [ ] **Suggestion Box** feature — Allow AMs to submit suggestions/feedback (deferred)
 
+### Phase 10: Proposal Management System (COMPLETE - v2.9.0)
+
+Structured proposal management for the Proposal funnel stage with AI-powered content generation and internal approval workflow.
+
+- [x] **Proposal types** - Created `src/types/Proposal.ts` with 11 section interfaces, status workflow, default T&C
+- [x] **ProposalService** - Full CRUD with status transition validation, section persistence, audit logging
+- [x] **AI generation** - Extended AIPreparationService with 10 proposal generation methods (Azure OpenAI)
+- [x] **Email templates** - 7 new DW-branded email templates for proposal lifecycle
+- [x] **Notification methods** - 7 new methods in DWxNotificationService
+- [x] **SP Provisioning** - DWxProposals list definition added to provisioning service
+- [x] **11 Section editors** - ExecutiveSummary, SolutionOverview, TechStack, ScopeOfWork, Pricing, Timeline, TeamComposition, Terms, ChangeControl, Risks, SigningPage
+- [x] **ProposalBuilder dialog** - DetailModalShell with 11 tabs, AI content generation, status-based actions
+- [x] **ProposalTracker card** - Compact status card embedded in RequestDetails for Proposal+ stages
+- [x] **Auto-creation** - Proposal record auto-created when deal enters Proposal stage
+- [x] **Stage integration** - RequestDetails shows ProposalTracker + ProposalBuilder for Proposal/Negotiation/Won stages
+
+**Proposal Status Workflow:**
+
+```
+Draft → Internal Review → Approved → Sent to Client → Accepted/Declined
+  ↑          ↓
+  ←── Revision Requested
+```
+
+**AI-Generated Sections**: Executive Summary, Solution Overview, Technology Stack, Scope of Work, Pricing Estimate (ZAR), Timeline & Milestones, Team Composition, Assumptions & Risks
+
+**Word Templates**: Standard, Enterprise, Custom (DW-branded)
+
 ### Pending / Round 4
 
 - [ ] Round 4: Medium-priority enhancements (M1-M10)
@@ -839,7 +920,8 @@ type AuditEntity =
   | 'Specialist'
   | 'ProductRequest'
   | 'LandingPageContent'
-  | 'KnowledgeBase';
+  | 'KnowledgeBase'
+  | 'Proposal';
 ```
 
 ### Product Request Status Workflow
@@ -941,9 +1023,12 @@ The app supports Account Managers from an external partner tenant:
 | `src/services/ProductRequestService.ts` | Product request CRUD + confirmProductDemo + specialist assignment |
 | `src/services/SpecialistService.ts` | Specialist management, availability, audit |
 | `src/services/PipelineService.ts` | Dashboard metrics and analytics |
-| `src/services/AuditService.ts` | Audit logging (12 entity types) |
-| `src/services/DWxNotificationService.ts` | 18 notification methods (service + product + session prep events) |
-| `src/services/EmailTemplates.ts` | 22 DW-branded email templates |
+| `src/types/Proposal.ts` | All proposal types, 11 section interfaces, status workflow, defaults, templates |
+| `src/services/ProposalService.ts` | Proposal CRUD + status transitions + section persistence |
+| `src/components/Proposal/ProposalBuilder.tsx` | Main proposal dialog (11 tabs + AI generation) |
+| `src/services/AuditService.ts` | Audit logging (13 entity types) |
+| `src/services/DWxNotificationService.ts` | 25 notification methods (service + product + session prep + proposal events) |
+| `src/services/EmailTemplates.ts` | 29 DW-branded email templates |
 | `src/services/SessionPrepService.ts` | Session prep CRUD + checklist management + completion tracking |
 | `src/services/AIPreparationService.ts` | Azure OpenAI integration for AI content generation |
 | `src/types/SessionPreparation.ts` | Session prep types (status, checklist, talking points, resources, agenda) |
@@ -1073,6 +1158,8 @@ DWxSupportingDocuments/
 ## Recent Commit History
 
 ```
+5e69c0e feat: Proposal Management System with AI generation + internal approval workflow (v2.9.0)
+d045a72 docs: Update CLAUDE.md to v2.8.0 with complete Phase 9 status
 b4fddfa feat: Add Landing Page content management + Knowledge Base with consumer UI (v2.8.0)
 2363221 docs: Update CLAUDE.md to v2.7.0 with full project state
 0b671cf feat: V4 Magazine landing page + team profile modals + KB/LP content types (v2.7.0)
