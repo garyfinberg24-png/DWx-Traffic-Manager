@@ -6,7 +6,7 @@
 
 **Project Origin**: Cloned from LP Booking App (v1.7.5) - a production Teams app for License Pulse demo scheduling.
 
-**Current Version**: v2.5.0 (February 2026) - AI-powered Session Preparation
+**Current Version**: v2.7.0 (February 2026) - Landing Page V4 + KB/Admin Content Management
 
 > **IMPORTANT**: We are ONLY working on the DWx Traffic Manager project. We DO NOT make any changes to the LP Booking App. The LP Booking App is a separate production application and must not be modified.
 
@@ -38,6 +38,8 @@
 | **Audit Log List** | `DWxAuditLog` |
 | **Product Requests List** | `DWxProductRequests` |
 | **Session Prep List** | `DWxSessionPrep` |
+| **Landing Page Content List** | `DWxLandingPageContent` |
+| **Knowledge Base List** | `DWxKnowledgeBase` |
 | **Document Library** | `DWxSupportingDocuments` |
 | **Pre-Sales Calendar Email** | `lpbookings@firsttech.digital` |
 
@@ -273,13 +275,34 @@ const STAGE_TRANSITIONS = {
 | CompletedAt | DateTime | When prep marked as Ready |
 | ReminderSent | Yes/No | Whether reminder email sent |
 
+### DWxLandingPageContent (NEW v2.7.0)
+
+| Column | Type | Description |
+|--------|------|-------------|
+| Title | Text | Section key (slogans, whatWeDo, teamMembers, stats, testimonial, mastheadText, teamPanelText, footerText, footerServices, footerProducts, footerResources) |
+| Content_JSON | Note | JSON payload for the section |
+| SortOrder | Number | Display order |
+| IsActive | Boolean | Whether section is active |
+
+### DWxKnowledgeBase (NEW v2.7.0)
+
+| Column | Type | Description |
+|--------|------|-------------|
+| Title | Text | Question / term / article title |
+| Content | Note | Answer / definition / article body |
+| Type | Choice | FAQ, Glossary, Article |
+| Category | Choice | General, Services, Products, Process, Technical, Commercial |
+| Tags_JSON | Note | JSON string array of tags |
+| SortOrder | Number | Display order |
+| IsActive | Boolean | Published or draft |
+
 ### DWxAuditLog
 
 | Column | Type | Description |
 |--------|------|-------------|
 | Title | Text | Action summary |
 | Action | Choice | CREATE, UPDATE, DELETE, VIEW, APPROVE, REJECT, RESCHEDULE, LOGIN, LOGOUT |
-| EntityType | Text | Booking, TeamMember, Client, Checklist, User, AccountManager, ServiceRequest, Service, Specialist, ProductRequest, SessionPrep |
+| EntityType | Text | Booking, TeamMember, Client, Checklist, User, AccountManager, ServiceRequest, Service, Specialist, ProductRequest, SessionPrep, LandingPageContent, KnowledgeBase |
 | EntityId | Text | ID of affected entity |
 | EntityName | Text | Human-readable entity name |
 | PerformedBy | Text | User display name |
@@ -296,7 +319,7 @@ DWx-Traffic-Manager/
 ├── src/
 │   ├── components/
 │   │   ├── LandingPage/
-│   │   │   ├── LandingPage.tsx          # Main entry with Services/Products cards
+│   │   │   ├── LandingPage.tsx          # V4 Magazine layout + team profile modals + slogan rotator
 │   │   │   └── index.ts
 │   │   ├── ProductCatalog/
 │   │   │   ├── ProductCatalog.tsx        # Tabbed view (Apps/WebParts/Cards)
@@ -308,6 +331,7 @@ DWx-Traffic-Manager/
 │   │   │   ├── ServiceCatalog.tsx        # Grid view of services
 │   │   │   ├── ServiceCard.tsx           # Service display card
 │   │   │   ├── ServiceDetails.tsx        # Service quick-view modal
+│   │   │   ├── ServiceDetailModal.tsx    # Large detail modal (NEW v2.7.0)
 │   │   │   ├── ServiceDetailPage.tsx     # Full-page rich service detail view
 │   │   │   └── index.ts
 │   │   ├── ServiceRequest/
@@ -346,7 +370,7 @@ DWx-Traffic-Manager/
 │   │   │   ├── GamificationTab.tsx       # Gamification dashboard
 │   │   │   └── index.ts
 │   │   ├── Admin/
-│   │   │   ├── AdminPage.tsx             # Admin tabbed container (10 tabs)
+│   │   │   ├── AdminPage.tsx             # Admin tabbed container (12 tabs)
 │   │   │   ├── TeamMemberList.tsx        # Team member CRUD
 │   │   │   ├── TeamMemberForm.tsx        # Team member form dialog
 │   │   │   ├── ClientList.tsx            # Client management
@@ -363,7 +387,15 @@ DWx-Traffic-Manager/
 │   │   │   ├── GuestInvitations.tsx      # Guest user management
 │   │   │   ├── ChecklistManagement.tsx   # Checklist management
 │   │   │   ├── DocumentManagement.tsx    # Document management
+│   │   │   ├── LandingPageManagement.tsx # Landing page content CRUD (NEW v2.7.0)
+│   │   │   ├── KnowledgeBaseManagement.tsx # KB/FAQ/Glossary CRUD (NEW v2.7.0)
 │   │   │   ├── DWxSharePointProvisioning.tsx  # DWx list provisioning (Graph API)
+│   │   │   └── index.ts
+│   │   ├── KnowledgeBase/
+│   │   │   ├── KnowledgeBase.tsx         # Consumer page - FAQ/Glossary/Articles tabs
+│   │   │   ├── FAQSection.tsx            # FAQ accordion display
+│   │   │   ├── GlossarySection.tsx       # Glossary alphabetical listing
+│   │   │   ├── ArticleSection.tsx        # Article cards/detail view
 │   │   │   └── index.ts
 │   │   ├── Gamification/
 │   │   │   ├── BadgeGrid.tsx             # Badge display
@@ -405,9 +437,11 @@ DWx-Traffic-Manager/
 │   │   ├── DWxNotificationService.ts     # DW-branded notifications (18 methods)
 │   │   ├── SessionPrepService.ts         # Session preparation CRUD + checklist management
 │   │   ├── AIPreparationService.ts       # Azure OpenAI integration for AI content generation
+│   │   ├── LandingPageContentService.ts  # Landing page content CRUD (NEW v2.7.0)
+│   │   ├── KnowledgeBaseService.ts       # Knowledge base CRUD (NEW v2.7.0)
 │   │   ├── AuthService.ts                # MSAL authentication + Teams SSO
 │   │   ├── GraphService.ts               # Microsoft Graph API
-│   │   ├── AuditService.ts               # Change tracking (10 entity types)
+│   │   ├── AuditService.ts               # Change tracking (12 entity types)
 │   │   ├── ProductRequestService.ts      # Product request CRUD + confirmProductDemo + specialist assignment
 │   │   ├── ManagerService.ts             # Manager access CRUD
 │   │   ├── AccountManagerService.ts      # AM CRUD operations
@@ -434,6 +468,8 @@ DWx-Traffic-Manager/
 │   │   ├── ServiceRequest.ts             # Core DWx types (DWService, DWServiceInput, ServiceCategory, FunnelStage, etc.)
 │   │   ├── ProductRequest.ts             # Product request entity types
 │   │   ├── SessionPreparation.ts         # Session prep types (NEW v2.5.0)
+│   │   ├── LandingPageContent.ts         # Landing page content types + DEFAULT_LANDING_PAGE_CONTENT fallback (NEW v2.7.0)
+│   │   ├── KnowledgeBase.ts              # KB/FAQ/Glossary types (KBEntry, KBType, KBCategory) (NEW v2.7.0)
 │   │   ├── Product.ts                    # Product catalog types (29 products)
 │   │   ├── ProductRequirements.ts        # Product requirements form types
 │   │   ├── ServiceRequirements.ts        # Service requirements types
@@ -459,7 +495,11 @@ DWx-Traffic-Manager/
 │   ├── App.tsx                           # Main app with routes
 │   ├── main.tsx                          # React entry point
 │   └── vite-env.d.ts
+├── mockups/
+│   ├── landing-page-variations.html      # 5 landing page design mockups (V4 approved)
+│   └── team-profile-modal.html           # 3 team profile modal variations (V2 Side-by-Side chosen)
 ├── docs/
+│   ├── agents/                           # 16 agent prompt reference documents
 │   ├── E2E_TEST_PLAN.md
 │   ├── POWER_AUTOMATE_FLOW.md
 │   ├── SHAREPOINT_CHECKLIST_COLUMNS.md
@@ -487,12 +527,21 @@ DWx-Traffic-Manager/
 | `/request` | ServiceRequestForm | All users |
 | `/product-request` | ProductRequestForm | All users |
 | `/requests` | MyRequests | All users (own only) |
+| `/knowledge-base` | KnowledgeBase | All users |
 | `/pipeline` | SalesFunnelDashboard | Managers only |
 | `/dashboard` | ManagerDashboard | Managers only |
 | `/admin` | AdminPage | Managers only |
 | `/admin/account-managers` | AccountManagerManagement | Managers only |
 
-## Admin Panel Tabs (10 Tabs)
+### Header Navigation Order
+
+```
+Services | Products | New Request | My Requests | Knowledge Base | [Dashboard | Admin] (manager-only)
+```
+
+The Knowledge Base link is visible to ALL authenticated users. Dashboard and Admin are manager-only.
+
+## Admin Panel Tabs (12 Tabs)
 
 | Tab | Component | Description |
 |-----|-----------|-------------|
@@ -505,6 +554,8 @@ DWx-Traffic-Manager/
 | Guest Invitations | GuestInvitations | Guest user management |
 | Checklist | ChecklistManagement | Checklist management |
 | Documents | DocumentManagement | Document management |
+| Landing Page | LandingPageManagement | Landing page content CRUD (slogans, team, testimonial, etc.) |
+| Knowledge Base | KnowledgeBaseManagement | KB/FAQ/Glossary CRUD management |
 | SP Provisioning | DWxSharePointProvisioning | SharePoint list provisioning via Graph API |
 
 ## Environment Variables Template
@@ -528,6 +579,8 @@ VITE_MANAGERS_LIST=DWxManagers
 VITE_AUDIT_LOG_LIST=DWxAuditLog
 VITE_PRODUCT_REQUESTS_LIST=DWxProductRequests
 VITE_DOCUMENT_LIBRARY=DWxSupportingDocuments
+VITE_LANDING_PAGE_CONTENT_LIST=DWxLandingPageContent
+VITE_KNOWLEDGE_BASE_LIST=DWxKnowledgeBase
 
 # Calendar
 VITE_PRESALES_CALENDAR_EMAIL=lpbookings@firsttech.digital
@@ -683,6 +736,35 @@ When a discovery meeting is confirmed, the system automatically creates a sessio
 6. Status progresses: Not Started → In Progress → Ready
 7. Reminder sent 24h before meeting if prep not complete
 
+### Phase 9: Landing Page V4 + Knowledge Base + Admin Content Management (IN PROGRESS - v2.7.0)
+
+Landing page redesigned with V4 Magazine editorial layout. Knowledge Base and admin content management features are in development.
+
+#### Phase 9a: Landing Page V4 Redesign - COMPLETE
+- [x] **V4 Magazine/Editorial layout** — Masthead with stats + slogan rotator, 3-column content grid, team panel, branded footer
+- [x] **5 HTML mockup variations** — V1-V5 in `mockups/landing-page-variations.html`, V4 approved
+- [x] **Team profile modals** — V2 Side-by-Side modal chosen (3 variations mockup'd in `mockups/team-profile-modal.html`)
+- [x] **Slogan rotator** — 8 taglines cycling every 5 seconds with fade animation
+- [x] **Team member profiles** — 5 real team members: Gary Finberg, Chris Botha, Shaaira Omar, Wimpie Baard, Gulzar Ismail
+- [x] **Profile modal features** — Quote highlighting, hobbies with emojis, favourite websites, engagement stats, Escape/backdrop close
+- [x] **Type definitions** — `LandingPageContent.ts` with all content types + `DEFAULT_LANDING_PAGE_CONTENT` fallback
+- [x] **KB types** — `KnowledgeBase.ts` with KBEntry, KBType, KBCategory
+
+#### Phase 9b: Admin Content Management - PENDING
+- [ ] `LandingPageContentService.ts` — SharePoint CRUD for landing page content
+- [ ] `KnowledgeBaseService.ts` — SharePoint CRUD for KB entries
+- [ ] Update `environmentConfig.ts` with 2 new list names
+- [ ] Update `DWxSharePointProvisioningService.ts` with 2 new list definitions
+- [ ] Update `AuditService.ts` with 2 new entity types (LandingPageContent, KnowledgeBase)
+- [ ] `LandingPageManagement.tsx` — Admin tab with sub-editors for all content sections
+- [ ] Update `LandingPage.tsx` to load from service with fallback to defaults
+- [ ] `KnowledgeBase.tsx` — Consumer page at `/knowledge-base` with FAQ/Glossary/Articles tabs
+- [ ] `KnowledgeBaseManagement.tsx` — Admin CRUD (search + filter + table + form dialog)
+- [ ] Add "Knowledge Base" to Header nav (visible to all users)
+- [ ] Add `/knowledge-base` route to App.tsx
+- [ ] Add Landing Page + Knowledge Base tabs to AdminPage (→ 12 tabs)
+- [ ] **Suggestion Box** feature — Allow AMs to submit suggestions/feedback
+
 ### Pending / Round 4
 
 - [ ] Round 4: Medium-priority enhancements (M1-M10)
@@ -751,7 +833,9 @@ type AuditEntity =
   | 'ServiceRequest'
   | 'Service'
   | 'Specialist'
-  | 'ProductRequest';
+  | 'ProductRequest'
+  | 'LandingPageContent'
+  | 'KnowledgeBase';
 ```
 
 ### Product Request Status Workflow
@@ -809,6 +893,27 @@ Services have rich content stored as JSON in SharePoint Note columns:
 - Array columns use pipe delimiter: `"item1|item2|item3"`
 - Engagement phases: `"Discovery:Requirements|Design:Architecture|Build:Development"`
 
+## Landing Page Architecture (V4 - v2.7.0)
+
+The landing page uses a V4 Magazine/Editorial layout with these sections:
+- **Masthead** — 2-column grid: title + lead text (left), stats row + slogan rotator (right)
+- **Content Grid** — 3-column: action cards (left), "What We Do" checklist (center), testimonial (right)
+- **Team Panel** — Full-width panel with 5 clickable team cards → opens V2 Side-by-Side profile modal
+- **Footer** — 4-column: brand description, services links, products links, resources links
+
+**Content Management Strategy:**
+- All content data defined in `DEFAULT_LANDING_PAGE_CONTENT` in `src/types/LandingPageContent.ts`
+- On mount, LandingPage loads from `LandingPageContentService` (SharePoint)
+- Falls back to defaults silently on error/empty (no spinner, no error display)
+- Admin manages content via LandingPageManagement tab in Admin panel
+
+**Team Profile Modal (V2 Side-by-Side):**
+- 680px wide, CSS Grid `220px 1fr`
+- Left panel: gradient background, avatar, name, role, specialization, stats
+- Right panel: quote with word highlighting, "What Inspires Me", hobbies (emoji pills), favourite websites
+- Close: X button, backdrop click, Escape key
+- Defined at module level (NOT inside render function — see CLAUDE.md anti-pattern note)
+
 ## External Tenant Support
 
 The app supports Account Managers from an external partner tenant:
@@ -825,12 +930,14 @@ The app supports Account Managers from an external partner tenant:
 | `src/types/ServiceRequest.ts` | Core type definitions + DEFAULT_SERVICES with rich content |
 | `src/types/Product.ts` | Product catalog types and data (29 products) |
 | `src/types/ProductRequest.ts` | Product request entity types + status workflow |
+| `src/types/LandingPageContent.ts` | Landing page content types + DEFAULT_LANDING_PAGE_CONTENT fallback |
+| `src/types/KnowledgeBase.ts` | KB/FAQ/Glossary types (KBEntry, KBType, KBCategory) |
 | `src/services/ServiceCatalogService.ts` | Service catalog CRUD with JSON persistence |
 | `src/services/ServiceRequestService.ts` | Funnel workflow orchestration + updateDealInfo |
 | `src/services/ProductRequestService.ts` | Product request CRUD + confirmProductDemo + specialist assignment |
 | `src/services/SpecialistService.ts` | Specialist management, availability, audit |
 | `src/services/PipelineService.ts` | Dashboard metrics and analytics |
-| `src/services/AuditService.ts` | Audit logging (10 entity types) |
+| `src/services/AuditService.ts` | Audit logging (12 entity types) |
 | `src/services/DWxNotificationService.ts` | 18 notification methods (service + product + session prep events) |
 | `src/services/EmailTemplates.ts` | 22 DW-branded email templates |
 | `src/services/SessionPrepService.ts` | Session prep CRUD + checklist management + completion tracking |
@@ -838,14 +945,17 @@ The app supports Account Managers from an external partner tenant:
 | `src/types/SessionPreparation.ts` | Session prep types (status, checklist, talking points, resources, agenda) |
 | `src/services/GraphService.ts` | Graph API + calendar conflict detection with error flag |
 | `src/services/DWxSharePointProvisioningService.ts` | All DWx list provisioning via Graph API |
-| `src/config/environmentConfig.ts` | Environment config with all 10 DWx list names |
+| `src/config/environmentConfig.ts` | Environment config with all DWx list names |
 | `src/App.tsx` | Main app with routes + route-level error boundaries |
-| `src/components/Admin/AdminPage.tsx` | Admin container with 10 tabs |
+| `src/components/Admin/AdminPage.tsx` | Admin container with 12 tabs |
 | `src/components/Admin/ServiceManagement.tsx` | Service CRUD list UI |
 | `src/components/Admin/ServiceForm.tsx` | 4-tab service form dialog |
 | `src/components/Admin/SpecialistManagement.tsx` | Specialist CRUD list with workload tracking |
 | `src/components/MyRequests/ProductRequestDetails.tsx` | Product request details modal with status actions |
 | `src/components/ServiceCatalog/ServiceDetailPage.tsx` | Full-page service detail view |
+| `src/components/LandingPage/LandingPage.tsx` | V4 Magazine layout + team profile modals + slogan rotator |
+| `mockups/landing-page-variations.html` | 5 landing page design mockups (V4 approved) |
+| `mockups/team-profile-modal.html` | 3 team profile modal variations (V2 Side-by-Side chosen) |
 
 ## Confirmed Design Decisions
 
@@ -858,6 +968,10 @@ The app supports Account Managers from an external partner tenant:
 | **Currency** | ZAR (South African Rand) |
 | **Rich Content Storage** | JSON Note columns in SharePoint with DEFAULT_SERVICES fallback |
 | **Service Import Format** | XLSX/CSV with pipe-delimited arrays |
+| **Landing Page Layout** | V4 Magazine/Editorial — masthead + 3-col grid + team panel + footer |
+| **Team Profile Modal** | V2 Side-by-Side — left gradient panel + right scrollable content |
+| **Landing Page Content Storage** | Key-value rows in DWxLandingPageContent with JSON payloads + hardcoded fallback |
+| **Knowledge Base Access** | Consumer UI in main nav (all users), Admin CRUD in Admin panel (managers only) |
 
 ## Product Catalog
 
@@ -955,15 +1069,14 @@ DWxSupportingDocuments/
 ## Recent Commit History
 
 ```
+0b671cf feat: V4 Magazine landing page + team profile modals + KB/LP content types (v2.7.0)
+b201029 feat: Add 5 new service categories + tabbed catalog + large detail modal
+b0b5b72 feat: Redesign email templates with LP Bookings style + add role infographics (v2.6.0)
+9d18152 feat: Redesign Session Prep dialog to use DetailModalShell layout
+a4939fa feat: Modal redesign with tabbed layout + My Drafts tab
+98eaebf fix: Switch SpecialistService to client-side filtering for SharePoint compatibility
+12f3b66 fix: Client-side filtering for service/product requests + wire Session Prep dialog
+b721eab feat: Save Draft, SP provisioning fixes, client-side filtering for non-indexed columns
+99ab0c1 fix: Resolve input focus loss and dropdown display bugs in service request form
 824fb9a feat: AI-powered session preparation with Azure OpenAI integration (v2.5.0)
-835fd53 feat: Deep dive R1-R3 — data integrity fixes, notifications, product request details modal (v2.2.0)
-0f96927 feat: Fix broken chains, add product request notifications, frost grey accordion style (v2.1.0)
-6c4d547 feat: 13-issue process remediation - fix dead ends, add specialist admin, cleanup legacy code
-86e0e24 style: Redesign service request form with V6 accordion + tab layout
-58e7bc8 docs: Update CLAUDE.md and create SESSION_STATE.md for agent handoff
-432e0e3 feat: Add Service CRUD management with spreadsheet import to Admin panel
-af822fc fix: Role selector validation not triggering on selection
-b841a82 feat: Add Re-provision button for individual lists in admin UI
-519244e fix: Always show Provision All Lists button in admin UI
-2da7cd7 fix: Rename LPManagers to DWxManagers and add to provisioning
 ```
