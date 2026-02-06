@@ -6,7 +6,7 @@
 
 **Project Origin**: Cloned from LP Booking App (v1.7.5) - a production Teams app for License Pulse demo scheduling.
 
-**Current Version**: v2.7.0 (February 2026) - Landing Page V4 + KB/Admin Content Management
+**Current Version**: v2.8.0 (February 2026) - Landing Page Content Management + Knowledge Base Consumer & Admin UI
 
 > **IMPORTANT**: We are ONLY working on the DWx Traffic Manager project. We DO NOT make any changes to the LP Booking App. The LP Booking App is a separate production application and must not be modified.
 
@@ -275,7 +275,7 @@ const STAGE_TRANSITIONS = {
 | CompletedAt | DateTime | When prep marked as Ready |
 | ReminderSent | Yes/No | Whether reminder email sent |
 
-### DWxLandingPageContent (NEW v2.7.0)
+### DWxLandingPageContent (v2.8.0)
 
 | Column | Type | Description |
 |--------|------|-------------|
@@ -284,7 +284,7 @@ const STAGE_TRANSITIONS = {
 | SortOrder | Number | Display order |
 | IsActive | Boolean | Whether section is active |
 
-### DWxKnowledgeBase (NEW v2.7.0)
+### DWxKnowledgeBase (v2.8.0)
 
 | Column | Type | Description |
 |--------|------|-------------|
@@ -331,7 +331,7 @@ DWx-Traffic-Manager/
 │   │   │   ├── ServiceCatalog.tsx        # Grid view of services
 │   │   │   ├── ServiceCard.tsx           # Service display card
 │   │   │   ├── ServiceDetails.tsx        # Service quick-view modal
-│   │   │   ├── ServiceDetailModal.tsx    # Large detail modal (NEW v2.7.0)
+│   │   │   ├── ServiceDetailModal.tsx    # Large detail modal (v2.8.0)
 │   │   │   ├── ServiceDetailPage.tsx     # Full-page rich service detail view
 │   │   │   └── index.ts
 │   │   ├── ServiceRequest/
@@ -387,8 +387,8 @@ DWx-Traffic-Manager/
 │   │   │   ├── GuestInvitations.tsx      # Guest user management
 │   │   │   ├── ChecklistManagement.tsx   # Checklist management
 │   │   │   ├── DocumentManagement.tsx    # Document management
-│   │   │   ├── LandingPageManagement.tsx # Landing page content CRUD (NEW v2.7.0)
-│   │   │   ├── KnowledgeBaseManagement.tsx # KB/FAQ/Glossary CRUD (NEW v2.7.0)
+│   │   │   ├── LandingPageManagement.tsx # Landing page content CRUD (v2.8.0)
+│   │   │   ├── KnowledgeBaseManagement.tsx # KB/FAQ/Glossary CRUD (v2.8.0)
 │   │   │   ├── DWxSharePointProvisioning.tsx  # DWx list provisioning (Graph API)
 │   │   │   └── index.ts
 │   │   ├── KnowledgeBase/
@@ -437,8 +437,8 @@ DWx-Traffic-Manager/
 │   │   ├── DWxNotificationService.ts     # DW-branded notifications (18 methods)
 │   │   ├── SessionPrepService.ts         # Session preparation CRUD + checklist management
 │   │   ├── AIPreparationService.ts       # Azure OpenAI integration for AI content generation
-│   │   ├── LandingPageContentService.ts  # Landing page content CRUD (NEW v2.7.0)
-│   │   ├── KnowledgeBaseService.ts       # Knowledge base CRUD (NEW v2.7.0)
+│   │   ├── LandingPageContentService.ts  # Landing page content CRUD (v2.8.0)
+│   │   ├── KnowledgeBaseService.ts       # Knowledge base CRUD (v2.8.0)
 │   │   ├── AuthService.ts                # MSAL authentication + Teams SSO
 │   │   ├── GraphService.ts               # Microsoft Graph API
 │   │   ├── AuditService.ts               # Change tracking (12 entity types)
@@ -468,8 +468,8 @@ DWx-Traffic-Manager/
 │   │   ├── ServiceRequest.ts             # Core DWx types (DWService, DWServiceInput, ServiceCategory, FunnelStage, etc.)
 │   │   ├── ProductRequest.ts             # Product request entity types
 │   │   ├── SessionPreparation.ts         # Session prep types (NEW v2.5.0)
-│   │   ├── LandingPageContent.ts         # Landing page content types + DEFAULT_LANDING_PAGE_CONTENT fallback (NEW v2.7.0)
-│   │   ├── KnowledgeBase.ts              # KB/FAQ/Glossary types (KBEntry, KBType, KBCategory) (NEW v2.7.0)
+│   │   ├── LandingPageContent.ts         # Landing page content types + DEFAULT_LANDING_PAGE_CONTENT fallback (v2.8.0)
+│   │   ├── KnowledgeBase.ts              # KB/FAQ/Glossary types (KBEntry, KBType, KBCategory) (v2.8.0)
 │   │   ├── Product.ts                    # Product catalog types (29 products)
 │   │   ├── ProductRequirements.ts        # Product requirements form types
 │   │   ├── ServiceRequirements.ts        # Service requirements types
@@ -736,11 +736,11 @@ When a discovery meeting is confirmed, the system automatically creates a sessio
 6. Status progresses: Not Started → In Progress → Ready
 7. Reminder sent 24h before meeting if prep not complete
 
-### Phase 9: Landing Page V4 + Knowledge Base + Admin Content Management (IN PROGRESS - v2.7.0)
+### Phase 9: Landing Page V4 + Knowledge Base + Admin Content Management (COMPLETE - v2.8.0)
 
-Landing page redesigned with V4 Magazine editorial layout. Knowledge Base and admin content management features are in development.
+Landing page redesigned with V4 Magazine editorial layout. Dynamic content loaded from SharePoint with hardcoded fallback. Knowledge Base consumer UI and admin CRUD fully implemented.
 
-#### Phase 9a: Landing Page V4 Redesign - COMPLETE
+#### Phase 9a: Landing Page V4 Redesign - COMPLETE (v2.7.0)
 - [x] **V4 Magazine/Editorial layout** — Masthead with stats + slogan rotator, 3-column content grid, team panel, branded footer
 - [x] **5 HTML mockup variations** — V1-V5 in `mockups/landing-page-variations.html`, V4 approved
 - [x] **Team profile modals** — V2 Side-by-Side modal chosen (3 variations mockup'd in `mockups/team-profile-modal.html`)
@@ -750,20 +750,24 @@ Landing page redesigned with V4 Magazine editorial layout. Knowledge Base and ad
 - [x] **Type definitions** — `LandingPageContent.ts` with all content types + `DEFAULT_LANDING_PAGE_CONTENT` fallback
 - [x] **KB types** — `KnowledgeBase.ts` with KBEntry, KBType, KBCategory
 
-#### Phase 9b: Admin Content Management - PENDING
-- [ ] `LandingPageContentService.ts` — SharePoint CRUD for landing page content
-- [ ] `KnowledgeBaseService.ts` — SharePoint CRUD for KB entries
-- [ ] Update `environmentConfig.ts` with 2 new list names
-- [ ] Update `DWxSharePointProvisioningService.ts` with 2 new list definitions
-- [ ] Update `AuditService.ts` with 2 new entity types (LandingPageContent, KnowledgeBase)
-- [ ] `LandingPageManagement.tsx` — Admin tab with sub-editors for all content sections
-- [ ] Update `LandingPage.tsx` to load from service with fallback to defaults
-- [ ] `KnowledgeBase.tsx` — Consumer page at `/knowledge-base` with FAQ/Glossary/Articles tabs
-- [ ] `KnowledgeBaseManagement.tsx` — Admin CRUD (search + filter + table + form dialog)
-- [ ] Add "Knowledge Base" to Header nav (visible to all users)
-- [ ] Add `/knowledge-base` route to App.tsx
-- [ ] Add Landing Page + Knowledge Base tabs to AdminPage (→ 12 tabs)
-- [ ] **Suggestion Box** feature — Allow AMs to submit suggestions/feedback
+#### Phase 9b: Admin Content Management + KB Consumer UI - COMPLETE (v2.8.0)
+- [x] `LandingPageContentService.ts` — SharePoint CRUD for landing page content (key-value row pattern)
+- [x] `KnowledgeBaseService.ts` — SharePoint CRUD for KB entries (full CRUD + toggle active)
+- [x] Update `environmentConfig.ts` with 2 new list names
+- [x] Update `DWxSharePointProvisioningService.ts` with 2 new list definitions
+- [x] Update `AuditService.ts` with 2 new entity types (LandingPageContent, KnowledgeBase)
+- [x] `LandingPageManagement.tsx` — Admin tab with 7 sub-tabs (Slogans, What We Do, Stats, Testimonial, Team Members, Text Content, Footer Links)
+- [x] Update `LandingPage.tsx` to load from service with silent fallback to defaults (removed hardcoded data arrays)
+- [x] `KnowledgeBase.tsx` — Consumer page at `/knowledge-base` with FAQ/Glossary/Articles tabs + search
+- [x] `FAQSection.tsx` — Categorized FAQ with Fluent UI Accordion
+- [x] `GlossarySection.tsx` — Alphabetical terms with A-Z letter bar navigation
+- [x] `ArticleSection.tsx` — Card grid with read-more dialog
+- [x] `KnowledgeBaseManagement.tsx` — Admin CRUD (search + type/category filters + table + form dialog + delete confirm)
+- [x] Add "Knowledge Base" to Header nav (visible to all users)
+- [x] Add `/knowledge-base` route to App.tsx
+- [x] Add Landing Page + Knowledge Base tabs to AdminPage (→ 12 tabs)
+- [x] Update `DWxSharePointProvisioning.tsx` UI with stat cards + provisioning for 2 new lists
+- [ ] **Suggestion Box** feature — Allow AMs to submit suggestions/feedback (deferred)
 
 ### Pending / Round 4
 
@@ -1069,6 +1073,8 @@ DWxSupportingDocuments/
 ## Recent Commit History
 
 ```
+b4fddfa feat: Add Landing Page content management + Knowledge Base with consumer UI (v2.8.0)
+2363221 docs: Update CLAUDE.md to v2.7.0 with full project state
 0b671cf feat: V4 Magazine landing page + team profile modals + KB/LP content types (v2.7.0)
 b201029 feat: Add 5 new service categories + tabbed catalog + large detail modal
 b0b5b72 feat: Redesign email templates with LP Bookings style + add role infographics (v2.6.0)
