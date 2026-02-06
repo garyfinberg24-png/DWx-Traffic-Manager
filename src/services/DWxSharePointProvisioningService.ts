@@ -1730,13 +1730,417 @@ class DWxSharePointProvisioningService {
   }
 
   /**
+   * Seed Knowledge Base with comprehensive FAQ, Glossary, and Article content for Account Managers
+   */
+  async seedKnowledgeBaseData(): Promise<{ results: Array<{ name: string; success: boolean; message: string }> }> {
+    const results: Array<{ name: string; success: boolean; message: string }> = [];
+    const graphService = getGraphService();
+
+    const entries: Array<{
+      Title: string;
+      Content: string;
+      Type: string;
+      Category: string;
+      Tags_JSON: string;
+      SortOrder: number;
+      IsActive: boolean;
+    }> = [
+      // ═══════════════════════════════════════════════════════════════════════
+      // FAQs (20 entries)
+      // ═══════════════════════════════════════════════════════════════════════
+
+      // --- General FAQs ---
+      {
+        Title: 'What is the DWx Traffic Manager?',
+        Content: 'The DWx Traffic Manager is Digital Workplace\'s internal pre-sales coordination platform. It manages the full sales lifecycle from initial lead through to closed deal. Account Managers use it to submit service requests, schedule discovery sessions with technical specialists, track deal progression through the sales funnel, and collaborate with the pre-sales team. The system integrates with Microsoft Teams, Outlook calendars, and SharePoint for seamless workflow.',
+        Type: 'FAQ', Category: 'General',
+        Tags_JSON: JSON.stringify(['getting-started', 'overview', 'platform']),
+        SortOrder: 1, IsActive: true,
+      },
+      {
+        Title: 'How do I submit a new service request?',
+        Content: 'Navigate to "New Request" in the top navigation bar or click "Submit a New Request" on the landing page. The 5-step wizard guides you through: (1) Select the service category, (2) Enter client details or select an existing client, (3) Describe requirements and upload supporting documents like RFPs, (4) Propose up to 3 time slots for the discovery session, and (5) Review and submit. You\'ll receive an email confirmation immediately, and a manager will review and assign a specialist within 24 hours.',
+        Type: 'FAQ', Category: 'Process',
+        Tags_JSON: JSON.stringify(['request', 'wizard', 'how-to', 'submission']),
+        SortOrder: 2, IsActive: true,
+      },
+      {
+        Title: 'What happens after I submit a request?',
+        Content: 'Your request enters the sales funnel at the "Lead" stage. Here\'s the typical flow:\n\n1. **Lead**: Your request is received. A manager reviews it within 24 hours.\n2. **Qualified**: The manager validates the opportunity and assigns a technical specialist.\n3. **Discovery**: A discovery meeting is scheduled with the client. Calendar invites with Teams links are sent automatically.\n4. **Proposal**: After the discovery session, the specialist prepares a formal proposal with pricing.\n5. **Negotiation**: The proposal is sent to the client for review.\n6. **Won/Lost**: The deal closes. Won deals update the client\'s lifetime value automatically.\n\nYou\'ll receive email notifications at each stage transition.',
+        Type: 'FAQ', Category: 'Process',
+        Tags_JSON: JSON.stringify(['funnel', 'stages', 'workflow', 'lifecycle']),
+        SortOrder: 3, IsActive: true,
+      },
+      {
+        Title: 'How do I track my existing requests?',
+        Content: 'Click "My Requests" in the top navigation bar. This view shows all your service requests and product requests in separate tabs. You can:\n\n- **Filter by stage**: Use the stage pills (Lead, Qualified, Discovery, etc.) to see requests at specific funnel stages.\n- **Search**: Type a client name, service, or keyword in the search bar.\n- **View details**: Click any request card to open the full detail view with timeline, documents, and action buttons.\n- **Quick actions**: Use the three-dot menu on each card for common actions like advancing the stage.\n\nManagers also have access to the Pipeline Dashboard for a bird\'s-eye view of all active deals.',
+        Type: 'FAQ', Category: 'Process',
+        Tags_JSON: JSON.stringify(['tracking', 'my-requests', 'filter', 'search']),
+        SortOrder: 4, IsActive: true,
+      },
+      {
+        Title: 'What\'s the difference between a Service Request and a Product Request?',
+        Content: 'A **Service Request** is for professional consulting engagements — things like Power Platform development, SharePoint migrations, M365 assessments, or Copilot agent builds. These go through the full 7-stage sales funnel (Lead → Won) and involve specialist assignment, discovery meetings, and proposals.\n\nA **Product Request** is for one of our 29 ready-made DWx products (15 apps, 8 web parts, 6 adaptive cards). These follow a simpler 5-status workflow: Pending Review → Awaiting Approval → Confirmed → Completed. Product requests are typically for demos, trials, or deployments of existing products rather than custom development.',
+        Type: 'FAQ', Category: 'General',
+        Tags_JSON: JSON.stringify(['service-request', 'product-request', 'difference']),
+        SortOrder: 5, IsActive: true,
+      },
+
+      // --- Services FAQs ---
+      {
+        Title: 'What services does Digital Workplace offer?',
+        Content: 'Digital Workplace offers six core service categories:\n\n1. **Power Platform Development** (Medium complexity) — Custom Power Apps, Power Automate flows, Power BI dashboards, and Power Virtual Agents. Ideal for business process automation and rapid application development.\n\n2. **SPFx Development** (High complexity) — SharePoint Framework web parts, extensions, and Teams apps. For organisations needing custom intranet experiences and Teams integrations.\n\n3. **SharePoint Migration** (High complexity) — On-premises to SharePoint Online migrations, including content, permissions, and workflows. Supports hybrid scenarios.\n\n4. **M365 Tenant Assessment** (Medium complexity) — Security, compliance, and governance reviews. Includes Microsoft Secure Score analysis, DLP policy review, and best-practice recommendations.\n\n5. **Enterprise Copilot Agents** (Enterprise complexity) — Custom Microsoft 365 Copilot plugins and autonomous agents for enterprise knowledge management and workflow automation.\n\n6. **Microsoft Viva Suite** (Medium complexity) — Viva Connections, Engage, Learning, Insights, and Goals implementations for employee experience platforms.',
+        Type: 'FAQ', Category: 'Services',
+        Tags_JSON: JSON.stringify(['services', 'catalog', 'categories', 'offerings']),
+        SortOrder: 10, IsActive: true,
+      },
+      {
+        Title: 'How should I position Power Platform vs SPFx to clients?',
+        Content: 'This is one of the most common questions from AMs. Here\'s the decision framework:\n\n**Choose Power Platform when:**\n- The client needs rapid prototyping (days/weeks, not months)\n- Business users need to maintain and extend the solution themselves\n- The solution involves forms, approvals, workflows, or dashboards\n- Budget is constrained (lower development cost, citizen developer model)\n- The client wants iterative delivery with quick wins\n\n**Choose SPFx when:**\n- The client needs a highly customised intranet or portal experience\n- The solution must integrate deeply with SharePoint pages and sites\n- Complex UI requirements beyond what Power Apps canvas offers\n- The client has strict branding requirements for their intranet\n- Teams app with complex tab experiences is needed\n\n**Hybrid approach** (often the best answer):\n- SPFx for the intranet/Teams UI layer\n- Power Automate for backend workflows and integrations\n- Power BI embedded in SPFx web parts for analytics\n\nWhen in doubt, suggest a Discovery session — the specialist will recommend the right approach.',
+        Type: 'FAQ', Category: 'Services',
+        Tags_JSON: JSON.stringify(['power-platform', 'spfx', 'positioning', 'decision-framework']),
+        SortOrder: 11, IsActive: true,
+      },
+      {
+        Title: 'What is a typical engagement timeline?',
+        Content: 'Timelines vary by service complexity:\n\n| Service | Discovery | Proposal | Delivery |\n|---------|-----------|----------|----------|\n| Power Platform | 1 session (1-2 hrs) | 3-5 days | 4-12 weeks |\n| SPFx Development | 1-2 sessions | 5-10 days | 8-20 weeks |\n| SharePoint Migration | 2-3 sessions + assessment | 10-15 days | 12-24 weeks |\n| M365 Assessment | 1 session + data collection | 5-7 days | 2-4 weeks |\n| Copilot Agents | 2-3 sessions | 7-14 days | 8-16 weeks |\n| Viva Suite | 1-2 sessions | 5-7 days | 6-12 weeks |\n\n**Tips for setting client expectations:**\n- Always add 20% buffer for client-side delays (approvals, access provisioning, stakeholder availability)\n- Migration projects depend heavily on content volume — get a site inventory early\n- Enterprise Copilot projects require Copilot licensing verification before proposal',
+        Type: 'FAQ', Category: 'Services',
+        Tags_JSON: JSON.stringify(['timeline', 'delivery', 'planning', 'expectations']),
+        SortOrder: 12, IsActive: true,
+      },
+
+      // --- Commercial FAQs ---
+      {
+        Title: 'How are deal values estimated?',
+        Content: 'Deal values should be estimated using the following guidelines:\n\n**Hourly rates** (standard, before discounts):\n- Solution Architect: R1,800/hr\n- Senior Developer: R1,500/hr\n- Consultant: R1,200/hr\n- Project Manager: R1,100/hr\n\n**Fixed-price packages** (starting from):\n- Power App (single app): R80,000 - R250,000\n- Power Platform suite: R200,000 - R750,000\n- SPFx web part: R60,000 - R180,000\n- SharePoint migration (per TB): R150,000 - R400,000\n- M365 Assessment: R120,000 - R200,000\n- Copilot Agent: R250,000 - R800,000\n- Viva implementation: R180,000 - R500,000\n\n**Probability guidelines:**\n- Lead stage: 10-20%\n- Qualified: 25-40%\n- Discovery completed: 40-60%\n- Proposal sent: 50-70%\n- Negotiation: 70-90%\n\nThe system automatically calculates Weighted Pipeline = Deal Value × Probability.',
+        Type: 'FAQ', Category: 'Commercial',
+        Tags_JSON: JSON.stringify(['pricing', 'deal-value', 'rates', 'estimation']),
+        SortOrder: 20, IsActive: true,
+      },
+      {
+        Title: 'What discount authority do Account Managers have?',
+        Content: 'Discount authority is tiered:\n\n| Discount Level | Authority | Approval Required |\n|----------------|-----------|-------------------|\n| 0-10% | Account Manager | Self-approved |\n| 11-20% | Regional Manager | Written approval |\n| 21-30% | Head of Sales | Business case required |\n| 30%+ | MD/CEO | Exceptional approval |\n\n**When discounting is appropriate:**\n- Strategic accounts with multi-year potential\n- Bundled engagements (3+ services)\n- Reference client agreements (client allows case study)\n- Competitive displacement situations\n\n**Never discount:**\n- First engagement with a new client (sets wrong precedent)\n- Without understanding the client\'s budget first\n- Under time pressure without proper approval\n\nAlways document the business justification in the deal\'s Comments field.',
+        Type: 'FAQ', Category: 'Commercial',
+        Tags_JSON: JSON.stringify(['discount', 'pricing', 'authority', 'approval']),
+        SortOrder: 21, IsActive: true,
+      },
+      {
+        Title: 'How does the Weighted Pipeline calculation work?',
+        Content: 'The Weighted Pipeline is a key metric used to forecast revenue. It\'s calculated as:\n\n**Weighted Pipeline = Deal Value × Deal Probability ÷ 100**\n\nFor example:\n- R500,000 deal at Discovery (50% probability) = R250,000 weighted\n- R200,000 deal at Negotiation (80% probability) = R160,000 weighted\n- R1,000,000 deal at Lead (15% probability) = R150,000 weighted\n\nThe system automatically recalculates when you update either Deal Value or Probability in the request details. Managers use the total Weighted Pipeline across all active deals for monthly and quarterly revenue forecasting.\n\n**Best practice:** Update probability whenever the deal situation changes, not just at stage transitions. A Discovery meeting that went poorly should be marked down even if the stage hasn\'t changed yet.',
+        Type: 'FAQ', Category: 'Commercial',
+        Tags_JSON: JSON.stringify(['pipeline', 'weighted', 'forecasting', 'probability']),
+        SortOrder: 22, IsActive: true,
+      },
+
+      // --- Technical FAQs ---
+      {
+        Title: 'What Microsoft 365 licenses does the client need?',
+        Content: 'Licensing requirements vary by service:\n\n**Power Platform:**\n- Power Apps per user: R350/user/month (standalone apps)\n- Power Apps per app: R85/app/user/month (up to 2 apps)\n- Power Automate per user: R250/user/month\n- Power BI Pro: R170/user/month (included in M365 E5)\n- Power BI Premium per user: R340/user/month\n\n**SPFx Development:**\n- SharePoint Online Plan 1 or 2 (included in M365 E3/E5)\n- No additional licensing for SPFx solutions\n\n**Copilot Agents:**\n- Microsoft 365 Copilot: R530/user/month\n- Copilot Studio: R340/user/month (for custom agents)\n\n**Viva Suite:**\n- Viva suite: R200/user/month\n- Individual modules available separately\n\n**Important:** Always verify the client\'s current licensing in the Discovery session. Many clients already have Power Platform and SharePoint through their M365 E3/E5 subscriptions. The DWx assessment team can do a license audit during the M365 Tenant Assessment.',
+        Type: 'FAQ', Category: 'Technical',
+        Tags_JSON: JSON.stringify(['licensing', 'microsoft-365', 'costs', 'requirements']),
+        SortOrder: 30, IsActive: true,
+      },
+      {
+        Title: 'What does the client need to provide before a Discovery session?',
+        Content: 'To ensure a productive Discovery session, ask the client to prepare:\n\n**Essential (before the meeting):**\n1. A brief description of the business problem or opportunity\n2. Names and roles of attendees from their side\n3. Any existing documentation (RFPs, process maps, architecture diagrams)\n4. Current technology stack overview (what M365 licenses they have)\n\n**Nice to have:**\n- Access to their current solution/system (screenshots or demo access)\n- Sample data or content they want to work with\n- Success criteria — how they\'ll measure if the project is successful\n- Budget range (even approximate helps shape the proposal)\n- Decision-making timeline and stakeholders involved\n\n**Upload these to the request:** Use the document upload feature in the Service Request form or add them later via the request detail view. The specialist will review all materials before the session.\n\nThe AI-powered Session Prep feature will automatically generate talking points and a meeting agenda based on the client profile and submitted materials.',
+        Type: 'FAQ', Category: 'Process',
+        Tags_JSON: JSON.stringify(['discovery', 'preparation', 'client', 'documents']),
+        SortOrder: 31, IsActive: true,
+      },
+      {
+        Title: 'How do I handle requests from external partner AMs?',
+        Content: 'External partner Account Managers (from tenant hallofd.com or other partners) can be onboarded through the Guest Invitation system:\n\n1. Go to **Admin > Guest Invitations** and send a B2B guest invite to the partner\'s email\n2. The partner receives an email invitation to join the DWx tenant\n3. Once accepted, their account appears in the **Account Managers** list with Source = "External"\n4. They can log in via Teams SSO using their own credentials\n5. External AMs see only their own requests — they cannot view other AMs\' deals\n\n**Key differences for external AMs:**\n- Their requests are tagged with AccountManagerTenant = "External"\n- They don\'t have access to the Pipeline Dashboard or Admin panel\n- Notifications go to both the external AM and their DW point of contact\n- Revenue attribution is tracked separately for partner-sourced deals\n\nAlways ensure the partner has signed the appropriate NDA and referral agreement before granting system access.',
+        Type: 'FAQ', Category: 'Process',
+        Tags_JSON: JSON.stringify(['external', 'partner', 'guest', 'onboarding']),
+        SortOrder: 32, IsActive: true,
+      },
+
+      // --- Products FAQs ---
+      {
+        Title: 'Which DWx products are the best sellers?',
+        Content: 'Based on 2025/2026 deployment data, our top-performing products by category:\n\n**DWx Apps (Top 5):**\n1. **Employee Onboarding** — Most requested by HR departments. Automates the entire onboarding workflow from offer acceptance to Day 1.\n2. **Leave Manager** — High volume, every company needs it. Integrates with payroll and Outlook calendars.\n3. **Knowledge Base** — Popular with knowledge-intensive industries (legal, consulting, financial services).\n4. **Asset Dashboard** — IT departments love the visibility. Works with Intune for automatic asset discovery.\n5. **Contract Manager** — Legal and procurement teams. Automates renewal reminders and approval workflows.\n\n**SharePoint Web Parts (Top 3):**\n1. News Carousel — Immediate visual impact on intranets\n2. People Directory — Solves a universal pain point\n3. Quick Links Grid — Simple but effective navigation\n\n**Adaptive Cards (Top 2):**\n1. Approval Card — Enables in-chat approvals without leaving Teams\n2. Leave Request — Combines with Leave Manager app\n\n**Tip:** Lead with the client\'s pain point, not the product. Ask "How do you handle X today?" before suggesting a specific product.',
+        Type: 'FAQ', Category: 'Products',
+        Tags_JSON: JSON.stringify(['products', 'best-sellers', 'recommendations', 'top-products']),
+        SortOrder: 40, IsActive: true,
+      },
+      {
+        Title: 'Can DWx products be customised?',
+        Content: 'Yes, all DWx products support varying levels of customisation:\n\n**Tier 1 — Configuration (included in base price):**\n- Company branding (logo, colours, fonts)\n- Field labels and terminology\n- Enable/disable features\n- Notification recipients and templates\n- Integration endpoints (SharePoint site URLs, mailboxes)\n\n**Tier 2 — Extension (quoted separately):**\n- Additional fields and data capture\n- Custom workflow steps\n- Integration with third-party systems\n- Additional dashboards and reports\n- Multi-language support\n\n**Tier 3 — Bespoke development (custom engagement):**\n- Major feature additions\n- Complete UI redesign\n- Enterprise-specific business logic\n- Custom API connectors\n\nWhen a client asks for customisation, log the specific requirements in the Product Request form. This helps the specialist scope the effort accurately. Tier 1 changes typically take 1-2 days, Tier 2 is 1-4 weeks, and Tier 3 becomes a service engagement.',
+        Type: 'FAQ', Category: 'Products',
+        Tags_JSON: JSON.stringify(['customisation', 'products', 'tiers', 'branding']),
+        SortOrder: 41, IsActive: true,
+      },
+
+      // --- More General/Process FAQs ---
+      {
+        Title: 'What should I do if a deal is going cold?',
+        Content: 'Cold deals are normal — here\'s how to handle them:\n\n**Immediate actions:**\n1. Update the Interest Level to "Cold" in the request details\n2. Add notes about why the deal has cooled (budget freeze, champion left, competitor, timing)\n3. Agree on a follow-up date with the client and add it to Next Steps\n\n**Re-engagement strategies:**\n- Share a relevant case study or industry insight (not a sales pitch)\n- Invite them to a DW webinar or event\n- Ask if a different stakeholder should be involved\n- Offer a free 30-minute consultation on a related topic\n- Wait for a trigger event (fiscal year start, leadership change, competitor issue)\n\n**When to mark as Lost:**\n- Client explicitly declines or goes with a competitor\n- No response after 3 follow-up attempts over 6 weeks\n- Budget has been reallocated with no recovery timeline\n- Champion has left the organisation with no replacement\n\nAlways capture the Win/Loss Reason — this data is gold for improving our approach. Lost deals can be reopened as new Leads when circumstances change.',
+        Type: 'FAQ', Category: 'Process',
+        Tags_JSON: JSON.stringify(['cold-deal', 'follow-up', 're-engagement', 'lost']),
+        SortOrder: 50, IsActive: true,
+      },
+      {
+        Title: 'How do I prepare for a client discovery meeting?',
+        Content: 'The system helps you prepare automatically, but here\'s what great AMs do:\n\n**Before the meeting (your responsibility):**\n1. Review the client\'s website and recent news (leadership changes, earnings, press releases)\n2. Check the client record in DWx for previous engagements and lifetime value\n3. Prepare 3-5 open-ended discovery questions specific to their industry\n4. Know your ask: what outcome do you want from this meeting?\n\n**System-assisted preparation:**\n- The AI Session Prep feature generates a client profile, talking points, suggested resources, and a meeting agenda\n- Access it from the request detail view once a specialist is assigned and discovery is confirmed\n- Review the talking points and customise them to your style\n- Select the resources you want to share in the meeting\n\n**During the meeting:**\n- Let the specialist lead the technical discussion\n- Focus on relationship building and business outcomes\n- Take notes on budget signals, decision-making process, and competitive landscape\n- Confirm next steps before ending\n\n**After the meeting:**\n- Update the request with discovery notes and any changed deal information\n- The specialist will advance the deal to Proposal stage when ready',
+        Type: 'FAQ', Category: 'Process',
+        Tags_JSON: JSON.stringify(['discovery', 'preparation', 'meeting', 'best-practice']),
+        SortOrder: 51, IsActive: true,
+      },
+      {
+        Title: 'What regions does Digital Workplace operate in?',
+        Content: 'Digital Workplace operates across South Africa and the UK:\n\n**South Africa:**\n- **Western Cape** (Cape Town) — Head office, largest team\n- **Gauteng** (Johannesburg) — Key enterprise clients, financial services hub\n- **KwaZulu-Natal** (Durban) — Growing presence, manufacturing and logistics focus\n\n**United Kingdom:**\n- **London** — Partnership-driven, targeting UK enterprises expanding into Africa\n\n**How regions affect requests:**\n- When submitting a request, the AM\'s assigned region is automatically captured\n- Specialists may be allocated from any region (remote delivery is standard)\n- For on-site requirements, note this in the Requirements field\n- Client meetings default to Microsoft Teams unless an in-person session is requested\n\nThe Pipeline Dashboard breaks down metrics by region for territory management.',
+        Type: 'FAQ', Category: 'General',
+        Tags_JSON: JSON.stringify(['regions', 'locations', 'territory', 'geography']),
+        SortOrder: 52, IsActive: true,
+      },
+      {
+        Title: 'How do proposals work in the system?',
+        Content: 'The Proposal system is integrated into the sales funnel. When a deal moves from Discovery to Proposal stage, the system automatically creates a proposal record. Here\'s the workflow:\n\n1. **Draft**: The specialist populates 11 proposal sections (Executive Summary, Solution Overview, Tech Stack, Scope of Work, Pricing, Timeline, Team Composition, Terms & Conditions, Change Control, Risks & Assumptions, Signing Page). AI can generate initial content.\n\n2. **Internal Review**: The specialist submits for manager review. Managers can approve or request revisions with notes.\n\n3. **Approved**: Once approved internally, the proposal is ready for the client. The AM can download it as a Word document using a DW-branded template.\n\n4. **Sent to Client**: The AM sends the proposal to the client and marks it as sent in the system.\n\n5. **Accepted/Declined**: When the client responds, the AM updates the status. Accepted proposals automatically advance the deal to Negotiation stage.\n\n**Important:** The pricing section auto-syncs the Deal Value back to the service request, keeping your pipeline numbers accurate.',
+        Type: 'FAQ', Category: 'Process',
+        Tags_JSON: JSON.stringify(['proposal', 'workflow', 'approval', 'document']),
+        SortOrder: 53, IsActive: true,
+      },
+
+      // ═══════════════════════════════════════════════════════════════════════
+      // GLOSSARY (20 entries)
+      // ═══════════════════════════════════════════════════════════════════════
+      {
+        Title: 'Account Manager (AM)',
+        Content: 'The primary client relationship owner responsible for identifying opportunities, submitting service requests, and managing the commercial relationship. AMs can be Internal (DW employees) or External (partner organisation employees invited as guests).',
+        Type: 'Glossary', Category: 'General',
+        Tags_JSON: JSON.stringify(['role', 'people']),
+        SortOrder: 100, IsActive: true,
+      },
+      {
+        Title: 'Copilot Agent',
+        Content: 'A custom AI-powered assistant built on Microsoft 365 Copilot and Copilot Studio. Agents can be configured to answer questions from enterprise knowledge bases, automate multi-step workflows, and integrate with line-of-business systems. DW builds bespoke agents tailored to the client\'s data, processes, and compliance requirements.',
+        Type: 'Glossary', Category: 'Technical',
+        Tags_JSON: JSON.stringify(['ai', 'copilot', 'microsoft-365']),
+        SortOrder: 101, IsActive: true,
+      },
+      {
+        Title: 'Deal Probability',
+        Content: 'A percentage (0-100%) representing the likelihood that a deal will close as Won. Used together with Deal Value to calculate Weighted Pipeline. Should be updated whenever the deal outlook changes — not just at stage transitions. Industry benchmarks: Lead 10-20%, Qualified 25-40%, Discovery 40-60%, Proposal 50-70%, Negotiation 70-90%.',
+        Type: 'Glossary', Category: 'Commercial',
+        Tags_JSON: JSON.stringify(['metrics', 'pipeline', 'forecasting']),
+        SortOrder: 102, IsActive: true,
+      },
+      {
+        Title: 'Discovery Session',
+        Content: 'A structured meeting between the client, Account Manager, and assigned Technical Specialist to understand the client\'s business requirements, technical landscape, and success criteria. Typically 1-2 hours via Microsoft Teams. The outcome informs the proposal scope and pricing. Discovery corresponds to the third stage of the sales funnel.',
+        Type: 'Glossary', Category: 'Process',
+        Tags_JSON: JSON.stringify(['meeting', 'funnel', 'stage']),
+        SortOrder: 103, IsActive: true,
+      },
+      {
+        Title: 'DLP (Data Loss Prevention)',
+        Content: 'Microsoft 365 policies that prevent sensitive information (credit card numbers, ID numbers, health records) from being shared inappropriately. Relevant to M365 Assessments where DW reviews and configures DLP policies. Key regulation alignment: POPIA (South Africa), GDPR (EU/UK), HIPAA (healthcare).',
+        Type: 'Glossary', Category: 'Technical',
+        Tags_JSON: JSON.stringify(['security', 'compliance', 'microsoft-365']),
+        SortOrder: 104, IsActive: true,
+      },
+      {
+        Title: 'Funnel Stage',
+        Content: 'One of 7 stages in the DWx sales funnel: Lead, Qualified, Discovery, Proposal, Negotiation, Won, Lost. Each stage has defined entry criteria, exit criteria, and allowed transitions. The funnel tracks deal progression and enables pipeline reporting. Stage transitions trigger automated notifications and, in some cases, system actions like calendar event creation or proposal record generation.',
+        Type: 'Glossary', Category: 'Process',
+        Tags_JSON: JSON.stringify(['sales', 'funnel', 'workflow', 'stages']),
+        SortOrder: 105, IsActive: true,
+      },
+      {
+        Title: 'Interest Level',
+        Content: 'A qualitative measure of the client\'s buying intent: Hot (actively seeking a solution, budget approved, short timeline), Warm (interested but no urgency, exploring options), or Cold (early stage, no defined need, future potential). Updated by the Account Manager based on client interactions. Influences deal prioritisation in the pipeline.',
+        Type: 'Glossary', Category: 'Commercial',
+        Tags_JSON: JSON.stringify(['qualification', 'lead', 'priority']),
+        SortOrder: 106, IsActive: true,
+      },
+      {
+        Title: 'M365 Tenant',
+        Content: 'A dedicated instance of Microsoft 365 services (Azure AD, SharePoint, Exchange, Teams) provisioned for an organisation. Each client has their own tenant identified by a domain name (e.g., contoso.onmicrosoft.com). DW specialists need appropriate access or consent to work within a client\'s tenant, typically granted through admin consent or delegated permissions.',
+        Type: 'Glossary', Category: 'Technical',
+        Tags_JSON: JSON.stringify(['microsoft-365', 'infrastructure', 'azure-ad']),
+        SortOrder: 107, IsActive: true,
+      },
+      {
+        Title: 'POPIA (Protection of Personal Information Act)',
+        Content: 'South Africa\'s data privacy legislation (effective 1 July 2021) that regulates how organisations collect, store, process, and share personal information. Similar to GDPR. Relevant to all DW engagements as our solutions handle personal data. Key requirements: lawful basis for processing, data minimisation, security safeguards, data subject rights, breach notification within 72 hours.',
+        Type: 'Glossary', Category: 'Technical',
+        Tags_JSON: JSON.stringify(['compliance', 'privacy', 'south-africa', 'regulation']),
+        SortOrder: 108, IsActive: true,
+      },
+      {
+        Title: 'Power Platform',
+        Content: 'Microsoft\'s low-code/no-code platform comprising Power Apps (application building), Power Automate (workflow automation), Power BI (business intelligence), Power Pages (external-facing websites), and Power Virtual Agents (chatbots). DW\'s most popular service category, ideal for rapid business process digitisation.',
+        Type: 'Glossary', Category: 'Technical',
+        Tags_JSON: JSON.stringify(['microsoft', 'low-code', 'platform']),
+        SortOrder: 109, IsActive: true,
+      },
+      {
+        Title: 'Pre-Sales Specialist',
+        Content: 'A technical team member (Solution Architect, Technical Specialist, or Consultant) assigned by a manager to lead the discovery session and prepare the proposal. Specialists have defined specialisations and maximum concurrent deal capacities. They are never self-assigned — only managers allocate specialists to requests.',
+        Type: 'Glossary', Category: 'General',
+        Tags_JSON: JSON.stringify(['role', 'people', 'specialist']),
+        SortOrder: 110, IsActive: true,
+      },
+      {
+        Title: 'Secure Score',
+        Content: 'A Microsoft 365 security posture metric (0-100%) calculated based on security configurations, identity protection, device management, and information protection settings. A key deliverable of the M365 Tenant Assessment service. DW typically improves client scores by 15-30 percentage points through recommended configuration changes.',
+        Type: 'Glossary', Category: 'Technical',
+        Tags_JSON: JSON.stringify(['security', 'microsoft-365', 'assessment']),
+        SortOrder: 111, IsActive: true,
+      },
+      {
+        Title: 'Session Prep (AI)',
+        Content: 'An AI-powered feature that automatically generates meeting preparation materials for discovery sessions. Uses Azure OpenAI (GPT-4o) to create: client profiles with industry context, categorised talking points, suggested resources with relevance scores, and a time-boxed meeting agenda. Created automatically when a discovery slot is confirmed.',
+        Type: 'Glossary', Category: 'Services',
+        Tags_JSON: JSON.stringify(['ai', 'preparation', 'automation']),
+        SortOrder: 112, IsActive: true,
+      },
+      {
+        Title: 'SharePoint Framework (SPFx)',
+        Content: 'Microsoft\'s modern development framework for building client-side SharePoint and Teams solutions. SPFx solutions run in the browser using React or other frameworks and can be deployed to SharePoint App Catalog or Teams. DW\'s second-most popular service category, used for intranet customisation, Teams tabs, and custom web parts.',
+        Type: 'Glossary', Category: 'Technical',
+        Tags_JSON: JSON.stringify(['development', 'sharepoint', 'framework']),
+        SortOrder: 113, IsActive: true,
+      },
+      {
+        Title: 'Viva Suite',
+        Content: 'Microsoft\'s employee experience platform consisting of: Viva Connections (company intranet in Teams), Viva Engage (social networking, formerly Yammer), Viva Learning (training and upskilling), Viva Insights (work patterns and wellbeing), and Viva Goals (OKR tracking). DW implements all modules individually or as a comprehensive suite.',
+        Type: 'Glossary', Category: 'Technical',
+        Tags_JSON: JSON.stringify(['microsoft', 'employee-experience', 'viva']),
+        SortOrder: 114, IsActive: true,
+      },
+      {
+        Title: 'Weighted Pipeline',
+        Content: 'The risk-adjusted value of all active deals, calculated as the sum of (Deal Value × Deal Probability) across all non-terminal funnel stages. Used for revenue forecasting. Example: 3 deals worth R500K at 60%, R300K at 40%, and R200K at 80% = R300K + R120K + R160K = R580K weighted pipeline.',
+        Type: 'Glossary', Category: 'Commercial',
+        Tags_JSON: JSON.stringify(['metrics', 'pipeline', 'forecasting', 'revenue']),
+        SortOrder: 115, IsActive: true,
+      },
+      {
+        Title: 'Win Rate',
+        Content: 'The percentage of closed deals that resulted in a Win (as opposed to Lost). Calculated as Won ÷ (Won + Lost) × 100. DW\'s target win rate is 35-45%. A win rate below 30% suggests qualification issues (pursuing too many unqualified leads), while above 50% may indicate not enough deals in the pipeline (being too selective).',
+        Type: 'Glossary', Category: 'Commercial',
+        Tags_JSON: JSON.stringify(['metrics', 'performance', 'kpi']),
+        SortOrder: 116, IsActive: true,
+      },
+      {
+        Title: 'RFP (Request for Proposal)',
+        Content: 'A formal document issued by a client organisation inviting vendors to submit proposals for a specific project or service. RFPs should be uploaded to the service request as supporting documents. DW typically responds within 10-15 business days. The service request form has a dedicated Requirements field and document upload for RFP materials.',
+        Type: 'Glossary', Category: 'Process',
+        Tags_JSON: JSON.stringify(['document', 'procurement', 'tender']),
+        SortOrder: 117, IsActive: true,
+      },
+      {
+        Title: 'Client Lifetime Value (LTV)',
+        Content: 'The total revenue generated from a client across all engagements. Automatically updated in the DWxClients list when a deal is marked as Won. Used to identify high-value accounts for premium treatment, cross-sell opportunities, and account development strategies. Premium clients (LTV > R1M) receive priority specialist assignment.',
+        Type: 'Glossary', Category: 'Commercial',
+        Tags_JSON: JSON.stringify(['metrics', 'client', 'revenue']),
+        SortOrder: 118, IsActive: true,
+      },
+      {
+        Title: 'Graph API',
+        Content: 'Microsoft\'s unified API endpoint (graph.microsoft.com) for accessing Microsoft 365 data including users, calendars, mail, SharePoint, Teams, and more. DWx Traffic Manager uses Graph API for authentication, calendar event creation, email notifications, and SharePoint list CRUD operations. Client solutions may also leverage Graph API for integrations.',
+        Type: 'Glossary', Category: 'Technical',
+        Tags_JSON: JSON.stringify(['api', 'microsoft', 'integration']),
+        SortOrder: 119, IsActive: true,
+      },
+
+      // ═══════════════════════════════════════════════════════════════════════
+      // ARTICLES (10 entries)
+      // ═══════════════════════════════════════════════════════════════════════
+      {
+        Title: 'Winning the Enterprise Deal: A Guide for Account Managers',
+        Content: 'Enterprise deals (R500K+) require a different approach than mid-market engagements. Here\'s the DW playbook:\n\n## 1. Multi-Threading the Relationship\nNever rely on a single champion. Identify and build relationships with:\n- **The Economic Buyer** — Controls the budget (CFO, CIO, or business unit head)\n- **The Technical Evaluator** — Assesses the solution (IT Manager, Enterprise Architect)\n- **The Champion** — Advocates internally for your solution\n- **The End User** — Will actually use the solution daily\n\n## 2. Discovery Is Everything\nEnterprise clients won\'t tolerate generic proposals. Invest in thorough discovery:\n- Request 2-3 discovery sessions rather than trying to cover everything in one meeting\n- Ask for access to their current systems (even screenshots help)\n- Understand their procurement process, approval chain, and timeline\n- Map their existing Microsoft 365 investments and utilisation\n\n## 3. Building the Business Case\nEnterprise decisions are justified with numbers:\n- Calculate ROI using time savings, error reduction, and compliance risk mitigation\n- Compare cost of DW solution vs. status quo (manual processes, legacy systems)\n- Include soft benefits: employee satisfaction, talent retention, competitive advantage\n- Reference similar enterprise deployments (with permission)\n\n## 4. Proposal Strategy\n- Lead with business outcomes, not technology\n- Include a phased approach with a quick-win first phase (de-risks the decision)\n- Offer a pilot or proof-of-concept for the most sceptical stakeholders\n- Price confidently — enterprise clients expect premium pricing for quality\n\n## 5. Navigating Procurement\n- Ask early about procurement requirements (preferred vendor status, tender process)\n- Prepare for security questionnaires and compliance assessments\n- Have references ready (especially in the same industry)\n- Be patient — enterprise sales cycles are typically 3-6 months',
+        Type: 'Article', Category: 'Commercial',
+        Tags_JSON: JSON.stringify(['enterprise', 'strategy', 'sales', 'best-practice']),
+        SortOrder: 200, IsActive: true,
+      },
+      {
+        Title: 'Understanding the South African Enterprise IT Landscape',
+        Content: '## Key Trends Shaping SA Enterprise IT in 2025/2026\n\n### 1. Cloud-First Mandates\nMost JSE Top 40 companies have committed to cloud-first strategies. Microsoft 365 adoption is particularly strong in financial services, mining, and retail. This creates natural demand for our services.\n\n### 2. Regulatory Compliance Pressure\n- **POPIA** enforcement has intensified — clients need compliant data handling solutions\n- **SARB** (banking) and **FSCA** (financial services) require stringent IT governance\n- **King IV** corporate governance principles demand IT risk management\n- **BEE/BBBEE** reporting increasingly digital — opportunity for Power BI solutions\n\n### 3. Industry-Specific Opportunities\n\n**Financial Services** (Nedbank, Standard Bank, Sanlam, Old Mutual, Capitec):\n- Branch digitisation and customer onboarding automation\n- Regulatory reporting dashboards (Power BI)\n- Copilot agents for internal knowledge management\n\n**Mining** (Anglo American, Sibanye, Impala Platinum):\n- Safety incident reporting apps (Power Apps)\n- Environmental compliance tracking\n- Remote workforce management solutions\n\n**Retail** (Woolworths, Shoprite, Pick n Pay):\n- Store operations management\n- Employee scheduling and communication (Viva)\n- Supply chain visibility dashboards\n\n**Healthcare** (Discovery, Netcare, Life Healthcare):\n- Patient data compliance (POPIA + Health Act)\n- Staff onboarding and training portals (Viva Learning)\n- Clinical process automation\n\n### 4. Load Shedding & Remote Work\nSouth Africa\'s unique power challenges have accelerated cloud adoption and remote work tooling. Clients need:\n- Offline-capable Power Apps\n- Teams-first collaboration strategies\n- Cloud-based disaster recovery planning\n\n### 5. Skills Shortage\nSA has a significant digital skills gap. Position DW as:\n- Knowledge transfer partner (not just a vendor)\n- Citizen developer enablement through Power Platform training\n- Centre of Excellence (CoE) setup and mentoring',
+        Type: 'Article', Category: 'General',
+        Tags_JSON: JSON.stringify(['south-africa', 'market', 'trends', 'industry']),
+        SortOrder: 201, IsActive: true,
+      },
+      {
+        Title: 'Objection Handling Playbook',
+        Content: '## Common Client Objections and How to Handle Them\n\n### "We don\'t have the budget right now"\n**Response:** "I understand budget timing. Can I ask — is this a budget availability issue or a budget prioritisation issue? If the right solution could save your team 20 hours per week, would that change the priority?"\n**Follow-up:** Offer a free assessment to quantify the ROI, then revisit when the next budget cycle opens.\n\n### "We\'re already working with [Competitor]"\n**Response:** "That\'s great that you\'re investing in this area. We often work alongside other partners — our M365 platform specialisation is quite niche. Could I show you where we add value that\'s complementary to what they\'re doing?"\n**Follow-up:** Don\'t compete on price. Compete on specialisation and depth of Microsoft expertise.\n\n### "We can build it ourselves with our internal IT team"\n**Response:** "Your internal team is a fantastic asset. Many of our clients start internal builds but find the specialised skills and acceleration we bring gets them to production 3x faster. Would a hybrid model work — we build the foundation, your team maintains and extends it?"\n**Follow-up:** Offer a Power Platform CoE setup as a middle ground.\n\n### "The pricing seems high"\n**Response:** "I appreciate the feedback on pricing. Let me understand what you\'re comparing against. Our pricing reflects [SA-based team / M365 depth / post-go-live support]. Would it help to see a phased approach that spreads the investment?"\n**Follow-up:** Never lead with a discount. First understand their benchmark, then adjust scope if needed.\n\n### "We need to think about it"\n**Response:** "Absolutely — this is an important decision. Can I ask what specific aspects you need to think through? That way I can provide any additional information that might help."\n**Follow-up:** Agree on a specific follow-up date. "I\'ll send you the case study we discussed and touch base on Thursday — does that work?"\n\n### "We had a bad experience with a similar project"\n**Response:** "I\'m sorry to hear that. Would you mind sharing what went wrong? Understanding that helps us specifically address those risks in our approach. We have a structured methodology specifically designed to prevent [common failure they describe]."\n**Follow-up:** Use this intelligence to build explicit risk mitigation into the proposal.',
+        Type: 'Article', Category: 'Commercial',
+        Tags_JSON: JSON.stringify(['objections', 'sales', 'negotiation', 'tactics']),
+        SortOrder: 202, IsActive: true,
+      },
+      {
+        Title: 'Power Platform vs SPFx: Decision Framework for Account Managers',
+        Content: '## Quick Decision Matrix\n\nUse this matrix when a client asks "What technology should we use?"\n\n### Choose Power Platform When:\n- **Speed matters**: Client wants a working solution in weeks, not months\n- **Business users will own it**: Non-technical users need to maintain the app\n- **The problem is process-centric**: Forms, approvals, workflows, notifications\n- **Budget is limited**: Lower development cost, faster ROI\n- **Integration is standard**: Connecting to SharePoint, Dataverse, common APIs\n\n### Choose SPFx When:\n- **UX is paramount**: Pixel-perfect intranet pages, custom branding\n- **Deep SharePoint integration**: Custom web parts that need full page context\n- **Complex Teams tabs**: Beyond what Adaptive Cards or Power Apps embedded in Teams can do\n- **Performance critical**: Large datasets, complex rendering, real-time updates\n- **Enterprise deployment**: Tenant-wide solutions through App Catalog\n\n### The Hybrid Sweet Spot\nMany of our best engagements combine both:\n- SPFx web parts on the intranet → Power Automate flows for backend processing\n- Power Apps for data entry → SPFx dashboard for executive reporting\n- Power BI dashboards → Embedded in SPFx pages for contextual analytics\n\n### Red Flags (When Neither Is Right)\n- Client needs a consumer-facing website → Suggest Power Pages or custom web app\n- Client has no Microsoft 365 → This isn\'t our space (yet)\n- Client needs real-time millisecond processing → Suggest Azure Functions / custom API\n\n### What to Say to the Client\n"Based on what you\'ve described, I think [Power Platform/SPFx/a hybrid approach] would be the best fit because [reason]. Our specialist will confirm this in the discovery session and may recommend a different approach if the technical details suggest it. The beauty of our process is that the recommendation is always tailored to your specific needs, not a one-size-fits-all answer."',
+        Type: 'Article', Category: 'Technical',
+        Tags_JSON: JSON.stringify(['power-platform', 'spfx', 'decision', 'technology']),
+        SortOrder: 203, IsActive: true,
+      },
+      {
+        Title: 'How to Run a Great Discovery Meeting',
+        Content: '## The DW Discovery Meeting Playbook\n\n### Before the Meeting\n1. Review the AI-generated Session Prep materials in DWx Traffic Manager\n2. Research the client\'s company, industry, and recent news\n3. Align with the specialist on who leads which parts of the conversation\n4. Test your Teams meeting link and any demo environments\n\n### Meeting Structure (Recommended 90 minutes)\n\n**Opening (10 min)**\n- Introductions and role clarification\n- Confirm the agenda and desired outcomes\n- Reference any previous engagements or shared connections\n\n**Current State Discovery (25 min)**\n- "Walk me through how you handle [process] today"\n- "What are the biggest pain points for your team?"\n- "What have you tried before? What worked and what didn\'t?"\n- "Who are the key stakeholders affected by this?"\n\n**Solution Exploration (25 min)**\n- Specialist demonstrates relevant capabilities\n- Show similar work (case studies, demos)\n- Discuss technology options and trade-offs\n- "If we could solve one thing for you, what would have the biggest impact?"\n\n**Scope & Approach (15 min)**\n- Outline a potential approach (phases, timeline)\n- Discuss dependencies and assumptions\n- "What does success look like for you in 6 months?"\n\n**Next Steps (15 min)**\n- Summarise key findings and action items\n- Agree on proposal timeline\n- Identify additional stakeholders for follow-up\n- Confirm decision-making process and timeline\n\n### After the Meeting\n1. Send a thank-you email within 2 hours summarising key points\n2. Update the DWx request with discovery notes\n3. Debrief with the specialist on proposal approach\n4. Schedule internal proposal review before sending to client',
+        Type: 'Article', Category: 'Process',
+        Tags_JSON: JSON.stringify(['discovery', 'meeting', 'playbook', 'best-practice']),
+        SortOrder: 204, IsActive: true,
+      },
+      {
+        Title: 'Cross-Selling and Upselling DWx Services',
+        Content: '## Expanding Client Engagements\n\nThe most profitable growth comes from existing clients. Here\'s how to spot and pursue expansion opportunities:\n\n### Natural Cross-Sell Paths\n\n| If the client bought... | Suggest next... | Why it works |\n|------------------------|----------------|---------------|\n| Power Platform app | M365 Assessment | Optimise the platform they\'re building on |\n| M365 Assessment | Power Platform | Assessment reveals automation opportunities |\n| SPFx intranet | Viva Suite | Modern intranet → full employee experience |\n| SharePoint Migration | Power Platform | Now they have the data in the cloud, automate around it |\n| Copilot Agent | Training (Power Platform CoE) | Empower their team to build simpler agents internally |\n| Any service | Support retainer | Ongoing maintenance and enhancement |\n\n### Signals That a Client Is Ready for More\n- They mention other departments with similar challenges\n- They ask "Can this also do X?"\n- They\'re pleased with the current engagement outcome\n- Their organisation announces digital transformation initiatives\n- A new CIO/CTO joins with a modernisation mandate\n\n### How to Raise It\nDon\'t pitch during an active engagement — wait for the right moment:\n\n1. **During delivery** (specialist mentions it): "Our team noticed your HR department could benefit from the same approach. Would you like us to include a brief assessment?"\n\n2. **At project close**: "Now that we\'ve successfully delivered X, many clients find that Y is a natural next step. Shall we schedule a brief call to explore that?"\n\n3. **During QBR/account review**: "Looking at your M365 usage data, there\'s an opportunity to drive 3x more value from your existing licenses through Power Platform automation."\n\n### Tracking Cross-Sell in DWx\n- Submit a new service request linked to the same client\n- Reference the previous engagement in the Requirements field\n- The system automatically tracks the client\'s engagement count and lifetime value',
+        Type: 'Article', Category: 'Commercial',
+        Tags_JSON: JSON.stringify(['cross-sell', 'upsell', 'expansion', 'growth']),
+        SortOrder: 205, IsActive: true,
+      },
+      {
+        Title: 'Microsoft Copilot: What Account Managers Need to Know',
+        Content: '## The Copilot Landscape (2025/2026)\n\nMicrosoft Copilot is the #1 topic clients are asking about. Here\'s what you need to know:\n\n### What Is Copilot?\nMicrosoft 365 Copilot is an AI assistant embedded across Office apps (Word, Excel, PowerPoint, Outlook, Teams) that uses the client\'s organisational data (emails, documents, chats) to generate content, summarise information, and automate tasks.\n\n### DW\'s Copilot Offering\n\n**1. Copilot Readiness Assessment** (part of M365 Assessment)\n- Evaluate data quality and governance\n- Check licensing requirements\n- Identify high-impact use cases\n- Assess information architecture readiness\n\n**2. Custom Copilot Agents** (Enterprise service)\n- Build agents that answer questions from specific knowledge bases\n- Create workflow agents that automate multi-step processes\n- Develop agents that integrate with line-of-business systems\n- Deploy agents to Teams, SharePoint, or custom channels\n\n### Common Client Questions\n\n**"Is our data safe with Copilot?"**\nYes — Copilot respects all existing Microsoft 365 permissions. If a user can\'t access a document, Copilot can\'t either. No data leaves the Microsoft 365 boundary. However, this means permission hygiene is critical — the M365 Assessment addresses this.\n\n**"How much does it cost?"**\nMicrosoft 365 Copilot: R530/user/month on top of E3/E5. Copilot Studio: R340/user/month. Most clients start with 50-100 users in a pilot before full rollout.\n\n**"What ROI can we expect?"**\nMicrosoft\'s studies show 1.2 hours saved per user per day. At R500/hr loaded cost, that\'s R600/user/day or R13,200/user/month — significantly more than the license cost.\n\n### Qualifying Copilot Opportunities\n- Does the client have M365 E3 or E5? (Required foundation)\n- Is their SharePoint content well-organised? (Copilot needs good data)\n- Do they have a change management capability? (Adoption is key)\n- Are they willing to start with a focused pilot? (Best approach)',
+        Type: 'Article', Category: 'Services',
+        Tags_JSON: JSON.stringify(['copilot', 'ai', 'microsoft-365', 'strategy']),
+        SortOrder: 206, IsActive: true,
+      },
+      {
+        Title: 'Competitive Intelligence: How DW Wins Against Competitors',
+        Content: '## Understanding the SA Microsoft Partner Landscape\n\n### Our Key Competitors and How We Differentiate\n\n**Large Consultancies (Accenture, Deloitte, PwC, EY)**\n- *Their strength*: Brand recognition, existing C-suite relationships, broad capability\n- *Their weakness*: Expensive, slow to mobilise, junior resources on projects\n- *Our play*: We\'re faster, more specialised, and offer senior resources throughout. "You get the A-team, not the B-team."\n\n**Local IT Services (BBD, Entelect, DVT, Synthesis)**\n- *Their strength*: Strong .NET/Java development, established SA presence\n- *Their weakness*: Microsoft 365 is not their core focus, often treat SharePoint as an afterthought\n- *Our play*: We live and breathe Microsoft 365. Our depth in Power Platform, SharePoint, and Copilot is unmatched.\n\n**Microsoft Direct (FastTrack, Unified Support)**\n- *Their strength*: It\'s Microsoft. Free/included services.\n- *Their weakness*: Generic advice, no customisation, limited availability\n- *Our play*: We build ON TOP of what FastTrack provides. FastTrack gives you the platform; we build the custom solution.\n\n**Boutique M365 Partners (Mint, Siatik, Digital Matter)**\n- *Their strength*: Niche expertise, flexible, competitive pricing\n- *Their weakness*: Limited scale, fewer reference clients, narrower capability\n- *Our play*: Our product portfolio (29 DWx products) and full-stack capability (consulting + development + products) set us apart.\n\n### When We\'re in a Competitive Situation\n1. **Don\'t compete on price** — compete on value, speed, and specialisation\n2. **Ask who else they\'re talking to** — it\'s a fair question and helps you position\n3. **Offer a proof-of-concept** — seeing is believing, and it\'s hard to replicate\n4. **Leverage references** — offer to connect them with a similar client\n5. **Highlight our product portfolio** — 29 ready-made products accelerate delivery',
+        Type: 'Article', Category: 'Commercial',
+        Tags_JSON: JSON.stringify(['competition', 'positioning', 'strategy', 'differentiation']),
+        SortOrder: 207, IsActive: true,
+      },
+      {
+        Title: 'Understanding Client Industries: Tailoring Your Pitch',
+        Content: '## Industry-Specific Messaging Guide\n\n### Financial Services (Banking, Insurance, Asset Management)\n**Pain points:** Regulatory compliance, branch operations efficiency, customer experience\n**Lead with:** Compliance automation, secure document management, customer-facing Power Pages\n**Avoid:** Mentioning cloud concerns — most banks are already cloud-first\n**Key regulations:** POPIA, SARB regulations, FAIS, FICA\n**Decision cycle:** Long (4-8 months), multi-stakeholder procurement\n\n### Mining & Resources\n**Pain points:** Safety reporting, remote worker communication, environmental compliance\n**Lead with:** Mobile-first Power Apps that work offline, safety incident tracking, ESG reporting dashboards\n**Avoid:** Assuming low tech maturity — SA mines are increasingly digital\n**Key regulations:** Mine Health and Safety Act, Environmental Management Act\n**Decision cycle:** Medium (3-5 months), often driven by safety events\n\n### Retail & FMCG\n**Pain points:** Store operations, staff scheduling, supply chain visibility, employee training\n**Lead with:** Frontline worker solutions (Teams + Viva), operational dashboards, training portals\n**Avoid:** Complex technical jargon — retail buyers want business outcomes\n**Key regulations:** Consumer Protection Act, POPIA\n**Decision cycle:** Short-Medium (2-4 months), driven by seasonal cycles\n\n### Healthcare\n**Pain points:** Patient data compliance, staff onboarding, clinical process efficiency\n**Lead with:** POPIA-compliant document management, Viva Learning for staff training, Power Apps for clinical workflows\n**Avoid:** Any solution that stores patient data without explicit compliance discussion\n**Key regulations:** National Health Act, POPIA, Health Professions Act\n**Decision cycle:** Long (4-6 months), procurement-heavy\n\n### Professional Services (Legal, Consulting, Accounting)\n**Pain points:** Knowledge management, document automation, matter/project tracking\n**Lead with:** Knowledge Base (our DWx app), Copilot for document generation, Power Platform for time tracking\n**Avoid:** Competing with their existing practice management software\n**Key regulations:** POPIA, relevant professional body regulations\n**Decision cycle:** Short (1-3 months), partner/director decision',
+        Type: 'Article', Category: 'Services',
+        Tags_JSON: JSON.stringify(['industry', 'vertical', 'messaging', 'positioning']),
+        SortOrder: 208, IsActive: true,
+      },
+      {
+        Title: 'DWx Traffic Manager: Tips and Tricks for Power Users',
+        Content: '## Getting the Most Out of the System\n\n### Request Submission Tips\n- **Be specific in Requirements**: The more detail you provide, the better the specialist can prepare. Include client pain points, current systems, and desired outcomes.\n- **Upload documents early**: RFPs, architecture diagrams, and process maps help the specialist prepare for discovery before the meeting.\n- **Propose realistic time slots**: Offer 3 slots spread across different days and times. Avoid Mondays and Fridays if possible.\n\n### Pipeline Management\n- **Update deal values regularly**: Don\'t wait for the proposal — enter estimated values at Lead stage based on the service pricing guidelines.\n- **Adjust probability honestly**: Under-forecasting is as harmful as over-forecasting. Use the guidelines in the Glossary.\n- **Add Next Steps after every interaction**: This creates a paper trail and helps managers support you.\n\n### Using the Knowledge Base\n- **Search by tag**: Tags are more specific than categories. Try searching for "pricing" or "objection" for targeted results.\n- **Bookmark Articles**: Keep the "Objection Handling Playbook" and "Industry Messaging Guide" handy for client calls.\n- **Suggest new entries**: If you find yourself answering the same question repeatedly, ask a manager to add it to the KB.\n\n### Notifications\n- **Check the bell icon**: The Notification Center shows all system notifications. Click to mark as read.\n- **Email notifications**: You receive emails for key events (specialist assigned, stage changed, proposal approved). These link directly to the relevant request.\n\n### Quick Actions\n- **Three-dot menu on request cards**: Advance stages, add comments, or view details without opening the full modal.\n- **Bulk operations** (Managers): The Pipeline Dashboard supports bulk stage transitions for request queue management.',
+        Type: 'Article', Category: 'General',
+        Tags_JSON: JSON.stringify(['tips', 'power-user', 'system', 'productivity']),
+        SortOrder: 209, IsActive: true,
+      },
+    ];
+
+    // Create all entries
+    for (const entry of entries) {
+      try {
+        await graphService.createListItem('DWxKnowledgeBase', entry);
+        results.push({ name: entry.Title, success: true, message: `Created ${entry.Type}: ${entry.Title}` });
+      } catch (error) {
+        results.push({ name: entry.Title, success: false, message: error instanceof Error ? error.message : 'Failed to create KB entry' });
+      }
+    }
+
+    return { results };
+  }
+
+  /**
    * Seed all sample data in dependency order with progress reporting
    */
   async seedAllSampleData(
     onProgress?: (step: string, current: number, total: number) => void
   ): Promise<{ results: Array<{ list: string; itemCount: number; success: boolean; message: string }> }> {
     const results: Array<{ list: string; itemCount: number; success: boolean; message: string }> = [];
-    const totalSteps = 9;
+    const totalSteps = 10;
 
     const steps: Array<{ list: string; label: string; seed: () => Promise<{ results: Array<{ success: boolean; [key: string]: unknown }> }> }> = [
       { list: 'DWxClients', label: 'Seeding SA clients...', seed: () => this.seedClientsData() },
@@ -1747,6 +2151,7 @@ class DWxSharePointProvisioningService {
       { list: 'DWxServices', label: 'Seeding services...', seed: () => this.seedServicesData() },
       { list: 'DWxServiceRequests', label: 'Seeding service requests...', seed: () => this.seedServiceRequestsData() },
       { list: 'DWxProductRequests', label: 'Seeding product requests...', seed: () => this.seedProductRequestsData() },
+      { list: 'DWxKnowledgeBase', label: 'Seeding knowledge base...', seed: () => this.seedKnowledgeBaseData() },
     ];
 
     for (let i = 0; i < steps.length; i++) {

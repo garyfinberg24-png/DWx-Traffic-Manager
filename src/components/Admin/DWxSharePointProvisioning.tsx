@@ -364,6 +364,9 @@ export const DWxSharePointProvisioning: React.FC = () => {
         case 'DWxKnowledgeBase':
           result = await dwxSharePointProvisioningService.provisionKnowledgeBaseList();
           break;
+        case 'DWxProposals':
+          result = await dwxSharePointProvisioningService.provisionProposalsList();
+          break;
         case 'DWxSupportingDocuments':
           result = await dwxSharePointProvisioningService.provisionDocumentLibrary();
           break;
@@ -524,6 +527,22 @@ export const DWxSharePointProvisioning: React.FC = () => {
     }
   };
 
+  const seedKnowledgeBase = async () => {
+    setIsSeeding(true);
+    setError(null);
+    setSeedResults(null);
+    try {
+      const { results } = await dwxSharePointProvisioningService.seedKnowledgeBaseData();
+      setSeedResults(results.map(r => ({ service: r.name, success: r.success, message: r.message })));
+      const count = await dwxSharePointProvisioningService.getListItemCount('DWxKnowledgeBase');
+      setKnowledgeBaseCount(count);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to seed knowledge base');
+    } finally {
+      setIsSeeding(false);
+    }
+  };
+
   const seedAllData = async () => {
     setIsSeedingAll(true);
     setError(null);
@@ -573,6 +592,7 @@ export const DWxSharePointProvisioning: React.FC = () => {
   const serviceRequestsExists = getStatusForList('DWxServiceRequests');
   const productRequestsExists = getStatusForList('DWxProductRequests');
   const sessionPrepExists = getStatusForList('DWxSessionPrep');
+  const knowledgeBaseExists = getStatusForList('DWxKnowledgeBase');
   const anySeeding = isSeeding || isSeedingAll;
 
   const totalSeedItems = servicesCount + teamMembersCount + clientsCount + accountManagersCount +
@@ -1006,6 +1026,25 @@ export const DWxSharePointProvisioning: React.FC = () => {
         </div>
       </div>
 
+      {/* Seed Knowledge Base */}
+      <div className={styles.seedSection}>
+        <div className={styles.sectionHeader}>
+          <BookOpen24Regular className={styles.sectionIcon} />
+          <Text size={400} weight="semibold">
+            Seed Knowledge Base
+          </Text>
+        </div>
+        <Text className={styles.description}>
+          Populate DWxKnowledgeBase with 50 entries: 20 FAQs (process, services, commercial, technical), 20 Glossary terms, and 10 in-depth Articles covering sales playbooks, objection handling, competitive intelligence, and industry guides
+        </Text>
+        <div style={{ marginTop: tokens.spacingVerticalM }}>
+          <Button appearance="outline" icon={<Add24Regular />} onClick={seedKnowledgeBase} disabled={!knowledgeBaseExists || anySeeding || knowledgeBaseCount > 0}>
+            {anySeeding && !isSeedingAll ? (<><Spinner size="tiny" style={{ marginRight: '8px' }} />Seeding...</>) : knowledgeBaseCount > 0 ? (`Knowledge Base Already Seeded (${knowledgeBaseCount})`) : ('Seed 50 KB Entries')}
+          </Button>
+          {!knowledgeBaseExists && <Text className={styles.infoText} block style={{ marginTop: '4px' }}>Create the DWxKnowledgeBase list first</Text>}
+        </div>
+      </div>
+
       {/* Seed Results (shared across all seed operations) */}
       {seedResults && seedResults.length > 0 && (
         <div className={styles.resultsContainer}>
@@ -1048,6 +1087,7 @@ export const DWxSharePointProvisioning: React.FC = () => {
           <li><strong>DWxSessionPrep</strong> - AI-powered session preparation for meetings</li>
           <li><strong>DWxLandingPageContent</strong> - Admin-manageable landing page content sections</li>
           <li><strong>DWxKnowledgeBase</strong> - FAQ, Glossary, and Articles for Account Managers</li>
+          <li><strong>DWxProposals</strong> - Structured proposal management with AI generation and approval workflow</li>
           <li><strong>DWxAuditLog</strong> - Audit trail for compliance and tracking</li>
           <li><strong>DWxSupportingDocuments</strong> - Document library for RFPs and proposals</li>
         </ul>
