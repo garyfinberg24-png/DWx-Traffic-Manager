@@ -678,13 +678,52 @@ class DWxSharePointProvisioningService {
     };
   }
 
+  private get landingPageContentListDefinition(): ListDefinition {
+    return {
+      title: 'DWxLandingPageContent',
+      description: 'DWx Landing Page Content - Admin-manageable content sections for the landing page',
+      fields: [
+        { internalName: 'Content_JSON', displayName: 'Content (JSON)', type: 'Note', required: true },
+        { internalName: 'SortOrder', displayName: 'Sort Order', type: 'Number' },
+        { internalName: 'IsActive', displayName: 'Is Active', type: 'Boolean', defaultValue: '1' },
+      ],
+    };
+  }
+
+  private get knowledgeBaseListDefinition(): ListDefinition {
+    return {
+      title: 'DWxKnowledgeBase',
+      description: 'DWx Knowledge Base - FAQ, Glossary, and Articles for Account Managers',
+      fields: [
+        { internalName: 'Content', displayName: 'Content', type: 'Note', required: true },
+        {
+          internalName: 'Type',
+          displayName: 'Type',
+          type: 'Choice',
+          choices: ['FAQ', 'Glossary', 'Article'],
+          required: true,
+        },
+        {
+          internalName: 'Category',
+          displayName: 'Category',
+          type: 'Choice',
+          choices: ['General', 'Services', 'Products', 'Process', 'Technical', 'Commercial'],
+          defaultValue: 'General',
+        },
+        { internalName: 'Tags_JSON', displayName: 'Tags (JSON)', type: 'Note' },
+        { internalName: 'SortOrder', displayName: 'Sort Order', type: 'Number' },
+        { internalName: 'IsActive', displayName: 'Is Active', type: 'Boolean', defaultValue: '1' },
+      ],
+    };
+  }
+
   // ==================== PUBLIC METHODS ====================
 
   /**
    * Check which DWx lists exist
    */
   async checkListsStatus(): Promise<ListStatus[]> {
-    const listNames = ['DWxServices', 'DWxServiceRequests', 'DWxProductRequests', 'DWxClients', 'DWxSpecialists', 'DWxManagers', 'DWxTeamMembers', 'DWxAccountManagers', 'DWxAuditLog', 'DWxSessionPrep'];
+    const listNames = ['DWxServices', 'DWxServiceRequests', 'DWxProductRequests', 'DWxClients', 'DWxSpecialists', 'DWxManagers', 'DWxTeamMembers', 'DWxAccountManagers', 'DWxAuditLog', 'DWxSessionPrep', 'DWxLandingPageContent', 'DWxKnowledgeBase'];
     const results: ListStatus[] = [];
 
     for (const name of listNames) {
@@ -774,6 +813,20 @@ class DWxSharePointProvisioningService {
   }
 
   /**
+   * Provision the DWxLandingPageContent list
+   */
+  async provisionLandingPageContentList(): Promise<ProvisionResult> {
+    return this.provisionList(this.landingPageContentListDefinition);
+  }
+
+  /**
+   * Provision the DWxKnowledgeBase list
+   */
+  async provisionKnowledgeBaseList(): Promise<ProvisionResult> {
+    return this.provisionList(this.knowledgeBaseListDefinition);
+  }
+
+  /**
    * Create the DWxSupportingDocuments document library
    */
   async provisionDocumentLibrary(): Promise<ProvisionResult> {
@@ -813,6 +866,8 @@ class DWxSharePointProvisioningService {
       { name: 'DWxAccountManagers', provision: () => this.provisionAccountManagersList() },
       { name: 'DWxAuditLog', provision: () => this.provisionAuditLogList() },
       { name: 'DWxSessionPrep', provision: () => this.provisionSessionPrepList() },
+      { name: 'DWxLandingPageContent', provision: () => this.provisionLandingPageContentList() },
+      { name: 'DWxKnowledgeBase', provision: () => this.provisionKnowledgeBaseList() },
       { name: 'DWxSupportingDocuments', provision: () => this.provisionDocumentLibrary() },
     ];
 

@@ -21,6 +21,8 @@ import {
   Database24Regular,
   Apps24Regular,
   PersonBoard24Regular,
+  Home24Regular,
+  BookOpen24Regular,
 } from '@fluentui/react-icons';
 import { TeamMemberList } from './TeamMemberList';
 import { ClientList } from './ClientList';
@@ -32,6 +34,8 @@ import { DocumentManagement } from './DocumentManagement';
 import { DWxSharePointProvisioning } from './DWxSharePointProvisioning';
 import { ServiceManagement } from './ServiceManagement';
 import { SpecialistManagement } from './SpecialistManagement';
+import { LandingPageManagement } from './LandingPageManagement';
+import { KnowledgeBaseManagement } from './KnowledgeBaseManagement';
 
 const useStyles = makeStyles({
   container: {
@@ -72,7 +76,7 @@ const useStyles = makeStyles({
   },
 });
 
-type TabValue = 'team' | 'clients' | 'account-managers' | 'services' | 'specialists' | 'managers' | 'guests' | 'checklist' | 'documents' | 'provisioning';
+type TabValue = 'team' | 'clients' | 'account-managers' | 'services' | 'specialists' | 'managers' | 'guests' | 'checklist' | 'documents' | 'landing-page' | 'knowledge-base' | 'provisioning';
 
 export const AdminPage: React.FC = () => {
   const styles = useStyles();
@@ -133,6 +137,12 @@ export const AdminPage: React.FC = () => {
           <Tab value="documents" icon={<FolderOpen24Regular />}>
             Documents
           </Tab>
+          <Tab value="landing-page" icon={<Home24Regular />}>
+            Landing Page
+          </Tab>
+          <Tab value="knowledge-base" icon={<BookOpen24Regular />}>
+            Knowledge Base
+          </Tab>
           <Tab value="provisioning" icon={<Database24Regular />}>
             SP Provisioning
           </Tab>
@@ -150,6 +160,8 @@ export const AdminPage: React.FC = () => {
           {selectedTab === 'guests' && <GuestInvitations />}
           {selectedTab === 'checklist' && <ChecklistManagement />}
           {selectedTab === 'documents' && <DocumentManagement />}
+          {selectedTab === 'landing-page' && <LandingPageManagement />}
+          {selectedTab === 'knowledge-base' && <KnowledgeBaseManagement />}
           {selectedTab === 'provisioning' && <DWxSharePointProvisioning />}
         </div>
       </Card>

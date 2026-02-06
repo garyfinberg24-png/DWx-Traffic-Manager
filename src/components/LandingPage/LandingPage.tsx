@@ -17,137 +17,10 @@ import {
   ClipboardTask24Regular,
   ArrowRight24Regular,
 } from '@fluentui/react-icons';
+import { DEFAULT_LANDING_PAGE_CONTENT, LandingPageContent, LandingPageTeamMember } from '../../types/LandingPageContent';
+import { landingPageContentService } from '../../services/LandingPageContentService';
 
 // ─── Data ──────────────────────────────────────────────────────────────────────
-
-const SLOGANS = [
-  'Your Next Deal Starts Here',
-  'From Lead to Launch, Streamlined',
-  'Pre-Sales, Perfected',
-  'Move Deals Forward, Not Paperwork',
-  'Smart Scheduling. Smarter Selling.',
-  'Close Faster. Know More. Win Often.',
-  'Where Discovery Meets Delivery',
-  'Digital Workplace. Accelerated.',
-];
-
-const WHAT_WE_DO = [
-  'Custom Power Apps & Copilot agents',
-  'SPFx web parts & Teams apps',
-  'SharePoint migrations',
-  'M365 governance & assessments',
-  'Tender responses & proposals',
-  'Managed support & SLA',
-  'Strategic advisory & roadmapping',
-  'Training & change management',
-  'Microsoft Viva suite rollouts',
-  'Intranet design & branding',
-  'Power BI dashboards & reporting',
-  'Security & compliance reviews',
-];
-
-interface TeamMember {
-  name: string;
-  role: string;
-  spec: string;
-  img: number;
-  specFull: string;
-  engagements: string;
-  years: string;
-  quote: string;
-  highlightWords: string[];
-  inspiration: string;
-  hobbies: { emoji: string; label: string }[];
-  websites: string[];
-}
-
-const TEAM_MEMBERS: TeamMember[] = [
-  {
-    name: 'Gary Finberg', role: 'Solution Architect', spec: 'Power Platform \u2022 SPFx \u2022 Copilot', img: 11,
-    specFull: 'Power Platform \u2022 SPFx \u2022 Copilot Agents',
-    engagements: '40+', years: '12+',
-    quote: 'I\'m driven by the belief that great technology should feel invisible \u2014 it just works. Every engagement is a chance to solve a puzzle, collaborate with brilliant people, and deliver something the client didn\'t think was possible.',
-    highlightWords: ['works'],
-    inspiration: 'Seeing a client\'s face light up during a demo. Collaborating with the team to crack a tough architecture problem at the whiteboard. Shipping solutions that genuinely make people\'s work lives easier.',
-    hobbies: [
-      { emoji: '\uD83E\uDD3C', label: 'Mountain Biking' },
-      { emoji: '\u2615', label: 'Specialty Coffee' },
-      { emoji: '\uD83C\uDFA7', label: 'Tech Podcasts' },
-      { emoji: '\uD83D\uDCBB', label: 'Open Source' },
-      { emoji: '\uD83C\uDF0E', label: 'Travel' },
-    ],
-    websites: ['Microsoft Learn \u2014 Power Platform', 'PnP Community \u2014 sp-dev-fx-webparts', 'Hacker News \u2014 tech & startups'],
-  },
-  {
-    name: 'Chris Botha', role: 'Technical Specialist', spec: 'SharePoint \u2022 Migrations', img: 12,
-    specFull: 'SharePoint \u2022 Migrations \u2022 Hybrid',
-    engagements: '35+', years: '10+',
-    quote: 'There\'s a real craft to migrating thousands of sites without users ever noticing. I love the precision it demands \u2014 planning every detail, testing every edge case, and then watching it all land perfectly on go-live day.',
-    highlightWords: ['precision'],
-    inspiration: 'Complex migration puzzles that everyone says can\'t be done. The satisfaction of zero-downtime cutovers. Building tooling that saves the team hundreds of hours on the next project.',
-    hobbies: [
-      { emoji: '\uD83C\uDFC8', label: 'Rugby' },
-      { emoji: '\uD83C\uDF74', label: 'Braai Master' },
-      { emoji: '\uD83D\uDCF7', label: 'Photography' },
-      { emoji: '\uD83C\uDFB6', label: 'Live Music' },
-    ],
-    websites: ['SharePoint Maven \u2014 migration guides', 'Microsoft Tech Community', 'Stack Overflow \u2014 SharePoint'],
-  },
-  {
-    name: 'Shaaira Omar', role: 'Consultant', spec: 'M365 \u2022 Governance', img: 45,
-    specFull: 'M365 \u2022 Governance \u2022 Compliance',
-    engagements: '25+', years: '8+',
-    quote: 'Governance isn\'t about saying no \u2014 it\'s about creating the guardrails that let everyone say yes with confidence. I help organisations unlock M365\'s full potential while keeping their data safe and compliant.',
-    highlightWords: ['no', 'yes'],
-    inspiration: 'Helping clients realise that governance can be an enabler, not a blocker. Turning chaotic tenant sprawl into a clean, well-structured environment that teams actually enjoy using.',
-    hobbies: [
-      { emoji: '\uD83D\uDCDA', label: 'Reading' },
-      { emoji: '\uD83C\uDF69', label: 'Baking' },
-      { emoji: '\uD83D\uDEB2', label: 'Cycling' },
-      { emoji: '\uD83C\uDF31', label: 'Gardening' },
-      { emoji: '\uD83C\uDF08', label: 'Art & Design' },
-    ],
-    websites: ['Microsoft Purview documentation', 'Practical 365 \u2014 governance deep dives', 'The Verge \u2014 tech culture'],
-  },
-  {
-    name: 'Wimpie Baard', role: 'Solution Architect', spec: 'Copilot \u2022 AI \u2022 Viva', img: 14,
-    specFull: 'Copilot \u2022 AI \u2022 Viva Suite',
-    engagements: '30+', years: '11+',
-    quote: 'AI is only as good as the problems you point it at. I love working with clients to find the real pain points \u2014 the ones where Copilot or a custom agent can save hours every week and make people genuinely excited about their tools.',
-    highlightWords: ['real'],
-    inspiration: 'The AI revolution happening inside Microsoft 365 right now. Building Copilot agents that feel like magic to the end user. Helping traditional businesses take their first confident steps into AI.',
-    hobbies: [
-      { emoji: '\u26F3', label: 'Golf' },
-      { emoji: '\uD83D\uDC36', label: 'Dog Dad' },
-      { emoji: '\uD83C\uDFAC', label: 'Sci-Fi Films' },
-      { emoji: '\uD83D\uDCBB', label: 'Side Projects' },
-      { emoji: '\uD83C\uDF77', label: 'Wine Tasting' },
-    ],
-    websites: ['Microsoft Copilot Studio docs', 'AI Blog \u2014 Microsoft Research', 'Ars Technica \u2014 AI coverage'],
-  },
-  {
-    name: 'Gulzar Ismail', role: 'Consultant', spec: 'Training \u2022 Change Mgmt', img: 59,
-    specFull: 'Training \u2022 Change Mgmt \u2022 Adoption',
-    engagements: '20+', years: '9+',
-    quote: 'The best technology in the world is worthless if people don\'t use it. I specialise in the human side of digital transformation \u2014 getting buy-in, building confidence, and making sure every rollout sticks.',
-    highlightWords: ['use'],
-    inspiration: 'Watching the \'light-bulb moment\' when a sceptical user discovers a feature that changes their day. Designing training programmes that people actually enjoy attending. Turning resistance into enthusiasm.',
-    hobbies: [
-      { emoji: '\u26BD', label: 'Football' },
-      { emoji: '\uD83C\uDF73', label: 'Cooking' },
-      { emoji: '\uD83D\uDCDA', label: 'History Books' },
-      { emoji: '\uD83D\uDE97', label: 'Road Trips' },
-      { emoji: '\uD83C\uDFA7', label: 'Podcasts' },
-    ],
-    websites: ['Prosci \u2014 change management', 'LinkedIn Learning', 'Harvard Business Review'],
-  },
-];
-
-const STATS = [
-  { value: '12', label: 'Service Areas' },
-  { value: '29', label: 'Products' },
-  { value: '50+', label: 'Engagements' },
-];
 
 const ACTION_CARDS = [
   {
@@ -177,15 +50,6 @@ const ACTION_CARDS = [
     iconGradient: 'linear-gradient(135deg, #107c10, #16a34a)',
     Icon: ClipboardTask24Regular,
   },
-];
-
-const FOOTER_SERVICES = ['Power Platform', 'SPFx Development', 'SharePoint Migration', 'M365 Assessment', 'Copilot Agents', 'Microsoft Viva'];
-const FOOTER_PRODUCTS = ['DWx Business Apps', 'SharePoint Web Parts', 'Teams Adaptive Cards', 'License Pulse', 'Knowledge Base'];
-const FOOTER_RESOURCES = [
-  { label: 'Submit a Request', route: '/request' },
-  { label: 'My Requests', route: '/requests' },
-  { label: 'Contact the Team', route: '/services' },
-  { label: 'About DWx', route: '/' },
 ];
 
 // ─── Styles ────────────────────────────────────────────────────────────────────
@@ -843,7 +707,7 @@ function renderQuote(quote: string, highlightWords: string[], highlightClass: st
 }
 
 interface TeamProfileModalProps {
-  member: TeamMember;
+  member: LandingPageTeamMember;
   onClose: () => void;
   styles: ReturnType<typeof useStyles>;
 }
@@ -917,17 +781,23 @@ export const LandingPage: React.FC = () => {
   const styles = useStyles();
   const navigate = useNavigate();
   const [activeSlogan, setActiveSlogan] = useState(0);
-  const [selectedMember, setSelectedMember] = useState<TeamMember | null>(null);
+  const [selectedMember, setSelectedMember] = useState<LandingPageTeamMember | null>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const [content, setContent] = useState<LandingPageContent>(DEFAULT_LANDING_PAGE_CONTENT);
+
+  // Load content from SharePoint (silently falls back to defaults)
+  useEffect(() => {
+    landingPageContentService.getAllContent().then(setContent).catch(() => {/* defaults already set */});
+  }, []);
 
   useEffect(() => {
     intervalRef.current = setInterval(() => {
-      setActiveSlogan(prev => (prev + 1) % SLOGANS.length);
+      setActiveSlogan(prev => (prev + 1) % content.slogans.length);
     }, 5000);
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
     };
-  }, []);
+  }, [content.slogans.length]);
 
   return (
     <div>
@@ -935,19 +805,16 @@ export const LandingPage: React.FC = () => {
       <div className={styles.masthead}>
         <div>
           <div className={styles.mastheadTitle}>
-            Your Digital<br />
-            Workplace <span className={styles.mastheadAccent}>Partner</span>
+            {content.mastheadText.title}<br />
+            Workplace <span className={styles.mastheadAccent}>{content.mastheadText.titleAccent}</span>
           </div>
           <div className={styles.mastheadLead}>
-            Digital Workplace is First Technology Group's Microsoft 365 practice.
-            We combine deep platform expertise with business acumen to deliver
-            solutions that drive real productivity gains &mdash; from Power Platform
-            apps to enterprise Copilot agents.
+            {content.mastheadText.lead}
           </div>
         </div>
         <div className={styles.mastheadRight}>
           <div className={styles.statsRow}>
-            {STATS.map(s => (
+            {content.stats.map(s => (
               <div key={s.label} className={styles.statCard}>
                 <div className={styles.statValue}>{s.value}</div>
                 <div className={styles.statLabel}>{s.label}</div>
@@ -955,7 +822,7 @@ export const LandingPage: React.FC = () => {
             ))}
           </div>
           <div className={styles.sloganRotator}>
-            {SLOGANS.map((text, i) => (
+            {content.slogans.map((text, i) => (
               <div
                 key={i}
                 className={mergeClasses(
@@ -1007,7 +874,7 @@ export const LandingPage: React.FC = () => {
             <div className={styles.sidebarSection}>
               <div className={styles.sidebarTitle}>What We Do</div>
               <div className={styles.checklistContainer}>
-                {WHAT_WE_DO.map(item => (
+                {content.whatWeDo.map(item => (
                   <div key={item} className={styles.checkItem}>
                     <span className={styles.checkMark}>&#10003;</span>
                     {item}
@@ -1022,26 +889,23 @@ export const LandingPage: React.FC = () => {
             <div className={styles.testimonial}>
               <span className={styles.testimonialQuoteMark}>&ldquo;</span>
               <div className={styles.testimonialStars}>
-                {[1, 2, 3, 4, 5].map(n => (
-                  <span key={n} className={styles.star}>&#9733;</span>
+                {Array.from({ length: content.testimonial.rating }, (_, i) => (
+                  <span key={i} className={styles.star}>&#9733;</span>
                 ))}
               </div>
               <div className={styles.testimonialQuote}>
-                &ldquo;The DWx team transformed how we approach our M365 engagements.
-                Their discovery process is thorough, the specialists really understand
-                the platform, and turnaround on proposals is consistently fast.
-                It&rsquo;s made a real difference to our pipeline.&rdquo;
+                &ldquo;{content.testimonial.quote}&rdquo;
               </div>
               <div className={styles.testimonialAuthor}>
                 <img
                   className={styles.testimonialAvatar}
-                  src="https://i.pravatar.cc/88?img=47"
-                  alt="Sindy Kotse"
+                  src={content.testimonial.avatarUrl}
+                  alt={content.testimonial.name}
                 />
                 <div>
-                  <div className={styles.tName}>Sindy Kotse</div>
-                  <div className={styles.tRole}>Senior Account Manager</div>
-                  <div className={styles.tCompany}>First Technology Group</div>
+                  <div className={styles.tName}>{content.testimonial.name}</div>
+                  <div className={styles.tRole}>{content.testimonial.role}</div>
+                  <div className={styles.tCompany}>{content.testimonial.company}</div>
                 </div>
               </div>
             </div>
@@ -1052,17 +916,14 @@ export const LandingPage: React.FC = () => {
         <div className={styles.teamPanel}>
           <div className={styles.teamHeader}>
             <div className={styles.teamTitle}>
-              Your <span className={styles.mastheadAccent}>DWx</span> Team
+              {content.teamPanelText.title} <span className={styles.mastheadAccent}>{content.teamPanelText.titleAccent}</span> Team
             </div>
             <div className={styles.teamSubtitle}>
-              One team, one mission &mdash; we collaborate across disciplines to deliver
-              precision-engineered solutions. From first discovery to final deployment,
-              every engagement is a partnership built on trust, expertise, and a shared
-              drive for excellence.
+              {content.teamPanelText.subtitle}
             </div>
           </div>
           <div className={styles.teamRow}>
-            {TEAM_MEMBERS.map(member => (
+            {content.teamMembers.map(member => (
               <div key={member.name} className={styles.teamCard} onClick={() => setSelectedMember(member)}>
                 <img
                   className={styles.teamAvatar}
@@ -1083,17 +944,15 @@ export const LandingPage: React.FC = () => {
         <div className={styles.footerGrid}>
           <div>
             <div className={styles.footerBrandTitle}>
-              Digital <span className={styles.mastheadAccent}>Workplace</span>
+              {content.footerText.brandTitle} <span className={styles.mastheadAccent}>{content.footerText.brandTitleAccent}</span>
             </div>
             <div className={styles.footerBrandText}>
-              A practice of First Technology Group. We design, build, and support
-              modern workplace solutions on the Microsoft 365 platform &mdash; serving
-              organisations across South Africa and the United Kingdom.
+              {content.footerText.brandDescription}
             </div>
           </div>
           <div>
             <div className={styles.footerColTitle}>Services</div>
-            {FOOTER_SERVICES.map(s => (
+            {content.footerServices.map(s => (
               <span key={s} className={styles.footerLink} onClick={() => navigate('/services')}>
                 {s}
               </span>
@@ -1101,7 +960,7 @@ export const LandingPage: React.FC = () => {
           </div>
           <div>
             <div className={styles.footerColTitle}>Products</div>
-            {FOOTER_PRODUCTS.map(p => (
+            {content.footerProducts.map(p => (
               <span key={p} className={styles.footerLink} onClick={() => navigate('/products')}>
                 {p}
               </span>
@@ -1109,7 +968,7 @@ export const LandingPage: React.FC = () => {
           </div>
           <div>
             <div className={styles.footerColTitle}>Resources</div>
-            {FOOTER_RESOURCES.map(r => (
+            {content.footerResources.map(r => (
               <span key={r.label} className={styles.footerLink} onClick={() => navigate(r.route)}>
                 {r.label}
               </span>
@@ -1118,7 +977,7 @@ export const LandingPage: React.FC = () => {
         </div>
         <div className={styles.footerBottom}>
           <div className={styles.footerCopy}>
-            &copy; 2026 First Technology Group &bull; Digital Workplace
+            {content.footerText.copyright}
           </div>
           <span className={styles.footerPrivacy}>Privacy Policy</span>
         </div>

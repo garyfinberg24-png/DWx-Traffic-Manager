@@ -14,6 +14,8 @@ export { gamificationService } from './GamificationService';
 export { productRequestService } from './ProductRequestService';
 export { sessionPrepService } from './SessionPrepService';
 export { aiPreparationService, isAIConfigured } from './AIPreparationService';
+export { landingPageContentService } from './LandingPageContentService';
+export { knowledgeBaseService } from './KnowledgeBaseService';
 
 // Re-export individual services for direct access when needed
 export { authService as realAuthService } from './AuthService';

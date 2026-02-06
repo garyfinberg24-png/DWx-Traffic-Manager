@@ -22,6 +22,7 @@ import {
   DocumentBulletListRegular,
   ArrowTrendingRegular,
   Apps24Regular,
+  BookOpen24Regular,
 } from '@fluentui/react-icons';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -129,6 +130,14 @@ export const Header: React.FC = () => {
           icon={<DocumentBulletListRegular />}
         >
           My Requests
+        </Button>
+        <Button
+          appearance="subtle"
+          className={`${styles.navButton} ${isActive('/knowledge-base') ? styles.navButtonActive : ''}`}
+          onClick={() => navigate('/knowledge-base')}
+          icon={<BookOpen24Regular />}
+        >
+          Knowledge Base
         </Button>
         {isManager && (
           <>

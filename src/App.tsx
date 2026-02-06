@@ -19,6 +19,7 @@ import { ServiceRequestForm } from './components/ServiceRequest';
 import { ProductRequestForm } from './components/ProductRequest';
 import { MyRequests } from './components/MyRequests';
 import { SalesFunnelDashboard } from './components/SalesFunnel';
+import { KnowledgeBase } from './components/KnowledgeBase';
 import { LoginPage } from './components/LoginPage';
 import { getAuthService } from './services/serviceFactory';
 import { validateConfig } from './config/environmentConfig';
@@ -101,6 +102,7 @@ const AppRoutes: React.FC = () => {
           <Route path="/request" element={<ErrorBoundary><ServiceRequestForm /></ErrorBoundary>} />
           <Route path="/product-request" element={<ErrorBoundary><ProductRequestForm /></ErrorBoundary>} />
           <Route path="/requests" element={<ErrorBoundary><MyRequests /></ErrorBoundary>} />
+          <Route path="/knowledge-base" element={<ErrorBoundary><KnowledgeBase /></ErrorBoundary>} />
           <Route
             path="/pipeline"
             element={

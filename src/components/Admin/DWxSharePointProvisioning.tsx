@@ -34,6 +34,8 @@ import {
   Apps24Regular,
   ShieldKeyhole24Regular,
   Sparkle24Regular,
+  Home24Regular,
+  BookOpen24Regular,
 } from '@fluentui/react-icons';
 import { dwxSharePointProvisioningService } from '../../services/DWxSharePointProvisioningService';
 
@@ -215,6 +217,14 @@ const LIST_INFO: Record<string, { description: string; icon: React.ReactElement 
     description: 'AI-powered session preparation for client discovery meetings',
     icon: <Sparkle24Regular />,
   },
+  DWxLandingPageContent: {
+    description: 'Admin-manageable content sections for the landing page',
+    icon: <Home24Regular />,
+  },
+  DWxKnowledgeBase: {
+    description: 'FAQ, Glossary, and Articles for Account Managers',
+    icon: <BookOpen24Regular />,
+  },
   DWxSupportingDocuments: {
     description: 'Document library for RFPs, requirements, and proposals',
     icon: <FolderOpen24Regular />,
@@ -243,6 +253,8 @@ export const DWxSharePointProvisioning: React.FC = () => {
   const [serviceRequestsCount, setServiceRequestsCount] = useState<number>(0);
   const [productRequestsCount, setProductRequestsCount] = useState<number>(0);
   const [sessionPrepCount, setSessionPrepCount] = useState<number>(0);
+  const [landingPageContentCount, setLandingPageContentCount] = useState<number>(0);
+  const [knowledgeBaseCount, setKnowledgeBaseCount] = useState<number>(0);
 
   const checkListStatus = async () => {
     setIsChecking(true);
@@ -266,6 +278,8 @@ export const DWxSharePointProvisioning: React.FC = () => {
         { listName: 'DWxServiceRequests', setter: setServiceRequestsCount },
         { listName: 'DWxProductRequests', setter: setProductRequestsCount },
         { listName: 'DWxSessionPrep', setter: setSessionPrepCount },
+        { listName: 'DWxLandingPageContent', setter: setLandingPageContentCount },
+        { listName: 'DWxKnowledgeBase', setter: setKnowledgeBaseCount },
       ];
 
       await Promise.all(
@@ -336,6 +350,12 @@ export const DWxSharePointProvisioning: React.FC = () => {
           break;
         case 'DWxSessionPrep':
           result = await dwxSharePointProvisioningService.provisionSessionPrepList();
+          break;
+        case 'DWxLandingPageContent':
+          result = await dwxSharePointProvisioningService.provisionLandingPageContentList();
+          break;
+        case 'DWxKnowledgeBase':
+          result = await dwxSharePointProvisioningService.provisionKnowledgeBaseList();
           break;
         case 'DWxSupportingDocuments':
           result = await dwxSharePointProvisioningService.provisionDocumentLibrary();
@@ -548,7 +568,8 @@ export const DWxSharePointProvisioning: React.FC = () => {
   const anySeeding = isSeeding || isSeedingAll;
 
   const totalSeedItems = servicesCount + teamMembersCount + clientsCount + accountManagersCount +
-    specialistsCount + managersCount + serviceRequestsCount + productRequestsCount + sessionPrepCount;
+    specialistsCount + managersCount + serviceRequestsCount + productRequestsCount + sessionPrepCount +
+    landingPageContentCount + knowledgeBaseCount;
 
   return (
     <div className={styles.container}>
@@ -606,6 +627,14 @@ export const DWxSharePointProvisioning: React.FC = () => {
         <div className={styles.statCard}>
           <Text className={styles.statValue}>{sessionPrepCount}</Text>
           <Text className={styles.statLabel}>Session Preps</Text>
+        </div>
+        <div className={styles.statCard}>
+          <Text className={styles.statValue}>{landingPageContentCount}</Text>
+          <Text className={styles.statLabel}>LP Content</Text>
+        </div>
+        <div className={styles.statCard}>
+          <Text className={styles.statValue}>{knowledgeBaseCount}</Text>
+          <Text className={styles.statLabel}>KB Entries</Text>
         </div>
       </div>
 
@@ -1005,6 +1034,8 @@ export const DWxSharePointProvisioning: React.FC = () => {
           <li><strong>DWxSpecialists</strong> - Pre-sales team members who handle discovery sessions</li>
           <li><strong>DWxManagers</strong> - Users with admin and dashboard access</li>
           <li><strong>DWxSessionPrep</strong> - AI-powered session preparation for meetings</li>
+          <li><strong>DWxLandingPageContent</strong> - Admin-manageable landing page content sections</li>
+          <li><strong>DWxKnowledgeBase</strong> - FAQ, Glossary, and Articles for Account Managers</li>
           <li><strong>DWxAuditLog</strong> - Audit trail for compliance and tracking</li>
           <li><strong>DWxSupportingDocuments</strong> - Document library for RFPs and proposals</li>
         </ul>

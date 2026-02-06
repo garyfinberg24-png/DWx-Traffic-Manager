@@ -15,3 +15,5 @@ export { ServiceForm } from './ServiceForm';
 export { ImportServicesDialog } from './ImportServicesDialog';
 export { SpecialistManagement } from './SpecialistManagement';
 export { SpecialistForm } from './SpecialistForm';
+export { LandingPageManagement } from './LandingPageManagement';
+export { KnowledgeBaseManagement } from './KnowledgeBaseManagement';

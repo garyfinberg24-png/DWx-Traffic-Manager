@@ -25,6 +25,10 @@ export const config = {
     productRequestsListName: import.meta.env.VITE_PRODUCT_REQUESTS_LIST || 'DWxProductRequests',
     // Session Preparation list (AI-powered meeting prep)
     sessionPrepListName: import.meta.env.VITE_SESSION_PREP_LIST || 'DWxSessionPrep',
+    // Landing Page Content list
+    landingPageContentListName: import.meta.env.VITE_LANDING_PAGE_CONTENT_LIST || 'DWxLandingPageContent',
+    // Knowledge Base list
+    knowledgeBaseListName: import.meta.env.VITE_KNOWLEDGE_BASE_LIST || 'DWxKnowledgeBase',
     // Document library for uploads
     documentLibrary: import.meta.env.VITE_DOCUMENT_LIBRARY || 'DWxSupportingDocuments',
   },
