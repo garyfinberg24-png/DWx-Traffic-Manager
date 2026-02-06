@@ -1237,6 +1237,8 @@ DWxSupportingDocuments/
 ## Recent Commit History
 
 ```
+16a7997 feat: Deal Activity Timeline + Follow-Up Reminders + Win/Loss Analysis (v2.10.0)
+94b5483 fix: Deep assessment security, performance, and workflow fixes (v2.9.2)
 b085667 feat: V1 hero banner Services page + client auto-populate + KB tab reorder (v2.9.1)
 9f65ace fix: Uniform 24px padding on admin content area for consistent spacing
 130ea07 refactor: Redesign SP Provisioning with tabbed layout (Overview, Lists, Seed Data, Tools)
