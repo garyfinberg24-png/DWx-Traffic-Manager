@@ -1,0 +1,1065 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DWx Admin Center - Navigation Concepts</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #f5f5f5;
+      color: #242424;
+    }
+
+    /* ===== Concept Selector ===== */
+    .concept-nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      background: #1a1a2e;
+      display: flex;
+      align-items: center;
+      padding: 0 32px;
+      height: 56px;
+      gap: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    }
+    .concept-nav .logo {
+      color: #fff;
+      font-weight: 700;
+      font-size: 14px;
+      margin-right: 24px;
+      white-space: nowrap;
+    }
+    .concept-nav .logo span { color: #4fc3f7; }
+    .concept-btn {
+      padding: 8px 20px;
+      border: none;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+    .concept-btn.active {
+      background: #4fc3f7;
+      color: #1a1a2e;
+    }
+    .concept-btn:not(.active) {
+      background: rgba(255,255,255,0.1);
+      color: rgba(255,255,255,0.7);
+    }
+    .concept-btn:hover:not(.active) {
+      background: rgba(255,255,255,0.2);
+      color: #fff;
+    }
+
+    .concept-section {
+      display: none;
+      padding-top: 56px;
+      min-height: 100vh;
+    }
+    .concept-section.active { display: block; }
+
+    .concept-label {
+      background: linear-gradient(135deg, #1a5a8a, #2196F3);
+      color: #fff;
+      padding: 20px 32px;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+    .concept-label h2 { font-size: 18px; margin-bottom: 6px; }
+    .concept-label .tags { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
+    .concept-label .tag {
+      background: rgba(255,255,255,0.2);
+      padding: 2px 10px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .concept-label .tag.pro { background: rgba(76,175,80,0.3); }
+    .concept-label .tag.con { background: rgba(244,67,54,0.3); }
+
+    /* ===== Shared Admin Shell ===== */
+    .admin-shell {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 24px 32px;
+    }
+    .admin-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid #e0e0e0;
+      margin-bottom: 20px;
+    }
+    .admin-header .icon {
+      width: 32px; height: 32px;
+      background: #1a5a8a;
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      color: #fff; font-size: 16px;
+    }
+    .admin-header h1 { font-size: 22px; font-weight: 600; }
+    .admin-header p { font-size: 13px; color: #666; margin-top: 2px; }
+
+    .admin-card {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+      overflow: hidden;
+    }
+
+    /* Fake content area */
+    .fake-content {
+      padding: 32px;
+    }
+    .fake-content h3 { font-size: 18px; margin-bottom: 16px; color: #1a5a8a; }
+    .fake-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .fake-table th {
+      text-align: left;
+      padding: 10px 16px;
+      background: #f8f9fa;
+      font-size: 12px;
+      font-weight: 600;
+      color: #666;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border-bottom: 2px solid #e0e0e0;
+    }
+    .fake-table td {
+      padding: 12px 16px;
+      font-size: 14px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .fake-table tr:hover td { background: #f8f9fc; }
+    .status-badge {
+      display: inline-block;
+      padding: 2px 10px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .status-active { background: #e8f5e9; color: #2e7d32; }
+    .status-inactive { background: #fce4ec; color: #c62828; }
+    .avatar {
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #1a5a8a, #4fc3f7);
+      display: inline-flex; align-items: center; justify-content: center;
+      color: #fff; font-size: 13px; font-weight: 600;
+      margin-right: 8px; vertical-align: middle;
+    }
+
+    /* ============================================================
+       CONCEPT 1: Left Sidebar with Collapsible Groups
+       ============================================================ */
+    .c1-layout {
+      display: flex;
+      min-height: 600px;
+    }
+    .c1-sidebar {
+      width: 240px;
+      flex-shrink: 0;
+      border-right: 1px solid #e8e8e8;
+      background: #fafbfc;
+      padding: 8px 0;
+    }
+    .c1-group-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 16px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .c1-group-header:hover { background: #f0f2f5; }
+    .c1-group-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: #8a8a8a;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+    }
+    .c1-chevron {
+      font-size: 10px;
+      color: #aaa;
+      transition: transform 0.2s;
+    }
+    .c1-group.collapsed .c1-chevron { transform: rotate(-90deg); }
+    .c1-group.collapsed .c1-items { display: none; }
+    .c1-items { padding: 2px 0 8px; }
+    .c1-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 16px 9px 20px;
+      cursor: pointer;
+      font-size: 14px;
+      color: #444;
+      border-left: 3px solid transparent;
+      transition: all 0.15s;
+    }
+    .c1-item:hover { background: #eef2f7; }
+    .c1-item.active {
+      background: #e3f0fa;
+      border-left-color: #1a5a8a;
+      color: #1a5a8a;
+      font-weight: 600;
+    }
+    .c1-item .nav-icon { width: 18px; text-align: center; font-size: 15px; opacity: 0.7; }
+    .c1-item.active .nav-icon { opacity: 1; }
+    .c1-content { flex: 1; overflow: auto; }
+    .c1-divider {
+      height: 1px;
+      background: #e8e8e8;
+      margin: 4px 12px;
+    }
+
+    /* ============================================================
+       CONCEPT 2: Top Category Tabs + Sub-Tabs
+       ============================================================ */
+    .c2-category-bar {
+      display: flex;
+      gap: 0;
+      border-bottom: 2px solid #e0e0e0;
+      padding: 0 24px;
+      background: #fafbfc;
+    }
+    .c2-category {
+      padding: 14px 24px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      color: #666;
+      border-bottom: 3px solid transparent;
+      margin-bottom: -2px;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .c2-category:hover { color: #333; background: #f0f2f5; }
+    .c2-category.active {
+      color: #1a5a8a;
+      border-bottom-color: #1a5a8a;
+    }
+    .c2-category .cat-icon { font-size: 16px; }
+    .c2-category .count {
+      background: #e0e0e0;
+      color: #666;
+      font-size: 11px;
+      padding: 1px 7px;
+      border-radius: 10px;
+      font-weight: 600;
+    }
+    .c2-category.active .count { background: #1a5a8a; color: #fff; }
+    .c2-subtab-bar {
+      display: flex;
+      gap: 4px;
+      padding: 12px 24px;
+      background: #fff;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .c2-subtab {
+      padding: 7px 16px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 13px;
+      color: #666;
+      transition: all 0.15s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .c2-subtab:hover { background: #f0f2f5; color: #333; }
+    .c2-subtab.active {
+      background: #e3f0fa;
+      color: #1a5a8a;
+      font-weight: 600;
+    }
+    .c2-subtab .sub-icon { font-size: 14px; }
+
+    /* ============================================================
+       CONCEPT 3: Compact Icon Sidebar + Flyout Panels
+       ============================================================ */
+    .c3-layout {
+      display: flex;
+      min-height: 600px;
+    }
+    .c3-icon-rail {
+      width: 56px;
+      flex-shrink: 0;
+      background: #1a2332;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 8px 0;
+      gap: 2px;
+    }
+    .c3-rail-item {
+      width: 44px;
+      height: 44px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+      cursor: pointer;
+      color: rgba(255,255,255,0.5);
+      font-size: 18px;
+      transition: all 0.15s;
+      position: relative;
+    }
+    .c3-rail-item:hover { background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.8); }
+    .c3-rail-item.active { background: rgba(79,195,247,0.2); color: #4fc3f7; }
+    .c3-rail-label {
+      font-size: 8px;
+      margin-top: 2px;
+      text-align: center;
+      line-height: 1;
+    }
+    .c3-rail-divider {
+      width: 28px;
+      height: 1px;
+      background: rgba(255,255,255,0.15);
+      margin: 6px 0;
+    }
+    .c3-flyout {
+      width: 200px;
+      flex-shrink: 0;
+      background: #f5f7fa;
+      border-right: 1px solid #e0e0e0;
+      padding: 12px 0;
+    }
+    .c3-flyout-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: #888;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      padding: 8px 16px 12px;
+    }
+    .c3-fly-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 16px;
+      cursor: pointer;
+      font-size: 14px;
+      color: #555;
+      transition: all 0.15s;
+    }
+    .c3-fly-item:hover { background: #ebeef2; }
+    .c3-fly-item.active {
+      background: #e3f0fa;
+      color: #1a5a8a;
+      font-weight: 600;
+      border-right: 3px solid #1a5a8a;
+    }
+    .c3-fly-item .fly-icon { font-size: 15px; opacity: 0.6; }
+    .c3-fly-item.active .fly-icon { opacity: 1; }
+    .c3-content { flex: 1; overflow: auto; }
+
+    /* ============================================================
+       CONCEPT 4: Segmented Control + Dropdown Groups
+       ============================================================ */
+    .c4-top-bar {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 16px 24px;
+      background: #fafbfc;
+      border-bottom: 1px solid #e0e0e0;
+      flex-wrap: wrap;
+    }
+    .c4-segment {
+      display: inline-flex;
+      background: #e8ebef;
+      border-radius: 8px;
+      padding: 3px;
+      gap: 2px;
+    }
+    .c4-seg-btn {
+      padding: 8px 18px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      color: #666;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+    }
+    .c4-seg-btn:hover { color: #333; }
+    .c4-seg-btn.active {
+      background: #fff;
+      color: #1a5a8a;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+    }
+    .c4-dropdown {
+      position: relative;
+      display: inline-flex;
+    }
+    .c4-dd-trigger {
+      padding: 8px 16px;
+      border: 1px solid #d0d5dd;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      color: #444;
+      background: #fff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.15s;
+    }
+    .c4-dd-trigger:hover { border-color: #1a5a8a; }
+    .c4-dd-trigger.open { border-color: #1a5a8a; box-shadow: 0 0 0 2px rgba(26,90,138,0.15); }
+    .c4-dd-menu {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      margin-top: 4px;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+      min-width: 220px;
+      padding: 4px;
+      z-index: 10;
+      display: none;
+    }
+    .c4-dd-menu.show { display: block; }
+    .c4-dd-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      color: #444;
+      transition: all 0.1s;
+    }
+    .c4-dd-item:hover { background: #f0f2f5; }
+    .c4-dd-item.active { background: #e3f0fa; color: #1a5a8a; font-weight: 600; }
+    .c4-dd-divider { height: 1px; background: #f0f0f0; margin: 4px 8px; }
+    .c4-dd-group-label {
+      font-size: 10px;
+      font-weight: 700;
+      color: #999;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 8px 12px 4px;
+    }
+    .c4-view-label {
+      font-size: 12px;
+      color: #888;
+      font-weight: 500;
+    }
+
+    /* ============================================================
+       CONCEPT 5: Card Grid Hub (Dashboard-style)
+       ============================================================ */
+    .c5-hub {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 20px;
+      padding: 24px;
+    }
+    .c5-group-card {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+      overflow: hidden;
+      transition: box-shadow 0.2s;
+    }
+    .c5-group-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.1); }
+    .c5-group-head {
+      padding: 16px 20px 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .c5-group-icon {
+      width: 36px; height: 36px;
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; color: #fff;
+    }
+    .c5-group-head h4 { font-size: 15px; font-weight: 600; }
+    .c5-group-head .grp-count {
+      margin-left: auto;
+      font-size: 12px;
+      color: #999;
+    }
+    .c5-group-items { padding: 8px 0; }
+    .c5-gitem {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 11px 20px;
+      cursor: pointer;
+      font-size: 14px;
+      color: #444;
+      transition: all 0.15s;
+    }
+    .c5-gitem:hover { background: #f8f9fc; }
+    .c5-gitem.active { background: #e3f0fa; color: #1a5a8a; font-weight: 600; }
+    .c5-gitem .gi-icon { font-size: 16px; opacity: 0.6; width: 20px; text-align: center; }
+    .c5-gitem.active .gi-icon { opacity: 1; }
+    .c5-gitem .gi-arrow {
+      margin-left: auto;
+      font-size: 12px;
+      color: #ccc;
+    }
+    .c5-gitem:hover .gi-arrow { color: #1a5a8a; }
+    .c5-back-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 24px;
+      background: #fafbfc;
+      border-bottom: 1px solid #e0e0e0;
+      cursor: pointer;
+    }
+    .c5-back-bar:hover { background: #f0f2f5; }
+    .c5-back-bar .back-arrow { font-size: 16px; color: #1a5a8a; }
+    .c5-back-bar span { font-size: 14px; font-weight: 600; color: #1a5a8a; }
+    .c5-breadcrumb {
+      font-size: 13px;
+      color: #888;
+      margin-left: auto;
+    }
+
+    /* Animations */
+    @keyframes slideIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    .animate-in { animation: slideIn 0.3s ease; }
+  </style>
+</head>
+<body>
+
+  <!-- ===== Top Concept Selector ===== -->
+  <div class="concept-nav">
+    <div class="logo">DWx Admin <span>Nav Concepts</span></div>
+    <button class="concept-btn active" onclick="showConcept(1)">V1: Sidebar</button>
+    <button class="concept-btn" onclick="showConcept(2)">V2: Category Tabs</button>
+    <button class="concept-btn" onclick="showConcept(3)">V3: Icon Rail</button>
+    <button class="concept-btn" onclick="showConcept(4)">V4: Segmented</button>
+    <button class="concept-btn" onclick="showConcept(5)">V5: Card Hub</button>
+  </div>
+
+  <!-- ============================================================
+       CONCEPT 1: Left Sidebar with Collapsible Groups
+       ============================================================ -->
+  <div class="concept-section active" id="concept-1">
+    <div class="concept-label">
+      <h2>Concept 1: Left Sidebar with Collapsible Groups</h2>
+      <p>Classic admin pattern. Vertical sidebar with grouped sections that expand/collapse. Active item highlighted with left border accent.</p>
+      <div class="tags">
+        <span class="tag pro">Scalable</span>
+        <span class="tag pro">Familiar Pattern</span>
+        <span class="tag pro">Always Visible</span>
+        <span class="tag con">Uses Horizontal Space</span>
+      </div>
+    </div>
+    <div class="admin-shell">
+      <div class="admin-header">
+        <div class="icon">&#9881;</div>
+        <div>
+          <h1>Administration</h1>
+          <p>Manage team members, services, and system configuration</p>
+        </div>
+      </div>
+      <div class="admin-card">
+        <div class="c1-layout">
+          <nav class="c1-sidebar">
+            <!-- People & Roles -->
+            <div class="c1-group" onclick="toggleC1(this)">
+              <div class="c1-group-header">
+                <span class="c1-group-label">People & Roles</span>
+                <span class="c1-chevron">&#9660;</span>
+              </div>
+              <div class="c1-items">
+                <div class="c1-item active"><span class="nav-icon">&#128101;</span> Team Members</div>
+                <div class="c1-item"><span class="nav-icon">&#128188;</span> Account Managers</div>
+                <div class="c1-item"><span class="nav-icon">&#128736;</span> Specialists</div>
+                <div class="c1-item"><span class="nav-icon">&#128737;</span> Manager Access</div>
+                <div class="c1-item"><span class="nav-icon">&#128100;</span> Guest Invitations</div>
+              </div>
+            </div>
+            <div class="c1-divider"></div>
+            <!-- Catalog & Content -->
+            <div class="c1-group" onclick="toggleC1(this)">
+              <div class="c1-group-header">
+                <span class="c1-group-label">Catalog & Content</span>
+                <span class="c1-chevron">&#9660;</span>
+              </div>
+              <div class="c1-items">
+                <div class="c1-item"><span class="nav-icon">&#128230;</span> Services</div>
+                <div class="c1-item"><span class="nav-icon">&#127968;</span> Landing Page</div>
+                <div class="c1-item"><span class="nav-icon">&#128218;</span> Knowledge Base</div>
+              </div>
+            </div>
+            <div class="c1-divider"></div>
+            <!-- Data & Operations -->
+            <div class="c1-group" onclick="toggleC1(this)">
+              <div class="c1-group-header">
+                <span class="c1-group-label">Data & Operations</span>
+                <span class="c1-chevron">&#9660;</span>
+              </div>
+              <div class="c1-items">
+                <div class="c1-item"><span class="nav-icon">&#127970;</span> Clients</div>
+                <div class="c1-item"><span class="nav-icon">&#9745;</span> Checklist</div>
+                <div class="c1-item"><span class="nav-icon">&#128194;</span> Documents</div>
+              </div>
+            </div>
+            <div class="c1-divider"></div>
+            <!-- System -->
+            <div class="c1-group" onclick="toggleC1(this)">
+              <div class="c1-group-header">
+                <span class="c1-group-label">System</span>
+                <span class="c1-chevron">&#9660;</span>
+              </div>
+              <div class="c1-items">
+                <div class="c1-item"><span class="nav-icon">&#128451;</span> SP Provisioning</div>
+              </div>
+            </div>
+          </nav>
+          <div class="c1-content fake-content animate-in">
+            <h3>Team Members</h3>
+            <table class="fake-table">
+              <thead><tr><th></th><th>Name</th><th>Email</th><th>Role</th><th>Status</th></tr></thead>
+              <tbody>
+                <tr><td><span class="avatar">GF</span></td><td>Gary Finberg</td><td>gary@firsttech.digital</td><td>Administrator</td><td><span class="status-badge status-active">Active</span></td></tr>
+                <tr><td><span class="avatar">JD</span></td><td>James Davidson</td><td>james@firsttech.digital</td><td>Solution Architect</td><td><span class="status-badge status-active">Active</span></td></tr>
+                <tr><td><span class="avatar">SM</span></td><td>Sarah Mitchell</td><td>sarah@firsttech.digital</td><td>Technical Specialist</td><td><span class="status-badge status-active">Active</span></td></tr>
+                <tr><td><span class="avatar">AK</span></td><td>Andrew Klein</td><td>andrew@firsttech.digital</td><td>Consultant</td><td><span class="status-badge status-inactive">Inactive</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       CONCEPT 2: Top Category Tabs + Sub-Tabs (Pills)
+       ============================================================ -->
+  <div class="concept-section" id="concept-2">
+    <div class="concept-label">
+      <h2>Concept 2: Top Category Tabs + Sub-Tab Pills</h2>
+      <p>Two-tier horizontal navigation. 4 category tabs on top, then pill-style sub-tabs below. Keeps full width for content.</p>
+      <div class="tags">
+        <span class="tag pro">Full Content Width</span>
+        <span class="tag pro">Compact</span>
+        <span class="tag pro">Max 5 Sub-Tabs Visible</span>
+        <span class="tag con">Two Rows of Nav</span>
+      </div>
+    </div>
+    <div class="admin-shell">
+      <div class="admin-header">
+        <div class="icon">&#9881;</div>
+        <div>
+          <h1>Administration</h1>
+          <p>Manage team members, services, and system configuration</p>
+        </div>
+      </div>
+      <div class="admin-card">
+        <div class="c2-category-bar">
+          <div class="c2-category active">
+            <span class="cat-icon">&#128101;</span>
+            People & Roles
+            <span class="count">5</span>
+          </div>
+          <div class="c2-category">
+            <span class="cat-icon">&#128230;</span>
+            Catalog & Content
+            <span class="count">3</span>
+          </div>
+          <div class="c2-category">
+            <span class="cat-icon">&#127970;</span>
+            Data & Operations
+            <span class="count">3</span>
+          </div>
+          <div class="c2-category">
+            <span class="cat-icon">&#9881;</span>
+            System
+            <span class="count">1</span>
+          </div>
+        </div>
+        <div class="c2-subtab-bar">
+          <div class="c2-subtab active"><span class="sub-icon">&#128101;</span> Team Members</div>
+          <div class="c2-subtab"><span class="sub-icon">&#128188;</span> Account Managers</div>
+          <div class="c2-subtab"><span class="sub-icon">&#128736;</span> Specialists</div>
+          <div class="c2-subtab"><span class="sub-icon">&#128737;</span> Manager Access</div>
+          <div class="c2-subtab"><span class="sub-icon">&#128100;</span> Guest Invitations</div>
+        </div>
+        <div class="fake-content animate-in">
+          <h3>Team Members</h3>
+          <table class="fake-table">
+            <thead><tr><th></th><th>Name</th><th>Email</th><th>Role</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td><span class="avatar">GF</span></td><td>Gary Finberg</td><td>gary@firsttech.digital</td><td>Administrator</td><td><span class="status-badge status-active">Active</span></td></tr>
+              <tr><td><span class="avatar">JD</span></td><td>James Davidson</td><td>james@firsttech.digital</td><td>Solution Architect</td><td><span class="status-badge status-active">Active</span></td></tr>
+              <tr><td><span class="avatar">SM</span></td><td>Sarah Mitchell</td><td>sarah@firsttech.digital</td><td>Technical Specialist</td><td><span class="status-badge status-active">Active</span></td></tr>
+              <tr><td><span class="avatar">AK</span></td><td>Andrew Klein</td><td>andrew@firsttech.digital</td><td>Consultant</td><td><span class="status-badge status-inactive">Inactive</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       CONCEPT 3: Compact Icon Rail + Flyout Panel
+       ============================================================ -->
+  <div class="concept-section" id="concept-3">
+    <div class="concept-label">
+      <h2>Concept 3: Compact Icon Rail + Flyout Panel</h2>
+      <p>Narrow icon rail (like VS Code/Teams) with category icons. Clicking a category reveals a flyout panel with sub-items. Very space-efficient.</p>
+      <div class="tags">
+        <span class="tag pro">Minimal Footprint</span>
+        <span class="tag pro">Modern Feel</span>
+        <span class="tag pro">Scalable to 50+ Items</span>
+        <span class="tag con">Learning Curve</span>
+        <span class="tag con">More Complex</span>
+      </div>
+    </div>
+    <div class="admin-shell">
+      <div class="admin-header">
+        <div class="icon">&#9881;</div>
+        <div>
+          <h1>Administration</h1>
+          <p>Manage team members, services, and system configuration</p>
+        </div>
+      </div>
+      <div class="admin-card">
+        <div class="c3-layout">
+          <div class="c3-icon-rail">
+            <div class="c3-rail-item active" title="People & Roles">
+              <span>&#128101;</span>
+              <span class="c3-rail-label">People</span>
+            </div>
+            <div class="c3-rail-item" title="Catalog & Content">
+              <span>&#128230;</span>
+              <span class="c3-rail-label">Catalog</span>
+            </div>
+            <div class="c3-rail-divider"></div>
+            <div class="c3-rail-item" title="Data & Operations">
+              <span>&#127970;</span>
+              <span class="c3-rail-label">Data</span>
+            </div>
+            <div class="c3-rail-item" title="System">
+              <span>&#9881;</span>
+              <span class="c3-rail-label">System</span>
+            </div>
+          </div>
+          <div class="c3-flyout">
+            <div class="c3-flyout-title">People & Roles</div>
+            <div class="c3-fly-item active"><span class="fly-icon">&#128101;</span> Team Members</div>
+            <div class="c3-fly-item"><span class="fly-icon">&#128188;</span> Account Managers</div>
+            <div class="c3-fly-item"><span class="fly-icon">&#128736;</span> Specialists</div>
+            <div class="c3-fly-item"><span class="fly-icon">&#128737;</span> Manager Access</div>
+            <div class="c3-fly-item"><span class="fly-icon">&#128100;</span> Guest Invitations</div>
+          </div>
+          <div class="c3-content fake-content animate-in">
+            <h3>Team Members</h3>
+            <table class="fake-table">
+              <thead><tr><th></th><th>Name</th><th>Email</th><th>Role</th><th>Status</th></tr></thead>
+              <tbody>
+                <tr><td><span class="avatar">GF</span></td><td>Gary Finberg</td><td>gary@firsttech.digital</td><td>Administrator</td><td><span class="status-badge status-active">Active</span></td></tr>
+                <tr><td><span class="avatar">JD</span></td><td>James Davidson</td><td>james@firsttech.digital</td><td>Solution Architect</td><td><span class="status-badge status-active">Active</span></td></tr>
+                <tr><td><span class="avatar">SM</span></td><td>Sarah Mitchell</td><td>sarah@firsttech.digital</td><td>Technical Specialist</td><td><span class="status-badge status-active">Active</span></td></tr>
+                <tr><td><span class="avatar">AK</span></td><td>Andrew Klein</td><td>andrew@firsttech.digital</td><td>Consultant</td><td><span class="status-badge status-inactive">Inactive</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       CONCEPT 4: Segmented Control + Grouped Dropdown
+       ============================================================ -->
+  <div class="concept-section" id="concept-4">
+    <div class="concept-label">
+      <h2>Concept 4: Segmented Control + Grouped Dropdown</h2>
+      <p>Top bar with a segmented toggle for frequently used items, plus a "More" dropdown for overflow. Keeps things flat and accessible.</p>
+      <div class="tags">
+        <span class="tag pro">Minimal Chrome</span>
+        <span class="tag pro">Quick Access to Key Items</span>
+        <span class="tag pro">Original Request Style</span>
+        <span class="tag con">Dropdown Hides Items</span>
+      </div>
+    </div>
+    <div class="admin-shell">
+      <div class="admin-header">
+        <div class="icon">&#9881;</div>
+        <div>
+          <h1>Administration</h1>
+          <p>Manage team members, services, and system configuration</p>
+        </div>
+      </div>
+      <div class="admin-card">
+        <div class="c4-top-bar">
+          <div class="c4-segment">
+            <div class="c4-seg-btn active">&#128101; Team</div>
+            <div class="c4-seg-btn">&#128188; AMs</div>
+            <div class="c4-seg-btn">&#127970; Clients</div>
+            <div class="c4-seg-btn">&#128230; Services</div>
+            <div class="c4-seg-btn">&#128736; Specialists</div>
+          </div>
+          <div class="c4-dropdown">
+            <div class="c4-dd-trigger open" onclick="this.nextElementSibling.classList.toggle('show')">
+              &#9662; More sections...
+            </div>
+            <div class="c4-dd-menu show">
+              <div class="c4-dd-group-label">Security & Access</div>
+              <div class="c4-dd-item">&#128737; Manager Access</div>
+              <div class="c4-dd-item">&#128100; Guest Invitations</div>
+              <div class="c4-dd-divider"></div>
+              <div class="c4-dd-group-label">Content</div>
+              <div class="c4-dd-item">&#127968; Landing Page</div>
+              <div class="c4-dd-item">&#128218; Knowledge Base</div>
+              <div class="c4-dd-divider"></div>
+              <div class="c4-dd-group-label">Operations</div>
+              <div class="c4-dd-item">&#9745; Checklist</div>
+              <div class="c4-dd-item">&#128194; Documents</div>
+              <div class="c4-dd-divider"></div>
+              <div class="c4-dd-group-label">System</div>
+              <div class="c4-dd-item">&#128451; SP Provisioning</div>
+            </div>
+          </div>
+        </div>
+        <div class="fake-content animate-in">
+          <h3>Team Members</h3>
+          <table class="fake-table">
+            <thead><tr><th></th><th>Name</th><th>Email</th><th>Role</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td><span class="avatar">GF</span></td><td>Gary Finberg</td><td>gary@firsttech.digital</td><td>Administrator</td><td><span class="status-badge status-active">Active</span></td></tr>
+              <tr><td><span class="avatar">JD</span></td><td>James Davidson</td><td>james@firsttech.digital</td><td>Solution Architect</td><td><span class="status-badge status-active">Active</span></td></tr>
+              <tr><td><span class="avatar">SM</span></td><td>Sarah Mitchell</td><td>sarah@firsttech.digital</td><td>Technical Specialist</td><td><span class="status-badge status-active">Active</span></td></tr>
+              <tr><td><span class="avatar">AK</span></td><td>Andrew Klein</td><td>andrew@firsttech.digital</td><td>Consultant</td><td><span class="status-badge status-inactive">Inactive</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       CONCEPT 5: Card Grid Hub (Dashboard-style)
+       ============================================================ -->
+  <div class="concept-section" id="concept-5">
+    <div class="concept-label">
+      <h2>Concept 5: Card Grid Hub + Drill-Down</h2>
+      <p>Dashboard-style landing page with grouped cards. Click a card to drill into that section with a back button. Like M365 Admin Center.</p>
+      <div class="tags">
+        <span class="tag pro">Clean Overview</span>
+        <span class="tag pro">M365 Admin Style</span>
+        <span class="tag pro">Discoverable</span>
+        <span class="tag con">Extra Click to Navigate</span>
+      </div>
+    </div>
+    <div class="admin-shell">
+      <div class="admin-header">
+        <div class="icon">&#9881;</div>
+        <div>
+          <h1>Administration</h1>
+          <p>Manage team members, services, and system configuration</p>
+        </div>
+      </div>
+
+      <!-- Hub View (default) -->
+      <div id="c5-hub-view">
+        <div class="c5-hub">
+          <!-- People & Roles -->
+          <div class="c5-group-card">
+            <div class="c5-group-head">
+              <div class="c5-group-icon" style="background: linear-gradient(135deg, #1a5a8a, #4fc3f7);">&#128101;</div>
+              <div>
+                <h4>People & Roles</h4>
+              </div>
+              <span class="grp-count">5 items</span>
+            </div>
+            <div class="c5-group-items">
+              <div class="c5-gitem" onclick="showC5Detail('Team Members')"><span class="gi-icon">&#128101;</span> Team Members <span class="gi-arrow">&#8250;</span></div>
+              <div class="c5-gitem" onclick="showC5Detail('Account Managers')"><span class="gi-icon">&#128188;</span> Account Managers <span class="gi-arrow">&#8250;</span></div>
+              <div class="c5-gitem" onclick="showC5Detail('Specialists')"><span class="gi-icon">&#128736;</span> Specialists <span class="gi-arrow">&#8250;</span></div>
+              <div class="c5-gitem" onclick="showC5Detail('Manager Access')"><span class="gi-icon">&#128737;</span> Manager Access <span class="gi-arrow">&#8250;</span></div>
+              <div class="c5-gitem" onclick="showC5Detail('Guest Invitations')"><span class="gi-icon">&#128100;</span> Guest Invitations <span class="gi-arrow">&#8250;</span></div>
+            </div>
+          </div>
+          <!-- Catalog & Content -->
+          <div class="c5-group-card">
+            <div class="c5-group-head">
+              <div class="c5-group-icon" style="background: linear-gradient(135deg, #6a1b9a, #ba68c8);">&#128230;</div>
+              <div>
+                <h4>Catalog & Content</h4>
+              </div>
+              <span class="grp-count">3 items</span>
+            </div>
+            <div class="c5-group-items">
+              <div class="c5-gitem" onclick="showC5Detail('Services')"><span class="gi-icon">&#128230;</span> Services <span class="gi-arrow">&#8250;</span></div>
+              <div class="c5-gitem" onclick="showC5Detail('Landing Page')"><span class="gi-icon">&#127968;</span> Landing Page <span class="gi-arrow">&#8250;</span></div>
+              <div class="c5-gitem" onclick="showC5Detail('Knowledge Base')"><span class="gi-icon">&#128218;</span> Knowledge Base <span class="gi-arrow">&#8250;</span></div>
+            </div>
+          </div>
+          <!-- Data & Operations -->
+          <div class="c5-group-card">
+            <div class="c5-group-head">
+              <div class="c5-group-icon" style="background: linear-gradient(135deg, #e65100, #ffb74d);">&#127970;</div>
+              <div>
+                <h4>Data & Operations</h4>
+              </div>
+              <span class="grp-count">3 items</span>
+            </div>
+            <div class="c5-group-items">
+              <div class="c5-gitem" onclick="showC5Detail('Clients')"><span class="gi-icon">&#127970;</span> Clients <span class="gi-arrow">&#8250;</span></div>
+              <div class="c5-gitem" onclick="showC5Detail('Checklist')"><span class="gi-icon">&#9745;</span> Checklist <span class="gi-arrow">&#8250;</span></div>
+              <div class="c5-gitem" onclick="showC5Detail('Documents')"><span class="gi-icon">&#128194;</span> Documents <span class="gi-arrow">&#8250;</span></div>
+            </div>
+          </div>
+          <!-- System -->
+          <div class="c5-group-card">
+            <div class="c5-group-head">
+              <div class="c5-group-icon" style="background: linear-gradient(135deg, #2e7d32, #66bb6a);">&#9881;</div>
+              <div>
+                <h4>System</h4>
+              </div>
+              <span class="grp-count">1 item</span>
+            </div>
+            <div class="c5-group-items">
+              <div class="c5-gitem" onclick="showC5Detail('SP Provisioning')"><span class="gi-icon">&#128451;</span> SP Provisioning <span class="gi-arrow">&#8250;</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Detail View (drilled in) -->
+      <div id="c5-detail-view" style="display: none;">
+        <div class="admin-card">
+          <div class="c5-back-bar" onclick="showC5Hub()">
+            <span class="back-arrow">&#8249;</span>
+            <span>Back to Admin Hub</span>
+            <span class="c5-breadcrumb">Administration &gt; People & Roles &gt; <strong id="c5-detail-title">Team Members</strong></span>
+          </div>
+          <div class="fake-content animate-in">
+            <h3 id="c5-detail-heading">Team Members</h3>
+            <table class="fake-table">
+              <thead><tr><th></th><th>Name</th><th>Email</th><th>Role</th><th>Status</th></tr></thead>
+              <tbody>
+                <tr><td><span class="avatar">GF</span></td><td>Gary Finberg</td><td>gary@firsttech.digital</td><td>Administrator</td><td><span class="status-badge status-active">Active</span></td></tr>
+                <tr><td><span class="avatar">JD</span></td><td>James Davidson</td><td>james@firsttech.digital</td><td>Solution Architect</td><td><span class="status-badge status-active">Active</span></td></tr>
+                <tr><td><span class="avatar">SM</span></td><td>Sarah Mitchell</td><td>sarah@firsttech.digital</td><td>Technical Specialist</td><td><span class="status-badge status-active">Active</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Concept switcher
+    function showConcept(num) {
+      document.querySelectorAll('.concept-section').forEach(s => s.classList.remove('active'));
+      document.querySelectorAll('.concept-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById('concept-' + num).classList.add('active');
+      document.querySelectorAll('.concept-btn')[num - 1].classList.add('active');
+    }
+
+    // C1: Toggle sidebar groups
+    function toggleC1(el) {
+      if (el.classList.contains('c1-group')) {
+        el.classList.toggle('collapsed');
+      }
+    }
+
+    // C5: Hub drill-down
+    function showC5Detail(name) {
+      document.getElementById('c5-hub-view').style.display = 'none';
+      document.getElementById('c5-detail-view').style.display = 'block';
+      document.getElementById('c5-detail-title').textContent = name;
+      document.getElementById('c5-detail-heading').textContent = name;
+    }
+    function showC5Hub() {
+      document.getElementById('c5-hub-view').style.display = 'block';
+      document.getElementById('c5-detail-view').style.display = 'none';
+    }
+
+    // Make C1 nav items clickable (visual only)
+    document.querySelectorAll('.c1-item').forEach(item => {
+      item.addEventListener('click', function(e) {
+        e.stopPropagation();
+        document.querySelectorAll('.c1-item').forEach(i => i.classList.remove('active'));
+        this.classList.add('active');
+      });
+    });
+
+    // Make C2 category tabs interactive
+    document.querySelectorAll('.c2-category').forEach(cat => {
+      cat.addEventListener('click', function() {
+        document.querySelectorAll('.c2-category').forEach(c => c.classList.remove('active'));
+        this.classList.add('active');
+      });
+    });
+    document.querySelectorAll('.c2-subtab').forEach(tab => {
+      tab.addEventListener('click', function() {
+        document.querySelectorAll('.c2-subtab').forEach(t => t.classList.remove('active'));
+        this.classList.add('active');
+      });
+    });
+
+    // Make C3 rail items interactive
+    document.querySelectorAll('.c3-rail-item').forEach(item => {
+      item.addEventListener('click', function() {
+        document.querySelectorAll('.c3-rail-item').forEach(i => i.classList.remove('active'));
+        this.classList.add('active');
+      });
+    });
+    document.querySelectorAll('.c3-fly-item').forEach(item => {
+      item.addEventListener('click', function() {
+        document.querySelectorAll('.c3-fly-item').forEach(i => i.classList.remove('active'));
+        this.classList.add('active');
+      });
+    });
+
+    // Make C4 segment buttons interactive
+    document.querySelectorAll('.c4-seg-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        document.querySelectorAll('.c4-seg-btn').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+      });
+    });
+    document.querySelectorAll('.c4-dd-item').forEach(item => {
+      item.addEventListener('click', function() {
+        document.querySelectorAll('.c4-dd-item').forEach(i => i.classList.remove('active'));
+        this.classList.add('active');
+      });
+    });
+
+    // C5 hub items
+    document.querySelectorAll('.c5-gitem').forEach(item => {
+      item.addEventListener('click', function() {
+        document.querySelectorAll('.c5-gitem').forEach(i => i.classList.remove('active'));
+        this.classList.add('active');
+      });
+    });
+  </script>
+</body>
+</html>
