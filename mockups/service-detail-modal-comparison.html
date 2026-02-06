@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DWx — Service Detail: Full Page vs Large Modal Comparison</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; color: #242424; }
+
+  /* ── Comparison Tabs ── */
+  .comparison-bar {
+    position: sticky; top: 0; z-index: 100;
+    background: #1a1a2e; padding: 12px 32px;
+    display: flex; align-items: center; gap: 16px;
+  }
+  .comparison-bar h2 { color: white; font-size: 16px; font-weight: 600; margin-right: 12px; }
+  .view-btn {
+    padding: 8px 20px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.3);
+    background: transparent; color: rgba(255,255,255,0.7); cursor: pointer;
+    font-size: 13px; font-weight: 600; transition: all 0.2s;
+  }
+  .view-btn:hover { background: rgba(255,255,255,0.1); color: white; }
+  .view-btn.active { background: #1a5a8a; color: white; border-color: #1a5a8a; }
+  .comparison-bar .note { margin-left: auto; color: rgba(255,255,255,0.5); font-size: 12px; }
+
+  .view-panel { display: none; }
+  .view-panel.active { display: block; }
+
+  /* ── Shared ── */
+  .cat-badge { display: inline-block; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; padding: 3px 10px; border-radius: 10px; background: rgba(255,255,255,0.2); }
+  .badge { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 4px; font-size: 12px; font-weight: 500; }
+  .badge-low { background: #dff6dd; color: #107c10; }
+  .badge-medium { background: #fff4ce; color: #a67c00; }
+  .badge-high { background: #fde7e9; color: #c42b1c; }
+  .section-card { background: white; border-radius: 10px; border: 1px solid #e8e8e8; overflow: hidden; }
+  .section-header { display: flex; align-items: center; gap: 8px; padding: 14px 20px; border-bottom: 1px solid #f0f0f0; background: #fafafa; font-size: 14px; font-weight: 600; color: #242424; }
+  .section-header .icon { color: #1a5a8a; font-size: 16px; }
+  .section-body { padding: 16px 20px; }
+  .bullet-list { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+  .bullet-list li { display: flex; gap: 8px; font-size: 13px; color: #424242; line-height: 1.5; }
+  .bullet-list li::before { content: '✓'; color: #1a5a8a; font-weight: 700; flex-shrink: 0; }
+  .timeline-step { display: flex; gap: 12px; padding: 12px 0; }
+  .timeline-num { width: 28px; height: 28px; border-radius: 50%; background: #e8f4fc; color: #1a5a8a; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; border: 2px solid #1a5a8a; flex-shrink: 0; }
+  .timeline-name { font-size: 13px; font-weight: 600; color: #242424; }
+  .timeline-desc { font-size: 12px; color: #616161; margin-top: 2px; }
+  .role-badge { display: inline-flex; align-items: center; gap: 4px; padding: 6px 12px; background: #e8f4fc; border-radius: 6px; font-size: 12px; font-weight: 500; color: #1a5a8a; border: 1px solid #cce4f0; }
+  .btn { padding: 10px 24px; border-radius: 6px; border: none; cursor: pointer; font-size: 14px; font-weight: 600; transition: all 0.15s; }
+  .btn-primary { background: #1a5a8a; color: white; }
+  .btn-primary:hover { background: #145a7a; }
+  .btn-secondary { background: white; color: #424242; border: 1px solid #d0d0d0; }
+  .btn-secondary:hover { background: #f5f5f5; }
+  .btn-ghost { background: transparent; color: #1a5a8a; }
+  .btn-ghost:hover { background: #e8f4fc; }
+
+  /* ════════════════════════════════════════════════
+     VIEW A: Current Full Page (for reference)
+     ════════════════════════════════════════════════ */
+  .fullpage-container { max-width: 1200px; margin: 0 auto; padding: 24px 48px; }
+  .fullpage-hero { border-radius: 12px; overflow: hidden; margin-bottom: 28px; background: #742774; color: white; }
+  .fullpage-hero-inner { padding: 36px 44px; display: flex; align-items: center; gap: 28px; }
+  .fullpage-hero-icon { width: 72px; height: 72px; border-radius: 14px; background: rgba(255,255,255,0.15); display: flex; align-items: center; justify-content: center; font-size: 28px; flex-shrink: 0; }
+  .fullpage-hero-text { flex: 1; }
+  .fullpage-hero-text h1 { font-size: 28px; font-weight: 700; margin-bottom: 6px; }
+  .fullpage-hero-text p { font-size: 15px; opacity: 0.85; }
+  .fullpage-grid { display: grid; grid-template-columns: 1fr 320px; gap: 28px; align-items: start; }
+  .fullpage-main { display: flex; flex-direction: column; gap: 20px; }
+  .fullpage-sidebar { display: flex; flex-direction: column; gap: 20px; position: sticky; top: 80px; }
+  .fact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; padding: 16px 20px; }
+  .fact-label { font-size: 10px; color: #616161; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px; }
+  .fact-value { font-size: 14px; font-weight: 600; color: #242424; }
+  .price-value { font-size: 18px; font-weight: 700; color: #1a5a8a; }
+  .fullpage-label { display: inline-block; padding: 6px 16px; background: #f0f2f5; border-radius: 6px; font-size: 12px; color: #616161; margin-top: 16px; text-align: center; }
+
+  /* ════════════════════════════════════════════════
+     VIEW B: Large Modal (proposed)
+     ════════════════════════════════════════════════ */
+  .modal-backdrop {
+    position: relative; min-height: 90vh;
+    background: rgba(0,0,0,0.06); padding: 40px 20px;
+    display: flex; justify-content: center; align-items: flex-start;
+  }
+  .catalog-behind {
+    position: absolute; top: 0; left: 0; right: 0; padding: 20px 48px;
+    opacity: 0.3; filter: blur(1px); pointer-events: none;
+  }
+  .catalog-behind .cat-title { font-size: 24px; font-weight: 600; color: #242424; margin-bottom: 8px; }
+  .catalog-behind .cat-sub { font-size: 13px; color: #616161; margin-bottom: 16px; }
+  .catalog-behind .cat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  .catalog-behind .mini-card { background: white; border-radius: 8px; padding: 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); height: 80px; }
+
+  .large-modal {
+    position: relative; z-index: 10;
+    background: white; border-radius: 12px;
+    box-shadow: 0 12px 48px rgba(0,0,0,0.2);
+    width: 900px; max-width: 95vw;
+    max-height: 85vh; overflow: hidden;
+    display: flex; flex-direction: column;
+  }
+  .modal-hero { padding: 24px 32px; display: flex; align-items: center; gap: 20px; color: white; flex-shrink: 0; }
+  .modal-hero-icon { width: 56px; height: 56px; border-radius: 12px; background: rgba(255,255,255,0.15); display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
+  .modal-hero-text { flex: 1; }
+  .modal-hero-text h2 { font-size: 22px; font-weight: 700; margin-bottom: 4px; }
+  .modal-hero-text p { font-size: 14px; opacity: 0.85; }
+  .modal-close { width: 36px; height: 36px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.3); background: rgba(255,255,255,0.1); color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+  .modal-close:hover { background: rgba(255,255,255,0.2); }
+
+  .modal-content { flex: 1; overflow-y: auto; }
+  .modal-grid { display: grid; grid-template-columns: 1fr 280px; gap: 0; }
+  .modal-main { padding: 24px 28px; display: flex; flex-direction: column; gap: 20px; border-right: 1px solid #f0f0f0; }
+  .modal-side { padding: 24px 20px; background: #fafafa; display: flex; flex-direction: column; gap: 16px; }
+  .modal-side .fact-grid { padding: 0; }
+
+  .modal-footer { padding: 14px 28px; border-top: 1px solid #e0e0e0; display: flex; justify-content: flex-end; gap: 10px; flex-shrink: 0; background: #fafafa; }
+
+  /* ════════════════════════════════════════════════
+     VIEW C: Flow comparison (small → large modal)
+     ════════════════════════════════════════════════ */
+  .flow-container { max-width: 1100px; margin: 0 auto; padding: 32px 48px; }
+  .flow-title { font-size: 22px; font-weight: 600; color: #242424; margin-bottom: 8px; }
+  .flow-subtitle { font-size: 14px; color: #616161; margin-bottom: 32px; }
+  .flow-row { display: flex; gap: 32px; align-items: flex-start; margin-bottom: 40px; }
+  .flow-step { flex: 1; }
+  .flow-step-label { font-size: 12px; font-weight: 600; color: #1a5a8a; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+  .flow-step-label .step-num { width: 24px; height: 24px; border-radius: 50%; background: #1a5a8a; color: white; display: flex; align-items: center; justify-content: center; font-size: 12px; }
+  .flow-arrow { display: flex; align-items: center; padding-top: 100px; color: #1a5a8a; font-size: 28px; flex-shrink: 0; }
+
+  /* Small modal mockup */
+  .small-modal-mockup { background: white; border-radius: 8px; box-shadow: 0 8px 32px rgba(0,0,0,0.15); width: 100%; max-width: 340px; overflow: hidden; }
+  .sm-header { padding: 12px 16px; display: flex; align-items: center; gap: 12px; background: #742774; color: white; }
+  .sm-icon { width: 36px; height: 36px; border-radius: 6px; background: rgba(255,255,255,0.15); display: flex; align-items: center; justify-content: center; font-size: 16px; }
+  .sm-title { font-size: 15px; font-weight: 600; }
+  .sm-cat { font-size: 11px; opacity: 0.8; }
+  .sm-body { padding: 14px 16px; }
+  .sm-section-title { font-size: 10px; font-weight: 600; color: #1a5a8a; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; border-left: 2px solid #1a5a8a; padding-left: 8px; }
+  .sm-desc { font-size: 12px; color: #424242; line-height: 1.5; margin-bottom: 12px; }
+  .sm-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+  .sm-meta-label { font-size: 9px; color: #616161; text-transform: uppercase; }
+  .sm-meta-value { font-size: 12px; font-weight: 600; color: #242424; }
+  .sm-footer { padding: 12px 16px; border-top: 1px solid #e8e8e8; display: flex; gap: 8px; justify-content: flex-end; background: #fafafa; }
+  .sm-btn { padding: 6px 12px; border-radius: 4px; font-size: 11px; font-weight: 600; cursor: pointer; border: none; }
+  .sm-btn-ghost { background: transparent; color: #1a5a8a; }
+  .sm-btn-link { background: transparent; color: #742774; text-decoration: underline; }
+  .sm-btn-primary { background: #1a5a8a; color: white; }
+
+  /* Large modal mockup (inline, scaled) */
+  .large-modal-inline { background: white; border-radius: 10px; box-shadow: 0 12px 48px rgba(0,0,0,0.15); width: 100%; overflow: hidden; }
+  .lg-hero { padding: 16px 20px; display: flex; align-items: center; gap: 14px; background: #742774; color: white; }
+  .lg-icon { width: 44px; height: 44px; border-radius: 10px; background: rgba(255,255,255,0.15); display: flex; align-items: center; justify-content: center; font-size: 18px; }
+  .lg-title { font-size: 18px; font-weight: 700; }
+  .lg-sub { font-size: 12px; opacity: 0.85; }
+  .lg-grid { display: grid; grid-template-columns: 1fr 200px; }
+  .lg-main { padding: 16px 20px; border-right: 1px solid #f0f0f0; }
+  .lg-side { padding: 16px; background: #fafafa; }
+  .lg-section { margin-bottom: 14px; }
+  .lg-section-title { font-size: 12px; font-weight: 600; color: #242424; margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
+  .lg-section-title .dot { color: #1a5a8a; }
+  .lg-text { font-size: 12px; color: #424242; line-height: 1.5; }
+  .lg-list { list-style: none; padding: 0; }
+  .lg-list li { font-size: 11px; color: #424242; padding: 3px 0; display: flex; gap: 6px; }
+  .lg-list li::before { content: '✓'; color: #1a5a8a; font-weight: 700; }
+  .lg-phase { display: flex; gap: 8px; padding: 6px 0; }
+  .lg-phase-num { width: 20px; height: 20px; border-radius: 50%; background: #e8f4fc; color: #1a5a8a; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 700; border: 1.5px solid #1a5a8a; flex-shrink: 0; }
+  .lg-phase-name { font-size: 11px; font-weight: 600; color: #242424; }
+  .lg-phase-desc { font-size: 10px; color: #616161; }
+  .lg-fact { margin-bottom: 10px; }
+  .lg-fact-label { font-size: 9px; color: #616161; text-transform: uppercase; letter-spacing: 0.3px; }
+  .lg-fact-value { font-size: 12px; font-weight: 600; color: #242424; }
+  .lg-price { font-size: 15px; font-weight: 700; color: #1a5a8a; }
+  .lg-footer { padding: 10px 20px; border-top: 1px solid #e0e0e0; display: flex; justify-content: flex-end; gap: 8px; background: #fafafa; }
+
+  /* Pros/Cons cards */
+  .pros-cons { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 24px; }
+  .eval-card { background: white; border-radius: 10px; padding: 20px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+  .eval-card h4 { font-size: 14px; font-weight: 700; margin-bottom: 10px; }
+  .eval-card.pro h4 { color: #107c10; }
+  .eval-card.con h4 { color: #c42b1c; }
+  .eval-card ul { font-size: 13px; color: #424242; line-height: 1.8; padding-left: 18px; }
+
+  .recommendation { background: #e8f4fc; border: 1px solid #b3d7f0; border-radius: 10px; padding: 20px 24px; margin-top: 24px; }
+  .recommendation h4 { font-size: 14px; font-weight: 700; color: #1a5a8a; margin-bottom: 6px; }
+  .recommendation p { font-size: 13px; color: #424242; line-height: 1.5; }
+</style>
+</head>
+<body>
+
+<!-- Comparison Bar -->
+<div class="comparison-bar">
+  <h2>Service Detail Comparison</h2>
+  <button class="view-btn active" onclick="switchView('flow')">User Flow</button>
+  <button class="view-btn" onclick="switchView('fullpage')">A: Full Page (Current)</button>
+  <button class="view-btn" onclick="switchView('modal')">B: Large Modal (Proposed)</button>
+  <span class="note">Click tabs to compare approaches</span>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════════
+     VIEW: User Flow Comparison
+     ════════════════════════════════════════════════════════════════ -->
+<div id="flow" class="view-panel active">
+  <div class="flow-container">
+    <div class="flow-title">Proposed User Flow: Card → Quick View → Full Details Modal</div>
+    <div class="flow-subtitle">Users never leave the catalog page. All details are accessible through progressive modals.</div>
+
+    <div class="flow-row">
+      <!-- Step 1: Card -->
+      <div class="flow-step">
+        <div class="flow-step-label"><span class="step-num">1</span> Click Service Card</div>
+        <div class="small-modal-mockup" style="max-width: 220px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+          <div style="padding: 10px 12px; display: flex; gap: 8px; align-items: flex-start; border-bottom: 1px solid #f0f0f0;">
+            <div style="width: 28px; height: 28px; border-radius: 6px; background: #74277415; display: flex; align-items: center; justify-content: center; color: #742774; font-size: 12px; flex-shrink: 0;">⚡</div>
+            <div>
+              <div style="font-size: 12px; font-weight: 600;">Power Platform Dev</div>
+              <div style="font-size: 10px; color: #616161;">Custom Apps & Automation</div>
+            </div>
+          </div>
+          <div style="padding: 8px 12px; font-size: 10px; color: #424242; line-height: 1.4;">Custom Power Apps, Power Automate flows, Power BI dashboards...</div>
+          <div style="padding: 8px 12px; display: flex; gap: 4px; border-top: 1px solid #f0f0f0;">
+            <span style="font-size: 9px; padding: 2px 5px; background: #f0f4f8; border-radius: 3px;">Power Platform</span>
+            <span style="font-size: 9px; padding: 2px 5px; background: #fff4ce; border-radius: 3px; color: #a67c00;">Medium</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="flow-arrow">→</div>
+
+      <!-- Step 2: Small Modal (Quick View) -->
+      <div class="flow-step">
+        <div class="flow-step-label"><span class="step-num">2</span> Quick View Modal</div>
+        <div class="small-modal-mockup">
+          <div class="sm-header" style="background: #742774;">
+            <div class="sm-icon">⚡</div>
+            <div>
+              <div class="sm-title">Power Platform Development</div>
+              <div class="sm-cat">Power Platform</div>
+            </div>
+          </div>
+          <div class="sm-body">
+            <div class="sm-section-title">About this Service</div>
+            <div class="sm-desc">Custom Power Apps, Power Automate flows, Power BI dashboards, and Power Pages solutions tailored to your business needs.</div>
+            <div class="sm-meta">
+              <div><div class="sm-meta-label">Duration</div><div class="sm-meta-value">2hr</div></div>
+              <div><div class="sm-meta-label">Complexity</div><div class="sm-meta-value"><span style="background:#fff4ce; color:#a67c00; padding: 2px 6px; border-radius: 3px; font-size: 11px;">Medium</span></div></div>
+              <div><div class="sm-meta-label">Pricing</div><div class="sm-meta-value">Project-based</div></div>
+              <div><div class="sm-meta-label">From</div><div class="sm-meta-value" style="color: #1a5a8a;">R25 000</div></div>
+            </div>
+          </div>
+          <div class="sm-footer">
+            <button class="sm-btn sm-btn-ghost">Close</button>
+            <button class="sm-btn sm-btn-link" style="color: #742774;">View Full Details ↗</button>
+            <button class="sm-btn sm-btn-primary">Request Service</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="flow-arrow">→</div>
+
+      <!-- Step 3: Large Modal (Full Details) -->
+      <div class="flow-step" style="flex: 1.4;">
+        <div class="flow-step-label"><span class="step-num">3</span> Full Details Modal (New)</div>
+        <div class="large-modal-inline">
+          <div class="lg-hero" style="background: #742774;">
+            <div class="lg-icon">⚡</div>
+            <div style="flex: 1;">
+              <div class="lg-title">Power Platform Development</div>
+              <div class="lg-sub">Custom Power Apps & Automation</div>
+            </div>
+            <div style="width: 28px; height: 28px; border-radius: 6px; background: rgba(255,255,255,0.15); display: flex; align-items: center; justify-content: center; color: white; cursor: pointer; font-size: 14px;">✕</div>
+          </div>
+          <div class="lg-grid">
+            <div class="lg-main">
+              <!-- About -->
+              <div class="lg-section">
+                <div class="lg-section-title"><span class="dot">📋</span> About This Service</div>
+                <div class="lg-text">Custom Power Apps, Power Automate flows, Power BI dashboards, and Power Pages solutions tailored to your business needs. We deliver end-to-end development from discovery through deployment.</div>
+              </div>
+              <!-- What's Included -->
+              <div class="lg-section">
+                <div class="lg-section-title"><span class="dot">✓</span> What's Included</div>
+                <ul class="lg-list">
+                  <li>Requirements discovery workshop</li>
+                  <li>Solution architecture and design</li>
+                  <li>Custom development and testing</li>
+                  <li>User training and documentation</li>
+                  <li>Post-deployment support period</li>
+                </ul>
+              </div>
+              <!-- Engagement Timeline -->
+              <div class="lg-section">
+                <div class="lg-section-title"><span class="dot">🚀</span> Engagement Timeline</div>
+                <div class="lg-phase"><div class="lg-phase-num">1</div><div><div class="lg-phase-name">Discovery</div><div class="lg-phase-desc">Requirements gathering & process mapping</div></div></div>
+                <div class="lg-phase"><div class="lg-phase-num">2</div><div><div class="lg-phase-name">Design</div><div class="lg-phase-desc">Solution architecture & UX design</div></div></div>
+                <div class="lg-phase"><div class="lg-phase-num">3</div><div><div class="lg-phase-name">Build</div><div class="lg-phase-desc">Development, customisation & testing</div></div></div>
+                <div class="lg-phase"><div class="lg-phase-num">4</div><div><div class="lg-phase-name">Deploy</div><div class="lg-phase-desc">User training & production rollout</div></div></div>
+                <div class="lg-phase"><div class="lg-phase-num">5</div><div><div class="lg-phase-name">Optimise</div><div class="lg-phase-desc">Post-launch monitoring & refinement</div></div></div>
+              </div>
+              <!-- Key Benefits -->
+              <div class="lg-section">
+                <div class="lg-section-title"><span class="dot">⭐</span> Key Benefits</div>
+                <ul class="lg-list">
+                  <li>Rapid development with low-code platform</li>
+                  <li>Seamless M365 ecosystem integration</li>
+                  <li>Business users can maintain & extend</li>
+                  <li>Enterprise-grade security and compliance</li>
+                </ul>
+              </div>
+            </div>
+            <div class="lg-side">
+              <!-- Quick Facts -->
+              <div style="font-size: 12px; font-weight: 600; margin-bottom: 10px;">Quick Facts</div>
+              <div class="lg-fact"><div class="lg-fact-label">Duration</div><div class="lg-fact-value">2hr discovery</div></div>
+              <div class="lg-fact"><div class="lg-fact-label">Complexity</div><div class="lg-fact-value"><span style="background:#fff4ce; color:#a67c00; padding: 2px 8px; border-radius: 4px; font-size: 11px;">Medium</span></div></div>
+              <div class="lg-fact"><div class="lg-fact-label">Pricing</div><div class="lg-fact-value">Project-based</div></div>
+              <div class="lg-fact"><div class="lg-fact-label">Starting From</div><div class="lg-price">R25 000</div></div>
+              <hr style="border: none; border-top: 1px solid #e0e0e0; margin: 12px 0;">
+              <!-- Prerequisites -->
+              <div style="font-size: 12px; font-weight: 600; margin-bottom: 6px;">Prerequisites</div>
+              <div style="font-size: 11px; color: #616161; line-height: 1.5;">M365 license with Power Platform access</div>
+              <hr style="border: none; border-top: 1px solid #e0e0e0; margin: 12px 0;">
+              <!-- Team -->
+              <div style="font-size: 12px; font-weight: 600; margin-bottom: 8px;">Team Composition</div>
+              <div style="display: flex; flex-wrap: wrap; gap: 4px;">
+                <span style="font-size: 10px; padding: 4px 8px; background: #e8f4fc; border-radius: 4px; color: #1a5a8a;">Solution Architect</span>
+                <span style="font-size: 10px; padding: 4px 8px; background: #e8f4fc; border-radius: 4px; color: #1a5a8a;">Technical Specialist</span>
+              </div>
+              <hr style="border: none; border-top: 1px solid #e0e0e0; margin: 12px 0;">
+              <!-- Ideal For -->
+              <div style="font-size: 12px; font-weight: 600; margin-bottom: 6px;">Ideal For</div>
+              <ul class="lg-list" style="font-size: 10px;">
+                <li>Process automation needs</li>
+                <li>Custom business apps</li>
+                <li>Reporting & dashboards</li>
+              </ul>
+            </div>
+          </div>
+          <div class="lg-footer">
+            <button class="sm-btn sm-btn-ghost" style="font-size: 12px;">Close</button>
+            <button class="sm-btn sm-btn-primary" style="font-size: 12px; padding: 8px 18px;">Request This Service →</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pros / Cons -->
+    <div class="pros-cons">
+      <div class="eval-card pro">
+        <h4>✓ Advantages of Large Modal</h4>
+        <ul>
+          <li>User stays on catalog — can close and browse another service instantly</li>
+          <li>No full page navigation / back button needed</li>
+          <li>Progressive disclosure: quick view → full details → request</li>
+          <li>Faster browsing when comparing multiple services</li>
+          <li>Sidebar with quick facts always visible while scrolling content</li>
+          <li>Familiar pattern from e-commerce and SaaS product catalogs</li>
+        </ul>
+      </div>
+      <div class="eval-card con">
+        <h4>✗ Trade-offs</h4>
+        <ul>
+          <li>Less screen real estate than a full page (900px vs full width)</li>
+          <li>Can't bookmark or share a direct URL to service details</li>
+          <li>Two modal layers could feel complex for simple services</li>
+          <li>Content needs tighter design to fit 900px width</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="recommendation">
+      <h4>💡 Recommendation</h4>
+      <p>Use the <strong>large modal</strong> as the primary detail view. Remove the full page route (<code>/services/:serviceId</code>) entirely, or keep it as a fallback for direct URL access/bookmarks. The quick-view modal's "View Full Details" button opens the large modal instead of navigating to a new page. This creates a smooth, uninterrupted browsing experience within the catalog.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════════
+     VIEW A: Full Page (Current)
+     ════════════════════════════════════════════════════════════════ -->
+<div id="fullpage" class="view-panel">
+  <div class="fullpage-container">
+    <div style="margin-bottom: 16px;">
+      <button class="btn btn-secondary" style="font-size: 13px; padding: 8px 16px;">← Back to Catalog</button>
+    </div>
+    <div class="fullpage-hero">
+      <div class="fullpage-hero-inner">
+        <div class="fullpage-hero-icon">⚡</div>
+        <div class="fullpage-hero-text">
+          <span class="cat-badge">Power Platform</span>
+          <h1>Power Platform Development</h1>
+          <p>Custom Power Apps & Automation</p>
+        </div>
+        <button class="btn btn-secondary" style="background: white; color: #742774; font-weight: 600;">Request This Service →</button>
+      </div>
+    </div>
+
+    <div class="fullpage-grid">
+      <div class="fullpage-main">
+        <!-- About -->
+        <div class="section-card">
+          <div class="section-header"><span class="icon">📋</span> About This Service</div>
+          <div class="section-body"><p style="font-size: 14px; color: #424242; line-height: 1.7;">Custom Power Apps, Power Automate flows, Power BI dashboards, and Power Pages solutions tailored to your business needs. We deliver end-to-end development from requirements discovery through deployment and post-launch support.</p></div>
+        </div>
+        <!-- What's Included -->
+        <div class="section-card">
+          <div class="section-header"><span class="icon">✓</span> What's Included</div>
+          <div class="section-body">
+            <ul class="bullet-list">
+              <li>Requirements discovery workshop (1-2 sessions)</li>
+              <li>Solution architecture and design documentation</li>
+              <li>Custom Power Apps development with responsive UI</li>
+              <li>Power Automate workflow automation</li>
+              <li>User training and administrator documentation</li>
+              <li>30-day post-deployment support period</li>
+            </ul>
+          </div>
+        </div>
+        <!-- Engagement Timeline -->
+        <div class="section-card">
+          <div class="section-header"><span class="icon">🚀</span> Engagement Timeline</div>
+          <div class="section-body">
+            <div class="timeline-step"><div class="timeline-num">1</div><div><div class="timeline-name">Discovery</div><div class="timeline-desc">Requirements gathering, process mapping, and stakeholder interviews</div></div></div>
+            <div class="timeline-step"><div class="timeline-num">2</div><div><div class="timeline-name">Design</div><div class="timeline-desc">Solution architecture, UX wireframes, and technical design</div></div></div>
+            <div class="timeline-step"><div class="timeline-num">3</div><div><div class="timeline-name">Build</div><div class="timeline-desc">Iterative development, customisation, and unit testing</div></div></div>
+            <div class="timeline-step"><div class="timeline-num">4</div><div><div class="timeline-name">Deploy</div><div class="timeline-desc">User acceptance testing, training, and production rollout</div></div></div>
+            <div class="timeline-step"><div class="timeline-num">5</div><div><div class="timeline-name">Optimise</div><div class="timeline-desc">Post-launch monitoring, feedback collection, and refinement</div></div></div>
+          </div>
+        </div>
+        <!-- Key Benefits -->
+        <div class="section-card">
+          <div class="section-header"><span class="icon">⭐</span> Key Benefits</div>
+          <div class="section-body">
+            <ul class="bullet-list">
+              <li>Rapid application development with low-code platform</li>
+              <li>Seamless integration with existing M365 ecosystem</li>
+              <li>Business users can maintain and extend solutions</li>
+              <li>Enterprise-grade security and compliance built in</li>
+            </ul>
+          </div>
+        </div>
+        <!-- Ideal For -->
+        <div class="section-card">
+          <div class="section-header"><span class="icon">🎯</span> Ideal For</div>
+          <div class="section-body">
+            <ul class="bullet-list">
+              <li>Organisations looking to automate manual processes</li>
+              <li>Teams needing custom business applications</li>
+              <li>Companies wanting to consolidate data into dashboards</li>
+              <li>Businesses ready to digitise paper-based workflows</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sidebar -->
+      <div class="fullpage-sidebar">
+        <div class="section-card">
+          <div class="section-header"><span class="icon">⏱</span> Quick Facts</div>
+          <div class="fact-grid">
+            <div><div class="fact-label">Duration</div><div class="fact-value">2hr</div></div>
+            <div><div class="fact-label">Complexity</div><div class="fact-value"><span class="badge badge-medium">Medium</span></div></div>
+            <div><div class="fact-label">Pricing</div><div class="fact-value">Project-based</div></div>
+            <div><div class="fact-label">Starting From</div><div class="price-value">R25 000</div></div>
+          </div>
+        </div>
+        <div class="section-card">
+          <div class="section-header"><span class="icon">☑</span> Prerequisites</div>
+          <div class="section-body"><p style="font-size: 13px; color: #424242; line-height: 1.5;">M365 license with Power Platform access</p></div>
+        </div>
+        <div class="section-card">
+          <div class="section-header"><span class="icon">👤</span> Team Composition</div>
+          <div class="section-body">
+            <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+              <span class="role-badge">Solution Architect</span>
+              <span class="role-badge">Technical Specialist</span>
+            </div>
+          </div>
+        </div>
+        <button class="btn btn-primary" style="width: 100%;">Request This Service →</button>
+      </div>
+    </div>
+
+    <div style="text-align: center; margin-top: 32px;">
+      <span class="fullpage-label">Full Page View — User navigates away from the catalog</span>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════════
+     VIEW B: Large Modal (Proposed)
+     ════════════════════════════════════════════════════════════════ -->
+<div id="modal" class="view-panel">
+  <div class="modal-backdrop">
+    <!-- Blurred catalog behind -->
+    <div class="catalog-behind">
+      <div class="cat-title">Service Catalog</div>
+      <div class="cat-sub">12 services across 12 categories</div>
+      <div class="cat-grid">
+        <div class="mini-card"></div><div class="mini-card"></div><div class="mini-card"></div><div class="mini-card"></div>
+        <div class="mini-card"></div><div class="mini-card"></div><div class="mini-card"></div><div class="mini-card"></div>
+        <div class="mini-card"></div><div class="mini-card"></div><div class="mini-card"></div><div class="mini-card"></div>
+      </div>
+    </div>
+
+    <!-- Large Modal -->
+    <div class="large-modal">
+      <div class="modal-hero" style="background: #742774;">
+        <div class="modal-hero-icon">⚡</div>
+        <div class="modal-hero-text">
+          <span class="cat-badge" style="margin-bottom: 6px;">Power Platform</span>
+          <h2>Power Platform Development</h2>
+          <p>Custom Power Apps & Automation</p>
+        </div>
+        <button class="modal-close">✕</button>
+      </div>
+      <div class="modal-content">
+        <div class="modal-grid">
+          <div class="modal-main">
+            <!-- About -->
+            <div class="section-card">
+              <div class="section-header"><span class="icon">📋</span> About This Service</div>
+              <div class="section-body"><p style="font-size: 14px; color: #424242; line-height: 1.7;">Custom Power Apps, Power Automate flows, Power BI dashboards, and Power Pages solutions tailored to your business needs. We deliver end-to-end development from requirements discovery through deployment and post-launch support.</p></div>
+            </div>
+            <!-- What's Included -->
+            <div class="section-card">
+              <div class="section-header"><span class="icon">✓</span> What's Included</div>
+              <div class="section-body">
+                <ul class="bullet-list">
+                  <li>Requirements discovery workshop (1-2 sessions)</li>
+                  <li>Solution architecture and design documentation</li>
+                  <li>Custom Power Apps development with responsive UI</li>
+                  <li>Power Automate workflow automation</li>
+                  <li>User training and administrator documentation</li>
+                  <li>30-day post-deployment support period</li>
+                </ul>
+              </div>
+            </div>
+            <!-- Engagement Timeline -->
+            <div class="section-card">
+              <div class="section-header"><span class="icon">🚀</span> Engagement Timeline</div>
+              <div class="section-body">
+                <div class="timeline-step"><div class="timeline-num">1</div><div><div class="timeline-name">Discovery</div><div class="timeline-desc">Requirements gathering, process mapping, and stakeholder interviews</div></div></div>
+                <div class="timeline-step"><div class="timeline-num">2</div><div><div class="timeline-name">Design</div><div class="timeline-desc">Solution architecture, UX wireframes, and technical design</div></div></div>
+                <div class="timeline-step"><div class="timeline-num">3</div><div><div class="timeline-name">Build</div><div class="timeline-desc">Iterative development, customisation, and unit testing</div></div></div>
+                <div class="timeline-step"><div class="timeline-num">4</div><div><div class="timeline-name">Deploy</div><div class="timeline-desc">User acceptance testing, training, and production rollout</div></div></div>
+                <div class="timeline-step"><div class="timeline-num">5</div><div><div class="timeline-name">Optimise</div><div class="timeline-desc">Post-launch monitoring, feedback collection, and refinement</div></div></div>
+              </div>
+            </div>
+            <!-- Key Benefits -->
+            <div class="section-card">
+              <div class="section-header"><span class="icon">⭐</span> Key Benefits</div>
+              <div class="section-body">
+                <ul class="bullet-list">
+                  <li>Rapid application development with low-code platform</li>
+                  <li>Seamless integration with existing M365 ecosystem</li>
+                  <li>Business users can maintain and extend solutions</li>
+                  <li>Enterprise-grade security and compliance built in</li>
+                </ul>
+              </div>
+            </div>
+            <!-- Ideal For -->
+            <div class="section-card">
+              <div class="section-header"><span class="icon">🎯</span> Ideal For</div>
+              <div class="section-body">
+                <ul class="bullet-list">
+                  <li>Organisations looking to automate manual processes</li>
+                  <li>Teams needing custom business applications</li>
+                  <li>Companies wanting to consolidate data into dashboards</li>
+                  <li>Businesses ready to digitise paper-based workflows</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <!-- Sidebar -->
+          <div class="modal-side">
+            <div style="font-size: 14px; font-weight: 600; margin-bottom: 12px;">Quick Facts</div>
+            <div class="fact-grid" style="padding: 0; gap: 12px;">
+              <div><div class="fact-label">Duration</div><div class="fact-value">2hr</div></div>
+              <div><div class="fact-label">Complexity</div><div class="fact-value"><span class="badge badge-medium">Medium</span></div></div>
+              <div><div class="fact-label">Pricing</div><div class="fact-value">Project-based</div></div>
+              <div><div class="fact-label">From</div><div class="price-value">R25 000</div></div>
+            </div>
+            <hr style="border: none; border-top: 1px solid #e0e0e0; margin: 4px 0;">
+            <div>
+              <div style="font-size: 13px; font-weight: 600; margin-bottom: 6px;">Prerequisites</div>
+              <p style="font-size: 13px; color: #424242; line-height: 1.5;">M365 license with Power Platform access</p>
+            </div>
+            <hr style="border: none; border-top: 1px solid #e0e0e0; margin: 4px 0;">
+            <div>
+              <div style="font-size: 13px; font-weight: 600; margin-bottom: 8px;">Team Composition</div>
+              <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+                <span class="role-badge">Solution Architect</span>
+                <span class="role-badge">Technical Specialist</span>
+              </div>
+            </div>
+            <hr style="border: none; border-top: 1px solid #e0e0e0; margin: 4px 0;">
+            <div>
+              <div style="font-size: 13px; font-weight: 600; margin-bottom: 6px;">Related Services</div>
+              <div style="display: flex; flex-wrap: wrap; gap: 4px;">
+                <span style="font-size: 11px; padding: 4px 10px; background: #f0f4f8; border-radius: 6px; color: #1a5a8a; border: 1px solid #d0e4f0; cursor: pointer;">SPFx Development</span>
+                <span style="font-size: 11px; padding: 4px 10px; background: #f0f4f8; border-radius: 6px; color: #1a5a8a; border: 1px solid #d0e4f0; cursor: pointer;">Copilot Agents</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" style="font-size: 13px; padding: 8px 16px;">Close</button>
+        <button class="btn btn-primary" style="font-size: 13px; padding: 8px 24px;">Request This Service →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function switchView(id) {
+  document.querySelectorAll('.view-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  event.currentTarget.classList.add('active');
+}
+</script>
+</body>
+</html>

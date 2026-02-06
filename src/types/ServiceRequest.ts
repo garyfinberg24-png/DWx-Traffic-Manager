@@ -18,7 +18,12 @@ export type ServiceCategory =
   | 'M365 Assessment'
   | 'Copilot Agents'
   | 'MS Viva'
-  | 'Training';
+  | 'Training'
+  | 'Proposal'
+  | 'Tender'
+  | 'Ad-Hoc Support'
+  | 'SLA'
+  | 'Strategic Advisory';
 
 export type ServiceComplexity = 'Low' | 'Medium' | 'High' | 'Enterprise';
 export type PricingModel = 'Fixed' | 'Hourly' | 'Project-based' | 'TBD';
@@ -48,6 +53,7 @@ export interface DWService {
   RelatedCategories?: ServiceCategory[];
   KeyBenefits?: string[];
   IdealFor?: string[];
+  IsPopular?: boolean;
   Created?: string;
   Modified?: string;
 }
@@ -75,6 +81,7 @@ export interface DWServiceInput {
   RelatedCategories?: ServiceCategory[];
   KeyBenefits?: string[];
   IdealFor?: string[];
+  IsPopular?: boolean;
 }
 
 // ============================================================================
@@ -208,6 +215,15 @@ export interface ServiceRequest {
   NextSteps?: string;
   Comments?: string;
 
+  // Tender-Specific Fields
+  TenderReferenceNumber?: string;
+  BriefingSessionDate?: string;
+  SubmissionDeadline?: string;
+  TenderManagerName?: string;
+  TenderManagerEmail?: string;
+  TechnicalSectionOnly?: boolean;
+  CVRequired?: boolean;
+
   // Document References
   DocumentIds?: string; // JSON array of document IDs
 
@@ -242,6 +258,14 @@ export interface CreateServiceRequestInput {
   Requirements?: string;
   ServiceHistory?: string;
   Comments?: string;
+  // Tender-Specific Fields
+  TenderReferenceNumber?: string;
+  BriefingSessionDate?: string;
+  SubmissionDeadline?: string;
+  TenderManagerName?: string;
+  TenderManagerEmail?: string;
+  TechnicalSectionOnly?: boolean;
+  CVRequired?: boolean;
 }
 
 /**
@@ -473,6 +497,7 @@ export const DEFAULT_SERVICES: DWServiceInput[] = [
     IsActive: true,
     SortOrder: 1,
     IconName: 'LightningBolt',
+    IsPopular: true,
     WhatsIncluded: [
       'Requirements analysis and solution design',
       'Custom Power Apps (Canvas or Model-driven)',
@@ -515,6 +540,7 @@ export const DEFAULT_SERVICES: DWServiceInput[] = [
     IsActive: true,
     SortOrder: 2,
     IconName: 'Code',
+    IsPopular: true,
     WhatsIncluded: [
       'Technical feasibility assessment',
       'Custom SPFx web part development',
@@ -640,6 +666,7 @@ export const DEFAULT_SERVICES: DWServiceInput[] = [
     IsActive: true,
     SortOrder: 5,
     IconName: 'Bot',
+    IsPopular: true,
     WhatsIncluded: [
       'AI readiness assessment and use case identification',
       'Custom Copilot agent design and configuration',
@@ -724,6 +751,7 @@ export const DEFAULT_SERVICES: DWServiceInput[] = [
     IsActive: true,
     SortOrder: 7,
     IconName: 'LightningBolt',
+    IsPopular: true,
     WhatsIncluded: [
       'Plan & Setup session (1 hour)',
       'Zero to Hero training sessions (8 hours across 4 sessions)',
@@ -750,6 +778,217 @@ export const DEFAULT_SERVICES: DWServiceInput[] = [
       'Teams wanting to maximize AI productivity gains',
       'Change management programs for AI adoption',
       'Departments exploring Copilot Studio capabilities',
+    ],
+  },
+  {
+    Title: 'Proposal Development',
+    Description: 'Professional proposal preparation for client opportunities. We scope the technical solution, define resource requirements, build pricing models, and deliver presentation-ready proposals that win business.',
+    ShortDescription: 'Client Proposal Preparation',
+    Category: 'Proposal',
+    TypicalDuration: 'Multi-day',
+    ComplexityLevel: 'Medium',
+    PricingModel: 'Project-based',
+    RequiredRoles: ['Solution Architect', 'Consultant'],
+    Prerequisites: 'Client requirements or RFP document',
+    IsActive: true,
+    SortOrder: 8,
+    IconName: 'DocumentBulletList',
+    IsPopular: true,
+    WhatsIncluded: [
+      'Requirements analysis and solution scoping',
+      'Technical architecture and approach definition',
+      'Resource planning and team composition',
+      'Commercial pricing and effort estimation',
+      'Presentation-ready proposal document',
+      'Risk assessment and mitigation strategies',
+    ],
+    EngagementPhases: [
+      { name: 'Scoping', description: 'Review client requirements, RFP analysis, and solution feasibility' },
+      { name: 'Pricing', description: 'Effort estimation, resource costing, and commercial modelling' },
+      { name: 'Resource Allocation', description: 'Team composition, availability, and CV preparation' },
+      { name: 'Writing', description: 'Proposal drafting, technical sections, and executive summary' },
+      { name: 'Review & Submit', description: 'Internal review, quality assurance, and client submission' },
+    ],
+    RelatedCategories: ['Tender', 'Strategic Advisory'],
+    KeyBenefits: [
+      'Professional, presentation-ready proposals',
+      'Accurate scoping reduces project risk',
+      'Competitive pricing based on market intelligence',
+      'Fast turnaround with dedicated proposal support',
+    ],
+    IdealFor: [
+      'Direct client proposal requests',
+      'Competitive bid responses',
+      'Upsell and cross-sell opportunities',
+      'Partnership and framework agreements',
+    ],
+  },
+  {
+    Title: 'Tender Response',
+    Description: 'End-to-end tender response coordination. We attend briefing sessions, compile technical sections, provide resource CVs, and coordinate with the Tender Manager to ensure a compliant, competitive submission.',
+    ShortDescription: 'Tender & RFP Response',
+    Category: 'Tender',
+    TypicalDuration: 'Multi-day',
+    ComplexityLevel: 'High',
+    PricingModel: 'Project-based',
+    RequiredRoles: ['Solution Architect', 'Consultant'],
+    Prerequisites: 'Tender reference number and documentation from client',
+    IsActive: true,
+    SortOrder: 9,
+    IconName: 'Gavel',
+    WhatsIncluded: [
+      'Tender briefing session attendance and notes',
+      'Technical section response compilation',
+      'Resource CV preparation and formatting',
+      'Solution architecture and methodology write-up',
+      'Compliance checklist verification',
+      'Coordination with Tender Manager for overall submission',
+    ],
+    EngagementPhases: [
+      { name: 'Briefing', description: 'Attend client tender briefing session, capture requirements and clarifications' },
+      { name: 'Technical Section', description: 'Draft technical response covering methodology, architecture, and approach' },
+      { name: 'CV Preparation', description: 'Prepare and format CVs of proposed resources with relevant experience' },
+      { name: 'Review', description: 'Internal quality review, compliance check, and Tender Manager coordination' },
+      { name: 'Submission', description: 'Final assembly, sign-off, and submission before deadline' },
+    ],
+    RelatedCategories: ['Proposal', 'Strategic Advisory'],
+    KeyBenefits: [
+      'Compliant responses that meet all tender criteria',
+      'Technical depth that differentiates from competitors',
+      'Professional CV presentation highlighting relevant experience',
+      'Coordinated approach with overall tender team',
+    ],
+    IdealFor: [
+      'Government and public sector tenders',
+      'Large enterprise RFP/RFT responses',
+      'Framework agreement applications',
+      'Multi-vendor panel submissions',
+    ],
+  },
+  {
+    Title: 'Ad-Hoc Technical Support',
+    Description: 'On-demand technical support for existing Microsoft 365 implementations. Quick troubleshooting, configuration changes, minor enhancements, and expert guidance when you need it most.',
+    ShortDescription: 'On-Demand Expert Support',
+    Category: 'Ad-Hoc Support',
+    TypicalDuration: '1hr',
+    ComplexityLevel: 'Low',
+    PricingModel: 'Hourly',
+    RequiredRoles: ['Technical Specialist'],
+    Prerequisites: 'Existing M365 implementation',
+    IsActive: true,
+    SortOrder: 10,
+    IconName: 'Wrench',
+    IsPopular: true,
+    WhatsIncluded: [
+      'Rapid issue triage and assessment',
+      'Troubleshooting and root cause analysis',
+      'Configuration changes and quick fixes',
+      'Minor feature enhancements',
+      'Expert guidance and best practice advice',
+      'Post-resolution documentation',
+    ],
+    EngagementPhases: [
+      { name: 'Triage', description: 'Assess the issue severity, scope, and urgency' },
+      { name: 'Assessment', description: 'Diagnose root cause and determine resolution approach' },
+      { name: 'Resolution', description: 'Implement fix, configuration change, or enhancement' },
+      { name: 'Handover', description: 'Document changes and knowledge transfer to client team' },
+    ],
+    RelatedCategories: ['SLA', 'Power Platform', 'SPFx Development'],
+    KeyBenefits: [
+      'No long-term commitment required',
+      'Fast response from experienced specialists',
+      'Pay only for the time you need',
+      'Access to deep M365 expertise on demand',
+    ],
+    IdealFor: [
+      'Urgent production issues',
+      'One-off configuration changes',
+      'Quick consultations and architecture advice',
+      'Small enhancements to existing solutions',
+    ],
+  },
+  {
+    Title: 'Service Level Agreement',
+    Description: 'Ongoing managed support under a defined SLA. Guaranteed response times, proactive monitoring, regular health checks, and priority escalation paths to keep your digital workplace running smoothly.',
+    ShortDescription: 'Managed Support & SLA',
+    Category: 'SLA',
+    TypicalDuration: 'Multi-day',
+    ComplexityLevel: 'Medium',
+    PricingModel: 'Fixed',
+    RequiredRoles: ['Solution Architect', 'Technical Specialist'],
+    Prerequisites: 'Existing M365 environment with documented solutions',
+    IsActive: true,
+    SortOrder: 11,
+    IconName: 'ShieldTask',
+    WhatsIncluded: [
+      'Defined response and resolution time guarantees',
+      'Proactive monitoring and alerting',
+      'Monthly health check reports',
+      'Priority escalation paths',
+      'Quarterly business reviews',
+      'Dedicated support contact and knowledge base',
+    ],
+    EngagementPhases: [
+      { name: 'Discovery', description: 'Environment audit, solution inventory, and support scope definition' },
+      { name: 'SLA Design', description: 'Define service levels, response times, and escalation matrix' },
+      { name: 'Onboarding', description: 'Monitoring setup, documentation, and team introductions' },
+      { name: 'Steady State', description: 'Ongoing support delivery per agreed SLA terms' },
+      { name: 'Quarterly Review', description: 'Performance review, SLA compliance, and improvement planning' },
+    ],
+    RelatedCategories: ['Ad-Hoc Support', 'M365 Assessment'],
+    KeyBenefits: [
+      'Predictable costs with fixed monthly pricing',
+      'Guaranteed response times for critical issues',
+      'Proactive issue prevention through monitoring',
+      'Continuous improvement via quarterly reviews',
+    ],
+    IdealFor: [
+      'Organizations with business-critical M365 solutions',
+      'Companies without deep in-house M365 expertise',
+      'Environments requiring guaranteed uptime',
+      'Post-project transition to managed support',
+    ],
+  },
+  {
+    Title: 'Strategic Advisory & Roadmapping',
+    Description: 'Executive-level consulting for digital workplace strategy. We assess your current state, define a target architecture, build a prioritised technology roadmap, and provide governance frameworks for sustainable transformation.',
+    ShortDescription: 'Digital Workplace Strategy',
+    Category: 'Strategic Advisory',
+    TypicalDuration: 'Full-day',
+    ComplexityLevel: 'Enterprise',
+    PricingModel: 'Project-based',
+    RequiredRoles: ['Solution Architect', 'Consultant'],
+    Prerequisites: 'Executive sponsor and access to key stakeholders',
+    IsActive: true,
+    SortOrder: 12,
+    IconName: 'Lightbulb',
+    WhatsIncluded: [
+      'Stakeholder interviews and current state assessment',
+      'Maturity model evaluation across M365 workloads',
+      'Target architecture and vision definition',
+      'Prioritised technology roadmap (12-24 months)',
+      'Governance framework and policy recommendations',
+      'Executive presentation and board-ready report',
+    ],
+    EngagementPhases: [
+      { name: 'Discovery', description: 'Stakeholder interviews, pain point identification, and strategic goals alignment' },
+      { name: 'Current State Analysis', description: 'Technology audit, maturity assessment, and gap analysis' },
+      { name: 'Roadmap Design', description: 'Target architecture, initiative prioritisation, and dependency mapping' },
+      { name: 'Executive Presentation', description: 'Board-ready report with investment case and timeline' },
+      { name: 'Follow-up', description: 'Implementation guidance, vendor selection support, and quarterly check-ins' },
+    ],
+    RelatedCategories: ['M365 Assessment', 'Proposal'],
+    KeyBenefits: [
+      'Clear strategic direction backed by expert analysis',
+      'Investment prioritisation aligned to business outcomes',
+      'Governance frameworks that scale with growth',
+      'Executive-ready deliverables for board approval',
+    ],
+    IdealFor: [
+      'Digital transformation initiatives',
+      'Post-merger technology consolidation',
+      'Annual strategic planning cycles',
+      'CTO/CIO advisory engagements',
     ],
   },
 ];
@@ -856,5 +1095,75 @@ export const DW_SERVICES_SEED_DATA = [
     Prerequisites: 'M365 license with Copilot Studio access',
     SortOrder: 7,
     IconName: 'LightningBolt',
+  },
+  {
+    Title: 'Proposal Development',
+    Description: 'Professional proposal preparation for client opportunities — scoping, pricing, resource planning, and presentation-ready deliverables.',
+    ShortDescription: 'Professional Proposal Prep',
+    Category: 'Proposal',
+    TypicalDuration: 'Multi-day',
+    ComplexityLevel: 'Medium',
+    PricingModel: 'Project-based',
+    BasePrice: 20000,
+    RequiredRoles: ['Solution Architect', 'Consultant'],
+    Prerequisites: 'Client requirements or RFP documentation',
+    SortOrder: 8,
+    IconName: 'DocumentBulletList',
+  },
+  {
+    Title: 'Tender Response',
+    Description: 'End-to-end tender response coordination — attend briefing sessions, compile technical sections, provide resource CVs, and work with the Tender Manager on submission.',
+    ShortDescription: 'Technical Tender Response',
+    Category: 'Tender',
+    TypicalDuration: 'Multi-day',
+    ComplexityLevel: 'High',
+    PricingModel: 'Project-based',
+    BasePrice: 45000,
+    RequiredRoles: ['Solution Architect', 'Consultant'],
+    Prerequisites: 'Tender reference number and documentation from client',
+    SortOrder: 9,
+    IconName: 'Gavel',
+  },
+  {
+    Title: 'Ad-Hoc Technical Support',
+    Description: 'On-demand technical support for existing implementations — troubleshooting, quick fixes, configuration changes, and expert guidance.',
+    ShortDescription: 'On-Demand Expert Support',
+    Category: 'Ad-Hoc Support',
+    TypicalDuration: '1hr',
+    ComplexityLevel: 'Low',
+    PricingModel: 'Hourly',
+    BasePrice: 2500,
+    RequiredRoles: ['Technical Specialist'],
+    Prerequisites: 'Existing M365 implementation',
+    SortOrder: 10,
+    IconName: 'Wrench',
+  },
+  {
+    Title: 'Service Level Agreement',
+    Description: 'Ongoing managed support under a defined SLA — guaranteed response times, proactive monitoring, regular health checks, and priority escalation.',
+    ShortDescription: 'Managed Support & SLA',
+    Category: 'SLA',
+    TypicalDuration: 'Multi-day',
+    ComplexityLevel: 'Medium',
+    PricingModel: 'Fixed',
+    BasePrice: 30000,
+    RequiredRoles: ['Solution Architect', 'Technical Specialist'],
+    Prerequisites: 'Existing M365 environment with documented solutions',
+    SortOrder: 11,
+    IconName: 'ShieldTask',
+  },
+  {
+    Title: 'Strategic Advisory & Roadmapping',
+    Description: 'Executive-level consulting for digital workplace strategy, technology roadmaps, governance frameworks, and transformation planning.',
+    ShortDescription: 'Digital Strategy Consulting',
+    Category: 'Strategic Advisory',
+    TypicalDuration: 'Full-day',
+    ComplexityLevel: 'Enterprise',
+    PricingModel: 'Project-based',
+    BasePrice: 60000,
+    RequiredRoles: ['Solution Architect', 'Consultant'],
+    Prerequisites: 'Executive sponsorship and access to current technology landscape',
+    SortOrder: 12,
+    IconName: 'Lightbulb',
   },
 ];

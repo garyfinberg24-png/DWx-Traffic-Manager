@@ -5,7 +5,6 @@
  */
 
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
 import {
   Dialog,
   DialogSurface,
@@ -229,6 +228,7 @@ interface ServiceDetailsProps {
   isOpen: boolean;
   onClose: () => void;
   onRequestService: (service: DWService) => void;
+  onViewFullDetails?: (service: DWService) => void;
 }
 
 const getComplexityStyle = (
@@ -264,9 +264,9 @@ export const ServiceDetails: React.FC<ServiceDetailsProps> = ({
   isOpen,
   onClose,
   onRequestService,
+  onViewFullDetails,
 }) => {
   const styles = useStyles();
-  const navigate = useNavigate();
 
   const IconComponent = iconMap[service.IconName || ''] || FlashRegular;
 
@@ -376,7 +376,9 @@ export const ServiceDetails: React.FC<ServiceDetailsProps> = ({
             appearance="subtle"
             onClick={() => {
               onClose();
-              navigate(`/services/${service.Id}`);
+              if (onViewFullDetails) {
+                onViewFullDetails(service);
+              }
             }}
           >
             View Full Details

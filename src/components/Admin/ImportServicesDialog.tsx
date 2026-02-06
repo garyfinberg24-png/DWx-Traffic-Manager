@@ -107,6 +107,7 @@ const useStyles = makeStyles({
 const VALID_CATEGORIES: ServiceCategory[] = [
   'Power Platform', 'SPFx Development', 'SharePoint Migration',
   'M365 Assessment', 'Copilot Agents', 'MS Viva', 'Training',
+  'Proposal', 'Tender', 'Ad-Hoc Support', 'SLA', 'Strategic Advisory',
 ];
 const VALID_DURATIONS: ServiceDuration[] = ['30min', '1hr', '2hr', 'Half-day', 'Full-day', 'Multi-day'];
 const VALID_COMPLEXITIES: ServiceComplexity[] = ['Low', 'Medium', 'High', 'Enterprise'];

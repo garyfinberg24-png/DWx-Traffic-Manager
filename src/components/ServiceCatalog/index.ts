@@ -5,4 +5,5 @@
 export { ServiceCatalog } from './ServiceCatalog';
 export { ServiceCard } from './ServiceCard';
 export { ServiceDetails } from './ServiceDetails';
+export { ServiceDetailModal } from './ServiceDetailModal';
 export { ServiceDetailPage } from './ServiceDetailPage';

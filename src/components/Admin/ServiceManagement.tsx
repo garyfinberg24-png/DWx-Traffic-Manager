@@ -49,6 +49,7 @@ import { ConfirmDialog } from '../Common/ConfirmDialog';
 const SERVICE_CATEGORIES: ServiceCategory[] = [
   'Power Platform', 'SPFx Development', 'SharePoint Migration',
   'M365 Assessment', 'Copilot Agents', 'MS Viva', 'Training',
+  'Proposal', 'Tender', 'Ad-Hoc Support', 'SLA', 'Strategic Advisory',
 ];
 
 const useStyles = makeStyles({

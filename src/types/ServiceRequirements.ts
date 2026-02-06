@@ -1037,6 +1037,614 @@ export const TRAINING_REQUIREMENTS: ServiceRequirementsConfig = {
 };
 
 // ============================================================================
+// Proposal Requirements
+// ============================================================================
+
+export const PROPOSAL_REQUIREMENTS: ServiceRequirementsConfig = {
+  category: 'Proposal',
+  title: 'Proposal Requirements',
+  subtitle: 'Help us prepare a compelling proposal for your client',
+  sections: [
+    {
+      title: 'Opportunity Details',
+      description: 'Tell us about the client opportunity',
+      questions: [
+        {
+          id: 'prop_type',
+          question: 'What type of proposal is needed?',
+          type: 'select',
+          options: [
+            { value: 'rfp_response', label: 'RFP/RFI Response' },
+            { value: 'unsolicited', label: 'Unsolicited Proposal' },
+            { value: 'renewal', label: 'Contract Renewal' },
+            { value: 'upsell', label: 'Upsell/Expansion' },
+            { value: 'competitive', label: 'Competitive Displacement' },
+          ],
+          required: true,
+        },
+        {
+          id: 'prop_services',
+          question: 'Which service areas does this proposal cover?',
+          type: 'multiselect',
+          options: [
+            { value: 'power_platform', label: 'Power Platform Development' },
+            { value: 'spfx', label: 'SPFx Development' },
+            { value: 'migration', label: 'SharePoint Migration' },
+            { value: 'assessment', label: 'M365 Assessment' },
+            { value: 'copilot', label: 'Copilot Agents' },
+            { value: 'viva', label: 'Microsoft Viva' },
+            { value: 'training', label: 'Training Programs' },
+            { value: 'multiple', label: 'Multi-service engagement' },
+          ],
+          required: true,
+        },
+        {
+          id: 'prop_deadline',
+          question: 'When is the proposal due?',
+          type: 'date',
+          required: true,
+        },
+      ],
+    },
+    {
+      title: 'Scope & Pricing',
+      questions: [
+        {
+          id: 'prop_budget_known',
+          question: 'Does the client have a stated budget?',
+          type: 'radio',
+          options: [
+            { value: 'yes', label: 'Yes, budget is known' },
+            { value: 'range', label: 'Budget range given' },
+            { value: 'no', label: 'No budget disclosed' },
+          ],
+          required: true,
+        },
+        {
+          id: 'prop_competition',
+          question: 'Is this a competitive bid?',
+          type: 'radio',
+          options: [
+            { value: 'sole', label: 'Sole provider (no competition)' },
+            { value: 'competitive', label: 'Yes, competitive bid' },
+            { value: 'unknown', label: 'Not sure' },
+          ],
+          required: true,
+        },
+        {
+          id: 'prop_format',
+          question: 'Preferred proposal format?',
+          type: 'radio',
+          options: [
+            { value: 'standard', label: 'Standard DWx proposal template' },
+            { value: 'client', label: 'Client-provided template' },
+            { value: 'presentation', label: 'Presentation/pitch deck' },
+          ],
+          required: true,
+        },
+      ],
+    },
+    {
+      title: 'Additional Context',
+      questions: [
+        {
+          id: 'prop_relationship',
+          question: 'What is the existing client relationship?',
+          type: 'select',
+          options: [
+            { value: 'new', label: 'New client (no prior engagement)' },
+            { value: 'existing', label: 'Existing client (active projects)' },
+            { value: 'past', label: 'Past client (lapsed engagement)' },
+            { value: 'referral', label: 'Referral from partner/client' },
+          ],
+          required: true,
+        },
+        {
+          id: 'prop_notes',
+          question: 'Any additional context or special requirements?',
+          type: 'textarea',
+          placeholder: 'Key decision makers, client preferences, competitive intelligence, etc.',
+          required: false,
+        },
+      ],
+    },
+  ],
+};
+
+// ============================================================================
+// Tender Requirements
+// ============================================================================
+
+export const TENDER_REQUIREMENTS: ServiceRequirementsConfig = {
+  category: 'Tender',
+  title: 'Tender Response Requirements',
+  subtitle: 'Provide the tender details so we can coordinate the technical response',
+  sections: [
+    {
+      title: 'Tender Details',
+      description: 'Core tender information for coordination',
+      questions: [
+        {
+          id: 'tender_ref',
+          question: 'Tender Reference Number',
+          type: 'text',
+          placeholder: 'e.g. RFT-2026-001',
+          required: true,
+        },
+        {
+          id: 'tender_briefing_date',
+          question: 'Client Tender Briefing Session Date',
+          description: 'Date of the mandatory or optional briefing session',
+          type: 'date',
+          required: true,
+        },
+        {
+          id: 'tender_deadline',
+          question: 'Submission Deadline',
+          description: 'Final date and time for tender submission',
+          type: 'date',
+          required: true,
+        },
+        {
+          id: 'tender_manager_name',
+          question: 'Tender Manager Name',
+          description: 'The person compiling the overall tender response',
+          type: 'text',
+          placeholder: 'Full name of the Tender Manager',
+          required: true,
+        },
+        {
+          id: 'tender_manager_email',
+          question: 'Tender Manager Email',
+          type: 'text',
+          placeholder: 'Email address for coordination',
+          required: true,
+          validation: {
+            pattern: '^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$',
+            message: 'Please enter a valid email address',
+          },
+        },
+      ],
+    },
+    {
+      title: 'Technical Response Scope',
+      description: 'Define what is required from the DWx team',
+      questions: [
+        {
+          id: 'tender_tech_only',
+          question: 'Are we responding to the technical section only?',
+          description: 'The Tender Manager typically compiles the overall response',
+          type: 'radio',
+          options: [
+            { value: 'yes', label: 'Yes, technical section only' },
+            { value: 'no', label: 'No, full response required' },
+          ],
+          required: true,
+        },
+        {
+          id: 'tender_cv_required',
+          question: 'Are CVs of assigned resources required?',
+          type: 'radio',
+          options: [
+            { value: 'yes', label: 'Yes, CVs required' },
+            { value: 'no', label: 'No CVs needed' },
+          ],
+          required: true,
+        },
+        {
+          id: 'tender_tech_areas',
+          question: 'Which technical areas does this tender cover?',
+          type: 'multiselect',
+          options: [
+            { value: 'power_platform', label: 'Power Platform' },
+            { value: 'spfx', label: 'SPFx / SharePoint Development' },
+            { value: 'migration', label: 'SharePoint Migration' },
+            { value: 'copilot', label: 'Copilot / AI' },
+            { value: 'viva', label: 'Microsoft Viva' },
+            { value: 'security', label: 'Security & Compliance' },
+            { value: 'governance', label: 'Governance & Architecture' },
+            { value: 'training', label: 'Training & Change Management' },
+          ],
+          required: true,
+        },
+        {
+          id: 'tender_lead_time',
+          question: 'What is the available lead time for our response?',
+          description: 'Time between now and the submission deadline',
+          type: 'select',
+          options: [
+            { value: '<1week', label: 'Less than 1 week (urgent)' },
+            { value: '1-2weeks', label: '1-2 weeks' },
+            { value: '2-4weeks', label: '2-4 weeks' },
+            { value: '1-2months', label: '1-2 months' },
+            { value: '>2months', label: 'More than 2 months' },
+          ],
+          required: true,
+        },
+      ],
+    },
+    {
+      title: 'Tender Context',
+      questions: [
+        {
+          id: 'tender_type',
+          question: 'What type of tender is this?',
+          type: 'select',
+          options: [
+            { value: 'government', label: 'Government / Public Sector' },
+            { value: 'parastatal', label: 'Parastatal / SOE' },
+            { value: 'corporate', label: 'Corporate / Private Sector' },
+            { value: 'framework', label: 'Framework Agreement / Panel' },
+            { value: 'other', label: 'Other' },
+          ],
+          required: true,
+        },
+        {
+          id: 'tender_mandatory_briefing',
+          question: 'Is the briefing session mandatory?',
+          type: 'radio',
+          options: [
+            { value: 'yes', label: 'Yes, mandatory attendance' },
+            { value: 'no', label: 'No, optional' },
+            { value: 'unsure', label: 'Not confirmed yet' },
+          ],
+          required: true,
+        },
+        {
+          id: 'tender_notes',
+          question: 'Any additional tender requirements or notes?',
+          type: 'textarea',
+          placeholder: 'Special formatting requirements, BEE level needs, joint venture details, etc.',
+          required: false,
+        },
+      ],
+    },
+  ],
+};
+
+// ============================================================================
+// Ad-Hoc Support Requirements
+// ============================================================================
+
+export const ADHOC_SUPPORT_REQUIREMENTS: ServiceRequirementsConfig = {
+  category: 'Ad-Hoc Support',
+  title: 'Ad-Hoc Support Requirements',
+  subtitle: 'Tell us what you need help with',
+  sections: [
+    {
+      title: 'Issue Details',
+      description: 'Describe the problem or request',
+      questions: [
+        {
+          id: 'adhoc_type',
+          question: 'What type of support do you need?',
+          type: 'select',
+          options: [
+            { value: 'bug', label: 'Bug fix / Issue resolution' },
+            { value: 'config', label: 'Configuration change' },
+            { value: 'enhancement', label: 'Minor enhancement' },
+            { value: 'guidance', label: 'Expert guidance / Consultation' },
+            { value: 'troubleshooting', label: 'Troubleshooting' },
+            { value: 'other', label: 'Other' },
+          ],
+          required: true,
+        },
+        {
+          id: 'adhoc_urgency',
+          question: 'How urgent is this request?',
+          type: 'radio',
+          options: [
+            { value: 'critical', label: 'Critical (production down)' },
+            { value: 'high', label: 'High (major impact on users)' },
+            { value: 'medium', label: 'Medium (workaround available)' },
+            { value: 'low', label: 'Low (no immediate impact)' },
+          ],
+          required: true,
+        },
+        {
+          id: 'adhoc_platform',
+          question: 'Which platform area is affected?',
+          type: 'multiselect',
+          options: [
+            { value: 'sharepoint', label: 'SharePoint Online' },
+            { value: 'teams', label: 'Microsoft Teams' },
+            { value: 'power_platform', label: 'Power Platform' },
+            { value: 'azure', label: 'Azure Services' },
+            { value: 'copilot', label: 'Copilot / AI' },
+            { value: 'viva', label: 'Microsoft Viva' },
+            { value: 'security', label: 'Security / Compliance' },
+            { value: 'other', label: 'Other' },
+          ],
+          required: true,
+        },
+      ],
+    },
+    {
+      title: 'Environment',
+      questions: [
+        {
+          id: 'adhoc_environment',
+          question: 'Which environment is affected?',
+          type: 'radio',
+          options: [
+            { value: 'production', label: 'Production' },
+            { value: 'staging', label: 'Staging / Test' },
+            { value: 'development', label: 'Development' },
+          ],
+          required: true,
+        },
+        {
+          id: 'adhoc_users_affected',
+          question: 'How many users are affected?',
+          type: 'select',
+          options: [
+            { value: '1', label: 'Single user' },
+            { value: '2-10', label: 'Small group (2-10)' },
+            { value: '11-50', label: 'Department (11-50)' },
+            { value: '50+', label: 'Organization-wide (50+)' },
+          ],
+          required: true,
+        },
+        {
+          id: 'adhoc_description',
+          question: 'Describe the issue or request in detail',
+          type: 'textarea',
+          placeholder: 'Steps to reproduce, expected vs actual behaviour, error messages, screenshots, etc.',
+          required: true,
+        },
+      ],
+    },
+  ],
+};
+
+// ============================================================================
+// SLA Requirements
+// ============================================================================
+
+export const SLA_REQUIREMENTS: ServiceRequirementsConfig = {
+  category: 'SLA',
+  title: 'SLA Requirements',
+  subtitle: 'Help us design the right support agreement for your needs',
+  sections: [
+    {
+      title: 'Support Scope',
+      description: 'What do you need covered under the SLA?',
+      questions: [
+        {
+          id: 'sla_solutions',
+          question: 'Which solutions need SLA coverage?',
+          type: 'multiselect',
+          options: [
+            { value: 'power_apps', label: 'Power Apps' },
+            { value: 'power_automate', label: 'Power Automate flows' },
+            { value: 'spfx', label: 'SPFx solutions' },
+            { value: 'sharepoint', label: 'SharePoint sites/config' },
+            { value: 'teams', label: 'Teams apps/integrations' },
+            { value: 'copilot', label: 'Copilot agents' },
+            { value: 'viva', label: 'Viva modules' },
+            { value: 'custom', label: 'Custom integrations' },
+          ],
+          required: true,
+        },
+        {
+          id: 'sla_tier',
+          question: 'What level of support are you looking for?',
+          type: 'radio',
+          options: [
+            { value: 'basic', label: 'Basic (business hours, 8hr response)' },
+            { value: 'standard', label: 'Standard (business hours, 4hr response)' },
+            { value: 'premium', label: 'Premium (extended hours, 2hr response)' },
+            { value: 'enterprise', label: 'Enterprise (24/7, 1hr response)' },
+          ],
+          required: true,
+        },
+        {
+          id: 'sla_hours_estimate',
+          question: 'Estimated monthly support hours?',
+          type: 'select',
+          options: [
+            { value: '5', label: 'Up to 5 hours/month' },
+            { value: '10', label: 'Up to 10 hours/month' },
+            { value: '20', label: 'Up to 20 hours/month' },
+            { value: '40', label: 'Up to 40 hours/month' },
+            { value: 'custom', label: 'Custom (to be discussed)' },
+          ],
+          required: true,
+        },
+      ],
+    },
+    {
+      title: 'Current Environment',
+      questions: [
+        {
+          id: 'sla_solution_count',
+          question: 'How many solutions/apps need support?',
+          type: 'select',
+          options: [
+            { value: '1-3', label: '1-3 solutions' },
+            { value: '4-10', label: '4-10 solutions' },
+            { value: '11-20', label: '11-20 solutions' },
+            { value: '20+', label: 'More than 20 solutions' },
+          ],
+          required: true,
+        },
+        {
+          id: 'sla_documentation',
+          question: 'Is the current solution documentation up to date?',
+          type: 'radio',
+          options: [
+            { value: 'yes', label: 'Yes, well documented' },
+            { value: 'partial', label: 'Partially documented' },
+            { value: 'no', label: 'No documentation available' },
+            { value: 'unknown', label: 'Not sure' },
+          ],
+          required: true,
+        },
+        {
+          id: 'sla_health_checks',
+          question: 'Do you want proactive health checks included?',
+          type: 'radio',
+          options: [
+            { value: 'yes_monthly', label: 'Yes, monthly health checks' },
+            { value: 'yes_quarterly', label: 'Yes, quarterly health checks' },
+            { value: 'no', label: 'Reactive support only' },
+          ],
+          required: true,
+        },
+      ],
+    },
+    {
+      title: 'Contract Preferences',
+      questions: [
+        {
+          id: 'sla_duration',
+          question: 'Preferred contract duration?',
+          type: 'radio',
+          options: [
+            { value: '6months', label: '6 months' },
+            { value: '12months', label: '12 months' },
+            { value: '24months', label: '24 months' },
+            { value: 'flexible', label: 'Flexible / to be discussed' },
+          ],
+          required: true,
+        },
+        {
+          id: 'sla_notes',
+          question: 'Any specific SLA requirements or expectations?',
+          type: 'textarea',
+          placeholder: 'Escalation requirements, reporting needs, specific KPIs, etc.',
+          required: false,
+        },
+      ],
+    },
+  ],
+};
+
+// ============================================================================
+// Strategic Advisory Requirements
+// ============================================================================
+
+export const STRATEGIC_ADVISORY_REQUIREMENTS: ServiceRequirementsConfig = {
+  category: 'Strategic Advisory',
+  title: 'Strategic Advisory Requirements',
+  subtitle: 'Help us understand your strategic consulting needs',
+  sections: [
+    {
+      title: 'Advisory Focus',
+      description: 'What strategic areas do you need help with?',
+      questions: [
+        {
+          id: 'strategy_focus',
+          question: 'What is the primary focus of this engagement?',
+          type: 'multiselect',
+          options: [
+            { value: 'roadmap', label: 'Technology Roadmap Development' },
+            { value: 'governance', label: 'Governance Framework Design' },
+            { value: 'transformation', label: 'Digital Transformation Strategy' },
+            { value: 'adoption', label: 'Adoption & Change Management' },
+            { value: 'architecture', label: 'Enterprise Architecture Review' },
+            { value: 'ai_strategy', label: 'AI / Copilot Strategy' },
+            { value: 'cost', label: 'Cost Optimisation & Licensing' },
+          ],
+          required: true,
+        },
+        {
+          id: 'strategy_horizon',
+          question: 'What planning horizon are you looking at?',
+          type: 'radio',
+          options: [
+            { value: '6months', label: 'Short-term (6 months)' },
+            { value: '12months', label: 'Medium-term (12 months)' },
+            { value: '2-3years', label: 'Long-term (2-3 years)' },
+            { value: 'multi', label: 'Multi-phase (short + long term)' },
+          ],
+          required: true,
+        },
+        {
+          id: 'strategy_stakeholders',
+          question: 'Who are the key stakeholders for this initiative?',
+          type: 'multiselect',
+          options: [
+            { value: 'cio', label: 'CIO / CTO' },
+            { value: 'it_director', label: 'IT Director / Manager' },
+            { value: 'business', label: 'Business Unit Leaders' },
+            { value: 'ceo', label: 'CEO / COO' },
+            { value: 'hr', label: 'HR / People Leader' },
+            { value: 'procurement', label: 'Procurement' },
+          ],
+          required: true,
+        },
+      ],
+    },
+    {
+      title: 'Current State',
+      questions: [
+        {
+          id: 'strategy_maturity',
+          question: 'How would you rate your current digital workplace maturity?',
+          type: 'scale',
+          validation: { min: 1, max: 5 },
+          required: true,
+        },
+        {
+          id: 'strategy_existing_roadmap',
+          question: 'Do you have an existing technology roadmap?',
+          type: 'radio',
+          options: [
+            { value: 'yes_current', label: 'Yes, and it is current' },
+            { value: 'yes_outdated', label: 'Yes, but it needs updating' },
+            { value: 'no', label: 'No roadmap exists' },
+          ],
+          required: true,
+        },
+        {
+          id: 'strategy_challenges',
+          question: 'What are your top challenges?',
+          type: 'multiselect',
+          options: [
+            { value: 'adoption', label: 'Low user adoption of M365' },
+            { value: 'sprawl', label: 'Tool/app sprawl' },
+            { value: 'governance', label: 'Lack of governance' },
+            { value: 'security', label: 'Security concerns' },
+            { value: 'cost', label: 'Rising costs / licensing complexity' },
+            { value: 'skills', label: 'Lack of internal skills' },
+            { value: 'integration', label: 'System integration gaps' },
+            { value: 'change', label: 'Resistance to change' },
+          ],
+          required: true,
+        },
+      ],
+    },
+    {
+      title: 'Deliverables',
+      questions: [
+        {
+          id: 'strategy_deliverables',
+          question: 'What deliverables do you expect?',
+          type: 'multiselect',
+          options: [
+            { value: 'report', label: 'Written strategy document' },
+            { value: 'roadmap', label: 'Visual roadmap with milestones' },
+            { value: 'presentation', label: 'Executive presentation' },
+            { value: 'workshop', label: 'Strategy workshop facilitation' },
+            { value: 'budget', label: 'Budget estimation & business case' },
+            { value: 'governance', label: 'Governance framework document' },
+          ],
+          required: true,
+        },
+        {
+          id: 'strategy_notes',
+          question: 'Any additional context about your strategic priorities?',
+          type: 'textarea',
+          placeholder: 'Industry-specific challenges, recent mergers, regulatory changes, etc.',
+          required: false,
+        },
+      ],
+    },
+  ],
+};
+
+// ============================================================================
 // Service Requirements Map
 // ============================================================================
 
@@ -1048,6 +1656,11 @@ export const SERVICE_REQUIREMENTS_MAP: Record<ServiceCategory, ServiceRequiremen
   'Copilot Agents': COPILOT_REQUIREMENTS,
   'MS Viva': VIVA_REQUIREMENTS,
   'Training': TRAINING_REQUIREMENTS,
+  'Proposal': PROPOSAL_REQUIREMENTS,
+  'Tender': TENDER_REQUIREMENTS,
+  'Ad-Hoc Support': ADHOC_SUPPORT_REQUIREMENTS,
+  'SLA': SLA_REQUIREMENTS,
+  'Strategic Advisory': STRATEGIC_ADVISORY_REQUIREMENTS,
 };
 
 /**

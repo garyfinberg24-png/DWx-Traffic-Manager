@@ -30,6 +30,11 @@ import {
   RocketRegular,
   PeopleRegular,
   TextBulletListLtrRegular,
+  DocumentBulletListRegular,
+  GavelRegular,
+  WrenchRegular,
+  ShieldTaskRegular,
+  LightbulbRegular,
 } from '@fluentui/react-icons';
 import { DWService, ServiceComplexity } from '../../types/ServiceRequest';
 import { serviceCatalogService } from '../../services/ServiceCatalogService';
@@ -388,6 +393,11 @@ const categoryColors: Record<string, string> = {
   'Copilot Agents': '#6264a7',
   'MS Viva': '#e5559a',
   'Training': '#f59e0b',
+  'Proposal': '#0078d4',
+  'Tender': '#8b5cf6',
+  'Ad-Hoc Support': '#f59e0b',
+  'SLA': '#107c10',
+  'Strategic Advisory': '#e5559a',
 };
 
 // Icon map
@@ -398,6 +408,11 @@ const iconMap: Record<string, React.ElementType> = {
   ShieldCheckmark: ShieldCheckmarkRegular,
   Bot: BotRegular,
   PeopleTeam: PeopleTeamRegular,
+  DocumentBulletList: DocumentBulletListRegular,
+  Gavel: GavelRegular,
+  Wrench: WrenchRegular,
+  ShieldTask: ShieldTaskRegular,
+  Lightbulb: LightbulbRegular,
 };
 
 const formatPrice = (price?: number): string => {

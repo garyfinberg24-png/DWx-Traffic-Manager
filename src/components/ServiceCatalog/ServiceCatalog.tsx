@@ -1,6 +1,6 @@
 /**
  * DWx Traffic Manager - Service Catalog Component
- * Grid view of all available DW services with filtering by category
+ * Tabbed grid view of all available DW services with Popular default filter
  */
 
 import React, { useState, useEffect, useMemo } from 'react';
@@ -11,7 +11,10 @@ import {
   SearchBox,
   Button,
   makeStyles,
-  shorthands,
+  TabList,
+  Tab,
+  SelectTabEvent,
+  SelectTabData,
   MessageBar,
   MessageBarBody,
   MessageBarTitle,
@@ -21,17 +24,19 @@ import {
   FilterRegular,
   GridRegular,
   ArrowLeft24Regular,
+  StarRegular,
 } from '@fluentui/react-icons';
 import { DWService, ServiceCategory } from '../../types/ServiceRequest';
 import { serviceCatalogService } from '../../services/ServiceCatalogService';
 import { ServiceCard } from './ServiceCard';
 import { ServiceDetails } from './ServiceDetails';
+import { ServiceDetailModal } from './ServiceDetailModal';
 
 const useStyles = makeStyles({
   container: {
     display: 'flex',
     flexDirection: 'column',
-    gap: '24px',
+    gap: '20px',
     padding: '24px 64px',
     maxWidth: '1400px',
     margin: '0 auto',
@@ -58,6 +63,10 @@ const useStyles = makeStyles({
   backButton: {
     minWidth: 'auto',
   },
+  tabBar: {
+    borderBottom: '1px solid #e0e0e0',
+    overflowX: 'auto',
+  },
   toolbar: {
     display: 'flex',
     gap: '16px',
@@ -69,9 +78,6 @@ const useStyles = makeStyles({
     flex: '1 1 280px',
     maxWidth: '400px',
   },
-  categoryFilter: {
-    minWidth: '200px',
-  },
   resultsInfo: {
     marginLeft: 'auto',
     fontSize: '13px',
@@ -82,8 +88,8 @@ const useStyles = makeStyles({
   },
   grid: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
-    gap: '20px',
+    gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+    gap: '16px',
   },
   loadingContainer: {
     display: 'flex',
@@ -121,33 +127,22 @@ const useStyles = makeStyles({
     color: '#616161',
     maxWidth: '400px',
   },
-  categoryChips: {
-    display: 'flex',
-    flexWrap: 'wrap',
-    gap: '8px',
-    marginTop: '8px',
-  },
-  categoryChip: {
-    ...shorthands.padding('6px', '12px'),
-    ...shorthands.borderRadius('16px'),
-    fontSize: '13px',
-    fontWeight: '500',
-    cursor: 'pointer',
-    transitionProperty: 'all',
-    transitionDuration: '0.2s',
-    transitionTimingFunction: 'ease',
-    ...shorthands.border('1px', 'solid', '#d0d0d0'),
-    backgroundColor: 'white',
-    color: '#424242',
-  },
-  categoryChipActive: {
-    backgroundColor: '#1e6b7b',
-    color: 'white',
-    ...shorthands.border('1px', 'solid', '#1e6b7b'),
-  },
 });
 
-const ALL_CATEGORIES: ('All' | ServiceCategory)[] = [
+// Popular services — shown in the default "Popular" tab
+const POPULAR_TITLES = new Set([
+  'Power Platform Development',
+  'SPFx Development',
+  'Enterprise Copilot Agents',
+  'Zero to AI Copilot Chat Hero',
+  'Proposal Development',
+  'Ad-Hoc Technical Support',
+]);
+
+type CatalogTab = 'Popular' | 'All' | ServiceCategory;
+
+const CATALOG_TABS: CatalogTab[] = [
+  'Popular',
   'All',
   'Power Platform',
   'SPFx Development',
@@ -155,6 +150,12 @@ const ALL_CATEGORIES: ('All' | ServiceCategory)[] = [
   'M365 Assessment',
   'Copilot Agents',
   'MS Viva',
+  'Training',
+  'Proposal',
+  'Tender',
+  'Ad-Hoc Support',
+  'SLA',
+  'Strategic Advisory',
 ];
 
 interface ServiceCatalogProps {
@@ -169,9 +170,11 @@ export const ServiceCatalog: React.FC<ServiceCatalogProps> = ({ onRequestService
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchText, setSearchText] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<'All' | ServiceCategory>('All');
+  const [selectedTab, setSelectedTab] = useState<CatalogTab>('Popular');
   const [selectedService, setSelectedService] = useState<DWService | null>(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+  const [fullDetailsService, setFullDetailsService] = useState<DWService | null>(null);
+  const [isFullDetailsOpen, setIsFullDetailsOpen] = useState(false);
 
   // Load services on mount
   useEffect(() => {
@@ -192,12 +195,18 @@ export const ServiceCatalog: React.FC<ServiceCatalogProps> = ({ onRequestService
     loadServices();
   }, []);
 
-  // Filter services based on search and category
+  // Filter services based on search and selected tab
   const filteredServices = useMemo(() => {
     return services.filter((service) => {
-      // Category filter
-      if (selectedCategory !== 'All' && service.Category !== selectedCategory) {
-        return false;
+      // Tab filter
+      if (selectedTab === 'Popular') {
+        if (!service.IsPopular && !POPULAR_TITLES.has(service.Title)) {
+          return false;
+        }
+      } else if (selectedTab !== 'All') {
+        if (service.Category !== selectedTab) {
+          return false;
+        }
       }
 
       // Search filter
@@ -213,7 +222,7 @@ export const ServiceCatalog: React.FC<ServiceCatalogProps> = ({ onRequestService
 
       return true;
     });
-  }, [services, selectedCategory, searchText]);
+  }, [services, selectedTab, searchText]);
 
   const handleServiceClick = (service: DWService) => {
     setSelectedService(service);
@@ -227,16 +236,26 @@ export const ServiceCatalog: React.FC<ServiceCatalogProps> = ({ onRequestService
 
   const handleRequestService = (service: DWService) => {
     setIsDetailsOpen(false);
+    setIsFullDetailsOpen(false);
     if (onRequestService) {
       onRequestService(service);
     } else {
-      // Navigate to the service request form with the selected service
       navigate('/request', { state: { preSelectedService: service } });
     }
   };
 
-  const handleCategoryClick = (category: 'All' | ServiceCategory) => {
-    setSelectedCategory(category);
+  const handleViewFullDetails = (service: DWService) => {
+    setFullDetailsService(service);
+    setIsFullDetailsOpen(true);
+  };
+
+  const handleCloseFullDetails = () => {
+    setIsFullDetailsOpen(false);
+    setFullDetailsService(null);
+  };
+
+  const handleTabSelect = (_: SelectTabEvent, data: SelectTabData) => {
+    setSelectedTab(data.value as CatalogTab);
   };
 
   if (loading) {
@@ -280,17 +299,23 @@ export const ServiceCatalog: React.FC<ServiceCatalogProps> = ({ onRequestService
         </MessageBar>
       )}
 
-      {/* Category Chips */}
-      <div className={styles.categoryChips}>
-        {ALL_CATEGORIES.map((category) => (
-          <span
-            key={category}
-            className={`${styles.categoryChip} ${selectedCategory === category ? styles.categoryChipActive : ''}`}
-            onClick={() => handleCategoryClick(category)}
-          >
-            {category}
-          </span>
-        ))}
+      {/* Category Tabs */}
+      <div className={styles.tabBar}>
+        <TabList
+          selectedValue={selectedTab}
+          onTabSelect={handleTabSelect}
+          size="small"
+        >
+          {CATALOG_TABS.map((tab) => (
+            <Tab
+              key={tab}
+              value={tab}
+              icon={tab === 'Popular' ? <StarRegular /> : undefined}
+            >
+              {tab}
+            </Tab>
+          ))}
+        </TabList>
       </div>
 
       {/* Toolbar */}
@@ -320,20 +345,33 @@ export const ServiceCatalog: React.FC<ServiceCatalogProps> = ({ onRequestService
           <FilterRegular className={styles.emptyIcon} />
           <Text className={styles.emptyTitle}>No services found</Text>
           <Text className={styles.emptyText}>
-            {searchText || selectedCategory !== 'All'
+            {searchText || selectedTab !== 'All'
               ? 'Try adjusting your search or filter criteria'
               : 'No services are currently available'}
           </Text>
         </div>
       )}
 
-      {/* Service Details Modal */}
+      {/* Quick View Modal */}
       {selectedService && (
         <ServiceDetails
           service={selectedService}
           isOpen={isDetailsOpen}
           onClose={handleCloseDetails}
           onRequestService={handleRequestService}
+          onViewFullDetails={handleViewFullDetails}
+        />
+      )}
+
+      {/* Full Details Modal */}
+      {fullDetailsService && (
+        <ServiceDetailModal
+          service={fullDetailsService}
+          isOpen={isFullDetailsOpen}
+          onClose={handleCloseFullDetails}
+          onRequestService={handleRequestService}
+          allServices={services}
+          onViewService={handleViewFullDetails}
         />
       )}
     </div>

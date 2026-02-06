@@ -391,6 +391,14 @@ class DWxSharePointProvisioningService {
         { internalName: 'WinLossReason', displayName: 'Win/Loss Reason', type: 'Text' },
         { internalName: 'NextSteps', displayName: 'Next Steps', type: 'Note' },
         { internalName: 'Comments', displayName: 'Comments', type: 'Note' },
+        // Tender-specific fields
+        { internalName: 'TenderReferenceNumber', displayName: 'Tender Reference Number', type: 'Text' },
+        { internalName: 'BriefingSessionDate', displayName: 'Briefing Session Date', type: 'DateTime' },
+        { internalName: 'SubmissionDeadline', displayName: 'Submission Deadline', type: 'DateTime' },
+        { internalName: 'TenderManagerName', displayName: 'Tender Manager Name', type: 'Text' },
+        { internalName: 'TenderManagerEmail', displayName: 'Tender Manager Email', type: 'Text' },
+        { internalName: 'TechnicalSectionOnly', displayName: 'Technical Section Only', type: 'Boolean' },
+        { internalName: 'CVRequired', displayName: 'CV Required', type: 'Boolean' },
       ],
     };
   }

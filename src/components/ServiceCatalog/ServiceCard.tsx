@@ -18,6 +18,11 @@ import {
   PeopleTeamRegular,
   ClockRegular,
   MoneyRegular,
+  DocumentBulletListRegular,
+  GavelRegular,
+  WrenchRegular,
+  ShieldTaskRegular,
+  LightbulbRegular,
 } from '@fluentui/react-icons';
 import { DWService, ServiceCategory, ServiceComplexity } from '../../types/ServiceRequest';
 
@@ -38,16 +43,16 @@ const useStyles = makeStyles({
     },
   },
   cardHeader: {
-    padding: '20px 20px 16px',
+    padding: '14px 16px 12px',
     display: 'flex',
     alignItems: 'flex-start',
-    gap: '16px',
+    gap: '12px',
     borderBottom: '1px solid #f0f0f0',
   },
   iconContainer: {
-    width: '48px',
-    height: '48px',
-    borderRadius: '12px',
+    width: '36px',
+    height: '36px',
+    borderRadius: '10px',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
@@ -58,44 +63,44 @@ const useStyles = makeStyles({
     minWidth: 0,
   },
   title: {
-    fontSize: '16px',
+    fontSize: '14px',
     fontWeight: '600',
     color: '#242424',
-    marginBottom: '4px',
+    marginBottom: '2px',
     lineHeight: '1.3',
   },
   shortDescription: {
-    fontSize: '13px',
+    fontSize: '12px',
     color: '#616161',
-    lineHeight: '1.4',
+    lineHeight: '1.3',
   },
   cardBody: {
-    padding: '16px 20px',
+    padding: '10px 16px',
     flex: 1,
   },
   description: {
-    fontSize: '13px',
+    fontSize: '12px',
     color: '#424242',
     lineHeight: '1.5',
     display: '-webkit-box',
-    WebkitLineClamp: 3,
+    WebkitLineClamp: 2,
     WebkitBoxOrient: 'vertical',
     overflow: 'hidden',
   },
   cardFooter: {
-    padding: '12px 20px 16px',
+    padding: '10px 16px 12px',
     display: 'flex',
     flexWrap: 'wrap',
-    gap: '8px',
+    gap: '6px',
     borderTop: '1px solid #f0f0f0',
   },
   badge: {
     display: 'inline-flex',
     alignItems: 'center',
-    gap: '4px',
-    padding: '4px 8px',
+    gap: '3px',
+    padding: '3px 6px',
     borderRadius: '4px',
-    fontSize: '11px',
+    fontSize: '10px',
     fontWeight: '500',
   },
   categoryBadge: {
@@ -136,6 +141,11 @@ const iconMap: Record<string, React.ElementType> = {
   ShieldCheckmark: ShieldCheckmarkRegular,
   Bot: BotRegular,
   PeopleTeam: PeopleTeamRegular,
+  DocumentBulletList: DocumentBulletListRegular,
+  Gavel: GavelRegular,
+  Wrench: WrenchRegular,
+  ShieldTask: ShieldTaskRegular,
+  Lightbulb: LightbulbRegular,
 };
 
 // Category colors
@@ -147,6 +157,11 @@ const categoryColors: Record<ServiceCategory, string> = {
   'Copilot Agents': '#6264a7',
   'MS Viva': '#e5559a',
   'Training': '#f59e0b',
+  'Proposal': '#0078d4',
+  'Tender': '#8b5cf6',
+  'Ad-Hoc Support': '#f59e0b',
+  'SLA': '#107c10',
+  'Strategic Advisory': '#e5559a',
 };
 
 interface ServiceCardProps {
@@ -185,7 +200,7 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({ service, onClick }) =>
           className={styles.iconContainer}
           style={{ backgroundColor: `${categoryColor}15`, color: categoryColor }}
         >
-          <IconComponent style={{ width: '24px', height: '24px' }} />
+          <IconComponent style={{ width: '20px', height: '20px' }} />
         </div>
         <div className={styles.headerContent}>
           <Text className={styles.title}>{service.Title}</Text>

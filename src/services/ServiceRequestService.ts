@@ -73,6 +73,14 @@ class ServiceRequestService {
         Requirements: data.Requirements,
         ServiceHistory: data.ServiceHistory,
         Comments: data.Comments,
+        // Tender-specific fields (only included when provided)
+        ...(data.TenderReferenceNumber && { TenderReferenceNumber: data.TenderReferenceNumber }),
+        ...(data.BriefingSessionDate && { BriefingSessionDate: data.BriefingSessionDate }),
+        ...(data.SubmissionDeadline && { SubmissionDeadline: data.SubmissionDeadline }),
+        ...(data.TenderManagerName && { TenderManagerName: data.TenderManagerName }),
+        ...(data.TenderManagerEmail && { TenderManagerEmail: data.TenderManagerEmail }),
+        ...(data.TechnicalSectionOnly !== undefined && { TechnicalSectionOnly: data.TechnicalSectionOnly }),
+        ...(data.CVRequired !== undefined && { CVRequired: data.CVRequired }),
       };
 
       // Create the request in SharePoint

@@ -49,6 +49,11 @@ const SERVICE_CATEGORIES: ServiceCategory[] = [
   'Copilot Agents',
   'MS Viva',
   'Training',
+  'Proposal',
+  'Tender',
+  'Ad-Hoc Support',
+  'SLA',
+  'Strategic Advisory',
 ];
 
 const SERVICE_DURATIONS: ServiceDuration[] = [
