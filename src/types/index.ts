@@ -7,3 +7,5 @@ export * from './ReferenceData';
 export * from './SessionPreparation';
 export * from './FollowUp';
 export * from './WinLossAnalysis';
+export * from './EmailTracking';
+export * from './MeetingNotes';

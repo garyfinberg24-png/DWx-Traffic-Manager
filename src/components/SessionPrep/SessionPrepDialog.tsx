@@ -17,6 +17,7 @@ import {
   FolderRegular,
   CalendarRegular,
   CheckmarkRegular,
+  NoteRegular,
   SparkleRegular,
   ArrowSyncRegular,
   CheckmarkCircleRegular,
@@ -30,6 +31,7 @@ import {
   SessionPrepStatus,
   AIGenerationContext,
   UpdateSessionPrepInput,
+  MeetingNotes,
 } from '../../types/SessionPreparation';
 import { sessionPrepService } from '../../services/SessionPrepService';
 import { aiPreparationService, isAIConfigured } from '../../services/AIPreparationService';
@@ -43,6 +45,7 @@ import { TalkingPointsEditor } from './TalkingPointsEditor';
 import { ResourcePicker } from './ResourcePicker';
 import { MeetingAgendaView } from './MeetingAgendaView';
 import { PrepChecklist } from './PrepChecklist';
+import { MeetingNotesEditor } from './MeetingNotesEditor';
 import { format } from 'date-fns';
 
 // ============================================================================
@@ -73,7 +76,7 @@ const useStyles = makeStyles({
 // Tabs
 // ============================================================================
 
-type TabValue = 'profile' | 'talking-points' | 'resources' | 'agenda' | 'checklist';
+type TabValue = 'profile' | 'talking-points' | 'resources' | 'agenda' | 'checklist' | 'notes';
 
 const TABS: ModalTab[] = [
   { value: 'profile', label: 'Client Profile', icon: <PersonRegular style={{ width: 16, height: 16 }} /> },
@@ -81,6 +84,7 @@ const TABS: ModalTab[] = [
   { value: 'resources', label: 'Resources', icon: <FolderRegular style={{ width: 16, height: 16 }} /> },
   { value: 'agenda', label: 'Agenda', icon: <CalendarRegular style={{ width: 16, height: 16 }} /> },
   { value: 'checklist', label: 'Checklist', icon: <CheckmarkRegular style={{ width: 16, height: 16 }} /> },
+  { value: 'notes', label: 'Notes', icon: <NoteRegular style={{ width: 16, height: 16 }} /> },
 ];
 
 // ============================================================================
@@ -306,6 +310,24 @@ export const SessionPrepDialog: React.FC<SessionPrepDialogProps> = ({
     }
   };
 
+  // Save meeting notes
+  const handleSaveMeetingNotes = async (meetingNotesData: MeetingNotes) => {
+    if (!sessionPrep) return;
+    try {
+      setSaving(true);
+      await sessionPrepService.updateSessionPrep(sessionPrep.Id, { meetingNotes: meetingNotesData });
+      const updated = { ...sessionPrep, MeetingNotes: meetingNotesData };
+      setSessionPrep(updated);
+      onSessionPrepUpdated?.(updated);
+      showToast('Meeting notes saved', 'success');
+    } catch (err) {
+      console.error('Failed to save meeting notes:', err);
+      showToast('Failed to save meeting notes', 'error');
+    } finally {
+      setSaving(false);
+    }
+  };
+
   // Calculate completion percentage
   const completionPercent = sessionPrep
     ? sessionPrepService.calculateCompletionPercentage(sessionPrep)
@@ -457,6 +479,18 @@ export const SessionPrepDialog: React.FC<SessionPrepDialogProps> = ({
             <PrepChecklist
               items={sessionPrep.ChecklistItems}
               onUpdate={(items) => handleUpdateSessionPrep({ checklistItems: items })}
+            />
+          )}
+          {activeTab === 'notes' && (
+            <MeetingNotesEditor
+              data={sessionPrep.MeetingNotes ?? null}
+              onChange={handleSaveMeetingNotes}
+              readOnly={sessionPrep.Status === 'Ready'}
+              defaultAttendees={[
+                serviceRequest.AccountManagerName,
+                serviceRequest.AssignedSpecialistName || '',
+                serviceRequest.ContactName || '',
+              ].filter(Boolean)}
             />
           )}
         </>

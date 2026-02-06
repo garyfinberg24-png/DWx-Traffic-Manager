@@ -19,6 +19,7 @@ export { knowledgeBaseService } from './KnowledgeBaseService';
 export { proposalService } from './ProposalService';
 export { followUpService } from './FollowUpService';
 export { winLossAnalysisService } from './WinLossAnalysisService';
+export { emailTrackingService } from './EmailTrackingService';
 
 // Re-export individual services for direct access when needed
 export { authService as realAuthService } from './AuthService';

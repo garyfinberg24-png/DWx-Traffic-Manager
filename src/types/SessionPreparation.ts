@@ -3,6 +3,10 @@
  * Types for AI-powered session preparation workflow
  */
 
+import { MeetingNotes } from './MeetingNotes';
+
+export type { MeetingNotes, MeetingNoteSentiment } from './MeetingNotes';
+
 // ============================================================================
 // Session Preparation Status
 // ============================================================================
@@ -176,6 +180,9 @@ export interface SessionPreparation {
   // Manual checklist
   ChecklistItems: PrepChecklistItem[];
 
+  // Meeting notes (post-discovery)
+  MeetingNotes: MeetingNotes | null;
+
   // Metadata
   AIGeneratedAt: string | null;
   CompletedAt: string | null;
@@ -208,6 +215,7 @@ export interface UpdateSessionPrepInput {
   aiGeneratedAt?: string;
   completedAt?: string;
   reminderSent?: boolean;
+  meetingNotes?: MeetingNotes;
 }
 
 // ============================================================================

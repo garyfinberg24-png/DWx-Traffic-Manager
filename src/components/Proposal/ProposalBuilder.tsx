@@ -22,7 +22,9 @@ import {
   Checkmark24Regular,
   Dismiss24Regular,
   ArrowSync24Regular,
+  ArrowDownload24Regular,
 } from '@fluentui/react-icons';
+import { generateProposalPdf } from '../../utils/proposalPdfGenerator';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
 import { proposalService } from '../../services/ProposalService';
@@ -468,6 +470,25 @@ export const ProposalBuilder: React.FC<ProposalBuilderProps> = ({
 
     return (
       <div className={styles.actionBar}>
+        {/* PDF Download button (only for Approved+ statuses) */}
+        {['Approved', 'Sent to Client', 'Accepted', 'Declined'].includes(status) && (
+          <Button
+            appearance="outline"
+            icon={<ArrowDownload24Regular />}
+            onClick={() => {
+              generateProposalPdf({
+                proposal,
+                clientName: serviceRequest.ClientName,
+                serviceName: serviceRequest.ServiceName,
+                accountManagerName: serviceRequest.AccountManagerName || '',
+                proposalType: proposal.ProposalType || 'Standard',
+              });
+            }}
+          >
+            Download PDF
+          </Button>
+        )}
+
         {/* AI Generate button (only in editable states) */}
         {isEditable && isAIConfigured() && (
           <Button
@@ -556,7 +577,7 @@ export const ProposalBuilder: React.FC<ProposalBuilderProps> = ({
         )}
       </div>
     );
-  }, [proposal, isEditable, isTerminal, isManager, generating, saving, styles.actionBar, handleGenerateAI, handleSubmitForReview, handleApprove, handleRequestRevision, handleSendToClient, handleMarkAccepted, handleMarkDeclined, onClose]);
+  }, [proposal, isEditable, isTerminal, isManager, generating, saving, styles.actionBar, serviceRequest, handleGenerateAI, handleSubmitForReview, handleApprove, handleRequestRevision, handleSendToClient, handleMarkAccepted, handleMarkDeclined, onClose]);
 
   const footerLeft = useMemo(() => {
     if (!proposal) return null;

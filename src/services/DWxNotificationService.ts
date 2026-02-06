@@ -9,6 +9,8 @@ import { ProductRequest } from '../types/ProductRequest';
 import { SessionPreparation } from '../types/SessionPreparation';
 import { config } from '../config/environmentConfig';
 import { EmailTemplates, ProposalEmailContext } from './EmailTemplates';
+import { emailTrackingService } from './EmailTrackingService';
+import { EmailType } from '../types/EmailTracking';
 
 const graphService = getGraphService();
 
@@ -30,13 +32,14 @@ class DWxNotificationService {
   }
 
   /**
-   * Send email via Graph API
+   * Send email via Graph API, optionally tracking it against a service request.
    */
   private async sendEmail(
     toRecipients: string[],
     subject: string,
     htmlBody: string,
-    ccRecipients?: string[]
+    ccRecipients?: string[],
+    trackingOptions?: { requestId: number; emailType: EmailType; sentBy: string }
   ): Promise<NotificationResult> {
     try {
       await graphService.sendEmail({
@@ -46,6 +49,18 @@ class DWxNotificationService {
         cc: ccRecipients,
       });
       console.log(`[DWxNotificationService] Email sent: ${subject}`);
+
+      // Track the email if requestId provided (fire-and-forget, never blocks)
+      if (trackingOptions) {
+        emailTrackingService.logEmail(trackingOptions.requestId, {
+          subject,
+          sentTo: toRecipients,
+          sentAt: new Date().toISOString(),
+          sentBy: trackingOptions.sentBy,
+          type: trackingOptions.emailType,
+        });
+      }
+
       return { success: true };
     } catch (error) {
       console.error('[DWxNotificationService] Failed to send email:', error);
@@ -61,7 +76,11 @@ class DWxNotificationService {
    */
   async notifyRequestCreatedAM(request: ServiceRequest): Promise<NotificationResult> {
     const { subject, body } = EmailTemplates.requestCreatedAM(request);
-    return this.sendEmail([request.AccountManagerEmail], subject, body);
+    return this.sendEmail([request.AccountManagerEmail], subject, body, undefined, {
+      requestId: request.Id,
+      emailType: 'request_created',
+      sentBy: 'System',
+    });
   }
 
   /**
@@ -107,7 +126,11 @@ class DWxNotificationService {
       specialistEmail,
       specialistRole
     );
-    return this.sendEmail([request.AccountManagerEmail], subject, body);
+    return this.sendEmail([request.AccountManagerEmail], subject, body, undefined, {
+      requestId: request.Id,
+      emailType: 'specialist_assigned',
+      sentBy: 'System',
+    });
   }
 
   /**
@@ -159,7 +182,11 @@ class DWxNotificationService {
       request.AccountManagerName,
       confirmedSlot
     );
-    results.push(await this.sendEmail([request.AccountManagerEmail], amTemplate.subject, amTemplate.body));
+    results.push(await this.sendEmail([request.AccountManagerEmail], amTemplate.subject, amTemplate.body, undefined, {
+      requestId: request.Id,
+      emailType: 'discovery_confirmed',
+      sentBy: 'System',
+    }));
 
     // Notify specialist if assigned
     if (request.AssignedSpecialistEmail && request.AssignedSpecialistName) {
@@ -190,7 +217,11 @@ class DWxNotificationService {
     changedBy: string
   ): Promise<NotificationResult> {
     const { subject, body } = EmailTemplates.stageChanged(request, previousStage, newStage, changedBy);
-    return this.sendEmail([request.AccountManagerEmail], subject, body);
+    return this.sendEmail([request.AccountManagerEmail], subject, body, undefined, {
+      requestId: request.Id,
+      emailType: 'stage_changed',
+      sentBy: 'System',
+    });
   }
 
   /**
@@ -207,7 +238,11 @@ class DWxNotificationService {
       'Won',
       'System'
     );
-    results.push(await this.sendEmail([request.AccountManagerEmail], amTemplate.subject, amTemplate.body));
+    results.push(await this.sendEmail([request.AccountManagerEmail], amTemplate.subject, amTemplate.body, undefined, {
+      requestId: request.Id,
+      emailType: 'deal_won',
+      sentBy: 'System',
+    }));
 
     // Notify managers with deal won details
     if (managerEmails.length > 0) {
@@ -232,7 +267,11 @@ class DWxNotificationService {
       'Lost',
       'System'
     );
-    results.push(await this.sendEmail([request.AccountManagerEmail], amTemplate.subject, amTemplate.body));
+    results.push(await this.sendEmail([request.AccountManagerEmail], amTemplate.subject, amTemplate.body, undefined, {
+      requestId: request.Id,
+      emailType: 'deal_lost',
+      sentBy: 'System',
+    }));
 
     // Notify managers
     if (managerEmails.length > 0) {
@@ -356,7 +395,11 @@ class DWxNotificationService {
       return { success: true };
     }
     const { subject, body } = EmailTemplates.dealValueChanged(request, changes, changedBy);
-    return this.sendEmail(managerEmails, subject, body);
+    return this.sendEmail(managerEmails, subject, body, undefined, {
+      requestId: request.Id,
+      emailType: 'deal_value_changed',
+      sentBy: 'System',
+    });
   }
 
   /**
@@ -588,7 +631,11 @@ class DWxNotificationService {
   ): Promise<NotificationResult> {
     try {
       const { subject, body } = EmailTemplates.followUpReminderAM(request, urgency);
-      return await this.sendEmail([request.AccountManagerEmail], subject, body);
+      return await this.sendEmail([request.AccountManagerEmail], subject, body, undefined, {
+        requestId: request.Id,
+        emailType: 'follow_up_reminder',
+        sentBy: 'System',
+      });
     } catch (error) {
       console.error('[DWxNotificationService] Failed to send follow-up reminder to AM:', error);
       return { success: false, error: String(error) };
@@ -606,7 +653,11 @@ class DWxNotificationService {
       const managers = this.getManagerEmails();
       if (managers.length === 0) return { success: false, error: 'No manager emails configured' };
       const { subject, body } = EmailTemplates.followUpReminderManager(request, urgency);
-      return await this.sendEmail(managers, subject, body);
+      return await this.sendEmail(managers, subject, body, undefined, {
+        requestId: request.Id,
+        emailType: 'follow_up_reminder',
+        sentBy: 'System',
+      });
     } catch (error) {
       console.error('[DWxNotificationService] Failed to send stale deal alert to managers:', error);
       return { success: false, error: String(error) };

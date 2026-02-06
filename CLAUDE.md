@@ -6,7 +6,7 @@
 
 **Project Origin**: Cloned from LP Booking App (v1.7.5) - a production Teams app for License Pulse demo scheduling.
 
-**Current Version**: v2.10.0 (February 2026) - Deal Activity Timeline + Follow-Up Reminders + Win/Loss Analysis
+**Current Version**: v2.11.0 (February 2026) - Kanban Board + Quick-Create Deal + Email Tracking + PDF Export + Meeting Notes
 
 > **IMPORTANT**: We are ONLY working on the DWx Traffic Manager project. We DO NOT make any changes to the LP Booking App. The LP Booking App is a separate production application and must not be modified.
 
@@ -387,13 +387,18 @@ DWx-Traffic-Manager/
 │   │   │   ├── ProductRequestDetails.tsx # Full product request details modal (NEW v2.2.0)
 │   │   │   ├── StageProgressBar.tsx      # Visual funnel stage progress
 │   │   │   ├── DealActivityTimeline.tsx  # Chronological audit log feed (v2.10.0)
+│   │   │   ├── EmailTimeline.tsx        # Email communication timeline (v2.11.0)
 │   │   │   └── index.ts
 │   │   ├── SalesFunnel/
-│   │   │   ├── SalesFunnelDashboard.tsx  # Dashboard container
+│   │   │   ├── SalesFunnelDashboard.tsx  # Dashboard container + Board tab + Quick Create
 │   │   │   ├── FunnelChart.tsx           # Funnel visualization
 │   │   │   ├── PipelineKPIs.tsx          # Pipeline metrics cards
 │   │   │   ├── ConversionRatesCard.tsx   # Stage conversion metrics
 │   │   │   ├── RequestsQueue.tsx         # Manager request queue
+│   │   │   ├── KanbanBoard.tsx           # Drag-and-drop Kanban board (v2.11.0)
+│   │   │   ├── KanbanColumn.tsx          # Droppable column component (v2.11.0)
+│   │   │   ├── KanbanCard.tsx            # Draggable deal card (v2.11.0)
+│   │   │   ├── QuickCreateDialog.tsx     # Quick deal creation dialog (v2.11.0)
 │   │   │   └── index.ts
 │   │   ├── Dashboard/
 │   │   │   ├── ManagerDashboard.tsx      # Dashboard with tabs
@@ -455,6 +460,7 @@ DWx-Traffic-Manager/
 │   │   │   ├── ResourcePicker.tsx        # Suggested resources selector
 │   │   │   ├── MeetingAgendaView.tsx     # AI-generated meeting agenda timeline
 │   │   │   ├── PrepChecklist.tsx         # Pre-meeting checklist with completion tracking
+│   │   │   ├── MeetingNotesEditor.tsx   # Post-discovery meeting notes capture (v2.11.0)
 │   │   │   └── index.ts
 │   │   ├── Proposal/
 │   │   │   ├── ProposalBuilder.tsx       # Main proposal dialog (11 tabs + AI generation) (v2.9.0)
@@ -495,6 +501,7 @@ DWx-Traffic-Manager/
 │   │   ├── DWxNotificationService.ts     # DW-branded notifications (27 methods)
 │   │   ├── FollowUpService.ts            # Stale deal detection + follow-up reminders (v2.10.0)
 │   │   ├── WinLossAnalysisService.ts     # Win/loss analysis computation (v2.10.0)
+│   │   ├── EmailTrackingService.ts       # Email thread tracking per deal (v2.11.0)
 │   │   ├── SessionPrepService.ts         # Session preparation CRUD + checklist management
 │   │   ├── AIPreparationService.ts       # Azure OpenAI integration for AI content generation
 │   │   ├── ProposalService.ts            # Proposal CRUD + status workflow + section persistence (v2.9.0)
@@ -534,6 +541,8 @@ DWx-Traffic-Manager/
 │   │   ├── Proposal.ts                   # Proposal types, 11 section interfaces, defaults, templates (v2.9.0)
 │   │   ├── FollowUp.ts                   # Stale deal detection types (v2.10.0)
 │   │   ├── WinLossAnalysis.ts            # Win/loss analysis types (v2.10.0)
+│   │   ├── EmailTracking.ts             # Email tracking types (v2.11.0)
+│   │   ├── MeetingNotes.ts              # Meeting notes types (v2.11.0)
 │   │   ├── Product.ts                    # Product catalog types (29 products)
 │   │   ├── ProductRequirements.ts        # Product requirements form types
 │   │   ├── ServiceRequirements.ts        # Service requirements types
@@ -555,6 +564,7 @@ DWx-Traffic-Manager/
 │   │   └── index.ts
 │   ├── utils/
 │   │   ├── excelExport.ts                # Excel export utility
+│   │   ├── proposalPdfGenerator.ts       # PDF proposal export (jsPDF) (v2.11.0)
 │   │   └── timezone.ts                   # Timezone utilities
 │   ├── App.tsx                           # Main app with routes
 │   ├── main.tsx                          # React entry point
@@ -912,6 +922,52 @@ Three high-value analytics features, all purely client-side (no new SharePoint l
 - [x] Wired into ManagerDashboard.tsx as new "Win/Loss" tab with ChartMultipleRegular icon
 - [x] Exported from Dashboard/index.ts
 
+### Phase 12: Five Medium-Impact UX Features (COMPLETE - v2.11.0)
+
+Five features improving daily manager workflow. Client-side only, 2 new SharePoint Note columns, 3 new npm packages.
+
+#### Feature 1: Kanban Board View - COMPLETE
+- [x] **KanbanCard.tsx** — Draggable card with client name, service, deal value (ZAR), interest badge, specialist initials, days-in-stage, 3-dot context menu (Mark Won/Lost/Open Details)
+- [x] **KanbanColumn.tsx** — Droppable column with stage header (colored dot + count badge + total value), empty state, vertical scroll
+- [x] **KanbanBoard.tsx** — DragDropContext with 5 columns (Lead→Negotiation), Won/Lost via context menu only. Validates transitions via STAGE_TRANSITIONS, optimistic UI with revert on failure
+- [x] Wired into SalesFunnelDashboard.tsx as "Board" tab (manager-only) with ColumnTripleRegular icon
+- [x] Uses `@hello-pangea/dnd` for React 18-compatible drag-and-drop
+
+#### Feature 2: Quick-Create Deal - COMPLETE
+- [x] **QuickCreateDialog.tsx** — Compact Dialog (480px) with 5 fields: Client (freeform Combobox with auto-populate), Service (Dropdown), Deal Value (optional), Interest Level (RadioGroup), Notes (optional Textarea)
+- [x] Auto-fills contact info from DWxClients on selection (reuses client auto-populate pattern)
+- [x] Creates Lead-stage request via serviceRequestService.createRequest()
+- [x] "Quick Create" button in SalesFunnelDashboard header (manager-only, next to Export)
+
+#### Feature 3: Email Thread Tracking - COMPLETE
+- [x] **EmailTracking.ts** — EmailType union (12 types: request_created, stage_changed, specialist_assigned, etc.), EmailRecord interface
+- [x] **EmailTrackingService.ts** — Singleton with logEmail() (silent failure, never throws) and getEmailsForRequest() (sorted by sentAt desc)
+- [x] **EmailTimeline.tsx** — Vertical timeline of sent emails with type badges, recipients, timestamps
+- [x] Modified DWxNotificationService.ts — sendEmail() accepts optional requestId + emailType, calls emailTrackingService.logEmail() after successful send. ~12 key notification methods updated
+- [x] Added EmailThread_JSON (Note) column to DWxServiceRequests in SP Provisioning
+- [x] EmailTimeline rendered in RequestDetails Actions tab under "Email History" section
+
+#### Feature 4: PDF Proposal Export - COMPLETE
+- [x] **proposalPdfGenerator.ts** — DW-branded A4 PDF via jsPDF + jspdf-autotable: cover page (DWx blue stripe), auto-generated TOC, 11 conditional sections, autoTable for scope/pricing/timeline/team/risks, page numbers, Enterprise "CONFIDENTIAL" watermark
+- [x] "Download PDF" button in ProposalBuilder footerRight (visible when status is Approved/Sent to Client/Accepted/Declined)
+- [x] Filename: `{Client} - {Service} Proposal v{Version}.pdf`
+
+#### Feature 5: Meeting Notes Capture - COMPLETE
+- [x] **MeetingNotes.ts** — MeetingNoteSentiment type, MeetingNotes interface, DEFAULT_MEETING_NOTES constant
+- [x] **MeetingNotesEditor.tsx** — 7-section form: date/duration, attendees list, sentiment radio (Positive/Neutral/Negative), key takeaways repeater, client pain points repeater, next steps repeater, additional notes textarea. Explicit "Save Notes" button
+- [x] Added MeetingNotes field to SessionPreparation interface + re-export from types
+- [x] SessionPrepService handles MeetingNotes_JSON parsing/serialization
+- [x] SessionPrepDialog has 6th "Notes" tab with NoteRegular icon, save handler, defaultAttendees from AM + specialist + contact
+- [x] Added MeetingNotes_JSON (Note) column to DWxSessionPrep in SP Provisioning
+
+**SharePoint Schema Changes (2 columns, no new lists):**
+| List | Column | Type |
+|------|--------|------|
+| DWxServiceRequests | EmailThread_JSON | Note |
+| DWxSessionPrep | MeetingNotes_JSON | Note |
+
+**New Dependencies:** `@hello-pangea/dnd`, `jspdf`, `jspdf-autotable`
+
 ### Pending / Round 4
 
 - [ ] Round 4: Medium-priority enhancements (M1-M10)
@@ -1103,6 +1159,14 @@ The app supports Account Managers from an external partner tenant:
 | `src/types/WinLossAnalysis.ts` | Win/loss metrics, breakdown, trend types (v2.10.0) |
 | `src/components/MyRequests/DealActivityTimeline.tsx` | Chronological audit log feed component (v2.10.0) |
 | `src/components/Dashboard/WinLossTab.tsx` | Win/loss Recharts dashboard tab (v2.10.0) |
+| `src/components/SalesFunnel/KanbanBoard.tsx` | Drag-and-drop Kanban board with 5 columns (v2.11.0) |
+| `src/components/SalesFunnel/QuickCreateDialog.tsx` | Quick deal creation dialog (v2.11.0) |
+| `src/services/EmailTrackingService.ts` | Email thread tracking per deal (v2.11.0) |
+| `src/components/MyRequests/EmailTimeline.tsx` | Email communication timeline display (v2.11.0) |
+| `src/components/SessionPrep/MeetingNotesEditor.tsx` | Post-discovery meeting notes capture (v2.11.0) |
+| `src/utils/proposalPdfGenerator.ts` | DW-branded PDF proposal export via jsPDF (v2.11.0) |
+| `src/types/EmailTracking.ts` | EmailType (12 types), EmailRecord interface (v2.11.0) |
+| `src/types/MeetingNotes.ts` | MeetingNotes interface, sentiment, defaults (v2.11.0) |
 | `src/services/SessionPrepService.ts` | Session prep CRUD + checklist management + completion tracking |
 | `src/services/AIPreparationService.ts` | Azure OpenAI integration for AI content generation |
 | `src/types/SessionPreparation.ts` | Session prep types (status, checklist, talking points, resources, agenda) |
@@ -1140,6 +1204,9 @@ The app supports Account Managers from an external partner tenant:
 | **Admin Panel Layout** | Grouped sidebar navigation (People, Data, Content, Operations, Access, System) |
 | **SP Provisioning Layout** | 4-tab layout: Overview, Lists, Seed Data, Tools |
 | **Client Auto-Populate** | Freeform Combobox searches DWxClients, auto-fills contact name/email/phone/industry |
+| **Kanban Won/Lost** | Context menu only — 5 drag columns (Lead→Negotiation), Won/Lost via 3-dot menu |
+| **Email Tracking Scope** | Key emails only (~12 types: stage changes, proposals, specialist, reminders) |
+| **PDF Export** | jsPDF + jspdf-autotable for client-side PDF generation |
 
 ## Product Catalog
 

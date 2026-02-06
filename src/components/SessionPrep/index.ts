@@ -8,3 +8,4 @@ export { TalkingPointsEditor } from './TalkingPointsEditor';
 export { ResourcePicker } from './ResourcePicker';
 export { MeetingAgendaView } from './MeetingAgendaView';
 export { PrepChecklist } from './PrepChecklist';
+export { MeetingNotesEditor } from './MeetingNotesEditor';

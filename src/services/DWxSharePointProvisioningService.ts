@@ -399,6 +399,8 @@ class DWxSharePointProvisioningService {
         { internalName: 'TenderManagerEmail', displayName: 'Tender Manager Email', type: 'Text' },
         { internalName: 'TechnicalSectionOnly', displayName: 'Technical Section Only', type: 'Boolean' },
         { internalName: 'CVRequired', displayName: 'CV Required', type: 'Boolean' },
+        // Email Thread Tracking (v2.11.0)
+        { internalName: 'EmailThread_JSON', displayName: 'Email Thread JSON', type: 'Note' },
       ],
     };
   }
@@ -670,6 +672,7 @@ class DWxSharePointProvisioningService {
         { internalName: 'SuggestedResources_JSON', displayName: 'Suggested Resources (JSON)', type: 'Note' },
         { internalName: 'MeetingAgenda_JSON', displayName: 'Meeting Agenda (JSON)', type: 'Note' },
         { internalName: 'ChecklistItems_JSON', displayName: 'Checklist Items (JSON)', type: 'Note' },
+        { internalName: 'MeetingNotes_JSON', displayName: 'Meeting Notes JSON', type: 'Note', required: false },
         // Metadata
         { internalName: 'AIGeneratedAt', displayName: 'AI Generated At', type: 'DateTime' },
         { internalName: 'CompletedAt', displayName: 'Completed At', type: 'DateTime' },

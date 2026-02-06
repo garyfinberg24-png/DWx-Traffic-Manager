@@ -71,6 +71,9 @@ const mapSharePointItem = (item: Record<string, unknown>): SessionPreparation =>
     // Checklist
     ChecklistItems: parseJson<PrepChecklistItem[]>(fields.ChecklistItems_JSON) || [],
 
+    // Meeting notes (post-discovery)
+    MeetingNotes: parseJson<import('../types/MeetingNotes').MeetingNotes>(fields.MeetingNotes_JSON),
+
     // Metadata
     AIGeneratedAt: (fields.AIGeneratedAt as string) || null,
     CompletedAt: (fields.CompletedAt as string) || null,
@@ -251,6 +254,10 @@ class SessionPrepService {
 
       if (updates.reminderSent !== undefined) {
         updateData.ReminderSent = updates.reminderSent;
+      }
+
+      if (updates.meetingNotes !== undefined) {
+        updateData.MeetingNotes_JSON = JSON.stringify(updates.meetingNotes);
       }
 
       await graphService.updateListItem(LIST_NAME, id, updateData);

@@ -8,3 +8,5 @@ export { PipelineKPIs } from './PipelineKPIs';
 export { ConversionRatesCard } from './ConversionRatesCard';
 export { RequestsQueue } from './RequestsQueue';
 export { ProductRequestsQueue } from './ProductRequestsQueue';
+export { default as KanbanBoard } from './KanbanBoard';
+export { default as QuickCreateDialog } from './QuickCreateDialog';

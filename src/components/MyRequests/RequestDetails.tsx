@@ -37,6 +37,7 @@ import { SessionPrepDialog } from '../SessionPrep';
 import { ProposalBuilder, ProposalTracker } from '../Proposal';
 import { format } from 'date-fns';
 import { DealActivityTimeline } from './DealActivityTimeline';
+import { EmailTimeline } from './EmailTimeline';
 import {
   DetailModalShell,
   DetailSection,
@@ -928,6 +929,14 @@ export const RequestDetails: React.FC<RequestDetailsProps> = ({
         ) : (
           <div className={styles.unassigned}>No comments</div>
         )}
+      </DetailSection>
+
+      {/* Email Communication Timeline */}
+      <DetailSection
+        icon={<MailRegular style={{ width: '16px', height: '16px' }} />}
+        title="Email History"
+      >
+        <EmailTimeline requestId={request.Id} />
       </DetailSection>
 
       {request.WinLossReason && (

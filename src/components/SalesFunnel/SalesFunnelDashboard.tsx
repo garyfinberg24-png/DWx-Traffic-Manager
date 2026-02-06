@@ -27,6 +27,8 @@ import {
   BoxRegular,
   ArrowDownloadRegular,
   Warning24Regular,
+  ColumnTripleRegular,
+  AddRegular,
 } from '@fluentui/react-icons';
 import {
   downloadServiceRequestsExcel,
@@ -54,6 +56,8 @@ import { FunnelChart } from './FunnelChart';
 import { ConversionRatesCard } from './ConversionRatesCard';
 import { RequestsQueue } from './RequestsQueue';
 import { ProductRequestsQueue } from './ProductRequestsQueue';
+import KanbanBoard from './KanbanBoard';
+import QuickCreateDialog from './QuickCreateDialog';
 
 const useStyles = makeStyles({
   container: {
@@ -131,7 +135,7 @@ const useStyles = makeStyles({
   },
 });
 
-type DashboardTab = 'overview' | 'pipeline' | 'queue' | 'productQueue';
+type DashboardTab = 'overview' | 'pipeline' | 'queue' | 'productQueue' | 'board';
 
 interface SalesFunnelDashboardProps {
   onStageClick?: (stage: FunnelStage) => void;
@@ -148,6 +152,7 @@ export const SalesFunnelDashboard: React.FC<SalesFunnelDashboardProps> = ({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<DashboardTab>('overview');
+  const [showQuickCreate, setShowQuickCreate] = useState(false);
 
   // Load all requests on mount
   useEffect(() => {
@@ -217,6 +222,10 @@ export const SalesFunnelDashboard: React.FC<SalesFunnelDashboardProps> = ({
     );
   };
 
+  const handleDealCreated = (newRequest: ServiceRequest) => {
+    setRequests((prev) => [newRequest, ...prev]);
+  };
+
   // Count actionable product requests for badge
   const actionableProductCount = productRequests.filter(
     (r) => r.Status !== 'Completed' && r.Status !== 'Cancelled'
@@ -254,6 +263,18 @@ export const SalesFunnelDashboard: React.FC<SalesFunnelDashboardProps> = ({
             {isManager ? 'Organization-wide' : 'Your'} pre-sales pipeline and performance metrics
           </Text>
         </div>
+        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+        {isManager && (
+          <Button
+            appearance="primary"
+            icon={<AddRegular />}
+            size="small"
+            style={{ backgroundColor: '#1a5a8a' }}
+            onClick={() => setShowQuickCreate(true)}
+          >
+            Quick Create
+          </Button>
+        )}
         <Menu>
           <MenuTrigger disableButtonEnhancement>
             <Button
@@ -285,6 +306,7 @@ export const SalesFunnelDashboard: React.FC<SalesFunnelDashboardProps> = ({
             </MenuList>
           </MenuPopover>
         </Menu>
+        </div>
       </div>
 
       {/* Error Message */}
@@ -317,6 +339,11 @@ export const SalesFunnelDashboard: React.FC<SalesFunnelDashboardProps> = ({
         {isManager && (
           <Tab value="productQueue" icon={<BoxRegular />}>
             Product Queue{actionableProductCount > 0 ? ` (${actionableProductCount})` : ''}
+          </Tab>
+        )}
+        {isManager && (
+          <Tab value="board" icon={<ColumnTripleRegular />}>
+            Board
           </Tab>
         )}
       </TabList>
@@ -510,7 +537,18 @@ export const SalesFunnelDashboard: React.FC<SalesFunnelDashboardProps> = ({
             onRequestUpdated={handleProductRequestUpdated}
           />
         )}
+
+        {activeTab === 'board' && isManager && (
+          <KanbanBoard requests={requests} onRequestUpdated={handleRequestUpdated} />
+        )}
       </div>
+
+      {/* Quick Create Dialog */}
+      <QuickCreateDialog
+        open={showQuickCreate}
+        onClose={() => setShowQuickCreate(false)}
+        onDealCreated={handleDealCreated}
+      />
     </div>
   );
 };
