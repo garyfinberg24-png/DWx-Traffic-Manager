@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DWx Header + Masthead Integration - 5 Concepts</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #f0f2f5;
+      color: #242424;
+    }
+
+    /* ===== Concept Selector ===== */
+    .concept-nav {
+      position: fixed;
+      top: 0; left: 0; right: 0; z-index: 1000;
+      background: #111827;
+      display: flex;
+      align-items: center;
+      padding: 0 32px;
+      height: 52px;
+      gap: 8px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.4);
+    }
+    .concept-nav .logo { color: #fff; font-weight: 700; font-size: 13px; margin-right: 20px; white-space: nowrap; }
+    .concept-nav .logo span { color: #60a5fa; }
+    .concept-btn {
+      padding: 7px 18px;
+      border: none;
+      border-radius: 18px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+    .concept-btn.active { background: #60a5fa; color: #111827; }
+    .concept-btn:not(.active) { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.6); }
+    .concept-btn:hover:not(.active) { background: rgba(255,255,255,0.15); color: #fff; }
+
+    .concept-section { display: none; padding-top: 52px; }
+    .concept-section.active { display: block; }
+
+    .concept-label {
+      background: linear-gradient(135deg, #1e3a5f, #3b82f6);
+      color: #fff;
+      padding: 16px 32px;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+    .concept-label h2 { font-size: 16px; margin-bottom: 4px; }
+    .concept-label .tags { display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap; }
+    .concept-label .tag { background: rgba(255,255,255,0.2); padding: 2px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; }
+    .concept-label .tag.pro { background: rgba(76,175,80,0.3); }
+    .concept-label .tag.con { background: rgba(244,67,54,0.3); }
+
+    /* ===== Shared Elements ===== */
+    /* Fake page content below each concept */
+    .page-content {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 48px 64px;
+    }
+    .content-grid {
+      display: grid;
+      grid-template-columns: 5fr 2fr 2fr;
+      gap: 28px;
+    }
+    .action-card {
+      background: #fff;
+      border-radius: 16px;
+      border: 1px solid #e8e8e8;
+      overflow: hidden;
+      display: flex;
+      cursor: pointer;
+      transition: box-shadow 0.3s, transform 0.3s;
+      margin-bottom: 20px;
+    }
+    .action-card:hover { box-shadow: 0 8px 24px rgba(0,0,0,0.1); transform: translateY(-2px); }
+    .action-card:last-child { margin-bottom: 0; }
+    .card-accent { width: 6px; flex-shrink: 0; }
+    .card-inner { display: flex; gap: 20px; padding: 24px 28px; align-items: center; flex: 1; }
+    .card-icon { width: 56px; height: 56px; border-radius: 14px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 22px; flex-shrink: 0; }
+    .card-title { font-size: 18px; font-weight: 600; margin-bottom: 4px; }
+    .card-meta { font-size: 12px; color: #1a5a8a; font-weight: 500; margin-bottom: 6px; }
+    .card-desc { font-size: 13px; color: #616161; line-height: 1.5; }
+    .card-arrow { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 1px solid #e0e0e0; color: #616161; background: #fafafa; flex-shrink: 0; }
+
+    .sidebar-section { background: #fff; border-radius: 16px; padding: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); border: 1px solid #e8e8e8; }
+    .sidebar-title { font-size: 16px; font-weight: 600; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 2px solid #1a5a8a; }
+    .check-item { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #424242; padding: 6px 0; }
+    .check-mark { color: #1a5a8a; font-weight: 700; }
+
+    .testimonial-card { background: linear-gradient(160deg, #f8fbff, #edf4fb); border-radius: 16px; padding: 28px 24px; border: 1px solid #d0e4f0; }
+    .t-stars { color: #f59e0b; margin-bottom: 12px; font-size: 14px; letter-spacing: 2px; }
+    .t-quote { font-size: 14px; color: #424242; line-height: 1.7; font-style: italic; margin-bottom: 20px; }
+    .t-author { display: flex; align-items: center; gap: 12px; padding-top: 16px; border-top: 1px solid #d0e4f0; }
+    .t-avatar { width: 44px; height: 44px; border-radius: 50%; border: 2px solid #d0e4f0; }
+    .t-name { font-size: 13px; font-weight: 600; }
+    .t-role { font-size: 11px; color: #1a5a8a; }
+
+    /* Nav links shared style */
+    .nav-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 500;
+      color: rgba(255,255,255,0.75);
+      cursor: pointer;
+      transition: all 0.15s;
+      text-decoration: none;
+      border: none;
+      background: none;
+    }
+    .nav-link:hover { background: rgba(255,255,255,0.1); color: #fff; }
+    .nav-link.active { background: rgba(255,255,255,0.15); color: #fff; font-weight: 600; }
+    .nav-link .nav-ico { font-size: 16px; }
+
+    /* User section */
+    .user-section {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .user-name { font-size: 13px; color: rgba(255,255,255,0.8); }
+    .user-avatar {
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #5bb8f5, #1a5a8a);
+      display: flex; align-items: center; justify-content: center;
+      color: #fff; font-size: 13px; font-weight: 600;
+      cursor: pointer;
+    }
+    .notif-bell {
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      color: rgba(255,255,255,0.7);
+      cursor: pointer;
+      font-size: 16px;
+      transition: background 0.15s;
+    }
+    .notif-bell:hover { background: rgba(255,255,255,0.1); }
+
+    /* Stat cards shared */
+    .stat-card {
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+      flex: 1;
+    }
+    .stat-val { font-size: 28px; font-weight: 700; color: #fff; margin-bottom: 4px; }
+    .stat-lbl { font-size: 12px; color: rgba(255,255,255,0.6); text-transform: uppercase; letter-spacing: 0.5px; }
+
+    /* Slogan rotator */
+    .slogan-area {
+      text-align: center;
+      font-size: 22px;
+      font-weight: 600;
+      color: #5bb8f5;
+      letter-spacing: 0.3px;
+      height: 36px;
+      line-height: 36px;
+    }
+
+    /* ============================================================
+       CONCEPT 1: Transparent Nav Overlaid on Masthead
+       ============================================================ */
+    .c1-hero {
+      background: linear-gradient(135deg, #0d3a5c 0%, #1a5a8a 100%);
+      color: #fff;
+      position: relative;
+    }
+    .c1-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 64px;
+      /* No background — transparent over the masthead gradient */
+    }
+    .c1-logo {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 18px;
+      font-weight: 700;
+    }
+    .c1-logo .accent { color: #5bb8f5; }
+    .c1-divider {
+      height: 1px;
+      background: rgba(255,255,255,0.1);
+      margin: 0 64px;
+    }
+    .c1-masthead {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 48px;
+      align-items: center;
+      padding: 48px 64px 48px;
+    }
+    .c1-title { font-size: 38px; font-weight: 700; line-height: 1.15; margin-bottom: 16px; }
+    .c1-lead { font-size: 16px; color: rgba(255,255,255,0.8); line-height: 1.7; }
+    .c1-right { display: flex; flex-direction: column; gap: 20px; }
+    .c1-stats { display: flex; gap: 16px; }
+
+    /* ============================================================
+       CONCEPT 2: Slim Header Bar + Masthead Below (Tighter Spacing)
+       ============================================================ */
+    .c2-header {
+      background: #081f36;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 64px;
+      height: 52px;
+    }
+    .c2-logo {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 15px;
+      font-weight: 700;
+      color: #fff;
+    }
+    .c2-logo .accent { color: #5bb8f5; }
+    .c2-nav { display: flex; gap: 2px; }
+    .c2-nav .nav-link { padding: 6px 14px; font-size: 13px; border-radius: 4px; }
+    .c2-masthead {
+      background: linear-gradient(135deg, #0d3a5c 0%, #1a5a8a 100%);
+      color: #fff;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 48px;
+      align-items: center;
+      padding: 48px 64px;
+    }
+    .c2-title { font-size: 38px; font-weight: 700; line-height: 1.15; margin-bottom: 16px; }
+    .c2-lead { font-size: 16px; color: rgba(255,255,255,0.8); line-height: 1.7; }
+    .c2-right { display: flex; flex-direction: column; gap: 20px; }
+    .c2-stats { display: flex; gap: 16px; }
+
+    /* ============================================================
+       CONCEPT 3: Nav Embedded Inside Masthead (Right-aligned)
+       ============================================================ */
+    .c3-hero {
+      background: linear-gradient(135deg, #0d3a5c 0%, #1a5a8a 100%);
+      color: #fff;
+      padding: 0 64px 48px;
+    }
+    .c3-top-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 24px 0 32px;
+    }
+    .c3-logo {
+      font-size: 20px;
+      font-weight: 700;
+    }
+    .c3-logo .accent { color: #5bb8f5; }
+    .c3-nav-user {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .c3-nav-user .nav-link { padding: 7px 14px; font-size: 13px; }
+    .c3-nav-user .user-sep {
+      width: 1px;
+      height: 24px;
+      background: rgba(255,255,255,0.15);
+      margin: 0 12px;
+    }
+    .c3-content {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 48px;
+      align-items: center;
+    }
+    .c3-title { font-size: 38px; font-weight: 700; line-height: 1.15; margin-bottom: 16px; }
+    .c3-lead { font-size: 16px; color: rgba(255,255,255,0.8); line-height: 1.7; }
+    .c3-right { display: flex; flex-direction: column; gap: 20px; }
+    .c3-stats { display: flex; gap: 16px; }
+
+    /* ============================================================
+       CONCEPT 4: Full-Width Gradient with Floating Nav Pills
+       ============================================================ */
+    .c4-hero {
+      background: linear-gradient(135deg, #0d3a5c 0%, #1a5a8a 60%, #2980b9 100%);
+      color: #fff;
+      position: relative;
+    }
+    .c4-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 64px;
+    }
+    .c4-logo { font-size: 20px; font-weight: 700; }
+    .c4-logo .accent { color: #5bb8f5; }
+    .c4-pill-nav {
+      display: flex;
+      gap: 4px;
+      background: rgba(0,0,0,0.2);
+      border-radius: 24px;
+      padding: 4px;
+    }
+    .c4-pill {
+      padding: 7px 18px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 500;
+      color: rgba(255,255,255,0.7);
+      cursor: pointer;
+      transition: all 0.15s;
+      border: none;
+      background: none;
+    }
+    .c4-pill:hover { color: #fff; background: rgba(255,255,255,0.08); }
+    .c4-pill.active { background: rgba(255,255,255,0.18); color: #fff; font-weight: 600; }
+    .c4-masthead {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 48px;
+      align-items: center;
+      padding: 32px 64px 52px;
+    }
+    .c4-title { font-size: 38px; font-weight: 700; line-height: 1.15; margin-bottom: 16px; }
+    .c4-lead { font-size: 16px; color: rgba(255,255,255,0.8); line-height: 1.7; }
+    .c4-right { display: flex; flex-direction: column; gap: 20px; }
+    .c4-stats { display: flex; gap: 16px; }
+
+    /* ============================================================
+       CONCEPT 5: Split Header — Logo+User Topbar, Nav in Masthead Bottom
+       ============================================================ */
+    .c5-topbar {
+      background: #081f36;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 64px;
+      height: 44px;
+    }
+    .c5-logo { font-size: 14px; font-weight: 700; color: #fff; }
+    .c5-logo .accent { color: #5bb8f5; }
+    .c5-hero {
+      background: linear-gradient(135deg, #0d3a5c 0%, #1a5a8a 100%);
+      color: #fff;
+    }
+    .c5-masthead {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 48px;
+      align-items: center;
+      padding: 48px 64px 24px;
+    }
+    .c5-title { font-size: 38px; font-weight: 700; line-height: 1.15; margin-bottom: 16px; }
+    .c5-lead { font-size: 16px; color: rgba(255,255,255,0.8); line-height: 1.7; }
+    .c5-right { display: flex; flex-direction: column; gap: 20px; }
+    .c5-stats { display: flex; gap: 16px; }
+    .c5-nav-bar {
+      display: flex;
+      justify-content: center;
+      gap: 4px;
+      padding: 12px 64px 16px;
+      border-top: 1px solid rgba(255,255,255,0.08);
+      margin-top: 24px;
+    }
+    .c5-nav-bar .nav-link {
+      padding: 8px 20px;
+      border-radius: 20px;
+      font-size: 13px;
+    }
+    .c5-nav-bar .nav-link.active {
+      background: rgba(255,255,255,0.12);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Concept Selector -->
+  <div class="concept-nav">
+    <div class="logo">DWx Header <span>Concepts</span></div>
+    <button class="concept-btn active" onclick="showConcept(1)">V1: Transparent Overlay</button>
+    <button class="concept-btn" onclick="showConcept(2)">V2: Slim Bar + Hero</button>
+    <button class="concept-btn" onclick="showConcept(3)">V3: Embedded Nav</button>
+    <button class="concept-btn" onclick="showConcept(4)">V4: Pill Nav</button>
+    <button class="concept-btn" onclick="showConcept(5)">V5: Split Bar</button>
+  </div>
+
+  <!-- ============================================================
+       CONCEPT 1: Transparent Nav Overlaid on Masthead
+       The nav sits directly on the masthead gradient — no separate
+       header bar. A subtle divider line separates nav from content.
+       ============================================================ -->
+  <div class="concept-section active" id="concept-1">
+    <div class="concept-label">
+      <h2>Concept 1: Transparent Overlay</h2>
+      <p>Navigation floats directly on the masthead gradient with no separate background. A subtle 1px divider separates it from hero content. One continuous visual block.</p>
+      <div class="tags">
+        <span class="tag pro">Seamless</span>
+        <span class="tag pro">One Visual Block</span>
+        <span class="tag pro">Elegant</span>
+        <span class="tag con">Nav Less Prominent</span>
+      </div>
+    </div>
+    <div class="c1-hero">
+      <div class="c1-nav">
+        <div class="c1-logo">
+          <span style="font-size: 20px;">&#8599;</span>
+          DWx Traffic <span class="accent">Manager</span>
+        </div>
+        <nav style="display: flex; gap: 2px;">
+          <button class="nav-link"><span class="nav-ico">&#9638;</span> Services</button>
+          <button class="nav-link"><span class="nav-ico">&#9776;</span> Products</button>
+          <button class="nav-link active"><span class="nav-ico">&#10010;</span> New Request</button>
+          <button class="nav-link"><span class="nav-ico">&#9776;</span> My Requests</button>
+          <button class="nav-link"><span class="nav-ico">&#128218;</span> Knowledge Base</button>
+          <button class="nav-link"><span class="nav-ico">&#128200;</span> Dashboard</button>
+          <button class="nav-link"><span class="nav-ico">&#9881;</span> Admin</button>
+        </nav>
+        <div class="user-section">
+          <div class="notif-bell">&#128276;</div>
+          <span class="user-name">Gary Finberg</span>
+          <div class="user-avatar">GF</div>
+        </div>
+      </div>
+      <div class="c1-divider"></div>
+      <div class="c1-masthead">
+        <div>
+          <div class="c1-title">Digital<br>Workplace <span style="color: #5bb8f5;">Exchange</span></div>
+          <div class="c1-lead">Your one-stop pre-sales platform for Microsoft consulting, solution architecture, and technical advisory services.</div>
+        </div>
+        <div class="c1-right">
+          <div class="c1-stats">
+            <div class="stat-card"><div class="stat-val">12+</div><div class="stat-lbl">Service Categories</div></div>
+            <div class="stat-card"><div class="stat-val">29</div><div class="stat-lbl">DWx Products</div></div>
+            <div class="stat-card"><div class="stat-val">R4.2M</div><div class="stat-lbl">Pipeline Value</div></div>
+          </div>
+          <div class="slogan-area">Empowering Digital Transformation</div>
+        </div>
+      </div>
+    </div>
+    <!-- Page content preview -->
+    <div class="page-content">
+      <div class="content-grid">
+        <div>
+          <div class="action-card">
+            <div class="card-accent" style="background: linear-gradient(180deg, #1a5a8a, #2980b9);"></div>
+            <div class="card-inner">
+              <div class="card-icon" style="background: linear-gradient(135deg, #1a5a8a, #2980b9);">&#128295;</div>
+              <div><div class="card-title">Browse Service Catalog</div><div class="card-meta">12 categories &bull; Pre-sales & consulting</div><div class="card-desc">Power Platform, SPFx, Copilot, Migrations, and more.</div></div>
+              <div class="card-arrow">&#8250;</div>
+            </div>
+          </div>
+          <div class="action-card">
+            <div class="card-accent" style="background: linear-gradient(180deg, #0d3a5c, #1a5a8a);"></div>
+            <div class="card-inner">
+              <div class="card-icon" style="background: linear-gradient(135deg, #0d3a5c, #1a5a8a);">&#128230;</div>
+              <div><div class="card-title">Explore Product Portfolio</div><div class="card-meta">29 products &bull; Apps, web parts & cards</div><div class="card-desc">15 business apps, 8 web parts, and 6 adaptive cards.</div></div>
+              <div class="card-arrow">&#8250;</div>
+            </div>
+          </div>
+          <div class="action-card">
+            <div class="card-accent" style="background: linear-gradient(180deg, #107c10, #16a34a);"></div>
+            <div class="card-inner">
+              <div class="card-icon" style="background: linear-gradient(135deg, #107c10, #16a34a);">&#128203;</div>
+              <div><div class="card-title">Submit a New Request</div><div class="card-meta">5-step wizard &bull; All request types</div><div class="card-desc">Start a service request, proposal, or support session.</div></div>
+              <div class="card-arrow">&#8250;</div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="sidebar-section">
+            <div class="sidebar-title">What We Do</div>
+            <div class="check-item"><span class="check-mark">&#10003;</span> Microsoft 365 Consulting</div>
+            <div class="check-item"><span class="check-mark">&#10003;</span> Power Platform Development</div>
+            <div class="check-item"><span class="check-mark">&#10003;</span> SharePoint Migrations</div>
+            <div class="check-item"><span class="check-mark">&#10003;</span> Copilot Agent Building</div>
+            <div class="check-item"><span class="check-mark">&#10003;</span> SPFx Custom Development</div>
+            <div class="check-item"><span class="check-mark">&#10003;</span> Viva Suite Implementation</div>
+          </div>
+        </div>
+        <div>
+          <div class="testimonial-card">
+            <div class="t-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+            <div class="t-quote">&ldquo;DWx transformed our SharePoint migration. What seemed impossible became seamless.&rdquo;</div>
+            <div class="t-author">
+              <img class="t-avatar" src="https://i.pravatar.cc/88?img=32" alt="">
+              <div><div class="t-name">Sarah Mitchell</div><div class="t-role">CTO, TechCorp SA</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       CONCEPT 2: Slim Dark Bar + Masthead (Tighter Integration)
+       A very thin, darker nav bar that feels like an extension of
+       the masthead. Same gradient family, tighter vertical spacing.
+       ============================================================ -->
+  <div class="concept-section" id="concept-2">
+    <div class="concept-label">
+      <h2>Concept 2: Slim Dark Bar + Hero Below</h2>
+      <p>Ultra-thin (52px) dark navy header that acts as a "cap" on the masthead gradient. Same colour family creates visual continuity. Compact and professional.</p>
+      <div class="tags">
+        <span class="tag pro">Clear Nav Separation</span>
+        <span class="tag pro">Compact</span>
+        <span class="tag pro">Professional</span>
+        <span class="tag con">Still Two Sections</span>
+      </div>
+    </div>
+    <div class="c2-header">
+      <div class="c2-logo">
+        <span style="font-size: 18px;">&#8599;</span>
+        DWx Traffic <span class="accent">Manager</span>
+      </div>
+      <div class="c2-nav">
+        <button class="nav-link"><span class="nav-ico">&#9638;</span> Services</button>
+        <button class="nav-link"><span class="nav-ico">&#9776;</span> Products</button>
+        <button class="nav-link active"><span class="nav-ico">&#10010;</span> New Request</button>
+        <button class="nav-link"><span class="nav-ico">&#9776;</span> My Requests</button>
+        <button class="nav-link"><span class="nav-ico">&#128218;</span> Knowledge Base</button>
+        <button class="nav-link"><span class="nav-ico">&#128200;</span> Dashboard</button>
+        <button class="nav-link"><span class="nav-ico">&#9881;</span> Admin</button>
+      </div>
+      <div class="user-section">
+        <div class="notif-bell">&#128276;</div>
+        <span class="user-name">Gary Finberg</span>
+        <div class="user-avatar">GF</div>
+      </div>
+    </div>
+    <div class="c2-masthead">
+      <div>
+        <div class="c2-title">Digital<br>Workplace <span style="color: #5bb8f5;">Exchange</span></div>
+        <div class="c2-lead">Your one-stop pre-sales platform for Microsoft consulting, solution architecture, and technical advisory services.</div>
+      </div>
+      <div class="c2-right">
+        <div class="c2-stats">
+          <div class="stat-card"><div class="stat-val">12+</div><div class="stat-lbl">Service Categories</div></div>
+          <div class="stat-card"><div class="stat-val">29</div><div class="stat-lbl">DWx Products</div></div>
+          <div class="stat-card"><div class="stat-val">R4.2M</div><div class="stat-lbl">Pipeline Value</div></div>
+        </div>
+        <div class="slogan-area">Empowering Digital Transformation</div>
+      </div>
+    </div>
+    <div class="page-content">
+      <div class="content-grid">
+        <div>
+          <div class="action-card"><div class="card-accent" style="background: linear-gradient(180deg, #1a5a8a, #2980b9);"></div><div class="card-inner"><div class="card-icon" style="background: linear-gradient(135deg, #1a5a8a, #2980b9);">&#128295;</div><div><div class="card-title">Browse Service Catalog</div><div class="card-meta">12 categories</div><div class="card-desc">Power Platform, SPFx, Copilot, Migrations, and more.</div></div><div class="card-arrow">&#8250;</div></div></div>
+          <div class="action-card"><div class="card-accent" style="background: linear-gradient(180deg, #0d3a5c, #1a5a8a);"></div><div class="card-inner"><div class="card-icon" style="background: linear-gradient(135deg, #0d3a5c, #1a5a8a);">&#128230;</div><div><div class="card-title">Explore Product Portfolio</div><div class="card-meta">29 products</div><div class="card-desc">15 business apps, 8 web parts, and 6 adaptive cards.</div></div><div class="card-arrow">&#8250;</div></div></div>
+          <div class="action-card"><div class="card-accent" style="background: linear-gradient(180deg, #107c10, #16a34a);"></div><div class="card-inner"><div class="card-icon" style="background: linear-gradient(135deg, #107c10, #16a34a);">&#128203;</div><div><div class="card-title">Submit a New Request</div><div class="card-meta">5-step wizard</div><div class="card-desc">Start a service request, proposal, or support session.</div></div><div class="card-arrow">&#8250;</div></div></div>
+        </div>
+        <div><div class="sidebar-section"><div class="sidebar-title">What We Do</div><div class="check-item"><span class="check-mark">&#10003;</span> Microsoft 365 Consulting</div><div class="check-item"><span class="check-mark">&#10003;</span> Power Platform Development</div><div class="check-item"><span class="check-mark">&#10003;</span> SharePoint Migrations</div><div class="check-item"><span class="check-mark">&#10003;</span> Copilot Agent Building</div></div></div>
+        <div><div class="testimonial-card"><div class="t-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div><div class="t-quote">&ldquo;DWx transformed our SharePoint migration. What seemed impossible became seamless.&rdquo;</div><div class="t-author"><img class="t-avatar" src="https://i.pravatar.cc/88?img=32" alt=""><div><div class="t-name">Sarah Mitchell</div><div class="t-role">CTO, TechCorp SA</div></div></div></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       CONCEPT 3: Nav Embedded Inside Masthead (Single Block)
+       Everything in one gradient block — logo top-left, nav+user
+       top-right, hero content below. Truly unified.
+       ============================================================ -->
+  <div class="concept-section" id="concept-3">
+    <div class="concept-label">
+      <h2>Concept 3: Fully Embedded Nav</h2>
+      <p>Logo, navigation, and user section all live inside the masthead gradient. No separate header at all. One unified hero block with everything integrated.</p>
+      <div class="tags">
+        <span class="tag pro">Most Seamless</span>
+        <span class="tag pro">Single Block</span>
+        <span class="tag pro">Clean</span>
+        <span class="tag con">Only Works on Landing Page</span>
+      </div>
+    </div>
+    <div class="c3-hero">
+      <div class="c3-top-row">
+        <div class="c3-logo">
+          <span style="font-size: 22px;">&#8599;</span>
+          DWx Traffic <span class="accent">Manager</span>
+        </div>
+        <div class="c3-nav-user">
+          <button class="nav-link"><span class="nav-ico">&#9638;</span> Services</button>
+          <button class="nav-link"><span class="nav-ico">&#9776;</span> Products</button>
+          <button class="nav-link active"><span class="nav-ico">&#10010;</span> New Request</button>
+          <button class="nav-link"><span class="nav-ico">&#9776;</span> My Requests</button>
+          <button class="nav-link"><span class="nav-ico">&#128218;</span> KB</button>
+          <button class="nav-link"><span class="nav-ico">&#128200;</span> Dashboard</button>
+          <button class="nav-link"><span class="nav-ico">&#9881;</span> Admin</button>
+          <div class="user-sep"></div>
+          <div class="notif-bell">&#128276;</div>
+          <span class="user-name">Gary Finberg</span>
+          <div class="user-avatar">GF</div>
+        </div>
+      </div>
+      <div class="c3-content">
+        <div>
+          <div class="c3-title">Digital<br>Workplace <span style="color: #5bb8f5;">Exchange</span></div>
+          <div class="c3-lead">Your one-stop pre-sales platform for Microsoft consulting, solution architecture, and technical advisory services.</div>
+        </div>
+        <div class="c3-right">
+          <div class="c3-stats">
+            <div class="stat-card"><div class="stat-val">12+</div><div class="stat-lbl">Service Categories</div></div>
+            <div class="stat-card"><div class="stat-val">29</div><div class="stat-lbl">DWx Products</div></div>
+            <div class="stat-card"><div class="stat-val">R4.2M</div><div class="stat-lbl">Pipeline Value</div></div>
+          </div>
+          <div class="slogan-area">Empowering Digital Transformation</div>
+        </div>
+      </div>
+    </div>
+    <div class="page-content">
+      <div class="content-grid">
+        <div>
+          <div class="action-card"><div class="card-accent" style="background: linear-gradient(180deg, #1a5a8a, #2980b9);"></div><div class="card-inner"><div class="card-icon" style="background: linear-gradient(135deg, #1a5a8a, #2980b9);">&#128295;</div><div><div class="card-title">Browse Service Catalog</div><div class="card-meta">12 categories</div><div class="card-desc">Power Platform, SPFx, Copilot, Migrations, and more.</div></div><div class="card-arrow">&#8250;</div></div></div>
+          <div class="action-card"><div class="card-accent" style="background: linear-gradient(180deg, #0d3a5c, #1a5a8a);"></div><div class="card-inner"><div class="card-icon" style="background: linear-gradient(135deg, #0d3a5c, #1a5a8a);">&#128230;</div><div><div class="card-title">Explore Product Portfolio</div><div class="card-meta">29 products</div><div class="card-desc">15 business apps, 8 web parts, and 6 adaptive cards.</div></div><div class="card-arrow">&#8250;</div></div></div>
+          <div class="action-card"><div class="card-accent" style="background: linear-gradient(180deg, #107c10, #16a34a);"></div><div class="card-inner"><div class="card-icon" style="background: linear-gradient(135deg, #107c10, #16a34a);">&#128203;</div><div><div class="card-title">Submit a New Request</div><div class="card-meta">5-step wizard</div><div class="card-desc">Start a service request, proposal, or support session.</div></div><div class="card-arrow">&#8250;</div></div></div>
+        </div>
+        <div><div class="sidebar-section"><div class="sidebar-title">What We Do</div><div class="check-item"><span class="check-mark">&#10003;</span> Microsoft 365 Consulting</div><div class="check-item"><span class="check-mark">&#10003;</span> Power Platform Development</div><div class="check-item"><span class="check-mark">&#10003;</span> SharePoint Migrations</div><div class="check-item"><span class="check-mark">&#10003;</span> Copilot Agent Building</div></div></div>
+        <div><div class="testimonial-card"><div class="t-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div><div class="t-quote">&ldquo;DWx transformed our SharePoint migration. What seemed impossible became seamless.&rdquo;</div><div class="t-author"><img class="t-avatar" src="https://i.pravatar.cc/88?img=32" alt=""><div><div class="t-name">Sarah Mitchell</div><div class="t-role">CTO, TechCorp SA</div></div></div></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       CONCEPT 4: Floating Pill Navigation
+       Nav links enclosed in a frosted pill container that floats
+       on the masthead. Modern, app-like feel.
+       ============================================================ -->
+  <div class="concept-section" id="concept-4">
+    <div class="concept-label">
+      <h2>Concept 4: Floating Pill Navigation</h2>
+      <p>Navigation links grouped in a frosted pill container (dark glass effect) that floats on the masthead. Logo and user section flank it. Modern, app-like aesthetic.</p>
+      <div class="tags">
+        <span class="tag pro">Modern Feel</span>
+        <span class="tag pro">Contained Nav</span>
+        <span class="tag pro">Eye-catching</span>
+        <span class="tag con">Uses More Vertical Space</span>
+      </div>
+    </div>
+    <div class="c4-hero">
+      <div class="c4-top">
+        <div class="c4-logo">
+          <span style="font-size: 22px;">&#8599;</span>
+          DWx Traffic <span class="accent">Manager</span>
+        </div>
+        <div class="c4-pill-nav">
+          <button class="c4-pill"><span class="nav-ico">&#9638;</span> Services</button>
+          <button class="c4-pill"><span class="nav-ico">&#9776;</span> Products</button>
+          <button class="c4-pill active"><span class="nav-ico">&#10010;</span> New Request</button>
+          <button class="c4-pill"><span class="nav-ico">&#9776;</span> My Requests</button>
+          <button class="c4-pill"><span class="nav-ico">&#128218;</span> KB</button>
+          <button class="c4-pill"><span class="nav-ico">&#128200;</span> Dashboard</button>
+          <button class="c4-pill"><span class="nav-ico">&#9881;</span> Admin</button>
+        </div>
+        <div class="user-section">
+          <div class="notif-bell">&#128276;</div>
+          <span class="user-name">Gary Finberg</span>
+          <div class="user-avatar">GF</div>
+        </div>
+      </div>
+      <div class="c4-masthead">
+        <div>
+          <div class="c4-title">Digital<br>Workplace <span style="color: #5bb8f5;">Exchange</span></div>
+          <div class="c4-lead">Your one-stop pre-sales platform for Microsoft consulting, solution architecture, and technical advisory services.</div>
+        </div>
+        <div class="c4-right">
+          <div class="c4-stats">
+            <div class="stat-card"><div class="stat-val">12+</div><div class="stat-lbl">Service Categories</div></div>
+            <div class="stat-card"><div class="stat-val">29</div><div class="stat-lbl">DWx Products</div></div>
+            <div class="stat-card"><div class="stat-val">R4.2M</div><div class="stat-lbl">Pipeline Value</div></div>
+          </div>
+          <div class="slogan-area">Empowering Digital Transformation</div>
+        </div>
+      </div>
+    </div>
+    <div class="page-content">
+      <div class="content-grid">
+        <div>
+          <div class="action-card"><div class="card-accent" style="background: linear-gradient(180deg, #1a5a8a, #2980b9);"></div><div class="card-inner"><div class="card-icon" style="background: linear-gradient(135deg, #1a5a8a, #2980b9);">&#128295;</div><div><div class="card-title">Browse Service Catalog</div><div class="card-meta">12 categories</div><div class="card-desc">Power Platform, SPFx, Copilot, Migrations, and more.</div></div><div class="card-arrow">&#8250;</div></div></div>
+          <div class="action-card"><div class="card-accent" style="background: linear-gradient(180deg, #0d3a5c, #1a5a8a);"></div><div class="card-inner"><div class="card-icon" style="background: linear-gradient(135deg, #0d3a5c, #1a5a8a);">&#128230;</div><div><div class="card-title">Explore Product Portfolio</div><div class="card-meta">29 products</div><div class="card-desc">15 business apps, 8 web parts, and 6 adaptive cards.</div></div><div class="card-arrow">&#8250;</div></div></div>
+          <div class="action-card"><div class="card-accent" style="background: linear-gradient(180deg, #107c10, #16a34a);"></div><div class="card-inner"><div class="card-icon" style="background: linear-gradient(135deg, #107c10, #16a34a);">&#128203;</div><div><div class="card-title">Submit a New Request</div><div class="card-meta">5-step wizard</div><div class="card-desc">Start a service request, proposal, or support session.</div></div><div class="card-arrow">&#8250;</div></div></div>
+        </div>
+        <div><div class="sidebar-section"><div class="sidebar-title">What We Do</div><div class="check-item"><span class="check-mark">&#10003;</span> Microsoft 365 Consulting</div><div class="check-item"><span class="check-mark">&#10003;</span> Power Platform Development</div><div class="check-item"><span class="check-mark">&#10003;</span> SharePoint Migrations</div><div class="check-item"><span class="check-mark">&#10003;</span> Copilot Agent Building</div></div></div>
+        <div><div class="testimonial-card"><div class="t-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div><div class="t-quote">&ldquo;DWx transformed our SharePoint migration. What seemed impossible became seamless.&rdquo;</div><div class="t-author"><img class="t-avatar" src="https://i.pravatar.cc/88?img=32" alt=""><div><div class="t-name">Sarah Mitchell</div><div class="t-role">CTO, TechCorp SA</div></div></div></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       CONCEPT 5: Split Bar — Utility Top + Nav at Masthead Bottom
+       Ultra-slim identity bar (logo + user) up top, navigation
+       links positioned at the bottom of the masthead as a
+       centered pill row, anchoring the hero visually.
+       ============================================================ -->
+  <div class="concept-section" id="concept-5">
+    <div class="concept-label">
+      <h2>Concept 5: Split Bar (Identity Top, Nav Bottom)</h2>
+      <p>Ultra-thin identity bar (logo + user) at the very top. The main navigation is centered at the bottom of the masthead as pill links — visually anchoring the hero section.</p>
+      <div class="tags">
+        <span class="tag pro">Clean Hierarchy</span>
+        <span class="tag pro">Balanced Layout</span>
+        <span class="tag pro">Content First</span>
+        <span class="tag con">Nav at Bottom</span>
+      </div>
+    </div>
+    <div class="c5-topbar">
+      <div class="c5-logo">
+        <span style="font-size: 16px;">&#8599;</span>
+        DWx Traffic <span class="accent">Manager</span>
+      </div>
+      <div class="user-section">
+        <div class="notif-bell" style="color: rgba(255,255,255,0.5);">&#128276;</div>
+        <span class="user-name" style="color: rgba(255,255,255,0.7); font-size: 12px;">Gary Finberg</span>
+        <div class="user-avatar" style="width: 28px; height: 28px; font-size: 11px;">GF</div>
+      </div>
+    </div>
+    <div class="c5-hero">
+      <div class="c5-masthead">
+        <div>
+          <div class="c5-title">Digital<br>Workplace <span style="color: #5bb8f5;">Exchange</span></div>
+          <div class="c5-lead">Your one-stop pre-sales platform for Microsoft consulting, solution architecture, and technical advisory services.</div>
+        </div>
+        <div class="c5-right">
+          <div class="c5-stats">
+            <div class="stat-card"><div class="stat-val">12+</div><div class="stat-lbl">Service Categories</div></div>
+            <div class="stat-card"><div class="stat-val">29</div><div class="stat-lbl">DWx Products</div></div>
+            <div class="stat-card"><div class="stat-val">R4.2M</div><div class="stat-lbl">Pipeline Value</div></div>
+          </div>
+          <div class="slogan-area">Empowering Digital Transformation</div>
+        </div>
+      </div>
+      <div class="c5-nav-bar">
+        <button class="nav-link"><span class="nav-ico">&#9638;</span> Services</button>
+        <button class="nav-link"><span class="nav-ico">&#9776;</span> Products</button>
+        <button class="nav-link active"><span class="nav-ico">&#10010;</span> New Request</button>
+        <button class="nav-link"><span class="nav-ico">&#9776;</span> My Requests</button>
+        <button class="nav-link"><span class="nav-ico">&#128218;</span> Knowledge Base</button>
+        <button class="nav-link"><span class="nav-ico">&#128200;</span> Dashboard</button>
+        <button class="nav-link"><span class="nav-ico">&#9881;</span> Admin</button>
+      </div>
+    </div>
+    <div class="page-content">
+      <div class="content-grid">
+        <div>
+          <div class="action-card"><div class="card-accent" style="background: linear-gradient(180deg, #1a5a8a, #2980b9);"></div><div class="card-inner"><div class="card-icon" style="background: linear-gradient(135deg, #1a5a8a, #2980b9);">&#128295;</div><div><div class="card-title">Browse Service Catalog</div><div class="card-meta">12 categories</div><div class="card-desc">Power Platform, SPFx, Copilot, Migrations, and more.</div></div><div class="card-arrow">&#8250;</div></div></div>
+          <div class="action-card"><div class="card-accent" style="background: linear-gradient(180deg, #0d3a5c, #1a5a8a);"></div><div class="card-inner"><div class="card-icon" style="background: linear-gradient(135deg, #0d3a5c, #1a5a8a);">&#128230;</div><div><div class="card-title">Explore Product Portfolio</div><div class="card-meta">29 products</div><div class="card-desc">15 business apps, 8 web parts, and 6 adaptive cards.</div></div><div class="card-arrow">&#8250;</div></div></div>
+          <div class="action-card"><div class="card-accent" style="background: linear-gradient(180deg, #107c10, #16a34a);"></div><div class="card-inner"><div class="card-icon" style="background: linear-gradient(135deg, #107c10, #16a34a);">&#128203;</div><div><div class="card-title">Submit a New Request</div><div class="card-meta">5-step wizard</div><div class="card-desc">Start a service request, proposal, or support session.</div></div><div class="card-arrow">&#8250;</div></div></div>
+        </div>
+        <div><div class="sidebar-section"><div class="sidebar-title">What We Do</div><div class="check-item"><span class="check-mark">&#10003;</span> Microsoft 365 Consulting</div><div class="check-item"><span class="check-mark">&#10003;</span> Power Platform Development</div><div class="check-item"><span class="check-mark">&#10003;</span> SharePoint Migrations</div><div class="check-item"><span class="check-mark">&#10003;</span> Copilot Agent Building</div></div></div>
+        <div><div class="testimonial-card"><div class="t-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div><div class="t-quote">&ldquo;DWx transformed our SharePoint migration. What seemed impossible became seamless.&rdquo;</div><div class="t-author"><img class="t-avatar" src="https://i.pravatar.cc/88?img=32" alt=""><div><div class="t-name">Sarah Mitchell</div><div class="t-role">CTO, TechCorp SA</div></div></div></div></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function showConcept(num) {
+      document.querySelectorAll('.concept-section').forEach(s => s.classList.remove('active'));
+      document.querySelectorAll('.concept-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById('concept-' + num).classList.add('active');
+      document.querySelectorAll('.concept-btn')[num - 1].classList.add('active');
+    }
+
+    // Make all nav links interactive (visual only)
+    document.querySelectorAll('.nav-link, .c4-pill').forEach(link => {
+      link.addEventListener('click', function() {
+        const parent = this.closest('nav, .c2-nav, .c3-nav-user, .c4-pill-nav, .c5-nav-bar') || this.parentElement;
+        parent.querySelectorAll('.nav-link, .c4-pill').forEach(l => l.classList.remove('active'));
+        this.classList.add('active');
+      });
+    });
+  </script>
+</body>
+</html>

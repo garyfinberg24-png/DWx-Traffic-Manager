@@ -59,7 +59,7 @@ const useStyles = makeStyles({
   masthead: {
     backgroundImage: 'linear-gradient(135deg, #0d3a5c 0%, #1a5a8a 100%)',
     color: 'white',
-    ...shorthands.padding('64px', '64px', '48px'),
+    ...shorthands.padding('40px', '64px', '48px'),
     display: 'grid',
     gridTemplateColumns: '1fr 1fr',
     gap: '48px',

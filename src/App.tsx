@@ -35,7 +35,7 @@ const useStyles = makeStyles({
     backgroundColor: tokens.colorNeutralBackground1,
   },
   main: {
-    paddingTop: tokens.spacingVerticalM,
+    // No top padding — landing page masthead blends seamlessly with header
   },
   loginContainer: {
     display: 'flex',
