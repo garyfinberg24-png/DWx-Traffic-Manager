@@ -232,7 +232,7 @@ const useStyles = makeStyles({
     flex: 1,
     overflowY: 'auto',
     minHeight: '400px',
-    ...shorthands.padding('0', '24px', '24px', '24px'),
+    ...shorthands.padding('24px'),
   },
 });
 
