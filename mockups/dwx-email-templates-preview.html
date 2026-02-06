@@ -1,0 +1,1087 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DWx Traffic Manager - Email Templates Preview</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 20px; background: #e5e5e5; }
+    .page-header { text-align: center; margin-bottom: 40px; background: linear-gradient(135deg, #1a5a8a 0%, #2980b9 100%); color: white; padding: 30px; border-radius: 8px; }
+    .page-header h1 { margin: 0 0 10px; }
+    .page-header p { margin: 0; opacity: 0.9; }
+    .template-section { margin-bottom: 60px; }
+    .section-title { background: #323130; color: white; padding: 15px 20px; margin-bottom: 20px; border-radius: 4px; }
+    .section-title h2 { margin: 0; font-size: 18px; }
+    .section-title p { margin: 5px 0 0; font-size: 14px; opacity: 0.8; }
+    .email-preview { background: white; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); overflow: hidden; margin-bottom: 30px; }
+    .email-subject { background: #f5f5f5; padding: 12px 20px; border-bottom: 1px solid #e1e1e1; font-size: 14px; }
+    .email-subject strong { color: #1a5a8a; }
+    .email-body { padding: 20px; }
+    .toc { background: white; padding: 20px 30px; border-radius: 8px; margin-bottom: 40px; }
+    .toc h3 { margin-top: 0; color: #1a5a8a; }
+    .toc-group { margin-bottom: 12px; }
+    .toc-group h4 { margin: 0 0 6px; color: #424242; font-size: 14px; }
+    .toc ul { margin: 0; padding-left: 20px; }
+    .toc li { padding: 4px 0; }
+    .toc a { color: #1a5a8a; text-decoration: none; }
+    .toc a:hover { text-decoration: underline; }
+    .category-divider { background: linear-gradient(135deg, #1a5a8a 0%, #2980b9 100%); color: white; padding: 16px 24px; border-radius: 6px; margin: 50px 0 30px; }
+    .category-divider h2 { margin: 0; font-size: 20px; }
+    .category-divider p { margin: 4px 0 0; opacity: 0.85; font-size: 14px; }
+
+    /* Shared inline email styles (used inside each email preview) */
+    .e-container { max-width: 600px; margin: 0 auto; padding: 20px; }
+    .e-header { padding: 20px; border-radius: 8px 8px 0 0; color: white; }
+    .e-header h1 { margin: 0; font-size: 20px; }
+    .e-content { background: #f9f9f9; padding: 20px; border: 1px solid #e1e1e1; }
+    .e-footer { padding: 15px 20px; background: #f0f0f0; border-radius: 0 0 8px 8px; font-size: 12px; color: #616161; }
+    .e-footer p { margin: 0; }
+    .e-row { display: flex; margin-bottom: 12px; }
+    .e-label { font-weight: 600; width: 140px; color: #616161; flex-shrink: 0; }
+    .e-value { flex: 1; }
+    .e-callout { padding: 15px; margin: 15px 0; border-radius: 4px; }
+    .e-card { background: white; padding: 15px; border-radius: 4px; margin-top: 15px; }
+    .e-card h3 { margin-top: 0; }
+    .e-badge { display: inline-block; padding: 4px 12px; border-radius: 16px; font-weight: 500; font-size: 12px; }
+    .e-stage { display: inline-block; padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: 600; text-transform: uppercase; }
+    .e-slot { padding: 12px 16px; background-color: #f5f5f5; border-radius: 6px; margin-bottom: 8px; border-left: 3px solid #1a5a8a; }
+    .e-slot.confirmed { border-left-color: #107c10; background-color: #d1fae5; }
+    .e-premium { background: #fff4ce; color: #8b6914; padding: 2px 8px; border-radius: 12px; font-size: 12px; }
+  </style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>DWx Traffic Manager - Email Templates</h1>
+  <p>Preview of all notification email styles sent by the application</p>
+</div>
+
+<!-- TABLE OF CONTENTS -->
+<div class="toc">
+  <h3>Table of Contents</h3>
+
+  <div class="toc-group">
+    <h4>Service Request Emails</h4>
+    <ul>
+      <li><a href="#sr-created-am">1. Service Request Submitted (AM)</a></li>
+      <li><a href="#sr-created-mgr">2. Service Request Submitted (Manager)</a></li>
+      <li><a href="#sr-specialist-am">3. Specialist Assigned (AM)</a></li>
+      <li><a href="#sr-specialist-spec">4. Specialist Assigned (Specialist)</a></li>
+      <li><a href="#sr-discovery">5. Discovery Meeting Confirmed</a></li>
+      <li><a href="#sr-stage-progress">6. Stage Changed (Progress)</a></li>
+      <li><a href="#sr-deal-won">7. Deal Won</a></li>
+      <li><a href="#sr-deal-lost">8. Deal Lost</a></li>
+      <li><a href="#sr-deal-value">9. Deal Value Changed</a></li>
+      <li><a href="#sr-reassigned">10. Specialist Reassigned</a></li>
+    </ul>
+  </div>
+
+  <div class="toc-group">
+    <h4>Product Request Emails</h4>
+    <ul>
+      <li><a href="#pr-created-am">11. Product Request Submitted (AM)</a></li>
+      <li><a href="#pr-created-mgr">12. Product Request Submitted (Manager)</a></li>
+      <li><a href="#pr-specialist-am">13. Product Specialist Assigned (AM)</a></li>
+      <li><a href="#pr-specialist-spec">14. Product Specialist Assigned (Specialist)</a></li>
+      <li><a href="#pr-status-am">15. Product Request Status Changed (AM)</a></li>
+      <li><a href="#pr-status-mgr">16. Product Request Status Changed (Manager)</a></li>
+      <li><a href="#pr-demo-confirmed">17. Product Demo Confirmed (Specialist)</a></li>
+    </ul>
+  </div>
+
+  <div class="toc-group">
+    <h4>Session Preparation Emails</h4>
+    <ul>
+      <li><a href="#sp-created">18. Session Preparation Created</a></li>
+      <li><a href="#sp-reminder-incomplete">19. Session Prep Reminder (Incomplete)</a></li>
+      <li><a href="#sp-reminder-ready">20. Session Prep Reminder (Ready)</a></li>
+    </ul>
+  </div>
+
+  <div class="toc-group">
+    <h4>System / Alert Emails</h4>
+    <ul>
+      <li><a href="#sys-calendar-fail">21. Calendar Event Failed</a></li>
+      <li><a href="#sys-welcome-am">22. Welcome New Account Manager (NEW)</a></li>
+      <li><a href="#sys-weekly-digest">23. Weekly Pipeline Digest (NEW)</a></li>
+    </ul>
+  </div>
+</div>
+
+<!-- ================================================================== -->
+<!-- SERVICE REQUEST EMAILS -->
+<!-- ================================================================== -->
+<div class="category-divider">
+  <h2>Service Request Emails</h2>
+  <p>Notifications for the service request lifecycle and sales funnel</p>
+</div>
+
+<!-- 1. Service Request Submitted (AM) -->
+<div class="template-section" id="sr-created-am">
+  <div class="section-title">
+    <h2>1. Service Request Submitted (AM)</h2>
+    <p>Sent to Account Manager when a service request is submitted</p>
+  </div>
+  <div class="email-preview">
+    <div class="email-subject"><strong>Subject:</strong> [DWx] Service Request Submitted: Power Platform Development for Acme Corporation</div>
+    <div class="email-body">
+      <div class="e-container">
+        <div class="e-header" style="background: linear-gradient(135deg, #1a5a8a 0%, #2980b9 100%);">
+          <h1>📋 Service Request Submitted</h1>
+        </div>
+        <div class="e-content">
+          <p>Hi <strong>Sarah Johnson</strong>,</p>
+          <p>Your service request for <strong>Acme Corporation</strong> has been successfully submitted and is now in the sales pipeline.</p>
+
+          <div class="e-row"><span class="e-label">Service:</span><span class="e-value">Power Platform Development</span></div>
+          <div class="e-row"><span class="e-label">Client:</span><span class="e-value">Acme Corporation <span class="e-premium">⭐ Premium</span></span></div>
+          <div class="e-row"><span class="e-label">Contact:</span><span class="e-value">John Williams (john@acme.co.za)</span></div>
+          <div class="e-row"><span class="e-label">Stage:</span><span class="e-value"><span class="e-stage" style="background: #e5e7eb; color: #4b5563;">LEAD</span></span></div>
+          <div class="e-row"><span class="e-label">Interest Level:</span><span class="e-value" style="color: #d13438;">🔥 Hot</span></div>
+          <div class="e-row"><span class="e-label">Deal Value:</span><span class="e-value" style="font-size: 18px; font-weight: 700; color: #107c10;">R 450,000</span></div>
+
+          <div class="e-card">
+            <h3 style="color: #1a5a8a;">Proposed Discovery Meeting Times</h3>
+            <div class="e-slot"><strong>Option 1:</strong> Monday, February 10, 2026 at 10:00 AM</div>
+            <div class="e-slot"><strong>Option 2:</strong> Tuesday, February 11, 2026 at 2:00 PM</div>
+            <div class="e-slot"><strong>Option 3:</strong> Wednesday, February 12, 2026 at 11:00 AM</div>
+          </div>
+
+          <p style="margin-top: 20px;">Our pre-sales team will review your request and a specialist will be assigned shortly.</p>
+        </div>
+        <div class="e-footer"><p>This is an automated message from DWx Traffic Manager. Please do not reply directly to this email.</p></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 2. Service Request Submitted (Manager) -->
+<div class="template-section" id="sr-created-mgr">
+  <div class="section-title">
+    <h2>2. Service Request Submitted (Manager)</h2>
+    <p>Sent to Managers when a new service request needs review</p>
+  </div>
+  <div class="email-preview">
+    <div class="email-subject"><strong>Subject:</strong> [DWx] 🆕 New Request: Power Platform Development - Acme Corporation (Hot)</div>
+    <div class="email-body">
+      <div class="e-container">
+        <div class="e-header" style="background: linear-gradient(135deg, #1a5a8a 0%, #2980b9 100%);">
+          <h1>🆕 New Service Request</h1>
+        </div>
+        <div class="e-content">
+          <p>A new service request has been submitted and requires your attention.</p>
+
+          <div class="e-row"><span class="e-label">Service:</span><span class="e-value">Power Platform Development</span></div>
+          <div class="e-row"><span class="e-label">Client:</span><span class="e-value">Acme Corporation <span class="e-premium">⭐ Premium</span></span></div>
+          <div class="e-row"><span class="e-label">Account Manager:</span><span class="e-value">Sarah Johnson (sarah@firsttech.digital)</span></div>
+          <div class="e-row"><span class="e-label">Interest Level:</span><span class="e-value" style="color: #d13438;">🔥 Hot</span></div>
+          <div class="e-row"><span class="e-label">Deal Value:</span><span class="e-value" style="font-size: 18px; font-weight: 700; color: #107c10;">R 450,000</span></div>
+          <div class="e-row"><span class="e-label">Win Probability:</span><span class="e-value">75%</span></div>
+
+          <div class="e-callout" style="background: #e8f4fc; border-left: 4px solid #1a5a8a;">
+            <strong>📝 Requirements:</strong>
+            <p style="margin: 5px 0 0;">Client needs a custom Power App for inventory management across 3 warehouses. Integration with existing SAP system required. Must support offline mode for warehouse floor staff.</p>
+          </div>
+
+          <div class="e-card">
+            <h3 style="color: #1a5a8a;">Proposed Discovery Meeting Times</h3>
+            <div class="e-slot"><strong>Option 1:</strong> Monday, February 10, 2026 at 10:00 AM</div>
+            <div class="e-slot"><strong>Option 2:</strong> Tuesday, February 11, 2026 at 2:00 PM</div>
+            <div class="e-slot"><strong>Option 3:</strong> Wednesday, February 12, 2026 at 11:00 AM</div>
+          </div>
+
+          <p style="margin-top: 20px;"><strong>Actions Required:</strong></p>
+          <ul>
+            <li>Review the request details</li>
+            <li>Assign a specialist</li>
+            <li>Confirm a meeting time slot</li>
+          </ul>
+        </div>
+        <div class="e-footer"><p>This is an automated message from DWx Traffic Manager. Please do not reply directly to this email.</p></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 3. Specialist Assigned (AM) -->
+<div class="template-section" id="sr-specialist-am">
+  <div class="section-title">
+    <h2>3. Specialist Assigned (AM)</h2>
+    <p>Sent to Account Manager when a specialist is assigned to their request</p>
+  </div>
+  <div class="email-preview">
+    <div class="email-subject"><strong>Subject:</strong> [DWx] Specialist Assigned: Michael Chen for Acme Corporation</div>
+    <div class="email-body">
+      <div class="e-container">
+        <div class="e-header" style="background: linear-gradient(135deg, #1a5a8a 0%, #2980b9 100%);">
+          <h1>👤 Specialist Assigned</h1>
+        </div>
+        <div class="e-content">
+          <p>Hi <strong>Sarah Johnson</strong>,</p>
+          <p>Great news! A specialist has been assigned to your service request for <strong>Acme Corporation</strong>.</p>
+
+          <div class="e-callout" style="background: #e8f4fc; border-left: 4px solid #1a5a8a;">
+            <div class="e-row"><span class="e-label">Specialist:</span><span class="e-value"><strong>Michael Chen</strong></span></div>
+            <div class="e-row"><span class="e-label">Role:</span><span class="e-value">Solution Architect</span></div>
+            <div class="e-row" style="margin-bottom: 0;"><span class="e-label">Email:</span><span class="e-value"><a href="#" style="color: #1a5a8a;">michael@firsttech.digital</a></span></div>
+          </div>
+
+          <div class="e-row"><span class="e-label">Service:</span><span class="e-value">Power Platform Development</span></div>
+          <div class="e-row"><span class="e-label">Client:</span><span class="e-value">Acme Corporation</span></div>
+          <div class="e-row"><span class="e-label">Current Stage:</span><span class="e-value"><span class="e-stage" style="background: #dbeafe; color: #1d4ed8;">QUALIFIED</span></span></div>
+
+          <p style="margin-top: 20px;">The specialist will reach out to schedule the discovery meeting. You can also contact them directly if needed.</p>
+        </div>
+        <div class="e-footer"><p>This is an automated message from DWx Traffic Manager. Please do not reply directly to this email.</p></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 4. Specialist Assigned (Specialist) -->
+<div class="template-section" id="sr-specialist-spec">
+  <div class="section-title">
+    <h2>4. Specialist Assigned (Specialist)</h2>
+    <p>Sent to Specialist when they are assigned to a new service request</p>
+  </div>
+  <div class="email-preview">
+    <div class="email-subject"><strong>Subject:</strong> [DWx] 📋 New Assignment: Power Platform Development for Acme Corporation</div>
+    <div class="email-body">
+      <div class="e-container">
+        <div class="e-header" style="background: linear-gradient(135deg, #6264a7 0%, #7a7cbf 100%);">
+          <h1>📋 New Assignment</h1>
+        </div>
+        <div class="e-content">
+          <p>Hi <strong>Michael Chen</strong>,</p>
+          <p>You have been assigned to a new service request. Please review the details below and schedule a discovery meeting with the client.</p>
+
+          <div class="e-row"><span class="e-label">Service:</span><span class="e-value"><strong>Power Platform Development</strong></span></div>
+          <div class="e-row"><span class="e-label">Client:</span><span class="e-value">Acme Corporation <span class="e-premium">⭐ Premium</span></span></div>
+          <div class="e-row"><span class="e-label">Contact:</span><span class="e-value">John Williams (<a href="#" style="color: #1a5a8a;">john@acme.co.za</a>)</span></div>
+          <div class="e-row"><span class="e-label">Phone:</span><span class="e-value">+27 21 555 0100</span></div>
+          <div class="e-row"><span class="e-label">Interest Level:</span><span class="e-value" style="color: #d13438;">🔥 Hot</span></div>
+          <div class="e-row"><span class="e-label">Deal Value:</span><span class="e-value" style="font-size: 18px; font-weight: 700; color: #107c10;">R 450,000</span></div>
+
+          <p><strong>Account Manager:</strong> Sarah Johnson (<a href="#" style="color: #1a5a8a;">sarah@firsttech.digital</a>)</p>
+
+          <div class="e-callout" style="background: #f5f5f5; border-left: 4px solid #616161;">
+            <strong>📝 Client Requirements:</strong>
+            <p style="margin: 5px 0 0;">Custom Power App for inventory management across 3 warehouses. SAP integration required. Must support offline mode.</p>
+          </div>
+
+          <div class="e-card">
+            <h3 style="color: #1a5a8a;">Proposed Meeting Times (Client's Preference)</h3>
+            <div class="e-slot"><strong>Option 1:</strong> Monday, February 10, 2026 at 10:00 AM</div>
+            <div class="e-slot"><strong>Option 2:</strong> Tuesday, February 11, 2026 at 2:00 PM</div>
+            <div class="e-slot"><strong>Option 3:</strong> Wednesday, February 12, 2026 at 11:00 AM</div>
+          </div>
+
+          <p style="margin-top: 20px;">Please confirm one of the proposed slots or coordinate with the Account Manager to find an alternative time.</p>
+        </div>
+        <div class="e-footer"><p>This is an automated message from DWx Traffic Manager. Please do not reply directly to this email.</p></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 5. Discovery Meeting Confirmed -->
+<div class="template-section" id="sr-discovery">
+  <div class="section-title">
+    <h2>5. Discovery Meeting Confirmed</h2>
+    <p>Sent to all parties when a discovery meeting is confirmed</p>
+  </div>
+  <div class="email-preview">
+    <div class="email-subject"><strong>Subject:</strong> [DWx] ✅ Meeting Confirmed: Power Platform Development - Acme Corporation</div>
+    <div class="email-body">
+      <div class="e-container">
+        <div class="e-header" style="background: linear-gradient(135deg, #107c10 0%, #14a114 100%);">
+          <h1>✅ Discovery Meeting Confirmed</h1>
+        </div>
+        <div class="e-content">
+          <p>Hi <strong>Sarah Johnson</strong>,</p>
+          <p>The discovery meeting for <strong>Acme Corporation</strong> has been confirmed.</p>
+
+          <div style="background: #dff6dd; border: 2px solid #107c10; border-radius: 8px; padding: 15px; margin: 15px 0; text-align: center;">
+            <h2 style="margin: 0; color: #107c10; font-size: 18px;">📅 Confirmed Date &amp; Time</h2>
+            <p style="margin: 5px 0 0; font-size: 14px; color: #616161;">Monday, February 10, 2026 at 10:00 AM</p>
+          </div>
+
+          <div class="e-row"><span class="e-label">Service:</span><span class="e-value">Power Platform Development</span></div>
+          <div class="e-row"><span class="e-label">Client:</span><span class="e-value">Acme Corporation</span></div>
+          <div class="e-row"><span class="e-label">Contact:</span><span class="e-value">John Williams (john@acme.co.za)</span></div>
+          <div class="e-row"><span class="e-label">Specialist:</span><span class="e-value">Michael Chen</span></div>
+
+          <p style="margin-top: 20px;">A calendar invite has been sent to all participants. Please ensure you're prepared for the meeting.</p>
+
+          <div class="e-callout" style="background: #dff6dd; border-left: 4px solid #107c10;">
+            <strong>📋 Meeting Preparation Checklist:</strong>
+            <ul style="margin: 8px 0 0; padding-left: 20px;">
+              <li>Review client requirements and background</li>
+              <li>Prepare relevant case studies or demos</li>
+              <li>Test your audio/video setup</li>
+              <li>Have pricing information ready if needed</li>
+            </ul>
+          </div>
+        </div>
+        <div class="e-footer"><p>This is an automated message from DWx Traffic Manager. Please do not reply directly to this email.</p></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 6. Stage Changed (Progress) -->
+<div class="template-section" id="sr-stage-progress">
+  <div class="section-title">
+    <h2>6. Stage Changed (Progress)</h2>
+    <p>Sent to Account Manager when their request moves through the pipeline</p>
+  </div>
+  <div class="email-preview">
+    <div class="email-subject"><strong>Subject:</strong> [DWx] 📈 Stage Update: Acme Corporation moved to Proposal</div>
+    <div class="email-body">
+      <div class="e-container">
+        <div class="e-header" style="background: linear-gradient(135deg, #1a5a8a 0%, #2980b9 100%);">
+          <h1>📈 Pipeline Stage Updated</h1>
+        </div>
+        <div class="e-content">
+          <p>Hi <strong>Sarah Johnson</strong>,</p>
+          <p>Your service request for <strong>Acme Corporation</strong> has progressed in the pipeline.</p>
+
+          <div class="e-row"><span class="e-label">Service:</span><span class="e-value">Power Platform Development</span></div>
+          <div class="e-row">
+            <span class="e-label">Previous Stage:</span>
+            <span class="e-value"><span class="e-stage" style="background: #ede9fe; color: #7c3aed;">DISCOVERY</span></span>
+          </div>
+          <div class="e-row">
+            <span class="e-label">New Stage:</span>
+            <span class="e-value"><span class="e-stage" style="background: #fef3c7; color: #b45309;">PROPOSAL</span></span>
+          </div>
+          <div class="e-row"><span class="e-label">Updated By:</span><span class="e-value">Gary Finbow</span></div>
+
+          <p style="margin-top: 20px;">Keep up the momentum! The deal is progressing well.</p>
+        </div>
+        <div class="e-footer"><p>This is an automated message from DWx Traffic Manager. Please do not reply directly to this email.</p></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 7. Deal Won -->
+<div class="template-section" id="sr-deal-won">
+  <div class="section-title">
+    <h2>7. Deal Won</h2>
+    <p>Sent to Managers when a deal is marked as Won</p>
+  </div>
+  <div class="email-preview">
+    <div class="email-subject"><strong>Subject:</strong> [DWx] 🏆 DEAL WON: Acme Corporation - Power Platform Development (R 450,000)</div>
+    <div class="email-body">
+      <div class="e-container">
+        <div class="e-header" style="background: linear-gradient(135deg, #107c10 0%, #14a114 100%);">
+          <h1>🏆 Deal Won!</h1>
+        </div>
+        <div class="e-content">
+          <p>Great news! A deal has been closed successfully.</p>
+
+          <div style="background: #dff6dd; border-left: 4px solid #107c10; padding: 15px; border-radius: 4px; margin: 15px 0;">
+            <div class="e-row"><span class="e-label">Client:</span><span class="e-value"><strong>Acme Corporation</strong></span></div>
+            <div class="e-row"><span class="e-label">Service:</span><span class="e-value">Power Platform Development</span></div>
+            <div class="e-row"><span class="e-label">Account Manager:</span><span class="e-value">Sarah Johnson</span></div>
+            <div class="e-row"><span class="e-label">Specialist:</span><span class="e-value">Michael Chen</span></div>
+            <div class="e-row" style="margin-bottom: 0;"><span class="e-label">Deal Value:</span><span class="e-value" style="font-size: 24px; font-weight: 700; color: #107c10;">R 450,000</span></div>
+          </div>
+
+          <div class="e-callout" style="background: #dff6dd; border-left: 4px solid #107c10;">
+            <strong>🎯 Win Reason:</strong>
+            <p style="margin: 5px 0 0;">Strong product fit with client's requirements. Competitive pricing and proven track record with similar Power Platform deployments.</p>
+          </div>
+
+          <p style="margin-top: 20px;">Next steps: Transition to delivery team and initiate project kickoff.</p>
+        </div>
+        <div class="e-footer"><p>This is an automated message from DWx Traffic Manager. Please do not reply directly to this email.</p></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 8. Deal Lost -->
+<div class="template-section" id="sr-deal-lost">
+  <div class="section-title">
+    <h2>8. Deal Lost</h2>
+    <p>Sent to Managers when a deal is marked as Lost</p>
+  </div>
+  <div class="email-preview">
+    <div class="email-subject"><strong>Subject:</strong> [DWx] ❌ Deal Lost: TechStart Ltd - SPFx Development</div>
+    <div class="email-body">
+      <div class="e-container">
+        <div class="e-header" style="background: linear-gradient(135deg, #d13438 0%, #e74c4c 100%);">
+          <h1>❌ Deal Lost</h1>
+        </div>
+        <div class="e-content">
+          <p>Unfortunately, a deal has been marked as lost.</p>
+
+          <div style="padding: 15px; border-left: 4px solid #d13438; background: #f9f9f9; border-radius: 4px; margin: 15px 0;">
+            <div class="e-row"><span class="e-label">Client:</span><span class="e-value"><strong>TechStart Ltd</strong></span></div>
+            <div class="e-row"><span class="e-label">Service:</span><span class="e-value">SPFx Development</span></div>
+            <div class="e-row"><span class="e-label">Account Manager:</span><span class="e-value">James Ndlovu</span></div>
+            <div class="e-row" style="margin-bottom: 0;"><span class="e-label">Deal Value:</span><span class="e-value" style="text-decoration: line-through; color: #888;">R 280,000</span></div>
+          </div>
+
+          <div class="e-callout" style="background: #fde7e9; border-left: 4px solid #d13438;">
+            <strong>📝 Loss Reason:</strong>
+            <p style="margin: 5px 0 0;">Client chose a competitor with lower pricing. Budget constraints meant they prioritised cost over capability.</p>
+          </div>
+
+          <p style="margin-top: 20px;">Consider scheduling a post-mortem to capture learnings and identify improvement opportunities.</p>
+        </div>
+        <div class="e-footer"><p>This is an automated message from DWx Traffic Manager. Please do not reply directly to this email.</p></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 9. Deal Value Changed -->
+<div class="template-section" id="sr-deal-value">
+  <div class="section-title">
+    <h2>9. Deal Value Changed</h2>
+    <p>Sent to Managers when deal value or probability is updated</p>
+  </div>
+  <div class="email-preview">
+    <div class="email-subject"><strong>Subject:</strong> [DWx] 💰 Deal Value Updated: Acme Corporation — Power Platform Development</div>
+    <div class="email-body">
+      <div class="e-container">
+        <div class="e-header" style="background: linear-gradient(135deg, #f7630c 0%, #ff8c00 100%);">
+          <h1>💰 Deal Value Updated</h1>
+        </div>
+        <div class="e-content">
+          <p>A deal's financial details have been updated in the pipeline.</p>
+
+          <div class="e-row"><span class="e-label">Service:</span><span class="e-value">Power Platform Development</span></div>
+          <div class="e-row"><span class="e-label">Client:</span><span class="e-value">Acme Corporation</span></div>
+          <div class="e-row"><span class="e-label">Account Manager:</span><span class="e-value">Sarah Johnson</span></div>
+          <div class="e-row"><span class="e-label">Stage:</span><span class="e-value"><span class="e-stage" style="background: #fce7f3; color: #db2777;">NEGOTIATION</span></span></div>
+          <div class="e-row"><span class="e-label">Updated By:</span><span class="e-value">Sarah Johnson</span></div>
+
+          <div style="padding: 15px; border-left: 4px solid #f7630c; background: #fff8f0; border-radius: 4px; margin: 15px 0;">
+            <div class="e-row"><span class="e-label">Deal Value:</span><span class="e-value"><span style="text-decoration: line-through; color: #888;">R 350,000</span> → <strong>R 450,000</strong></span></div>
+            <div class="e-row"><span class="e-label">Win Probability:</span><span class="e-value"><span style="text-decoration: line-through; color: #888;">60%</span> → <strong>75%</strong></span></div>
+            <div class="e-row" style="margin-bottom: 0;"><span class="e-label">Weighted Pipeline:</span><span class="e-value"><span style="text-decoration: line-through; color: #888;">R 210,000</span> → <strong style="color: #107c10; font-size: 18px;">R 337,500</strong></span></div>
+          </div>
+        </div>
+        <div class="e-footer"><p>This is an automated message from DWx Traffic Manager. Please do not reply directly to this email.</p></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 10. Specialist Reassigned -->
+<div class="template-section" id="sr-reassigned">
+  <div class="section-title">
+    <h2>10. Specialist Reassigned</h2>
+    <p>Sent to previous specialist when they are unassigned from a request</p>
+  </div>
+  <div class="email-preview">
+    <div class="email-subject"><strong>Subject:</strong> [DWx] Assignment Update: Acme Corporation — reassigned to David Botha</div>
+    <div class="email-body">
+      <div class="e-container">
+        <div class="e-header" style="background: linear-gradient(135deg, #605e5c 0%, #8a8886 100%);">
+          <h1>🔄 Assignment Update</h1>
+        </div>
+        <div class="e-content">
+          <p>Hi <strong>Michael Chen</strong>,</p>
+          <p>You have been unassigned from the following service request. A different specialist has been assigned to continue.</p>
+
+          <div class="e-row"><span class="e-label">Service Request:</span><span class="e-value">Power Platform Development</span></div>
+          <div class="e-row"><span class="e-label">Client:</span><span class="e-value">Acme Corporation</span></div>
+          <div class="e-row"><span class="e-label">New Specialist:</span><span class="e-value">David Botha</span></div>
+
+          <p style="margin-top: 20px;">Your workload has been updated accordingly. No further action is needed on this request.</p>
+        </div>
+        <div class="e-footer"><p>This is an automated message from DWx Traffic Manager. Please do not reply directly to this email.</p></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================================================================== -->
+<!-- PRODUCT REQUEST EMAILS -->
+<!-- ================================================================== -->
+<div class="category-divider">
+  <h2>Product Request Emails</h2>
+  <p>Notifications for product demo and trial request lifecycle</p>
+</div>
+
+<!-- 11. Product Request Submitted (AM) -->
+<div class="template-section" id="pr-created-am">
+  <div class="section-title">
+    <h2>11. Product Request Submitted (AM)</h2>
+    <p>Sent to Account Manager when a product request is submitted</p>
+  </div>
+  <div class="email-preview">
+    <div class="email-subject"><strong>Subject:</strong> [DWx] Product Demo Request Submitted — Leave Manager for GlobalTech SA</div>
+    <div class="email-body">
+      <div class="e-container">
+        <div class="e-header" style="background: linear-gradient(135deg, #1a5a8a 0%, #2980b9 100%);">
+          <h1>📦 Product Request Submitted</h1>
+        </div>
+        <div class="e-content">
+          <p>Hi <strong>Sarah Johnson</strong>,</p>
+          <p>Your demo request for <strong>Leave Manager</strong> has been successfully submitted.</p>
+
+          <div class="e-row"><span class="e-label">Product:</span><span class="e-value">Leave Manager</span></div>
+          <div class="e-row"><span class="e-label">Type:</span><span class="e-value">DWx App — Demo</span></div>
+          <div class="e-row"><span class="e-label">Client:</span><span class="e-value">GlobalTech SA <span class="e-premium">⭐ Premium</span></span></div>
+          <div class="e-row"><span class="e-label">Contact:</span><span class="e-value">Lisa Naidoo (lisa@globaltech.co.za)</span></div>
+          <div class="e-row"><span class="e-label">Status:</span><span class="e-value"><span class="e-badge" style="background: #fff4ce; color: #f7630c;">Pending Review</span></span></div>
+          <div class="e-row"><span class="e-label">Licenses:</span><span class="e-value">800</span></div>
+          <div class="e-row"><span class="e-label">Estimated Value:</span><span class="e-value" style="font-size: 18px; font-weight: 700; color: #107c10;">R 120,000</span></div>
+
+          <div class="e-card">
+            <h3 style="color: #1a5a8a;">Proposed Time Slots</h3>
+            <div class="e-slot">📅 Slot 1: Thursday, February 13, 2026 at 9:00 AM</div>
+            <div class="e-slot">📅 Slot 2: Friday, February 14, 2026 at 11:00 AM</div>
+          </div>
+
+          <p style="margin-top: 20px;">You'll be notified when the request is reviewed and a specialist is assigned.</p>
+        </div>
+        <div class="e-footer"><p>This is an automated message from DWx Traffic Manager. Please do not reply directly to this email.</p></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 12. Product Request Submitted (Manager) -->
+<div class="template-section" id="pr-created-mgr">
+  <div class="section-title">
+    <h2>12. Product Request Submitted (Manager)</h2>
+    <p>Sent to Managers when a new product request needs review</p>
+  </div>
+  <div class="email-preview">
+    <div class="email-subject"><strong>Subject:</strong> [DWx] 🆕 Product Demo — Leave Manager for GlobalTech SA</div>
+    <div class="email-body">
+      <div class="e-container">
+        <div class="e-header" style="background: linear-gradient(135deg, #1a5a8a 0%, #2980b9 100%);">
+          <h1>🆕 New Product Request</h1>
+        </div>
+        <div class="e-content">
+          <p>A new product request requires your review.</p>
+
+          <div class="e-row"><span class="e-label">Product:</span><span class="e-value">Leave Manager (DWx App)</span></div>
+          <div class="e-row"><span class="e-label">Request Type:</span><span class="e-value">Demo</span></div>
+          <div class="e-row"><span class="e-label">Client:</span><span class="e-value">GlobalTech SA <span class="e-premium">⭐ Premium</span></span></div>
+          <div class="e-row"><span class="e-label">Contact:</span><span class="e-value">Lisa Naidoo (lisa@globaltech.co.za)</span></div>
+          <div class="e-row"><span class="e-label">Submitted By:</span><span class="e-value">Sarah Johnson (sarah@firsttech.digital)</span></div>
+          <div class="e-row"><span class="e-label">Licenses:</span><span class="e-value">800</span></div>
+          <div class="e-row"><span class="e-label">Estimated Value:</span><span class="e-value" style="font-size: 18px; font-weight: 700; color: #107c10;">R 120,000</span></div>
+
+          <div class="e-callout" style="background: #f5f5f5; border-left: 4px solid #616161;">
+            <strong>💬 Comments:</strong>
+            <p style="margin: 5px 0 0;">Client wants to see integration with their existing SAP SuccessFactors system. Key decision maker is the Head of HR.</p>
+          </div>
+
+          <p style="margin-top: 20px;">Please review this request and assign a specialist.</p>
+        </div>
+        <div class="e-footer"><p>This is an automated message from DWx Traffic Manager. Please do not reply directly to this email.</p></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 13. Product Specialist Assigned (AM) -->
+<div class="template-section" id="pr-specialist-am">
+  <div class="section-title">
+    <h2>13. Product Specialist Assigned (AM)</h2>
+    <p>Sent to Account Manager when a specialist is assigned to their product request</p>
+  </div>
+  <div class="email-preview">
+    <div class="email-subject"><strong>Subject:</strong> [DWx] Specialist Assigned: Priya Pillay for Leave Manager (GlobalTech SA)</div>
+    <div class="email-body">
+      <div class="e-container">
+        <div class="e-header" style="background: linear-gradient(135deg, #1a5a8a 0%, #2980b9 100%);">
+          <h1>👤 Specialist Assigned</h1>
+        </div>
+        <div class="e-content">
+          <p>Hi <strong>Sarah Johnson</strong>,</p>
+          <p>A specialist has been assigned to your demo request for <strong>Leave Manager</strong>.</p>
+
+          <div class="e-callout" style="background: #e8f4fc; border-left: 4px solid #1a5a8a;">
+            <div class="e-row"><span class="e-label">Specialist:</span><span class="e-value"><strong>Priya Pillay</strong></span></div>
+            <div class="e-row"><span class="e-label">Role:</span><span class="e-value">Technical Specialist</span></div>
+            <div class="e-row" style="margin-bottom: 0;"><span class="e-label">Email:</span><span class="e-value"><a href="#" style="color: #1a5a8a;">priya@firsttech.digital</a></span></div>
+          </div>
+
+          <div class="e-row"><span class="e-label">Product:</span><span class="e-value">Leave Manager (DWx App)</span></div>
+          <div class="e-row"><span class="e-label">Request Type:</span><span class="e-value">Demo</span></div>
+          <div class="e-row"><span class="e-label">Client:</span><span class="e-value">GlobalTech SA</span></div>
+
+          <p style="margin-top: 20px;">The specialist will coordinate with you to schedule the demo.</p>
+        </div>
+        <div class="e-footer"><p>This is an automated message from DWx Traffic Manager. Please do not reply directly to this email.</p></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 14. Product Specialist Assigned (Specialist) -->
+<div class="template-section" id="pr-specialist-spec">
+  <div class="section-title">
+    <h2>14. Product Specialist Assigned (Specialist)</h2>
+    <p>Sent to Specialist when assigned to a product request</p>
+  </div>
+  <div class="email-preview">
+    <div class="email-subject"><strong>Subject:</strong> [DWx] 📋 New Assignment: Leave Manager Demo for GlobalTech SA</div>
+    <div class="email-body">
+      <div class="e-container">
+        <div class="e-header" style="background: linear-gradient(135deg, #6264a7 0%, #7a7cbf 100%);">
+          <h1>📋 New Product Assignment</h1>
+        </div>
+        <div class="e-content">
+          <p>Hi <strong>Priya Pillay</strong>,</p>
+          <p>You have been assigned to a product demo request. Please review the details below.</p>
+
+          <div class="e-row"><span class="e-label">Product:</span><span class="e-value"><strong>Leave Manager</strong> (DWx App)</span></div>
+          <div class="e-row"><span class="e-label">Request Type:</span><span class="e-value">Demo</span></div>
+          <div class="e-row"><span class="e-label">Client:</span><span class="e-value">GlobalTech SA <span class="e-premium">⭐ Premium</span></span></div>
+          <div class="e-row"><span class="e-label">Contact:</span><span class="e-value">Lisa Naidoo (<a href="#" style="color: #1a5a8a;">lisa@globaltech.co.za</a>)</span></div>
+          <div class="e-row"><span class="e-label">Phone:</span><span class="e-value">+27 11 555 0200</span></div>
+          <div class="e-row"><span class="e-label">Licenses:</span><span class="e-value">800</span></div>
+          <div class="e-row"><span class="e-label">Estimated Value:</span><span class="e-value" style="font-size: 18px; font-weight: 700; color: #107c10;">R 120,000</span></div>
+
+          <p><strong>Account Manager:</strong> Sarah Johnson (<a href="#" style="color: #1a5a8a;">sarah@firsttech.digital</a>)</p>
+
+          <div class="e-card">
+            <h3 style="color: #1a5a8a;">Proposed Time Slots</h3>
+            <div class="e-slot">📅 Slot 1: Thursday, February 13, 2026 at 9:00 AM</div>
+            <div class="e-slot">📅 Slot 2: Friday, February 14, 2026 at 11:00 AM</div>
+          </div>
+
+          <p style="margin-top: 20px;">Please confirm one of the proposed slots or coordinate with the Account Manager.</p>
+        </div>
+        <div class="e-footer"><p>This is an automated message from DWx Traffic Manager. Please do not reply directly to this email.</p></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 15. Product Request Status Changed (AM) -->
+<div class="template-section" id="pr-status-am">
+  <div class="section-title">
+    <h2>15. Product Request Status Changed (AM)</h2>
+    <p>Sent to Account Manager when their product request status changes</p>
+  </div>
+  <div class="email-preview">
+    <div class="email-subject"><strong>Subject:</strong> [DWx] Product Request Confirmed — Leave Manager for GlobalTech SA</div>
+    <div class="email-body">
+      <div class="e-container">
+        <div class="e-header" style="background: linear-gradient(135deg, #1a5a8a 0%, #2980b9 100%);">
+          <h1>📦 Product Request Status Updated</h1>
+        </div>
+        <div class="e-content">
+          <p>Hi <strong>Sarah Johnson</strong>,</p>
+          <p>The status of your product request has been updated.</p>
+
+          <div class="e-row"><span class="e-label">Product:</span><span class="e-value">Leave Manager (DWx App)</span></div>
+          <div class="e-row"><span class="e-label">Client:</span><span class="e-value">GlobalTech SA</span></div>
+          <div class="e-row">
+            <span class="e-label">Previous Status:</span>
+            <span class="e-value"><span class="e-badge" style="background: #e5e7eb; color: #4b5563;">Awaiting Approval</span></span>
+          </div>
+          <div class="e-row">
+            <span class="e-label">New Status:</span>
+            <span class="e-value"><span class="e-badge" style="background: #d1fae5; color: #059669;">Confirmed</span></span>
+          </div>
+        </div>
+        <div class="e-footer"><p>This is an automated message from DWx Traffic Manager. Please do not reply directly to this email.</p></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 16. Product Request Status Changed (Manager) -->
+<div class="template-section" id="pr-status-mgr">
+  <div class="section-title">
+    <h2>16. Product Request Status Changed (Manager)</h2>
+    <p>Sent to Managers for visibility on product request status changes</p>
+  </div>
+  <div class="email-preview">
+    <div class="email-subject"><strong>Subject:</strong> [DWx] ✅ Product Request Confirmed: Leave Manager — GlobalTech SA</div>
+    <div class="email-body">
+      <div class="e-container">
+        <div class="e-header" style="background: linear-gradient(135deg, #1a5a8a 0%, #2980b9 100%);">
+          <h1>📦 Product Request Update</h1>
+        </div>
+        <div class="e-content">
+          <p>A product request status has changed and may require your attention.</p>
+
+          <div class="e-row"><span class="e-label">Product:</span><span class="e-value">Leave Manager (DWx App)</span></div>
+          <div class="e-row"><span class="e-label">Client:</span><span class="e-value">GlobalTech SA <span class="e-premium">⭐ Premium</span></span></div>
+          <div class="e-row"><span class="e-label">Account Manager:</span><span class="e-value">Sarah Johnson</span></div>
+          <div class="e-row">
+            <span class="e-label">Previous Status:</span>
+            <span class="e-value"><span class="e-badge" style="background: #e5e7eb; color: #4b5563;">Awaiting Approval</span></span>
+          </div>
+          <div class="e-row">
+            <span class="e-label">New Status:</span>
+            <span class="e-value"><span class="e-badge" style="background: #d1fae5; color: #059669;">Confirmed</span></span>
+          </div>
+          <div class="e-row"><span class="e-label">Specialist:</span><span class="e-value">Priya Pillay</span></div>
+        </div>
+        <div class="e-footer"><p>This is an automated message from DWx Traffic Manager. Please do not reply directly to this email.</p></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 17. Product Demo Confirmed (Specialist) -->
+<div class="template-section" id="pr-demo-confirmed">
+  <div class="section-title">
+    <h2>17. Product Demo Confirmed (Specialist)</h2>
+    <p>Sent to Specialist when a product demo/trial date is confirmed</p>
+  </div>
+  <div class="email-preview">
+    <div class="email-subject"><strong>Subject:</strong> [DWx] ✅ Product Demo Confirmed: Leave Manager for GlobalTech SA</div>
+    <div class="email-body">
+      <div class="e-container">
+        <div class="e-header" style="background: linear-gradient(135deg, #107c10 0%, #14a114 100%);">
+          <h1>✅ Product Demo Confirmed</h1>
+        </div>
+        <div class="e-content">
+          <p>Hi <strong>Priya Pillay</strong>,</p>
+          <p>A product demo for <strong>Leave Manager</strong> has been confirmed. Please ensure you are prepared for the session.</p>
+
+          <div style="background: #dff6dd; border: 2px solid #107c10; border-radius: 8px; padding: 15px; margin: 15px 0; text-align: center;">
+            <h2 style="margin: 0; color: #107c10; font-size: 18px;">📅 Confirmed Date &amp; Time</h2>
+            <p style="margin: 5px 0 0; font-size: 14px; color: #616161;">Thursday, February 13, 2026 at 9:00 AM</p>
+          </div>
+
+          <div class="e-row"><span class="e-label">Product:</span><span class="e-value">Leave Manager (DWx App)</span></div>
+          <div class="e-row"><span class="e-label">Request Type:</span><span class="e-value">Demo</span></div>
+          <div class="e-row"><span class="e-label">Client:</span><span class="e-value">GlobalTech SA</span></div>
+          <div class="e-row"><span class="e-label">Contact:</span><span class="e-value">Lisa Naidoo (lisa@globaltech.co.za)</span></div>
+          <div class="e-row"><span class="e-label">Account Manager:</span><span class="e-value">Sarah Johnson (<a href="#" style="color: #1a5a8a;">sarah@firsttech.digital</a>)</span></div>
+
+          <div class="e-callout" style="background: #dff6dd; border-left: 4px solid #107c10;">
+            <strong>📋 Preparation Checklist:</strong>
+            <ul style="margin: 8px 0 0; padding-left: 20px;">
+              <li>Review the product requirements and client background</li>
+              <li>Ensure the demo environment is ready</li>
+              <li>Test your audio/video setup</li>
+              <li>Have relevant documentation and pricing ready</li>
+            </ul>
+          </div>
+        </div>
+        <div class="e-footer"><p>This is an automated message from DWx Traffic Manager. Please do not reply directly to this email.</p></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================================================================== -->
+<!-- SESSION PREPARATION EMAILS -->
+<!-- ================================================================== -->
+<div class="category-divider">
+  <h2>Session Preparation Emails</h2>
+  <p>AI-powered session preparation notifications for specialists</p>
+</div>
+
+<!-- 18. Session Preparation Created -->
+<div class="template-section" id="sp-created">
+  <div class="section-title">
+    <h2>18. Session Preparation Created</h2>
+    <p>Sent to Specialist when session prep is created for an upcoming discovery meeting</p>
+  </div>
+  <div class="email-preview">
+    <div class="email-subject"><strong>Subject:</strong> [DWx] 📋 Session Preparation Ready: Power Platform Development - Acme Corporation</div>
+    <div class="email-body">
+      <div class="e-container">
+        <div class="e-header" style="background: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%);">
+          <h1>🤖 Session Preparation Ready</h1>
+        </div>
+        <div class="e-content">
+          <p>Hi <strong>Michael Chen</strong>,</p>
+          <p>A session preparation has been created for your upcoming discovery meeting with <strong>Acme Corporation</strong>. Use the AI-powered preparation tools to get ready for a successful meeting.</p>
+
+          <div style="background: #f5eefa; border-left: 4px solid #8b5cf6; padding: 15px; border-radius: 4px; margin: 15px 0;">
+            <div class="e-row"><span class="e-label">Meeting Date:</span><span class="e-value"><strong>Monday, February 10, 2026 at 10:00 AM</strong></span></div>
+            <div class="e-row"><span class="e-label">Service:</span><span class="e-value">Power Platform Development</span></div>
+            <div class="e-row"><span class="e-label">Client:</span><span class="e-value">Acme Corporation <span class="e-premium">⭐ Premium</span></span></div>
+            <div class="e-row"><span class="e-label">Contact:</span><span class="e-value">John Williams (john@acme.co.za)</span></div>
+            <div class="e-row"><span class="e-label">Interest Level:</span><span class="e-value" style="color: #d13438;">🔥 Hot</span></div>
+            <div class="e-row" style="margin-bottom: 0;"><span class="e-label">Deal Value:</span><span class="e-value" style="font-size: 18px; font-weight: 700; color: #107c10;">R 450,000</span></div>
+          </div>
+
+          <div class="e-card">
+            <h3 style="color: #8b5cf6;">🤖 AI-Powered Preparation Tools</h3>
+            <p>Access the Session Preparation panel in DWx Traffic Manager to:</p>
+            <ul>
+              <li><strong>Client Profile:</strong> AI-generated overview of the client, key stakeholders, and pain points</li>
+              <li><strong>Talking Points:</strong> Customisable conversation guide with discovery questions and value propositions</li>
+              <li><strong>Resource Suggestions:</strong> AI-recommended slide decks, case studies, and materials</li>
+              <li><strong>Meeting Agenda:</strong> Suggested timeline and structure for the discovery session</li>
+              <li><strong>Prep Checklist:</strong> Track your preparation progress</li>
+            </ul>
+          </div>
+
+          <div class="e-callout" style="background: #f5f5f5; border-left: 4px solid #616161;">
+            <strong>📝 Client Requirements:</strong>
+            <p style="margin: 5px 0 0;">Custom Power App for inventory management across 3 warehouses. SAP integration required. Must support offline mode.</p>
+          </div>
+
+          <p style="margin-top: 20px;"><strong>Account Manager:</strong> Sarah Johnson (<a href="#" style="color: #1a5a8a;">sarah@firsttech.digital</a>)</p>
+        </div>
+        <div class="e-footer"><p>This is an automated message from DWx Traffic Manager. Please do not reply directly to this email.</p></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 19. Session Prep Reminder (Incomplete) -->
+<div class="template-section" id="sp-reminder-incomplete">
+  <div class="section-title">
+    <h2>19. Session Prep Reminder (Incomplete)</h2>
+    <p>Sent to Specialist when prep is incomplete and meeting is approaching</p>
+  </div>
+  <div class="email-preview">
+    <div class="email-subject"><strong>Subject:</strong> [DWx] ⏰ Meeting in 24h: Acme Corporation - Prep Incomplete</div>
+    <div class="email-body">
+      <div class="e-container">
+        <div class="e-header" style="background: linear-gradient(135deg, #f7630c 0%, #ff8c00 100%);">
+          <h1>⏰ Meeting Reminder — 24 Hours Away</h1>
+        </div>
+        <div class="e-content">
+          <p>Hi <strong>Michael Chen</strong>,</p>
+          <p>This is a reminder that your discovery meeting with <strong>Acme Corporation</strong> is scheduled for <strong>Monday, February 10, 2026 at 10:00 AM</strong>.</p>
+
+          <div style="text-align: center; padding: 20px; margin: 15px 0; background: #fff4ce; border-radius: 8px;">
+            <h2 style="margin: 0; color: #f7630c; font-size: 24px;">24 Hours Until Meeting</h2>
+          </div>
+
+          <div style="background: #fff8f0; border-left: 4px solid #f7630c; padding: 15px; border-radius: 4px; margin: 15px 0;">
+            <div class="e-row"><span class="e-label">Preparation Status:</span><span class="e-value"><strong style="color: #f7630c;">⚠️ Incomplete</strong></span></div>
+            <div class="e-row"><span class="e-label">Checklist Progress:</span><span class="e-value">3 of 8 items (38%)</span></div>
+            <div class="e-row" style="margin-bottom: 0;"><span class="e-label">AI Content:</span><span class="e-value">✅ Generated</span></div>
+          </div>
+
+          <div class="e-row"><span class="e-label">Service:</span><span class="e-value">Power Platform Development</span></div>
+          <div class="e-row"><span class="e-label">Client:</span><span class="e-value">Acme Corporation</span></div>
+          <div class="e-row"><span class="e-label">Contact:</span><span class="e-value">John Williams (john@acme.co.za)</span></div>
+
+          <div class="e-callout" style="background: #fef3c7; border-left: 4px solid #f7630c;">
+            <strong>⚠️ Action Required:</strong> Your session preparation is not yet complete. Please review and complete your checklist items before the meeting.
+          </div>
+        </div>
+        <div class="e-footer"><p>This is an automated message from DWx Traffic Manager. Please do not reply directly to this email.</p></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 20. Session Prep Reminder (Ready) -->
+<div class="template-section" id="sp-reminder-ready">
+  <div class="section-title">
+    <h2>20. Session Prep Reminder (Ready)</h2>
+    <p>Sent to Specialist when prep is complete and meeting is approaching</p>
+  </div>
+  <div class="email-preview">
+    <div class="email-subject"><strong>Subject:</strong> [DWx] ⏰ Meeting in 24h: Acme Corporation - Ready</div>
+    <div class="email-body">
+      <div class="e-container">
+        <div class="e-header" style="background: linear-gradient(135deg, #107c10 0%, #14a114 100%);">
+          <h1>⏰ Meeting Reminder — You're All Set!</h1>
+        </div>
+        <div class="e-content">
+          <p>Hi <strong>Michael Chen</strong>,</p>
+          <p>This is a reminder that your discovery meeting with <strong>Acme Corporation</strong> is scheduled for <strong>Monday, February 10, 2026 at 10:00 AM</strong>.</p>
+
+          <div style="background: #dff6dd; border-left: 4px solid #107c10; padding: 15px; border-radius: 4px; margin: 15px 0;">
+            <div class="e-row"><span class="e-label">Preparation Status:</span><span class="e-value"><strong style="color: #107c10;">✅ Ready</strong></span></div>
+            <div class="e-row"><span class="e-label">Checklist Progress:</span><span class="e-value">8 of 8 items (100%)</span></div>
+            <div class="e-row" style="margin-bottom: 0;"><span class="e-label">AI Content:</span><span class="e-value">✅ Generated</span></div>
+          </div>
+
+          <div class="e-row"><span class="e-label">Service:</span><span class="e-value">Power Platform Development</span></div>
+          <div class="e-row"><span class="e-label">Client:</span><span class="e-value">Acme Corporation</span></div>
+          <div class="e-row"><span class="e-label">Contact:</span><span class="e-value">John Williams (john@acme.co.za)</span></div>
+
+          <div class="e-callout" style="background: #d1fae5; border-left: 4px solid #107c10;">
+            <strong>✅ You're all set!</strong> Your session preparation is complete. Good luck with your meeting!
+          </div>
+        </div>
+        <div class="e-footer"><p>This is an automated message from DWx Traffic Manager. Please do not reply directly to this email.</p></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================================================================== -->
+<!-- SYSTEM / ALERT EMAILS -->
+<!-- ================================================================== -->
+<div class="category-divider">
+  <h2>System / Alert Emails</h2>
+  <p>System alerts, error notifications, and new templates</p>
+</div>
+
+<!-- 21. Calendar Event Failed -->
+<div class="template-section" id="sys-calendar-fail">
+  <div class="section-title">
+    <h2>21. Calendar Event Failed</h2>
+    <p>Sent to Managers when a calendar event could not be created</p>
+  </div>
+  <div class="email-preview">
+    <div class="email-subject"><strong>Subject:</strong> [DWx] ⚠️ Calendar Event Failed: Acme Corporation — Monday, February 10, 2026 at 10:00 AM</div>
+    <div class="email-body">
+      <div class="e-container">
+        <div class="e-header" style="background: linear-gradient(135deg, #d13438 0%, #e74c4c 100%);">
+          <h1>⚠️ Calendar Event Failed</h1>
+        </div>
+        <div class="e-content">
+          <p>A calendar event could not be created automatically. Manual intervention may be needed.</p>
+
+          <div style="background: #fde7e9; border-left: 4px solid #d13438; padding: 15px; border-radius: 4px; margin: 15px 0;">
+            <div class="e-row"><span class="e-label">Service Request:</span><span class="e-value">Power Platform Development</span></div>
+            <div class="e-row"><span class="e-label">Client:</span><span class="e-value">Acme Corporation</span></div>
+            <div class="e-row"><span class="e-label">Confirmed Slot:</span><span class="e-value"><strong>Monday, February 10, 2026 at 10:00 AM</strong></span></div>
+            <div class="e-row" style="margin-bottom: 0;"><span class="e-label">Account Manager:</span><span class="e-value">Sarah Johnson</span></div>
+          </div>
+
+          <p><strong>Recommended Actions:</strong></p>
+          <ul>
+            <li>Manually create a Teams meeting for the confirmed time slot</li>
+            <li>Ensure all attendees receive the meeting invitation</li>
+            <li>Check that calendar permissions are correctly configured</li>
+          </ul>
+        </div>
+        <div class="e-footer"><p>This is an automated message from DWx Traffic Manager. Please do not reply directly to this email.</p></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 22. Welcome New Account Manager (NEW) -->
+<div class="template-section" id="sys-welcome-am">
+  <div class="section-title">
+    <h2>22. Welcome New Account Manager (NEW)</h2>
+    <p>Sent to Account Manager when they are added to the system</p>
+  </div>
+  <div class="email-preview">
+    <div class="email-subject"><strong>Subject:</strong> [DWx] Welcome to DWx Traffic Manager!</div>
+    <div class="email-body">
+      <div class="e-container">
+        <div class="e-header" style="background: linear-gradient(135deg, #1a5a8a 0%, #2980b9 100%);">
+          <h1>👋 Welcome to DWx Traffic Manager</h1>
+        </div>
+        <div class="e-content">
+          <p>Hi <strong>Sarah Johnson</strong>,</p>
+          <p>You've been added as an Account Manager in the DWx Traffic Manager system. You can now submit service and product requests for your clients.</p>
+
+          <div class="e-card">
+            <h3 style="color: #1a5a8a;">What You Can Do</h3>
+            <ul>
+              <li><strong>Browse Services:</strong> Explore our 6 service categories — Power Platform, SPFx, Migrations, Assessments, Copilot Agents, and Viva</li>
+              <li><strong>Browse Products:</strong> View 29 DWx products across Apps, Web Parts, and Adaptive Cards</li>
+              <li><strong>Submit Requests:</strong> Create service or product demo/trial requests for your clients</li>
+              <li><strong>Track Progress:</strong> Monitor your requests through the sales pipeline</li>
+            </ul>
+          </div>
+
+          <div class="e-callout" style="background: #e8f4fc; border-left: 4px solid #1a5a8a;">
+            <div class="e-row"><span class="e-label">Your Region:</span><span class="e-value">Western Cape</span></div>
+            <div class="e-row" style="margin-bottom: 0;"><span class="e-label">Source:</span><span class="e-value">Internal</span></div>
+          </div>
+
+          <p style="margin-top: 20px;">If you have any questions, please reach out to your DWx manager. Happy selling!</p>
+        </div>
+        <div class="e-footer"><p>This is an automated message from DWx Traffic Manager. Please do not reply directly to this email.</p></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 23. Weekly Pipeline Digest (NEW) -->
+<div class="template-section" id="sys-weekly-digest">
+  <div class="section-title">
+    <h2>23. Weekly Pipeline Digest (NEW)</h2>
+    <p>Sent to Managers as a weekly summary of pipeline activity</p>
+  </div>
+  <div class="email-preview">
+    <div class="email-subject"><strong>Subject:</strong> [DWx] 📊 Weekly Pipeline Digest — Week of February 3, 2026</div>
+    <div class="email-body">
+      <div class="e-container">
+        <div class="e-header" style="background: linear-gradient(135deg, #1a5a8a 0%, #2980b9 100%);">
+          <h1>📊 Weekly Pipeline Digest</h1>
+        </div>
+        <div class="e-content">
+          <p>Here's your weekly summary of DWx Traffic Manager pipeline activity.</p>
+
+          <!-- KPI Row -->
+          <div style="display: flex; gap: 12px; margin: 20px 0;">
+            <div style="flex: 1; background: #e8f4fc; padding: 16px; border-radius: 8px; text-align: center;">
+              <div style="font-size: 24px; font-weight: 700; color: #1a5a8a;">R 2.4M</div>
+              <div style="font-size: 12px; color: #616161; margin-top: 4px;">Total Pipeline</div>
+            </div>
+            <div style="flex: 1; background: #dff6dd; padding: 16px; border-radius: 8px; text-align: center;">
+              <div style="font-size: 24px; font-weight: 700; color: #107c10;">R 1.1M</div>
+              <div style="font-size: 12px; color: #616161; margin-top: 4px;">Weighted Pipeline</div>
+            </div>
+            <div style="flex: 1; background: #f5eefa; padding: 16px; border-radius: 8px; text-align: center;">
+              <div style="font-size: 24px; font-weight: 700; color: #8b5cf6;">67%</div>
+              <div style="font-size: 12px; color: #616161; margin-top: 4px;">Win Rate</div>
+            </div>
+          </div>
+
+          <!-- This Week's Activity -->
+          <div class="e-card">
+            <h3 style="color: #1a5a8a;">This Week's Activity</h3>
+            <div class="e-row"><span class="e-label">New Requests:</span><span class="e-value">4</span></div>
+            <div class="e-row"><span class="e-label">Deals Won:</span><span class="e-value" style="color: #107c10; font-weight: 600;">2 (R 730,000)</span></div>
+            <div class="e-row"><span class="e-label">Deals Lost:</span><span class="e-value" style="color: #d13438;">1 (R 280,000)</span></div>
+            <div class="e-row"><span class="e-label">Meetings Scheduled:</span><span class="e-value">3</span></div>
+            <div class="e-row" style="margin-bottom: 0;"><span class="e-label">Product Demos:</span><span class="e-value">2</span></div>
+          </div>
+
+          <!-- Pipeline by Stage -->
+          <div class="e-card" style="margin-top: 12px;">
+            <h3 style="color: #1a5a8a;">Pipeline by Stage</h3>
+            <div style="display: flex; align-items: center; gap: 10px; padding: 6px 0; border-bottom: 1px solid #eee;">
+              <span class="e-stage" style="background: #e5e7eb; color: #4b5563; width: 100px; text-align: center;">LEAD</span>
+              <span style="flex: 1;">5 requests</span>
+              <span style="font-weight: 600;">R 650,000</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 10px; padding: 6px 0; border-bottom: 1px solid #eee;">
+              <span class="e-stage" style="background: #dbeafe; color: #1d4ed8; width: 100px; text-align: center;">QUALIFIED</span>
+              <span style="flex: 1;">3 requests</span>
+              <span style="font-weight: 600;">R 480,000</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 10px; padding: 6px 0; border-bottom: 1px solid #eee;">
+              <span class="e-stage" style="background: #ede9fe; color: #7c3aed; width: 100px; text-align: center;">DISCOVERY</span>
+              <span style="flex: 1;">4 requests</span>
+              <span style="font-weight: 600;">R 520,000</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 10px; padding: 6px 0; border-bottom: 1px solid #eee;">
+              <span class="e-stage" style="background: #fef3c7; color: #b45309; width: 100px; text-align: center;">PROPOSAL</span>
+              <span style="flex: 1;">2 requests</span>
+              <span style="font-weight: 600;">R 350,000</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 10px; padding: 6px 0;">
+              <span class="e-stage" style="background: #fce7f3; color: #db2777; width: 100px; text-align: center;">NEGOTIATION</span>
+              <span style="flex: 1;">2 requests</span>
+              <span style="font-weight: 600;">R 400,000</span>
+            </div>
+          </div>
+
+          <!-- Hot Deals -->
+          <div class="e-callout" style="background: #fde7e9; border-left: 4px solid #d13438; margin-top: 15px;">
+            <strong>🔥 Hot Leads Requiring Attention:</strong>
+            <ul style="margin: 8px 0 0; padding-left: 20px;">
+              <li>Acme Corporation — Power Platform (R 450,000) — Negotiation</li>
+              <li>FinServe Holdings — M365 Assessment (R 200,000) — Discovery</li>
+            </ul>
+          </div>
+        </div>
+        <div class="e-footer"><p>This is an automated message from DWx Traffic Manager. Please do not reply directly to this email.</p></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DWx Traffic Manager — Specialist Journey</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; color: #242424; height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+
+  /* ── Hero (compact) ── */
+  .hero {
+    background: linear-gradient(135deg, #6264a7 0%, #7a7cbf 60%, #8e90d0 100%);
+    color: white; padding: 20px 32px; display: flex; align-items: center; gap: 24px; flex-shrink: 0;
+  }
+  .hero-left { flex: 1; }
+  .hero-badge { display: inline-block; background: rgba(255,255,255,0.2); padding: 3px 12px; border-radius: 12px; font-size: 10px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 6px; }
+  .hero h1 { font-size: 24px; font-weight: 700; margin-bottom: 4px; }
+  .hero p { font-size: 13px; opacity: 0.9; line-height: 1.4; max-width: 500px; }
+  .hero-stats { display: flex; gap: 16px; flex-shrink: 0; }
+  .stat { text-align: center; background: rgba(255,255,255,0.15); border-radius: 10px; padding: 10px 16px; min-width: 80px; }
+  .stat .num { font-size: 22px; font-weight: 700; }
+  .stat .label { font-size: 9px; text-transform: uppercase; letter-spacing: 0.5px; opacity: 0.85; margin-top: 2px; }
+
+  /* ── Tabs ── */
+  .tab-bar {
+    display: flex; background: white; border-bottom: 2px solid #e0e0e0; padding: 0 24px; flex-shrink: 0;
+  }
+  .tab {
+    padding: 12px 18px; font-size: 13px; font-weight: 600; color: #616161; cursor: pointer;
+    border-bottom: 3px solid transparent; margin-bottom: -2px; transition: all 0.15s;
+    user-select: none; white-space: nowrap;
+  }
+  .tab:hover { color: #6264a7; }
+  .tab.active { color: #6264a7; border-bottom-color: #6264a7; }
+
+  /* ── Tab content ── */
+  .tab-content { flex: 1; overflow-y: auto; padding: 24px; }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* ── Journey timeline ── */
+  .timeline { position: relative; max-width: 800px; }
+  .timeline::before {
+    content: ''; position: absolute; left: 24px; top: 0; bottom: 0; width: 3px;
+    background: linear-gradient(to bottom, #6264a7, #8e90d0);
+  }
+  .step { display: flex; gap: 16px; margin-bottom: 20px; position: relative; }
+  .step:last-child { margin-bottom: 0; }
+  .step-num {
+    width: 48px; height: 48px; border-radius: 50%; background: #6264a7; color: white;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; font-weight: 700; flex-shrink: 0; z-index: 1;
+    border: 3px solid #f0f2f5;
+  }
+  .step-card {
+    flex: 1; background: white; border-radius: 10px; padding: 16px 20px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  }
+  .step-card h3 { font-size: 15px; font-weight: 700; color: #242424; margin-bottom: 4px; }
+  .step-card .subtitle { font-size: 11px; color: #6264a7; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+  .step-card p { font-size: 13px; color: #616161; line-height: 1.5; }
+  .step-card ul { font-size: 13px; color: #616161; line-height: 1.7; padding-left: 16px; }
+
+  /* ── Session Prep tabs ── */
+  .prep-tabs { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; max-width: 800px; }
+  .prep-tab {
+    background: white; border-radius: 10px; padding: 16px 18px; box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    border-left: 3px solid #6264a7;
+  }
+  .prep-tab.ai { border-left-color: #8b5cf6; }
+  .prep-tab h4 { font-size: 13px; font-weight: 700; color: #242424; margin-bottom: 3px; }
+  .prep-tab .ai-badge { display: inline-block; background: #f3f0ff; color: #8b5cf6; font-size: 9px; font-weight: 600; padding: 2px 7px; border-radius: 10px; margin-left: 4px; vertical-align: middle; }
+  .prep-tab p { font-size: 12px; color: #616161; line-height: 1.4; }
+
+  /* ── Status flow ── */
+  .status-flow { display: flex; align-items: center; justify-content: center; gap: 0; margin-top: 20px; }
+  .status-node {
+    background: white; border-radius: 10px; padding: 14px 24px; text-align: center;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08); min-width: 160px;
+  }
+  .status-node.active { border: 2px solid #6264a7; }
+  .status-node .status-name { font-size: 14px; font-weight: 700; color: #242424; }
+  .status-node .status-desc { font-size: 11px; color: #888; margin-top: 3px; }
+  .status-arrow { font-size: 24px; color: #6264a7; padding: 0 10px; font-weight: 700; }
+
+  /* ── Checklist ── */
+  .checklist { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; max-width: 800px; }
+  .check-item {
+    display: flex; align-items: flex-start; gap: 10px; background: white; border-radius: 8px;
+    padding: 12px 14px; box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  }
+  .check-box {
+    width: 20px; height: 20px; border-radius: 4px; border: 2px solid #6264a7;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    color: #6264a7; font-size: 13px; font-weight: 700; margin-top: 1px;
+  }
+  .check-item .check-text { font-size: 13px; color: #242424; font-weight: 600; }
+  .check-item .check-desc { font-size: 11px; color: #888; margin-top: 2px; }
+
+  /* ── Notification list ── */
+  .notif-list { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; max-width: 800px; }
+  .notif {
+    display: flex; align-items: center; gap: 12px; background: white; border-radius: 8px;
+    padding: 12px 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  }
+  .notif-icon {
+    width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 700; color: white; flex-shrink: 0;
+  }
+  .notif-text { flex: 1; }
+  .notif-text strong { font-size: 13px; color: #242424; }
+  .notif-text span { display: block; font-size: 11px; color: #888; margin-top: 1px; }
+
+  /* ── Permissions box ── */
+  .perms { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; max-width: 800px; }
+  .perm-card { background: white; border-radius: 10px; padding: 20px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+  .perm-card h4 { font-size: 14px; font-weight: 700; margin-bottom: 10px; }
+  .perm-card.can h4 { color: #107c10; }
+  .perm-card.cannot h4 { color: #d13438; }
+  .perm-card ul { font-size: 13px; color: #616161; line-height: 1.8; padding-left: 18px; }
+
+  /* ── Footer ── */
+  .footer { text-align: center; padding: 8px; color: #aaa; font-size: 11px; flex-shrink: 0; background: #f0f2f5; border-top: 1px solid #e0e0e0; }
+</style>
+</head>
+<body>
+
+<!-- Hero -->
+<div class="hero">
+  <div class="hero-left">
+    <div class="hero-badge">Role Overview</div>
+    <h1>Pre-Sales Specialist</h1>
+    <p>You are the technical expert. When a manager assigns you to a deal, you prepare for and lead discovery meetings using AI-powered session preparation tools.</p>
+  </div>
+  <div class="hero-stats">
+    <div class="stat"><div class="num">5</div><div class="label">Prep Tabs</div></div>
+    <div class="stat"><div class="num">4</div><div class="label">AI Sections</div></div>
+    <div class="stat"><div class="num">3</div><div class="label">Prep Statuses</div></div>
+    <div class="stat"><div class="num">7</div><div class="label">Email Alerts</div></div>
+  </div>
+</div>
+
+<!-- Tab bar -->
+<div class="tab-bar">
+  <div class="tab active" onclick="switchTab(event, 'journey')">Your Journey</div>
+  <div class="tab" onclick="switchTab(event, 'session-prep')">Session Preparation</div>
+  <div class="tab" onclick="switchTab(event, 'checklist')">Preparation Checklist</div>
+  <div class="tab" onclick="switchTab(event, 'emails')">Emails You Receive</div>
+  <div class="tab" onclick="switchTab(event, 'perms')">Permissions</div>
+</div>
+
+<!-- Tab content -->
+<div class="tab-content">
+
+  <!-- Journey -->
+  <div id="journey" class="tab-panel active">
+    <div class="timeline">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-card">
+          <div class="subtitle">Assigned</div>
+          <h3>Manager Assigns You to a Deal</h3>
+          <p>A manager selects you as the pre-sales specialist for a service or product request. You receive an email notification with the client name, service requested, requirements summary, and your role.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-card">
+          <div class="subtitle">Scheduled</div>
+          <h3>Discovery Meeting Confirmed</h3>
+          <p>The manager confirms one of the proposed time slots. You receive a <strong>Teams meeting invite</strong> on the shared calendar with the AM, client contact, and yourself as attendees. A <strong>Session Preparation</strong> record is automatically created.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-card">
+          <div class="subtitle">Prepare</div>
+          <h3>Use AI-Powered Session Preparation</h3>
+          <p>Open the Session Prep dialog from the request details. Click <strong>"Generate AI Content"</strong> to have Azure OpenAI (GPT-4o) create:</p>
+          <ul>
+            <li><strong>Client Profile</strong> &mdash; industry context, engagement history, key stakeholders</li>
+            <li><strong>Talking Points</strong> &mdash; opening, discovery, value proposition, objection handling, closing</li>
+            <li><strong>Suggested Resources</strong> &mdash; slide decks, case studies, datasheets, demo scripts</li>
+            <li><strong>Meeting Agenda</strong> &mdash; time-boxed items with descriptions</li>
+          </ul>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-card">
+          <div class="subtitle">Review</div>
+          <h3>Customise &amp; Complete the Checklist</h3>
+          <p>Edit talking points, select relevant resources, adjust the agenda, and work through the preparation checklist. Mark items as complete: review client history, prepare demo environment, test equipment, and more.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">5</div>
+        <div class="step-card">
+          <div class="subtitle">Remind</div>
+          <h3>24-Hour Reminder</h3>
+          <p>If your preparation isn't marked as <strong>Ready</strong> 24 hours before the meeting, you'll receive a reminder email with a link directly to the prep dialog.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">6</div>
+        <div class="step-card">
+          <div class="subtitle">Deliver</div>
+          <h3>Lead the Discovery Meeting</h3>
+          <p>Join the Teams meeting armed with your AI-enhanced preparation. After the meeting, the manager transitions the request to <strong>Proposal</strong> stage and the deal continues through the pipeline.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Session Preparation -->
+  <div id="session-prep" class="tab-panel">
+    <div class="prep-tabs">
+      <div class="prep-tab ai">
+        <h4>Client Profile <span class="ai-badge">AI Generated</span></h4>
+        <p>Industry context, company background, engagement history, key stakeholders, and strategic context for the meeting.</p>
+      </div>
+      <div class="prep-tab ai">
+        <h4>Talking Points <span class="ai-badge">AI Generated</span></h4>
+        <p>Organised by category: opening, discovery questions, value propositions, objection handling, and closing. Editable inline.</p>
+      </div>
+      <div class="prep-tab ai">
+        <h4>Resources <span class="ai-badge">AI Generated</span></h4>
+        <p>Suggested slide decks, case studies, datasheets, and demo scripts with relevance scores. Select the ones you need.</p>
+      </div>
+      <div class="prep-tab ai">
+        <h4>Meeting Agenda <span class="ai-badge">AI Generated</span></h4>
+        <p>Time-boxed agenda items in a timeline view. Customise durations and descriptions to match your meeting style.</p>
+      </div>
+      <div class="prep-tab">
+        <h4>Preparation Checklist</h4>
+        <p>Pre-meeting checklist items with completion tracking. Progress bar shows overall readiness.</p>
+      </div>
+    </div>
+
+    <div class="status-flow">
+      <div class="status-node">
+        <div class="status-name">Not Started</div>
+        <div class="status-desc">Record created automatically</div>
+      </div>
+      <div class="status-arrow">&rarr;</div>
+      <div class="status-node active">
+        <div class="status-name">In Progress</div>
+        <div class="status-desc">AI content generated, editing</div>
+      </div>
+      <div class="status-arrow">&rarr;</div>
+      <div class="status-node">
+        <div class="status-name">Ready</div>
+        <div class="status-desc">Checklist complete, good to go</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Checklist -->
+  <div id="checklist" class="tab-panel">
+    <div class="checklist">
+      <div class="check-item">
+        <div class="check-box">&check;</div>
+        <div>
+          <div class="check-text">Review client engagement history</div>
+          <div class="check-desc">Check past interactions, contracts, and outcomes</div>
+        </div>
+      </div>
+      <div class="check-item">
+        <div class="check-box">&check;</div>
+        <div>
+          <div class="check-text">Review AI-generated client profile</div>
+          <div class="check-desc">Industry context, stakeholders, and strategic goals</div>
+        </div>
+      </div>
+      <div class="check-item">
+        <div class="check-box">&check;</div>
+        <div>
+          <div class="check-text">Customise talking points</div>
+          <div class="check-desc">Edit, add, or remove points across all categories</div>
+        </div>
+      </div>
+      <div class="check-item">
+        <div class="check-box">&check;</div>
+        <div>
+          <div class="check-text">Select relevant resources</div>
+          <div class="check-desc">Choose slide decks, case studies, and demo scripts</div>
+        </div>
+      </div>
+      <div class="check-item">
+        <div class="check-box">&check;</div>
+        <div>
+          <div class="check-text">Prepare demo environment</div>
+          <div class="check-desc">Set up tenant, sample data, and test scenarios</div>
+        </div>
+      </div>
+      <div class="check-item">
+        <div class="check-box">&check;</div>
+        <div>
+          <div class="check-text">Test audio/video equipment</div>
+          <div class="check-desc">Verify Teams, microphone, camera, and screen sharing</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Emails -->
+  <div id="emails" class="tab-panel">
+    <div class="notif-list">
+      <div class="notif">
+        <div class="notif-icon" style="background:#6264a7;">1</div>
+        <div class="notif-text"><strong>Assigned to Service Request</strong><span>Manager assigned you as pre-sales specialist for a service deal</span></div>
+      </div>
+      <div class="notif">
+        <div class="notif-icon" style="background:#6264a7;">2</div>
+        <div class="notif-text"><strong>Assigned to Product Request</strong><span>Manager assigned you for a product demo or trial</span></div>
+      </div>
+      <div class="notif">
+        <div class="notif-icon" style="background:#107c10;">3</div>
+        <div class="notif-text"><strong>Discovery Meeting Confirmed</strong><span>Meeting date, time, and Teams link confirmed — calendar invite sent</span></div>
+      </div>
+      <div class="notif">
+        <div class="notif-icon" style="background:#107c10;">4</div>
+        <div class="notif-text"><strong>Product Demo Confirmed</strong><span>Demo/trial slot confirmed with preparation checklist</span></div>
+      </div>
+      <div class="notif">
+        <div class="notif-icon" style="background:#8b5cf6;">5</div>
+        <div class="notif-text"><strong>Session Prep Created</strong><span>Session preparation record ready — open dialog to generate AI content</span></div>
+      </div>
+      <div class="notif">
+        <div class="notif-icon" style="background:#f7630c;">6</div>
+        <div class="notif-text"><strong>Session Prep Reminder</strong><span>24-hour reminder — preparation not yet marked as Ready</span></div>
+      </div>
+      <div class="notif">
+        <div class="notif-icon" style="background:#605e5c;">7</div>
+        <div class="notif-text"><strong>Reassigned</strong><span>You have been reassigned from a deal — another specialist is taking over</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Permissions -->
+  <div id="perms" class="tab-panel">
+    <div class="perms">
+      <div class="perm-card can">
+        <h4>You Can</h4>
+        <ul>
+          <li>View requests assigned to you</li>
+          <li>Open and use Session Preparation dialog</li>
+          <li>Generate AI content (client profile, talking points, resources, agenda)</li>
+          <li>Edit talking points and meeting agenda</li>
+          <li>Select resources for your meeting</li>
+          <li>Complete checklist items</li>
+          <li>Mark preparation as Ready</li>
+          <li>Join discovery meetings via Teams</li>
+          <li>Browse service and product catalogs</li>
+        </ul>
+      </div>
+      <div class="perm-card cannot">
+        <h4>You Cannot</h4>
+        <ul>
+          <li>Self-assign to requests</li>
+          <li>Submit service or product requests</li>
+          <li>Transition pipeline stages</li>
+          <li>Confirm or reschedule meeting slots</li>
+          <li>Access the Manager Dashboard</li>
+          <li>Access the Admin Panel</li>
+          <li>View other specialists' assignments</li>
+          <li>Modify client or service master data</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="footer">DWx Traffic Manager &mdash; Pre-Sales Specialist Role Overview &mdash; v2.5.0</div>
+
+<script>
+function switchTab(e, id) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  e.currentTarget.classList.add('active');
+  document.getElementById(id).classList.add('active');
+}
+</script>
+</body>
+</html>

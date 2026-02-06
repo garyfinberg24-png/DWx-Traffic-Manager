@@ -427,6 +427,43 @@ class DWxNotificationService {
     );
     return this.sendEmail([sessionPrep.SpecialistEmail], subject, body);
   }
+
+  // ==========================================================================
+  // New Notifications (v2.6.0)
+  // ==========================================================================
+
+  /**
+   * Send welcome email to a newly added Account Manager
+   */
+  async notifyWelcomeAccountManager(
+    name: string,
+    email: string,
+    region: string,
+    source: string
+  ): Promise<NotificationResult> {
+    const { subject, body } = EmailTemplates.welcomeAccountManager(name, email, region, source);
+    return this.sendEmail([email], subject, body);
+  }
+
+  /**
+   * Send weekly pipeline digest to managers
+   */
+  async sendWeeklyPipelineDigest(
+    weekLabel: string,
+    kpis: { totalPipeline: number; weightedPipeline: number; winRate: number },
+    activity: { newRequests: number; dealsWon: number; wonRevenue: number; dealsLost: number; lostRevenue: number; meetingsScheduled: number; productDemos: number },
+    stageBreakdown: Array<{ stage: string; count: number; value: number }>,
+    hotDeals: Array<{ client: string; service: string; value: number; stage: string }>
+  ): Promise<NotificationResult> {
+    const managerEmails = this.getManagerEmails();
+    if (managerEmails.length === 0) {
+      return { success: true };
+    }
+    const { subject, body } = EmailTemplates.weeklyPipelineDigest(
+      weekLabel, kpis, activity, stageBreakdown, hotDeals
+    );
+    return this.sendEmail(managerEmails, subject, body);
+  }
 }
 
 export const dwxNotificationService = new DWxNotificationService();

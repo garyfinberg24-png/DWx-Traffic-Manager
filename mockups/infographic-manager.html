@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DWx Traffic Manager — Manager Journey</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; color: #242424; height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+
+  /* ── Hero (compact) ── */
+  .hero {
+    background: linear-gradient(135deg, #107c10 0%, #14a114 60%, #1db91d 100%);
+    color: white; padding: 20px 32px; display: flex; align-items: center; gap: 24px; flex-shrink: 0;
+  }
+  .hero-left { flex: 1; }
+  .hero-badge { display: inline-block; background: rgba(255,255,255,0.2); padding: 3px 12px; border-radius: 12px; font-size: 10px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 6px; }
+  .hero h1 { font-size: 24px; font-weight: 700; margin-bottom: 4px; }
+  .hero p { font-size: 13px; opacity: 0.9; line-height: 1.4; max-width: 500px; }
+  .hero-stats { display: flex; gap: 16px; flex-shrink: 0; }
+  .stat { text-align: center; background: rgba(255,255,255,0.15); border-radius: 10px; padding: 10px 16px; min-width: 80px; }
+  .stat .num { font-size: 22px; font-weight: 700; }
+  .stat .label { font-size: 9px; text-transform: uppercase; letter-spacing: 0.5px; opacity: 0.85; margin-top: 2px; }
+
+  /* ── Tabs ── */
+  .tab-bar {
+    display: flex; background: white; border-bottom: 2px solid #e0e0e0; padding: 0 24px; flex-shrink: 0;
+  }
+  .tab {
+    padding: 12px 18px; font-size: 13px; font-weight: 600; color: #616161; cursor: pointer;
+    border-bottom: 3px solid transparent; margin-bottom: -2px; transition: all 0.15s;
+    user-select: none; white-space: nowrap;
+  }
+  .tab:hover { color: #107c10; }
+  .tab.active { color: #107c10; border-bottom-color: #107c10; }
+
+  /* ── Tab content ── */
+  .tab-content { flex: 1; overflow-y: auto; padding: 24px; }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* ── Journey timeline ── */
+  .timeline { position: relative; max-width: 800px; }
+  .timeline::before {
+    content: ''; position: absolute; left: 24px; top: 0; bottom: 0; width: 3px;
+    background: linear-gradient(to bottom, #107c10, #1db91d);
+  }
+  .step { display: flex; gap: 16px; margin-bottom: 20px; position: relative; }
+  .step:last-child { margin-bottom: 0; }
+  .step-num {
+    width: 48px; height: 48px; border-radius: 50%; background: #107c10; color: white;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; font-weight: 700; flex-shrink: 0; z-index: 1;
+    border: 3px solid #f0f2f5;
+  }
+  .step-card {
+    flex: 1; background: white; border-radius: 10px; padding: 16px 20px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  }
+  .step-card h3 { font-size: 15px; font-weight: 700; color: #242424; margin-bottom: 4px; }
+  .step-card .subtitle { font-size: 11px; color: #107c10; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+  .step-card p { font-size: 13px; color: #616161; line-height: 1.5; }
+  .step-card ul { font-size: 13px; color: #616161; line-height: 1.7; padding-left: 16px; }
+
+  /* ── Screens grid ── */
+  .screens { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; max-width: 800px; }
+  .screen-card {
+    background: white; border-radius: 10px; padding: 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  }
+  .screen-card h4 { font-size: 14px; font-weight: 700; color: #242424; margin-bottom: 3px; }
+  .screen-card .route { font-size: 11px; color: #107c10; font-family: 'Consolas', monospace; margin-bottom: 6px; }
+  .screen-card p { font-size: 12px; color: #616161; line-height: 1.4; }
+
+  /* ── Dashboard tabs grid ── */
+  .tabs-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; max-width: 800px; }
+  .tab-card {
+    background: white; border-radius: 10px; padding: 14px 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    border-left: 3px solid #107c10;
+  }
+  .tab-card h4 { font-size: 13px; font-weight: 700; color: #242424; margin-bottom: 3px; }
+  .tab-card p { font-size: 11px; color: #616161; line-height: 1.4; }
+  .sub-heading { font-size: 16px; font-weight: 700; color: #107c10; margin: 24px 0 14px; }
+  .sub-heading:first-child { margin-top: 0; }
+
+  /* ── KPI grid ── */
+  .kpi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; max-width: 800px; }
+  .kpi-card {
+    background: white; border-radius: 10px; padding: 16px; text-align: center;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  }
+  .kpi-card .kpi-label { font-size: 10px; color: #616161; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+  .kpi-card .kpi-value { font-size: 17px; font-weight: 700; color: #107c10; }
+  .kpi-card .kpi-desc { font-size: 10px; color: #888; margin-top: 3px; }
+
+  /* ── Notification list ── */
+  .notif-list { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; max-width: 800px; }
+  .notif {
+    display: flex; align-items: center; gap: 12px; background: white; border-radius: 8px;
+    padding: 12px 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  }
+  .notif-icon {
+    width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 700; color: white; flex-shrink: 0;
+  }
+  .notif-text { flex: 1; }
+  .notif-text strong { font-size: 13px; color: #242424; }
+  .notif-text span { display: block; font-size: 11px; color: #888; margin-top: 1px; }
+
+  /* ── Permissions box ── */
+  .perms { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; max-width: 800px; }
+  .perm-card { background: white; border-radius: 10px; padding: 20px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+  .perm-card h4 { font-size: 14px; font-weight: 700; margin-bottom: 10px; }
+  .perm-card.can h4 { color: #107c10; }
+  .perm-card.cannot h4 { color: #d13438; }
+  .perm-card ul { font-size: 13px; color: #616161; line-height: 1.8; padding-left: 18px; }
+
+  /* ── Footer ── */
+  .footer { text-align: center; padding: 8px; color: #aaa; font-size: 11px; flex-shrink: 0; background: #f0f2f5; border-top: 1px solid #e0e0e0; }
+</style>
+</head>
+<body>
+
+<!-- Hero -->
+<div class="hero">
+  <div class="hero-left">
+    <div class="hero-badge">Role Overview</div>
+    <h1>Manager</h1>
+    <p>You are the command centre of Digital Workplace pre-sales. Assign specialists, confirm meetings, transition pipeline stages, and monitor KPIs across the entire team.</p>
+  </div>
+  <div class="hero-stats">
+    <div class="stat"><div class="num">3</div><div class="label">Dashboards</div></div>
+    <div class="stat"><div class="num">10</div><div class="label">Admin Tabs</div></div>
+    <div class="stat"><div class="num">7</div><div class="label">Funnel Stages</div></div>
+    <div class="stat"><div class="num">12</div><div class="label">Email Alerts</div></div>
+  </div>
+</div>
+
+<!-- Tab bar -->
+<div class="tab-bar">
+  <div class="tab active" onclick="switchTab(event, 'journey')">Your Journey</div>
+  <div class="tab" onclick="switchTab(event, 'screens')">Your Screens</div>
+  <div class="tab" onclick="switchTab(event, 'dashboards')">Dashboard &amp; Admin Tabs</div>
+  <div class="tab" onclick="switchTab(event, 'kpis')">KPIs</div>
+  <div class="tab" onclick="switchTab(event, 'emails')">Emails You Receive</div>
+  <div class="tab" onclick="switchTab(event, 'perms')">Permissions</div>
+</div>
+
+<!-- Tab content -->
+<div class="tab-content">
+
+  <!-- Journey -->
+  <div id="journey" class="tab-panel active">
+    <div class="timeline">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-card">
+          <div class="subtitle">Receive</div>
+          <h3>New Request Lands in Your Queue</h3>
+          <p>When an Account Manager submits a service or product request, you receive an email alert and the request appears in the <strong>Sales Funnel &rarr; Request Queue</strong> tab. Review client details, interest level, and deal value.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-card">
+          <div class="subtitle">Qualify</div>
+          <h3>Validate &amp; Qualify the Lead</h3>
+          <p>Open the request and assess fit. Move the request from <strong>Lead &rarr; Qualified</strong>. You can also mark it as Lost if the opportunity isn't viable.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-card">
+          <div class="subtitle">Assign</div>
+          <h3>Assign a Pre-Sales Specialist</h3>
+          <p>Open the <strong>Assign Specialist</strong> dialog. View each specialist's current deal count, role, and specializations. Pick the best fit. Both the AM and specialist receive notifications.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-card">
+          <div class="subtitle">Confirm</div>
+          <h3>Confirm a Discovery Meeting Slot</h3>
+          <p>The AM proposed up to 3 time slots. Select one and confirm. The system:</p>
+          <ul>
+            <li>Creates a Teams meeting on the shared calendar</li>
+            <li>Sends invites to the AM, specialist, and client contact</li>
+            <li>Moves the request to <strong>Discovery</strong> stage</li>
+            <li>Auto-creates a <strong>Session Preparation</strong> record for the specialist</li>
+          </ul>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">5</div>
+        <div class="step-card">
+          <div class="subtitle">Monitor</div>
+          <h3>Track the Pipeline</h3>
+          <p>Use the Sales Funnel Dashboard to monitor requests through <strong>Discovery &rarr; Proposal &rarr; Negotiation</strong>. Transition stages, update deal values, and keep the pipeline moving.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">6</div>
+        <div class="step-card">
+          <div class="subtitle">Close</div>
+          <h3>Mark Deals as Won or Lost</h3>
+          <p>When a deal closes, transition to <strong>Won</strong> (updates client lifetime value, decrements specialist deal count) or <strong>Lost</strong> (captures reason, cleans up calendar events). Both trigger notifications.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">7</div>
+        <div class="step-card">
+          <div class="subtitle">Administer</div>
+          <h3>Manage Configuration &amp; Master Data</h3>
+          <p>Use the Admin Panel to manage team members, account managers, clients, services, specialists, and more. Import data via XLSX, provision SharePoint lists, and control manager access.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Screens -->
+  <div id="screens" class="tab-panel">
+    <div class="screens">
+      <div class="screen-card">
+        <h4>Sales Funnel Dashboard</h4>
+        <div class="route">/pipeline</div>
+        <p>Funnel visualisation, pipeline KPIs, conversion rates, and request queue with bulk actions.</p>
+      </div>
+      <div class="screen-card">
+        <h4>Manager Dashboard</h4>
+        <div class="route">/dashboard</div>
+        <p>10-tab analytics hub: KPIs, charts, calendar, timeline, commercial metrics, resources, gamification.</p>
+      </div>
+      <div class="screen-card">
+        <h4>Admin Panel</h4>
+        <div class="route">/admin</div>
+        <p>10-tab configuration centre for all master data, provisioning, and access control.</p>
+      </div>
+      <div class="screen-card">
+        <h4>Service Catalog</h4>
+        <div class="route">/services</div>
+        <p>Browse and manage the 6 service categories and their detail pages.</p>
+      </div>
+      <div class="screen-card">
+        <h4>Product Catalog</h4>
+        <div class="route">/products</div>
+        <p>Browse 29 DWx products across Apps, Web Parts, and Adaptive Cards.</p>
+      </div>
+      <div class="screen-card">
+        <h4>My Requests</h4>
+        <div class="route">/requests</div>
+        <p>View your own requests. Managers can also see all requests via the pipeline.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dashboard & Admin Tabs -->
+  <div id="dashboards" class="tab-panel">
+    <div class="sub-heading">Sales Funnel Tabs (4)</div>
+    <div class="tabs-grid">
+      <div class="tab-card">
+        <h4>Funnel Chart</h4>
+        <p>Visual funnel showing request counts per stage with click-through filtering.</p>
+      </div>
+      <div class="tab-card">
+        <h4>Pipeline KPIs</h4>
+        <p>Total pipeline, weighted pipeline, win rate, average deal size, and hot leads.</p>
+      </div>
+      <div class="tab-card">
+        <h4>Request Queue</h4>
+        <p>All service requests with quick-action menus: assign specialist, confirm slot, transition stage.</p>
+      </div>
+      <div class="tab-card">
+        <h4>Product Queue</h4>
+        <p>All product requests with specialist assignment, demo confirmation, and bulk operations.</p>
+      </div>
+    </div>
+
+    <div class="sub-heading">Admin Panel Tabs (10)</div>
+    <div class="tabs-grid">
+      <div class="tab-card">
+        <h4>Team Members</h4>
+        <p>CRUD for team members with role assignment.</p>
+      </div>
+      <div class="tab-card">
+        <h4>Account Managers</h4>
+        <p>AM management with Entra ID user picker.</p>
+      </div>
+      <div class="tab-card">
+        <h4>Clients</h4>
+        <p>Client master data with XLSX import and orphan protection.</p>
+      </div>
+      <div class="tab-card">
+        <h4>Services</h4>
+        <p>Service CRUD with rich content editing and XLSX import.</p>
+      </div>
+      <div class="tab-card">
+        <h4>Specialists</h4>
+        <p>Specialist management with workload tracking.</p>
+      </div>
+      <div class="tab-card">
+        <h4>Manager Access</h4>
+        <p>Control who has manager-level access.</p>
+      </div>
+      <div class="tab-card">
+        <h4>Guest Invitations</h4>
+        <p>Invite external partner AMs via Azure AD.</p>
+      </div>
+      <div class="tab-card">
+        <h4>Checklist</h4>
+        <p>Manage pre-sales checklists.</p>
+      </div>
+      <div class="tab-card">
+        <h4>Documents</h4>
+        <p>Document library management.</p>
+      </div>
+      <div class="tab-card">
+        <h4>SP Provisioning</h4>
+        <p>Provision SharePoint lists via Graph API.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- KPIs -->
+  <div id="kpis" class="tab-panel">
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-label">Total Pipeline</div>
+        <div class="kpi-value">SUM(DealValue)</div>
+        <div class="kpi-desc">Active requests excl. Won/Lost</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Weighted Pipeline</div>
+        <div class="kpi-value">Value x Prob.</div>
+        <div class="kpi-desc">Risk-adjusted pipeline value</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Win Rate</div>
+        <div class="kpi-value">Won / Total</div>
+        <div class="kpi-desc">Won vs Won + Lost percentage</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Avg Deal Size</div>
+        <div class="kpi-value">Revenue / Wins</div>
+        <div class="kpi-desc">Average closed deal value (ZAR)</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Avg Sales Cycle</div>
+        <div class="kpi-value">Days</div>
+        <div class="kpi-desc">Lead to Won average duration</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Hot Leads</div>
+        <div class="kpi-value">Count</div>
+        <div class="kpi-desc">Interest level = Hot</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Emails -->
+  <div id="emails" class="tab-panel">
+    <div class="notif-list">
+      <div class="notif">
+        <div class="notif-icon" style="background:#107c10;">1</div>
+        <div class="notif-text"><strong>New Service Request</strong><span>AM submitted a new service request requiring your review</span></div>
+      </div>
+      <div class="notif">
+        <div class="notif-icon" style="background:#107c10;">2</div>
+        <div class="notif-text"><strong>New Product Request</strong><span>AM submitted a product demo or trial request</span></div>
+      </div>
+      <div class="notif">
+        <div class="notif-icon" style="background:#107c10;">3</div>
+        <div class="notif-text"><strong>Deal Won</strong><span>A deal has been closed — revenue and client LTV updated</span></div>
+      </div>
+      <div class="notif">
+        <div class="notif-icon" style="background:#d13438;">4</div>
+        <div class="notif-text"><strong>Deal Lost</strong><span>An opportunity did not convert — loss reason captured</span></div>
+      </div>
+      <div class="notif">
+        <div class="notif-icon" style="background:#f7630c;">5</div>
+        <div class="notif-text"><strong>Deal Value Changed</strong><span>AM or system updated deal value or probability</span></div>
+      </div>
+      <div class="notif">
+        <div class="notif-icon" style="background:#6264a7;">6</div>
+        <div class="notif-text"><strong>Product Status Changed</strong><span>Product request moved to a new status</span></div>
+      </div>
+      <div class="notif">
+        <div class="notif-icon" style="background:#d13438;">7</div>
+        <div class="notif-text"><strong>Calendar Event Failed</strong><span>Teams meeting creation failed — manual action required</span></div>
+      </div>
+      <div class="notif">
+        <div class="notif-icon" style="background:#1a5a8a;">8</div>
+        <div class="notif-text"><strong>Weekly Pipeline Digest</strong><span>Weekly summary of KPIs, activity, stage breakdown, and hot deals</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Permissions -->
+  <div id="perms" class="tab-panel">
+    <div class="perms">
+      <div class="perm-card can">
+        <h4>You Can</h4>
+        <ul>
+          <li>View all service and product requests</li>
+          <li>Assign and reassign specialists</li>
+          <li>Confirm discovery meeting slots</li>
+          <li>Transition pipeline stages (Lead to Won/Lost)</li>
+          <li>Update deal values and probabilities</li>
+          <li>Access Sales Funnel and Manager Dashboards</li>
+          <li>Manage all Admin Panel tabs (10 tabs)</li>
+          <li>Import clients and services via XLSX</li>
+          <li>Provision SharePoint lists</li>
+          <li>Control manager access for other users</li>
+          <li>Invite external guest Account Managers</li>
+          <li>Confirm product demo/trial slots</li>
+        </ul>
+      </div>
+      <div class="perm-card cannot">
+        <h4>You Cannot</h4>
+        <ul>
+          <li>Submit requests on behalf of an AM</li>
+          <li>Edit another AM's personal details</li>
+          <li>Delete SharePoint lists (only provision)</li>
+          <li>Override audit log entries</li>
+          <li>Access Azure AD outside app scope</li>
+          <li>Modify production environment config</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="footer">DWx Traffic Manager &mdash; Manager Role Overview &mdash; v2.5.0</div>
+
+<script>
+function switchTab(e, id) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  e.currentTarget.classList.add('active');
+  document.getElementById(id).classList.add('active');
+}
+</script>
+</body>
+</html>
