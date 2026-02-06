@@ -863,6 +863,162 @@ export const weeklyPipelineDigest = (
 };
 
 // ============================================================================
+// PROPOSAL EMAILS
+// ============================================================================
+
+export interface ProposalEmailContext {
+  clientName: string;
+  serviceName: string;
+  proposalType: string;
+  version: number;
+  status: string;
+  createdByName: string;
+  createdByEmail: string;
+  approvedByName?: string;
+  accountManagerName: string;
+  accountManagerEmail: string;
+  grandTotal?: number;
+  validUntil?: string;
+  internalNotes?: string;
+  clientFeedback?: string;
+}
+
+/**
+ * 24. Proposal created — sent to creator + AM
+ */
+export const proposalCreated = (ctx: ProposalEmailContext): { subject: string; body: string } => {
+  const content = `
+    <p>A new proposal has been created for <strong>${ctx.clientName}</strong>.</p>
+    ${row('Client', ctx.clientName)}
+    ${row('Service', ctx.serviceName)}
+    ${row('Proposal Type', ctx.proposalType)}
+    ${row('Created By', `${ctx.createdByName} (${ctx.createdByEmail})`)}
+    ${row('Version', String(ctx.version))}
+    ${row('Status', ctx.status)}
+    <p style="margin-top:20px;">Open the proposal in DWx Traffic Manager to start building content.</p>
+  `;
+  return {
+    subject: `[DWx] New Proposal Created: ${ctx.serviceName} for ${ctx.clientName}`,
+    body: wrap(GRAD.standard, 'New Proposal Created', content),
+  };
+};
+
+/**
+ * 25. Proposal submitted for review — sent to managers
+ */
+export const proposalSubmittedForReview = (ctx: ProposalEmailContext): { subject: string; body: string } => {
+  const content = `
+    <p>A proposal has been submitted for your review and requires your approval.</p>
+    ${row('Client', ctx.clientName)}
+    ${row('Service', ctx.serviceName)}
+    ${row('Proposal Type', ctx.proposalType)}
+    ${row('Version', String(ctx.version))}
+    ${row('Submitted By', `${ctx.createdByName} (${ctx.createdByEmail})`)}
+    ${ctx.grandTotal ? row('Grand Total', dealValue(formatCurrency(ctx.grandTotal))) : ''}
+    <p style="margin-top:20px;">Please review and approve or request revisions.</p>
+  `;
+  return {
+    subject: `[DWx] Proposal Awaiting Review: ${ctx.serviceName} for ${ctx.clientName}`,
+    body: wrap(GRAD.warning, 'Proposal Awaiting Review', content),
+  };
+};
+
+/**
+ * 26. Proposal revision requested — sent to creator
+ */
+export const proposalRevisionRequested = (ctx: ProposalEmailContext): { subject: string; body: string } => {
+  const content = `
+    <p>Hi <strong>${ctx.createdByName}</strong>,</p>
+    <p>Your proposal for <strong>${ctx.clientName}</strong> requires revisions before it can be approved.</p>
+    ${row('Client', ctx.clientName)}
+    ${row('Service', ctx.serviceName)}
+    ${ctx.internalNotes ? callout('#f7630c', '#fff8f0', `<strong>Reviewer Notes:</strong><p style="margin:5px 0 0;">${ctx.internalNotes}</p>`) : ''}
+    <p style="margin-top:20px;">Please address the feedback and re-submit.</p>
+  `;
+  return {
+    subject: `[DWx] Proposal Revision Requested: ${ctx.serviceName} for ${ctx.clientName}`,
+    body: wrap(GRAD.warning, 'Proposal Revision Requested', content),
+  };
+};
+
+/**
+ * 27. Proposal approved — sent to creator + AM
+ */
+export const proposalApproved = (ctx: ProposalEmailContext): { subject: string; body: string } => {
+  const content = `
+    <p>The proposal for <strong>${ctx.clientName}</strong> has been approved and is ready for delivery.</p>
+    ${row('Client', ctx.clientName)}
+    ${row('Service', ctx.serviceName)}
+    ${ctx.approvedByName ? row('Approved By', ctx.approvedByName) : ''}
+    ${ctx.grandTotal ? row('Grand Total', dealValue(formatCurrency(ctx.grandTotal))) : ''}
+    ${callout('#107c10', '#dff6dd', `<strong>Next Step:</strong> The proposal is ready to send to the Account Manager for client delivery.`)}
+  `;
+  return {
+    subject: `[DWx] Proposal Approved: ${ctx.serviceName} for ${ctx.clientName}`,
+    body: wrap(GRAD.success, 'Proposal Approved', content),
+  };
+};
+
+/**
+ * 28. Proposal sent to client — sent to AM
+ */
+export const proposalSentToClient = (ctx: ProposalEmailContext): { subject: string; body: string } => {
+  const content = `
+    <p>Hi <strong>${ctx.accountManagerName}</strong>,</p>
+    <p>The proposal for <strong>${ctx.clientName}</strong> has been sent for client review.</p>
+    ${row('Client', ctx.clientName)}
+    ${row('Service', ctx.serviceName)}
+    ${row('Account Manager', `${ctx.accountManagerName} (${ctx.accountManagerEmail})`)}
+    ${ctx.validUntil ? row('Valid Until', ctx.validUntil) : ''}
+    ${ctx.grandTotal ? row('Grand Total', dealValue(formatCurrency(ctx.grandTotal))) : ''}
+    <p style="margin-top:20px;">The proposal has been sent. Please follow up with the client.</p>
+  `;
+  return {
+    subject: `[DWx] Proposal Sent for Client Review: ${ctx.serviceName} for ${ctx.clientName}`,
+    body: wrap(GRAD.standard, 'Proposal Sent for Client Review', content),
+  };
+};
+
+/**
+ * 29. Proposal accepted — sent to AM + creator + managers
+ */
+export const proposalAccepted = (ctx: ProposalEmailContext): { subject: string; body: string } => {
+  const content = `
+    <p>Great news! The proposal for <strong>${ctx.clientName}</strong> has been accepted by the client.</p>
+    ${callout('#107c10', '#dff6dd',
+      row('Client', `<strong>${ctx.clientName}</strong>`) +
+      row('Service', ctx.serviceName) +
+      (ctx.grandTotal ? row('Deal Value', dealValue(formatCurrency(ctx.grandTotal))) : '')
+    )}
+    ${row('Account Manager', ctx.accountManagerName)}
+    ${row('Proposal Type', ctx.proposalType)}
+    <p style="margin-top:20px;">The deal is moving to Negotiation stage.</p>
+  `;
+  return {
+    subject: `[DWx] Proposal Accepted: ${ctx.serviceName} for ${ctx.clientName}`,
+    body: wrap(GRAD.success, 'Proposal Accepted!', content),
+  };
+};
+
+/**
+ * 30. Proposal declined — sent to AM + creator + managers
+ */
+export const proposalDeclined = (ctx: ProposalEmailContext): { subject: string; body: string } => {
+  const content = `
+    <p>Unfortunately, the proposal for <strong>${ctx.clientName}</strong> has been declined by the client.</p>
+    ${row('Client', ctx.clientName)}
+    ${row('Service', ctx.serviceName)}
+    ${row('Account Manager', ctx.accountManagerName)}
+    ${ctx.clientFeedback ? callout('#d13438', '#fde7e9', `<strong>Client Feedback:</strong><p style="margin:5px 0 0;">${ctx.clientFeedback}</p>`) : ''}
+    <p style="margin-top:20px;">Review the feedback and consider next steps.</p>
+  `;
+  return {
+    subject: `[DWx] Proposal Declined: ${ctx.serviceName} for ${ctx.clientName}`,
+    body: wrap(GRAD.danger, 'Proposal Declined', content),
+  };
+};
+
+// ============================================================================
 // Export map
 // ============================================================================
 
@@ -891,4 +1047,12 @@ export const EmailTemplates = {
   // New templates
   welcomeAccountManager,
   weeklyPipelineDigest,
+  // Proposal templates
+  proposalCreated,
+  proposalSubmittedForReview,
+  proposalRevisionRequested,
+  proposalApproved,
+  proposalSentToClient,
+  proposalAccepted,
+  proposalDeclined,
 };

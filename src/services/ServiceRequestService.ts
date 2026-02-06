@@ -9,6 +9,7 @@ import { auditService } from './AuditService';
 import { dwxNotificationService } from './DWxNotificationService';
 import { specialistService } from './SpecialistService';
 import { sessionPrepService } from './SessionPrepService';
+import { proposalService } from './ProposalService';
 import {
   ServiceRequest,
   CreateServiceRequestInput,
@@ -743,7 +744,44 @@ class ServiceRequestService {
         }
         break;
       case 'Proposal':
-        // Proposal notification is already handled above the switch block
+        // Auto-create a proposal record when entering Proposal stage
+        try {
+          const existingProposal = await proposalService.getProposalByServiceRequest(request.Id);
+          if (!existingProposal) {
+            const proposalResult = await proposalService.createProposal(
+              {
+                serviceRequestId: request.Id,
+                proposalType: 'Standard',
+                templateName: '',
+                createdByEmail: userEmail,
+                createdByName: request.AssignedSpecialistName || userEmail,
+              },
+              request.ClientName,
+              request.ServiceName
+            );
+            if (proposalResult.success) {
+              console.log(`[ServiceRequestService] Auto-created proposal for request ${request.Id}`);
+              // Send proposal created notification
+              try {
+                await dwxNotificationService.notifyProposalCreated({
+                  clientName: request.ClientName,
+                  serviceName: request.ServiceName,
+                  proposalType: 'Standard',
+                  version: 1,
+                  status: 'Draft',
+                  createdByName: request.AssignedSpecialistName || userEmail,
+                  createdByEmail: userEmail,
+                  accountManagerName: request.AccountManagerName,
+                  accountManagerEmail: request.AccountManagerEmail,
+                });
+              } catch (notifError) {
+                console.error('Failed to send proposal created notification:', notifError);
+              }
+            }
+          }
+        } catch (proposalError) {
+          console.error('Failed to auto-create proposal:', proposalError);
+        }
         break;
     }
   }

@@ -8,7 +8,7 @@ import { ServiceRequest, FunnelStage, DWService } from '../types/ServiceRequest'
 import { ProductRequest } from '../types/ProductRequest';
 import { SessionPreparation } from '../types/SessionPreparation';
 import { config } from '../config/environmentConfig';
-import { EmailTemplates } from './EmailTemplates';
+import { EmailTemplates, ProposalEmailContext } from './EmailTemplates';
 
 const graphService = getGraphService();
 
@@ -463,6 +463,116 @@ class DWxNotificationService {
       weekLabel, kpis, activity, stageBreakdown, hotDeals
     );
     return this.sendEmail(managerEmails, subject, body);
+  }
+
+  // ==========================================================================
+  // Proposal Notifications
+  // ==========================================================================
+
+  /**
+   * Notify creator + AM that a proposal was created
+   */
+  async notifyProposalCreated(ctx: ProposalEmailContext): Promise<void> {
+    try {
+      const { subject, body } = EmailTemplates.proposalCreated(ctx);
+      const recipients = [ctx.createdByEmail];
+      if (ctx.accountManagerEmail && ctx.accountManagerEmail !== ctx.createdByEmail) {
+        recipients.push(ctx.accountManagerEmail);
+      }
+      await this.sendEmail(recipients, subject, body);
+    } catch (error) {
+      console.error('[DWxNotificationService] Failed to send proposal created notification:', error);
+    }
+  }
+
+  /**
+   * Notify all managers that a proposal is awaiting review
+   */
+  async notifyProposalSubmittedForReview(ctx: ProposalEmailContext): Promise<void> {
+    try {
+      const managerEmails = this.getManagerEmails();
+      if (managerEmails.length === 0) return;
+      const { subject, body } = EmailTemplates.proposalSubmittedForReview(ctx);
+      await this.sendEmail(managerEmails, subject, body);
+    } catch (error) {
+      console.error('[DWxNotificationService] Failed to send proposal submitted for review notification:', error);
+    }
+  }
+
+  /**
+   * Notify creator that revisions are requested on their proposal
+   */
+  async notifyProposalRevisionRequested(ctx: ProposalEmailContext): Promise<void> {
+    try {
+      const { subject, body } = EmailTemplates.proposalRevisionRequested(ctx);
+      await this.sendEmail([ctx.createdByEmail], subject, body);
+    } catch (error) {
+      console.error('[DWxNotificationService] Failed to send proposal revision requested notification:', error);
+    }
+  }
+
+  /**
+   * Notify creator + AM that a proposal was approved
+   */
+  async notifyProposalApproved(ctx: ProposalEmailContext): Promise<void> {
+    try {
+      const { subject, body } = EmailTemplates.proposalApproved(ctx);
+      const recipients = [ctx.createdByEmail];
+      if (ctx.accountManagerEmail && ctx.accountManagerEmail !== ctx.createdByEmail) {
+        recipients.push(ctx.accountManagerEmail);
+      }
+      await this.sendEmail(recipients, subject, body);
+    } catch (error) {
+      console.error('[DWxNotificationService] Failed to send proposal approved notification:', error);
+    }
+  }
+
+  /**
+   * Notify AM that proposal has been sent to the client
+   */
+  async notifyProposalSentToClient(ctx: ProposalEmailContext): Promise<void> {
+    try {
+      const { subject, body } = EmailTemplates.proposalSentToClient(ctx);
+      await this.sendEmail([ctx.accountManagerEmail], subject, body);
+    } catch (error) {
+      console.error('[DWxNotificationService] Failed to send proposal sent to client notification:', error);
+    }
+  }
+
+  /**
+   * Notify AM + creator + managers that proposal was accepted
+   */
+  async notifyProposalAccepted(ctx: ProposalEmailContext): Promise<void> {
+    try {
+      const { subject, body } = EmailTemplates.proposalAccepted(ctx);
+      const recipients = new Set<string>();
+      recipients.add(ctx.accountManagerEmail);
+      recipients.add(ctx.createdByEmail);
+      for (const email of this.getManagerEmails()) {
+        recipients.add(email);
+      }
+      await this.sendEmail(Array.from(recipients), subject, body);
+    } catch (error) {
+      console.error('[DWxNotificationService] Failed to send proposal accepted notification:', error);
+    }
+  }
+
+  /**
+   * Notify AM + creator + managers that proposal was declined
+   */
+  async notifyProposalDeclined(ctx: ProposalEmailContext): Promise<void> {
+    try {
+      const { subject, body } = EmailTemplates.proposalDeclined(ctx);
+      const recipients = new Set<string>();
+      recipients.add(ctx.accountManagerEmail);
+      recipients.add(ctx.createdByEmail);
+      for (const email of this.getManagerEmails()) {
+        recipients.add(email);
+      }
+      await this.sendEmail(Array.from(recipients), subject, body);
+    } catch (error) {
+      console.error('[DWxNotificationService] Failed to send proposal declined notification:', error);
+    }
   }
 }
 

@@ -29,7 +29,8 @@ export type AuditEntity =
   | 'ProductRequest'
   | 'SessionPrep'
   | 'LandingPageContent'
-  | 'KnowledgeBase';
+  | 'KnowledgeBase'
+  | 'Proposal';
 
 export interface AuditLogEntry {
   Id?: number;

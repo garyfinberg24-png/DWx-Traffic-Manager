@@ -16,6 +16,20 @@ import {
   ResourceType,
 } from '../types/SessionPreparation';
 
+import {
+  ProposalAIContext,
+  ProposalAIResult,
+  ProposalSectionKey,
+  ExecutiveSummary,
+  SolutionOverview,
+  TechnologyStack,
+  ScopeOfWork,
+  PricingBreakdown,
+  ProposalTimeline,
+  TeamComposition,
+  ProposalRisk,
+} from '../types/Proposal';
+
 /**
  * Generate a unique ID for items
  */
@@ -442,6 +456,330 @@ Instruction: ${refinementInstruction}`;
     } catch (error) {
       console.error('[AIPreparationService] Failed to refine talking point:', error);
       return null;
+    }
+  }
+
+  // ==========================================================================
+  // Proposal AI Generation
+  // ==========================================================================
+
+  /**
+   * Generate all proposal sections in parallel
+   */
+  async generateProposalContent(context: ProposalAIContext): Promise<ProposalAIResult> {
+    try {
+      const results = await Promise.allSettled([
+        this.generateExecutiveSummary(context),
+        this.generateSolutionOverview(context),
+        this.generateTechStack(context),
+        this.generateScopeOfWork(context),
+        this.generatePricingEstimate(context),
+        this.generateTimeline(context),
+        this.generateTeamComposition(context),
+        this.generateAssumptionsAndRisks(context),
+      ]);
+
+      const getValue = <T>(result: PromiseSettledResult<T>): T | undefined =>
+        result.status === 'fulfilled' ? result.value : undefined;
+
+      const assumptionsAndRisks = getValue(results[7]) as
+        | { assumptions: string[]; risks: ProposalRisk[] }
+        | undefined;
+
+      return {
+        success: true,
+        executiveSummary: getValue(results[0]) as ExecutiveSummary | undefined,
+        solutionOverview: getValue(results[1]) as SolutionOverview | undefined,
+        technologyStack: getValue(results[2]) as TechnologyStack | undefined,
+        scopeOfWork: getValue(results[3]) as ScopeOfWork | undefined,
+        pricingBreakdown: getValue(results[4]) as PricingBreakdown | undefined,
+        timeline: getValue(results[5]) as ProposalTimeline | undefined,
+        teamComposition: getValue(results[6]) as TeamComposition | undefined,
+        assumptions: assumptionsAndRisks?.assumptions,
+        risks: assumptionsAndRisks?.risks,
+      };
+    } catch (error) {
+      console.error('[AIPreparationService] Failed to generate proposal content:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to generate proposal content',
+      };
+    }
+  }
+
+  /**
+   * Generate executive summary for a proposal
+   */
+  async generateExecutiveSummary(context: ProposalAIContext): Promise<ExecutiveSummary> {
+    const systemPrompt = `You are a senior business consultant at Digital Workplace (DW), a Microsoft consulting firm in South Africa. Generate a professional executive summary for a client proposal.
+
+Return a JSON object with this exact structure:
+{
+  "overview": "2-3 paragraph overview of the proposed engagement",
+  "objectives": ["3-5 key project objectives"],
+  "successCriteria": ["2-4 measurable success criteria/outcomes"]
+}
+
+Be professional, concise, and focused on business value.`;
+
+    const userPrompt = `Generate an executive summary for a proposal:
+
+Client: ${context.clientName}
+Service: ${context.serviceName}
+Category: ${context.serviceCategory}
+Requirements: ${context.requirements || 'Not specified'}
+Discovery Notes: ${context.discoveryNotes || 'Not available'}
+Deal Value: R${context.dealValue.toLocaleString()}`;
+
+    const response = await callAzureOpenAI(systemPrompt, userPrompt, 0.7);
+    return parseAIJson<ExecutiveSummary>(response);
+  }
+
+  /**
+   * Generate solution overview for a proposal
+   */
+  async generateSolutionOverview(context: ProposalAIContext): Promise<SolutionOverview> {
+    const systemPrompt = `You are a senior business consultant at Digital Workplace (DW), a Microsoft consulting firm in South Africa. Generate a professional executive summary for a client proposal.
+
+Return a JSON object with this exact structure:
+{
+  "description": "2-3 paragraphs describing the proposed solution",
+  "approach": "Description of the methodology and approach DW will use",
+  "differentiators": ["3-5 reasons why DW is the right partner for this engagement"]
+}
+
+Be specific to the service category and Microsoft technology stack.`;
+
+    const userPrompt = `Generate a solution overview for a proposal:
+
+Client: ${context.clientName}
+Service: ${context.serviceName}
+Category: ${context.serviceCategory}
+Description: ${context.serviceDescription}
+Complexity: ${context.serviceComplexity}
+Requirements: ${context.requirements || 'Not specified'}
+Discovery Notes: ${context.discoveryNotes || 'Not available'}`;
+
+    const response = await callAzureOpenAI(systemPrompt, userPrompt, 0.7);
+    return parseAIJson<SolutionOverview>(response);
+  }
+
+  /**
+   * Generate technology stack recommendation for a proposal
+   */
+  async generateTechStack(context: ProposalAIContext): Promise<TechnologyStack> {
+    const systemPrompt = `You are a senior business consultant at Digital Workplace (DW), a Microsoft consulting firm in South Africa. Generate a professional executive summary for a client proposal.
+
+Return a JSON object with this exact structure:
+{
+  "technologies": [
+    { "name": "Technology name", "role": "Role in the solution", "justification": "Why this technology is recommended" }
+  ]
+}
+
+Include Microsoft technologies relevant to the service category. Recommend 4-8 technologies.`;
+
+    const userPrompt = `Generate a technology stack for a ${context.serviceCategory} proposal:
+
+Client: ${context.clientName}
+Service: ${context.serviceName}
+Category: ${context.serviceCategory}
+Description: ${context.serviceDescription}
+Complexity: ${context.serviceComplexity}
+Requirements: ${context.requirements || 'Not specified'}`;
+
+    const response = await callAzureOpenAI(systemPrompt, userPrompt, 0.7);
+    return parseAIJson<TechnologyStack>(response);
+  }
+
+  /**
+   * Generate scope of work for a proposal
+   */
+  async generateScopeOfWork(context: ProposalAIContext): Promise<ScopeOfWork> {
+    const systemPrompt = `You are a senior business consultant at Digital Workplace (DW), a Microsoft consulting firm in South Africa. Generate a professional executive summary for a client proposal.
+
+Return a JSON object with this exact structure:
+{
+  "deliverables": [
+    { "title": "Deliverable title", "description": "Brief description", "hours": 16 }
+  ],
+  "exclusions": ["Items explicitly out of scope"]
+}
+
+Include 4-8 deliverables with realistic hour estimates based on the service complexity and duration. Include 3-5 exclusions.`;
+
+    const userPrompt = `Generate a scope of work for a proposal:
+
+Client: ${context.clientName}
+Service: ${context.serviceName}
+Category: ${context.serviceCategory}
+Complexity: ${context.serviceComplexity}
+Duration: ${context.serviceDuration}
+Requirements: ${context.requirements || 'Not specified'}
+Discovery Notes: ${context.discoveryNotes || 'Not available'}
+Deal Value: R${context.dealValue.toLocaleString()}`;
+
+    const response = await callAzureOpenAI(systemPrompt, userPrompt, 0.7);
+    return parseAIJson<ScopeOfWork>(response);
+  }
+
+  /**
+   * Generate pricing estimate for a proposal
+   */
+  async generatePricingEstimate(context: ProposalAIContext): Promise<PricingBreakdown> {
+    const systemPrompt = `You are a senior business consultant at Digital Workplace (DW), a Microsoft consulting firm in South Africa. Generate a professional executive summary for a client proposal.
+
+Return a JSON object with this exact structure:
+{
+  "lineItems": [
+    { "description": "Line item description", "quantity": 1, "unitPrice": 10000, "total": 10000 }
+  ],
+  "subtotal": 100000,
+  "tax": 15000,
+  "discount": 0,
+  "grandTotal": 115000
+}
+
+Use ZAR currency. Tax should be 15% VAT. Line items should map to deliverables. Base estimates on the deal value provided.`;
+
+    const userPrompt = `Generate a pricing breakdown for a proposal:
+
+Client: ${context.clientName}
+Service: ${context.serviceName}
+Category: ${context.serviceCategory}
+Complexity: ${context.serviceComplexity}
+Duration: ${context.serviceDuration}
+Deal Value: R${context.dealValue.toLocaleString()}
+Proposal Type: ${context.proposalType}
+Requirements: ${context.requirements || 'Not specified'}`;
+
+    const response = await callAzureOpenAI(systemPrompt, userPrompt, 0.5);
+    return parseAIJson<PricingBreakdown>(response);
+  }
+
+  /**
+   * Generate timeline for a proposal
+   */
+  async generateTimeline(context: ProposalAIContext): Promise<ProposalTimeline> {
+    const systemPrompt = `You are a senior business consultant at Digital Workplace (DW), a Microsoft consulting firm in South Africa. Generate a professional executive summary for a client proposal.
+
+Return a JSON object with this exact structure:
+{
+  "phases": [
+    { "name": "Phase name", "startWeek": 1, "endWeek": 2, "milestones": ["Milestone 1", "Milestone 2"] }
+  ],
+  "totalWeeks": 12
+}
+
+Align the timeline with the service duration. Include 3-6 phases with realistic milestones.`;
+
+    const userPrompt = `Generate a project timeline for a proposal:
+
+Client: ${context.clientName}
+Service: ${context.serviceName}
+Category: ${context.serviceCategory}
+Complexity: ${context.serviceComplexity}
+Duration: ${context.serviceDuration}
+Requirements: ${context.requirements || 'Not specified'}`;
+
+    const response = await callAzureOpenAI(systemPrompt, userPrompt, 0.5);
+    return parseAIJson<ProposalTimeline>(response);
+  }
+
+  /**
+   * Generate team composition for a proposal
+   */
+  async generateTeamComposition(context: ProposalAIContext): Promise<TeamComposition> {
+    const systemPrompt = `You are a senior business consultant at Digital Workplace (DW), a Microsoft consulting firm in South Africa. Generate a professional executive summary for a client proposal.
+
+Return a JSON object with this exact structure:
+{
+  "members": [
+    { "role": "Team role", "name": "Team member name", "responsibility": "Key responsibilities" }
+  ]
+}
+
+Include the specialist as lead. Typical roles: Solution Architect, Technical Specialist, Project Manager, Developer. Include 3-6 team members.`;
+
+    const userPrompt = `Generate a team composition for a proposal:
+
+Client: ${context.clientName}
+Service: ${context.serviceName}
+Category: ${context.serviceCategory}
+Complexity: ${context.serviceComplexity}
+Specialist Lead: ${context.specialistName}
+Account Manager: ${context.accountManagerName}`;
+
+    const response = await callAzureOpenAI(systemPrompt, userPrompt, 0.7);
+    return parseAIJson<TeamComposition>(response);
+  }
+
+  /**
+   * Generate assumptions and risks for a proposal
+   */
+  async generateAssumptionsAndRisks(
+    context: ProposalAIContext
+  ): Promise<{ assumptions: string[]; risks: ProposalRisk[] }> {
+    const systemPrompt = `You are a senior business consultant at Digital Workplace (DW), a Microsoft consulting firm in South Africa. Generate a professional executive summary for a client proposal.
+
+Return a JSON object with this exact structure:
+{
+  "assumptions": ["5-8 project assumptions"],
+  "risks": [
+    { "risk": "Risk description", "impact": "High" | "Medium" | "Low", "mitigation": "Mitigation strategy", "likelihood": "High" | "Medium" | "Low" }
+  ]
+}
+
+Include 5-8 realistic assumptions and 4-6 risks with appropriate impact and likelihood levels.`;
+
+    const userPrompt = `Generate assumptions and risks for a proposal:
+
+Client: ${context.clientName}
+Industry: ${context.clientIndustry}
+Company Size: ${context.clientSize}
+Service: ${context.serviceName}
+Category: ${context.serviceCategory}
+Complexity: ${context.serviceComplexity}
+Duration: ${context.serviceDuration}
+Deal Value: R${context.dealValue.toLocaleString()}
+Requirements: ${context.requirements || 'Not specified'}`;
+
+    const response = await callAzureOpenAI(systemPrompt, userPrompt, 0.7);
+    return parseAIJson<{ assumptions: string[]; risks: ProposalRisk[] }>(response);
+  }
+
+  /**
+   * Regenerate a specific proposal section
+   */
+  async regenerateProposalSection(
+    section: ProposalSectionKey,
+    context: ProposalAIContext
+  ): Promise<unknown> {
+    switch (section) {
+      case 'executiveSummary':
+        return this.generateExecutiveSummary(context);
+      case 'solutionOverview':
+        return this.generateSolutionOverview(context);
+      case 'technologyStack':
+        return this.generateTechStack(context);
+      case 'scopeOfWork':
+        return this.generateScopeOfWork(context);
+      case 'pricingBreakdown':
+        return this.generatePricingEstimate(context);
+      case 'timeline':
+        return this.generateTimeline(context);
+      case 'teamComposition':
+        return this.generateTeamComposition(context);
+      case 'assumptions': {
+        const result = await this.generateAssumptionsAndRisks(context);
+        return result.assumptions;
+      }
+      case 'risks': {
+        const result = await this.generateAssumptionsAndRisks(context);
+        return result.risks;
+      }
+      default:
+        throw new Error(`Unknown proposal section: ${section}`);
     }
   }
 }

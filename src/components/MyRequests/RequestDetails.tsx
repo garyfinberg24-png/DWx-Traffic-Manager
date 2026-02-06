@@ -32,6 +32,7 @@ import {
 } from '../../types/ServiceRequest';
 import { serviceRequestService } from '../../services/ServiceRequestService';
 import { SessionPrepDialog } from '../SessionPrep';
+import { ProposalBuilder, ProposalTracker } from '../Proposal';
 import { format } from 'date-fns';
 import {
   DetailModalShell,
@@ -236,6 +237,7 @@ export const RequestDetails: React.FC<RequestDetailsProps> = ({
   const [updating, setUpdating] = useState(false);
   const [saving, setSaving] = useState(false);
   const [showSessionPrep, setShowSessionPrep] = useState(false);
+  const [showProposal, setShowProposal] = useState(false);
 
   // Edit mode state
   const [editingSection, setEditingSection] = useState<
@@ -654,7 +656,7 @@ export const RequestDetails: React.FC<RequestDetailsProps> = ({
           <DetailSection
             icon={<Sparkle24Regular style={{ width: '16px', height: '16px' }} />}
             title="Session Preparation"
-            last
+            last={!['Proposal', 'Negotiation', 'Won'].includes(request.FunnelStage)}
           >
             <Button
               appearance="primary"
@@ -666,6 +668,19 @@ export const RequestDetails: React.FC<RequestDetailsProps> = ({
             </Button>
           </DetailSection>
         )}
+
+      {['Proposal', 'Negotiation', 'Won'].includes(request.FunnelStage) && (
+        <DetailSection
+          icon={<DocumentRegular style={{ width: '16px', height: '16px' }} />}
+          title="Proposal"
+          last
+        >
+          <ProposalTracker
+            serviceRequestId={request.Id}
+            onOpenProposal={() => setShowProposal(true)}
+          />
+        </DetailSection>
+      )}
     </>
   );
 
@@ -951,6 +966,14 @@ export const RequestDetails: React.FC<RequestDetailsProps> = ({
         open={showSessionPrep}
         onClose={() => setShowSessionPrep(false)}
         serviceRequest={request}
+      />
+
+      {/* Proposal Builder Dialog */}
+      <ProposalBuilder
+        open={showProposal}
+        onClose={() => setShowProposal(false)}
+        serviceRequest={request}
+        isManager={user?.isManager ?? false}
       />
     </>
   );

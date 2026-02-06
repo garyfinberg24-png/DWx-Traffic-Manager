@@ -717,13 +717,65 @@ class DWxSharePointProvisioningService {
     };
   }
 
+  private get proposalsListDefinition(): ListDefinition {
+    return {
+      title: 'DWxProposals',
+      description: 'DWx Proposals - Structured proposal management with AI generation and approval workflow',
+      fields: [
+        { internalName: 'ServiceRequestId', displayName: 'Service Request ID', type: 'Number', required: true },
+        {
+          internalName: 'Status',
+          displayName: 'Status',
+          type: 'Choice',
+          choices: ['Draft', 'Internal Review', 'Revision Requested', 'Approved', 'Sent to Client', 'Accepted', 'Declined'],
+          defaultValue: 'Draft',
+        },
+        { internalName: 'Version', displayName: 'Version', type: 'Number' },
+        {
+          internalName: 'ProposalType',
+          displayName: 'Proposal Type',
+          type: 'Choice',
+          choices: ['Standard', 'Custom', 'Enterprise'],
+          defaultValue: 'Standard',
+        },
+        { internalName: 'TemplateName', displayName: 'Template Name', type: 'Text' },
+        // Proposal sections (stored as JSON)
+        { internalName: 'ExecutiveSummary_JSON', displayName: 'Executive Summary (JSON)', type: 'Note' },
+        { internalName: 'SolutionOverview_JSON', displayName: 'Solution Overview (JSON)', type: 'Note' },
+        { internalName: 'TechnologyStack_JSON', displayName: 'Technology Stack (JSON)', type: 'Note' },
+        { internalName: 'ScopeOfWork_JSON', displayName: 'Scope of Work (JSON)', type: 'Note' },
+        { internalName: 'PricingBreakdown_JSON', displayName: 'Pricing Breakdown (JSON)', type: 'Note' },
+        { internalName: 'Timeline_JSON', displayName: 'Timeline (JSON)', type: 'Note' },
+        { internalName: 'TeamComposition_JSON', displayName: 'Team Composition (JSON)', type: 'Note' },
+        { internalName: 'TermsAndConditions_JSON', displayName: 'Terms and Conditions (JSON)', type: 'Note' },
+        { internalName: 'ChangeControl_JSON', displayName: 'Change Control (JSON)', type: 'Note' },
+        { internalName: 'Assumptions_JSON', displayName: 'Assumptions (JSON)', type: 'Note' },
+        { internalName: 'RisksAndMitigations_JSON', displayName: 'Risks and Mitigations (JSON)', type: 'Note' },
+        { internalName: 'SigningPage_JSON', displayName: 'Signing Page (JSON)', type: 'Note' },
+        // Lifecycle metadata
+        { internalName: 'ValidUntil', displayName: 'Valid Until', type: 'DateTime' },
+        { internalName: 'SentDate', displayName: 'Sent Date', type: 'DateTime' },
+        { internalName: 'ClientResponseDate', displayName: 'Client Response Date', type: 'DateTime' },
+        { internalName: 'ClientFeedback', displayName: 'Client Feedback', type: 'Note' },
+        { internalName: 'InternalNotes', displayName: 'Internal Notes', type: 'Note' },
+        { internalName: 'DocumentUrl', displayName: 'Document URL', type: 'Text' },
+        // Author & approval
+        { internalName: 'CreatedByEmail', displayName: 'Created By Email', type: 'Text' },
+        { internalName: 'CreatedByName', displayName: 'Created By Name', type: 'Text' },
+        { internalName: 'ApprovedByEmail', displayName: 'Approved By Email', type: 'Text' },
+        { internalName: 'ApprovedByName', displayName: 'Approved By Name', type: 'Text' },
+        { internalName: 'ApprovedDate', displayName: 'Approved Date', type: 'DateTime' },
+      ],
+    };
+  }
+
   // ==================== PUBLIC METHODS ====================
 
   /**
    * Check which DWx lists exist
    */
   async checkListsStatus(): Promise<ListStatus[]> {
-    const listNames = ['DWxServices', 'DWxServiceRequests', 'DWxProductRequests', 'DWxClients', 'DWxSpecialists', 'DWxManagers', 'DWxTeamMembers', 'DWxAccountManagers', 'DWxAuditLog', 'DWxSessionPrep', 'DWxLandingPageContent', 'DWxKnowledgeBase'];
+    const listNames = ['DWxServices', 'DWxServiceRequests', 'DWxProductRequests', 'DWxClients', 'DWxSpecialists', 'DWxManagers', 'DWxTeamMembers', 'DWxAccountManagers', 'DWxAuditLog', 'DWxSessionPrep', 'DWxLandingPageContent', 'DWxKnowledgeBase', 'DWxProposals'];
     const results: ListStatus[] = [];
 
     for (const name of listNames) {
@@ -827,6 +879,13 @@ class DWxSharePointProvisioningService {
   }
 
   /**
+   * Provision the DWxProposals list
+   */
+  async provisionProposalsList(): Promise<ProvisionResult> {
+    return this.provisionList(this.proposalsListDefinition);
+  }
+
+  /**
    * Create the DWxSupportingDocuments document library
    */
   async provisionDocumentLibrary(): Promise<ProvisionResult> {
@@ -868,6 +927,7 @@ class DWxSharePointProvisioningService {
       { name: 'DWxSessionPrep', provision: () => this.provisionSessionPrepList() },
       { name: 'DWxLandingPageContent', provision: () => this.provisionLandingPageContentList() },
       { name: 'DWxKnowledgeBase', provision: () => this.provisionKnowledgeBaseList() },
+      { name: 'DWxProposals', provision: () => this.provisionProposalsList() },
       { name: 'DWxSupportingDocuments', provision: () => this.provisionDocumentLibrary() },
     ];
 
