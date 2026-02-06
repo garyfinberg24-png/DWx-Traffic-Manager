@@ -17,6 +17,7 @@ import {
   Button,
   Input,
   Dropdown,
+  Combobox,
   Option,
   Textarea,
   Field,
@@ -27,6 +28,7 @@ import {
   MessageBar,
   MessageBarBody,
   MessageBarTitle,
+  Badge,
 } from '@fluentui/react-components';
 import { DatePicker } from '@fluentui/react-datepicker-compat';
 import {
@@ -65,6 +67,8 @@ import {
 } from '../../types/ServiceRequest';
 import { serviceCatalogService } from '../../services/ServiceCatalogService';
 import { serviceRequestService } from '../../services/ServiceRequestService';
+import { referenceDataService } from '../../services/ReferenceDataService';
+import { Client } from '../../types/ReferenceData';
 import { ServiceCard } from '../ServiceCatalog/ServiceCard';
 import { ServiceRequirementsStep } from './ServiceRequirementsStep';
 import { getServiceRequirements, validateRequirements } from '../../types/ServiceRequirements';
@@ -531,6 +535,10 @@ export const ServiceRequestForm: React.FC<ServiceRequestFormProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [showDraftBanner, setShowDraftBanner] = useState(false);
 
+  // Client auto-populate
+  const [clients, setClients] = useState<Client[]>([]);
+  const [clientAutoFilled, setClientAutoFilled] = useState(false);
+
   // Service requirements state (separate from react-hook-form for flexibility)
   const [serviceRequirements, setServiceRequirements] = useState<Record<string, unknown>>({});
 
@@ -563,13 +571,17 @@ export const ServiceRequestForm: React.FC<ServiceRequestFormProps> = ({
     },
   });
 
-  // Load services on mount
+  // Load services and clients on mount
   useEffect(() => {
-    const loadServices = async () => {
+    const loadData = async () => {
       try {
         setLoading(true);
-        const data = await serviceCatalogService.getServices(true);
-        setServices(data);
+        const [servicesData, clientsData] = await Promise.all([
+          serviceCatalogService.getServices(true),
+          referenceDataService.getClients().catch(() => [] as Client[]),
+        ]);
+        setServices(servicesData);
+        setClients(clientsData);
       } catch (err) {
         console.error('Error loading services:', err);
         setError('Failed to load services');
@@ -578,7 +590,7 @@ export const ServiceRequestForm: React.FC<ServiceRequestFormProps> = ({
       }
     };
 
-    loadServices();
+    loadData();
   }, []);
 
   // --- Draft Save/Restore ---
@@ -693,6 +705,18 @@ export const ServiceRequestForm: React.FC<ServiceRequestFormProps> = ({
     setValue('serviceCategory', service.Category);
     // Reset service requirements when service changes
     setServiceRequirements({});
+  };
+
+  const handleClientSelect = (clientName: string) => {
+    const client = clients.find(c => c.Title === clientName);
+    if (client) {
+      setValue('clientName', client.Title);
+      if (client.PrimaryContactName) setValue('contactName', client.PrimaryContactName);
+      if (client.PrimaryContactEmail) setValue('contactEmail', client.PrimaryContactEmail);
+      if (client.Phone) setValue('contactPhone', client.Phone);
+      if (client.Industry) setValue('industry', client.Industry);
+      setClientAutoFilled(true);
+    }
   };
 
   const handleServiceRequirementChange = (questionId: string, value: unknown) => {
@@ -976,6 +1000,13 @@ export const ServiceRequestForm: React.FC<ServiceRequestFormProps> = ({
           onToggle={toggleSection}
         >
           <div className={styles.form}>
+            {clientAutoFilled && (
+              <MessageBar intent="success" style={{ marginBottom: '4px' }}>
+                <MessageBarBody>
+                  Client details auto-filled from your client list. You can edit any field below.
+                </MessageBarBody>
+              </MessageBar>
+            )}
             <div className={styles.row}>
               <Controller
                 name="clientName"
@@ -986,8 +1017,37 @@ export const ServiceRequestForm: React.FC<ServiceRequestFormProps> = ({
                     label="Client Company Name"
                     required
                     validationMessage={errors.clientName?.message}
+                    hint={clients.length > 0 ? 'Type to search existing clients or enter a new name' : undefined}
                   >
-                    <Input {...field} placeholder="Enter company name" />
+                    <Combobox
+                      freeform
+                      placeholder="Search or enter company name"
+                      value={field.value || ''}
+                      selectedOptions={field.value ? [field.value] : []}
+                      onInput={(e) => {
+                        field.onChange((e.target as HTMLInputElement).value);
+                        setClientAutoFilled(false);
+                      }}
+                      onOptionSelect={(_, data) => {
+                        if (data.optionText) {
+                          field.onChange(data.optionText);
+                          handleClientSelect(data.optionText);
+                        }
+                      }}
+                    >
+                      {clients
+                        .filter(c => !field.value || c.Title.toLowerCase().includes((field.value || '').toLowerCase()))
+                        .map((client) => (
+                          <Option key={client.Id} value={client.Title} text={client.Title}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+                              <span>{client.Title}</span>
+                              {client.Industry && (
+                                <Badge appearance="outline" size="small" color="informative">{client.Industry}</Badge>
+                              )}
+                            </div>
+                          </Option>
+                        ))}
+                    </Combobox>
                   </Field>
                 )}
               />
