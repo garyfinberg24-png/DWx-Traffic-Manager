@@ -26,6 +26,7 @@ import {
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
 import { proposalService } from '../../services/ProposalService';
+import { serviceRequestService } from '../../services/ServiceRequestService';
 import { aiPreparationService, isAIConfigured } from '../../services/AIPreparationService';
 import {
   DetailModalShell,
@@ -404,13 +405,21 @@ export const ProposalBuilder: React.FC<ProposalBuilderProps> = ({
         setProposal(result.proposal);
         onProposalUpdated?.(result.proposal);
         showToast('Proposal accepted! Moving to Negotiation.', 'success');
+        // Auto-advance the deal to Negotiation stage
+        try {
+          await serviceRequestService.updateStage(
+            serviceRequest.Id, 'Negotiation', user.email || '', user.displayName || ''
+          );
+        } catch (stageError) {
+          console.error('[ProposalBuilder] Failed to auto-advance to Negotiation:', stageError);
+        }
       }
     } catch (error) {
       showToast('Failed to mark as accepted', 'error');
     } finally {
       setSaving(false);
     }
-  }, [proposal, user, onProposalUpdated, showToast]);
+  }, [proposal, user, serviceRequest.Id, onProposalUpdated, showToast]);
 
   const handleMarkDeclined = useCallback(async () => {
     if (!proposal || !user) return;

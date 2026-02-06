@@ -6,6 +6,7 @@
 
 import { getGraphService } from './serviceFactory';
 import { auditService } from './AuditService';
+import { dwxNotificationService } from './DWxNotificationService';
 import { config } from '../config/environmentConfig';
 import {
   Proposal, ProposalStatus, ProposalType, ProposalResult,
@@ -386,6 +387,30 @@ class ProposalService {
     }
   }
 
+  private buildProposalContext(proposal: Proposal): {
+    clientName: string;
+    serviceName: string;
+    proposalType: string;
+    version: number;
+    status: string;
+    createdByName: string;
+    createdByEmail: string;
+    accountManagerName: string;
+    accountManagerEmail: string;
+  } {
+    return {
+      clientName: proposal.Title.split(' - ')[0] || 'Unknown Client',
+      serviceName: proposal.Title.replace(/^[^-]+-\s*/, '').replace(/\s*Proposal$/, '') || 'Unknown Service',
+      proposalType: proposal.ProposalType,
+      version: proposal.Version,
+      status: proposal.Status,
+      createdByName: proposal.CreatedByName,
+      createdByEmail: proposal.CreatedByEmail,
+      accountManagerName: proposal.CreatedByName,
+      accountManagerEmail: proposal.CreatedByEmail,
+    };
+  }
+
   /**
    * Submit proposal for internal review
    */
@@ -394,7 +419,13 @@ class ProposalService {
     userEmail: string,
     userName: string
   ): Promise<ProposalResult> {
-    return this.updateStatus(id, 'Internal Review', userEmail, userName);
+    const result = await this.updateStatus(id, 'Internal Review', userEmail, userName);
+    if (result.success && result.proposal) {
+      try {
+        await dwxNotificationService.notifyProposalSubmittedForReview(this.buildProposalContext(result.proposal));
+      } catch (e) { console.error('[ProposalService] Notification failed:', e); }
+    }
+    return result;
   }
 
   /**
@@ -405,7 +436,13 @@ class ProposalService {
     managerEmail: string,
     managerName: string
   ): Promise<ProposalResult> {
-    return this.updateStatus(id, 'Approved', managerEmail, managerName);
+    const result = await this.updateStatus(id, 'Approved', managerEmail, managerName);
+    if (result.success && result.proposal) {
+      try {
+        await dwxNotificationService.notifyProposalApproved(this.buildProposalContext(result.proposal));
+      } catch (e) { console.error('[ProposalService] Notification failed:', e); }
+    }
+    return result;
   }
 
   /**
@@ -461,6 +498,10 @@ class ProposalService {
         { status: 'Revision Requested', version: updatedProposal.Version, revisedBy: managerEmail }
       );
 
+      try {
+        await dwxNotificationService.notifyProposalRevisionRequested(this.buildProposalContext(updatedProposal));
+      } catch (e) { console.error('[ProposalService] Notification failed:', e); }
+
       return { success: true, proposal: updatedProposal };
     } catch (error) {
       console.error('[ProposalService] Failed to request revision:', error);
@@ -479,7 +520,13 @@ class ProposalService {
     userEmail: string,
     userName: string
   ): Promise<ProposalResult> {
-    return this.updateStatus(id, 'Sent to Client', userEmail, userName);
+    const result = await this.updateStatus(id, 'Sent to Client', userEmail, userName);
+    if (result.success && result.proposal) {
+      try {
+        await dwxNotificationService.notifyProposalSentToClient(this.buildProposalContext(result.proposal));
+      } catch (e) { console.error('[ProposalService] Notification failed:', e); }
+    }
+    return result;
   }
 
   /**
@@ -490,7 +537,13 @@ class ProposalService {
     userEmail: string,
     userName: string
   ): Promise<ProposalResult> {
-    return this.updateStatus(id, 'Accepted', userEmail, userName);
+    const result = await this.updateStatus(id, 'Accepted', userEmail, userName);
+    if (result.success && result.proposal) {
+      try {
+        await dwxNotificationService.notifyProposalAccepted(this.buildProposalContext(result.proposal));
+      } catch (e) { console.error('[ProposalService] Notification failed:', e); }
+    }
+    return result;
   }
 
   /**
@@ -545,6 +598,10 @@ class ProposalService {
         { status: current.Status },
         { status: 'Declined', declinedBy: userEmail, reason: reason || '' }
       );
+
+      try {
+        await dwxNotificationService.notifyProposalDeclined(this.buildProposalContext(updatedProposal));
+      } catch (e) { console.error('[ProposalService] Notification failed:', e); }
 
       return { success: true, proposal: updatedProposal };
     } catch (error) {

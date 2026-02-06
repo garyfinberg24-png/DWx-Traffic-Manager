@@ -829,6 +829,15 @@ export const ServiceRequestForm: React.FC<ServiceRequestFormProps> = ({
         ProposedSlot3: combineDateTime(data.proposedDate3, data.proposedTime3),
       };
 
+      // Validate proposed slots are not in the past
+      const now = new Date();
+      const proposedSlots = [input.ProposedSlot1, input.ProposedSlot2, input.ProposedSlot3].filter(Boolean);
+      const hasPastSlot = proposedSlots.some(slot => new Date(slot!) < now);
+      if (hasPastSlot) {
+        showToast('Proposed time slots cannot be in the past', 'error');
+        return;
+      }
+
       const result = await serviceRequestService.createRequest(
         input,
         user.email,

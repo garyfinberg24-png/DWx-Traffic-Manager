@@ -3,7 +3,7 @@
  * List view of user's service requests with stage filtering and search
  */
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useDeferredValue } from 'react';
 import {
   Text,
   Spinner,
@@ -329,6 +329,7 @@ export const MyRequests: React.FC<MyRequestsProps> = ({ onNewRequest }) => {
   const [productLoading, setProductLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [searchText, setSearchText] = useState('');
+  const debouncedSearch = useDeferredValue(searchText);
   const [selectedStage, setSelectedStage] = useState<FunnelStage | 'All'>('All');
   const [selectedInterest, setSelectedInterest] = useState<InterestLevel | 'All'>('All');
   const [sortBy, setSortBy] = useState('created-desc');
@@ -441,9 +442,9 @@ export const MyRequests: React.FC<MyRequestsProps> = ({ onNewRequest }) => {
       filtered = filtered.filter((r) => r.InterestLevel === selectedInterest);
     }
 
-    // Search filter
-    if (searchText) {
-      const searchLower = searchText.toLowerCase();
+    // Search filter (uses deferred value for debouncing)
+    if (debouncedSearch) {
+      const searchLower = debouncedSearch.toLowerCase();
       filtered = filtered.filter(
         (r) =>
           r.ClientName.toLowerCase().includes(searchLower) ||
@@ -506,7 +507,7 @@ export const MyRequests: React.FC<MyRequestsProps> = ({ onNewRequest }) => {
     });
 
     return filtered;
-  }, [requests, selectedStage, selectedInterest, searchText, sortBy, advancedFilters]);
+  }, [requests, selectedStage, selectedInterest, debouncedSearch, sortBy, advancedFilters]);
 
   // Pagination for service requests
   const {

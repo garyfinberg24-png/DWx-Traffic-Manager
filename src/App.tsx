@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { Suspense, useEffect, useState } from 'react';
 import { FluentProvider, webLightTheme, teamsDarkTheme, teamsLightTheme } from '@fluentui/react-components';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { MsalProvider } from '@azure/msal-react';
@@ -8,19 +8,22 @@ import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { ToastProvider } from './contexts/ToastContext';
 import { NotificationProvider } from './contexts/NotificationContext';
 import { TemplateProvider } from './contexts/TemplateContext';
-import { ManagerDashboard } from './components/Dashboard';
-import { AdminPage, AccountManagerManagement } from './components/Admin';
+// Critical path — keep as static imports
 import { Header, ErrorBoundary, LoadingSpinner, UserGuide } from './components/Common';
-// DWx Traffic Manager - New Components
 import { LandingPage } from './components/LandingPage';
-import { ProductCatalog } from './components/ProductCatalog';
-import { ServiceCatalog, ServiceDetailPage } from './components/ServiceCatalog';
-import { ServiceRequestForm } from './components/ServiceRequest';
-import { ProductRequestForm } from './components/ProductRequest';
-import { MyRequests } from './components/MyRequests';
-import { SalesFunnelDashboard } from './components/SalesFunnel';
-import { KnowledgeBase } from './components/KnowledgeBase';
 import { LoginPage } from './components/LoginPage';
+// Route-level code splitting — lazy-loaded
+const ManagerDashboard = React.lazy(() => import('./components/Dashboard').then(m => ({ default: m.ManagerDashboard })));
+const AdminPage = React.lazy(() => import('./components/Admin').then(m => ({ default: m.AdminPage })));
+const AccountManagerManagement = React.lazy(() => import('./components/Admin').then(m => ({ default: m.AccountManagerManagement })));
+const ProductCatalog = React.lazy(() => import('./components/ProductCatalog').then(m => ({ default: m.ProductCatalog })));
+const ServiceCatalog = React.lazy(() => import('./components/ServiceCatalog').then(m => ({ default: m.ServiceCatalog })));
+const ServiceDetailPage = React.lazy(() => import('./components/ServiceCatalog').then(m => ({ default: m.ServiceDetailPage })));
+const ServiceRequestForm = React.lazy(() => import('./components/ServiceRequest').then(m => ({ default: m.ServiceRequestForm })));
+const ProductRequestForm = React.lazy(() => import('./components/ProductRequest').then(m => ({ default: m.ProductRequestForm })));
+const MyRequests = React.lazy(() => import('./components/MyRequests').then(m => ({ default: m.MyRequests })));
+const SalesFunnelDashboard = React.lazy(() => import('./components/SalesFunnel').then(m => ({ default: m.SalesFunnelDashboard })));
+const KnowledgeBase = React.lazy(() => import('./components/KnowledgeBase').then(m => ({ default: m.KnowledgeBase })));
 import { getAuthService } from './services/serviceFactory';
 import { validateConfig } from './config/environmentConfig';
 import { isTestMode } from './config/testModeConfig';
@@ -93,6 +96,7 @@ const AppRoutes: React.FC = () => {
       <Header />
       <UserGuide userName={user?.displayName} />
       <main className={styles.main}>
+        <Suspense fallback={<LoadingSpinner fullPage label="Loading..." />}>
         <Routes>
           {/* DWx Traffic Manager - Primary Routes */}
           <Route path="/" element={<ErrorBoundary><LandingPage /></ErrorBoundary>} />
@@ -139,6 +143,7 @@ const AppRoutes: React.FC = () => {
           />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
+        </Suspense>
       </main>
     </div>
   );

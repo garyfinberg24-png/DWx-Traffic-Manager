@@ -16,8 +16,13 @@ import type { Client, TeamMember, AccountManager } from '../types/ReferenceData'
 import type { ServiceRequest, Specialist } from '../types/ServiceRequest';
 import type { ProductRequest } from '../types/ProductRequest';
 
-// Check if test mode is enabled
-export const isTestMode = import.meta.env.VITE_TEST_MODE === 'true';
+// Check if test mode is enabled — with production safeguard
+let _isTestMode = import.meta.env.VITE_TEST_MODE === 'true';
+if (_isTestMode && typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+  console.error('[TestMode] BLOCKED: Test mode cannot run in production. Hostname:', window.location.hostname);
+  _isTestMode = false;
+}
+export const isTestMode = _isTestMode;
 
 // Test mode user type - allows switching between AM and Manager roles
 export type TestUserRole = 'account_manager' | 'manager';

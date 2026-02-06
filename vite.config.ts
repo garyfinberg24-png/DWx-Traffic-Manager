@@ -17,6 +17,17 @@ export default defineConfig({
   },
   build: {
     outDir: 'build',
-    sourcemap: true,
+    sourcemap: false,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'vendor-react': ['react', 'react-dom', 'react-router-dom'],
+          'vendor-fluent': ['@fluentui/react-components', '@fluentui/react-icons'],
+          'vendor-msal': ['@azure/msal-browser', '@azure/msal-react'],
+          'vendor-charts': ['recharts'],
+          'vendor-excel': ['xlsx'],
+        },
+      },
+    },
   },
 });

@@ -153,11 +153,16 @@ class SpecialistService {
           endTime
         );
 
-        isAvailable = !conflictResult.hasConflict;
+        // If conflict check had an API error, fail closed (unavailable)
+        if (conflictResult.error) {
+          isAvailable = false;
+        } else {
+          isAvailable = !conflictResult.hasConflict;
+        }
       } catch (calError) {
         console.warn('Could not check calendar availability:', calError);
-        // Default to available if calendar check fails
-        isAvailable = true;
+        // Fail closed — treat as unavailable when calendar check fails
+        isAvailable = false;
       }
 
       // Check capacity

@@ -497,7 +497,8 @@ export const ProductRequestDetails: React.FC<ProductRequestDetailsProps> = ({
     isManager &&
     (request.Status === 'Awaiting Approval' || request.Status === 'Pending Review') &&
     !request.ConfirmedDateTime &&
-    request.ProposedSlot1;
+    request.ProposedSlot1 &&
+    request.AssignedSpecialistEmail;
 
   // ---- Specialist initials helper ----
 

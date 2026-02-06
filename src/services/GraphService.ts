@@ -408,7 +408,7 @@ class GraphService {
     userEmail: string,
     startTime: Date,
     endTime: Date
-  ): Promise<{ hasConflict: boolean; conflicts: CalendarEvent[] }> {
+  ): Promise<{ hasConflict: boolean; conflicts: CalendarEvent[]; error?: boolean }> {
     try {
       const client = this.getClient();
 
@@ -478,8 +478,7 @@ class GraphService {
       };
     } catch (error) {
       console.error(`Failed to check calendar availability for ${userEmail}:`, error);
-      // Return no conflict on error to not block the workflow
-      return { hasConflict: false, conflicts: [] };
+      return { hasConflict: false, conflicts: [], error: true };
     }
   }
 
@@ -825,11 +824,12 @@ class GraphService {
   async getEntraUserByEmail(email: string): Promise<EntraUser | null> {
     try {
       const client = this.getClient();
+      const sanitizedEmail = this.sanitizeODataInput(email);
 
       const response = await client
         .api('/users')
         .select('id,displayName,mail,userPrincipalName,jobTitle,department,officeLocation,mobilePhone,businessPhones')
-        .filter(`mail eq '${email}' or userPrincipalName eq '${email}'`)
+        .filter(`mail eq '${sanitizedEmail}' or userPrincipalName eq '${sanitizedEmail}'`)
         .top(1)
         .get();
 
@@ -847,11 +847,12 @@ class GraphService {
   async getEntraUsersByDepartment(department: string): Promise<EntraUser[]> {
     try {
       const client = this.getClient();
+      const sanitizedDepartment = this.sanitizeODataInput(department);
 
       const response = await client
         .api('/users')
         .select('id,displayName,mail,userPrincipalName,jobTitle,department,officeLocation,mobilePhone,businessPhones')
-        .filter(`department eq '${department}'`)
+        .filter(`department eq '${sanitizedDepartment}'`)
         .orderby('displayName')
         .get();
 

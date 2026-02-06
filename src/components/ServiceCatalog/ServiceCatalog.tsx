@@ -4,7 +4,7 @@
  * Gradient hero with embedded search, colorful category pills, accent-bordered cards
  */
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useDeferredValue } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Text,
@@ -308,6 +308,7 @@ export const ServiceCatalog: React.FC<ServiceCatalogProps> = ({ onRequestService
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchText, setSearchText] = useState('');
+  const debouncedSearch = useDeferredValue(searchText);
   const [selectedTab, setSelectedTab] = useState<CatalogTab>('Popular');
   const [selectedService, setSelectedService] = useState<DWService | null>(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
@@ -338,8 +339,8 @@ export const ServiceCatalog: React.FC<ServiceCatalogProps> = ({ onRequestService
       } else if (selectedTab !== 'All') {
         if (service.Category !== selectedTab) return false;
       }
-      if (searchText) {
-        const searchLower = searchText.toLowerCase();
+      if (debouncedSearch) {
+        const searchLower = debouncedSearch.toLowerCase();
         return (
           service.Title.toLowerCase().includes(searchLower) ||
           service.Description.toLowerCase().includes(searchLower) ||
@@ -349,7 +350,7 @@ export const ServiceCatalog: React.FC<ServiceCatalogProps> = ({ onRequestService
       }
       return true;
     });
-  }, [services, selectedTab, searchText]);
+  }, [services, selectedTab, debouncedSearch]);
 
   // Count services per category for hero stats
   const categoryCounts = useMemo(() => {

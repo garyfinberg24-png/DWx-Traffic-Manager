@@ -434,7 +434,7 @@ export const RequestsQueue: React.FC<RequestsQueueProps> = ({
   };
 
   const executeBulkAdvance = async (targetStage: FunnelStage) => {
-    if (!user) return;
+    if (!user || bulkProcessing) return;
 
     setBulkProcessing(true);
     let successCount = 0;
@@ -484,7 +484,7 @@ export const RequestsQueue: React.FC<RequestsQueueProps> = ({
 
   // Bulk operation: Assign specialist to all selected
   const handleBulkAssignSpecialist = async () => {
-    if (!user || !bulkSpecialist || selectedRequests.length === 0) return;
+    if (!user || !bulkSpecialist || selectedRequests.length === 0 || bulkProcessing) return;
 
     const specialist = specialists.find(s => s.Email === bulkSpecialist);
     if (!specialist) return;

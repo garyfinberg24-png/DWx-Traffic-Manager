@@ -208,7 +208,7 @@ class MockGraphService {
     userEmail: string,
     _startTime: Date,
     _endTime: Date
-  ): Promise<{ hasConflict: boolean; conflicts: CalendarEvent[] }> {
+  ): Promise<{ hasConflict: boolean; conflicts: CalendarEvent[]; error?: boolean }> {
     console.log('[MockGraphService] Checking user calendar conflicts', { userEmail });
     // In mock mode, return no conflicts for simplicity
     return { hasConflict: false, conflicts: [] };

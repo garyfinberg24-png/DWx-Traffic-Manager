@@ -38,6 +38,15 @@ class ServiceRequestService {
     try {
       const graphService = getGraphService();
 
+      // Validate proposed slots are not in the past
+      const now = new Date();
+      const pastSlots = [data.ProposedSlot1, data.ProposedSlot2, data.ProposedSlot3]
+        .filter(Boolean)
+        .filter(slot => new Date(slot!) < now);
+      if (pastSlots.length > 0) {
+        return { success: false, error: 'Proposed time slots cannot be in the past' };
+      }
+
       // Generate title: "Client - Service"
       const title = `${data.ClientName} - ${data.ServiceName}`;
 
@@ -293,7 +302,7 @@ class ServiceRequestService {
       const previousStage = currentRequest.FunnelStage;
 
       // Validate transition
-      const allowedTransitions = STAGE_TRANSITIONS[previousStage];
+      const allowedTransitions = STAGE_TRANSITIONS[previousStage] || [];
       if (!allowedTransitions.includes(newStage)) {
         return {
           success: false,
@@ -477,6 +486,11 @@ class ServiceRequestService {
       }
 
       const request = this.mapToServiceRequest(currentItem);
+
+      // Validate confirmed slot is not in the past
+      if (new Date(confirmedSlot) < new Date()) {
+        return { success: false, error: 'Confirmed time slot cannot be in the past' };
+      }
 
       // Create calendar event with Teams meeting
       let calendarEventId: string | undefined;
@@ -717,18 +731,21 @@ class ServiceRequestService {
       case 'Lost':
         // Clean up calendar event if one exists
         if (request.CalendarEventId) {
+          const graphService = getGraphService();
           try {
-            const graphService = getGraphService();
             try {
               await graphService.deleteCalendarEvent(request.CalendarEventId);
             } catch {
-              // Fallback: try deleting from user's own calendar
               await graphService.deleteMyCalendarEvent(request.CalendarEventId);
             }
-            // Clear the CalendarEventId in SharePoint
-            await graphService.updateListItem(this.listName, request.Id, { CalendarEventId: '' });
           } catch (calError) {
-            console.error('Failed to clean up calendar event for Lost deal:', calError);
+            console.error('Failed to delete calendar event for Lost deal:', calError);
+          }
+          // Always clear CalendarEventId regardless of delete success
+          try {
+            await graphService.updateListItem(this.listName, request.Id, { CalendarEventId: '' });
+          } catch (clearError) {
+            console.error('Failed to clear CalendarEventId:', clearError);
           }
         }
         // Decrement specialist deal count if assigned

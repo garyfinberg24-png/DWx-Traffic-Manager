@@ -332,6 +332,22 @@ class ProductRequestService {
         return { success: false, error: 'Product request not found' };
       }
 
+      // Check for calendar conflicts before booking
+      try {
+        const conflictStart = new Date(confirmedSlot);
+        const conflictEnd = new Date(conflictStart.getTime() + 60 * 60 * 1000); // 1hr default
+        const conflictResult = await graphService.checkCalendarConflicts(conflictStart, conflictEnd);
+        if (conflictResult.hasConflict) {
+          return {
+            success: false,
+            error: `Calendar conflict detected: ${conflictResult.conflicts?.map((c: { subject?: string }) => c.subject || 'Busy').join(', ')}`,
+          };
+        }
+      } catch (conflictError) {
+        console.error('Failed to check calendar conflicts:', conflictError);
+        warnings.push('Could not verify calendar availability');
+      }
+
       // Create calendar event
       let calendarEventId: string | undefined;
       try {

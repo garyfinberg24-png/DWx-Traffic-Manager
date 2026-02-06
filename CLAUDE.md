@@ -6,7 +6,7 @@
 
 **Project Origin**: Cloned from LP Booking App (v1.7.5) - a production Teams app for License Pulse demo scheduling.
 
-**Current Version**: v2.9.0 (February 2026) - Proposal Management System with AI Generation + Internal Approval
+**Current Version**: v2.9.1 (February 2026) - Hero Banner Services Page + Client Auto-Populate + Admin Sidebar Nav
 
 > **IMPORTANT**: We are ONLY working on the DWx Traffic Manager project. We DO NOT make any changes to the LP Booking App. The LP Booking App is a separate production application and must not be modified.
 
@@ -68,13 +68,13 @@
 - **Data Storage**: SharePoint Online via Microsoft Graph API
 - **Calendar Operations**: Microsoft Graph API
 - **Email**: Microsoft Graph API
-- **AI**: Azure OpenAI (GPT-4o) for session preparation content generation
+- **AI**: Azure OpenAI (GPT-4o) for session preparation + proposal content generation
 
 ### Infrastructure
 - **IaC**: Bicep templates for Azure resource provisioning
 - **AI Resources**: Azure OpenAI deployed via `infrastructure/azure-openai.bicep`
 
-## Service Offerings (6 Categories)
+## Service Offerings (12 Categories)
 
 Digital Workplace offers the following services through this app:
 
@@ -86,6 +86,12 @@ Digital Workplace offers the following services through this app:
 | M365 Tenant Assessment | M365 Assessment | Medium | Security, compliance, governance review |
 | Enterprise Copilot Agents | Copilot Agents | Enterprise | Custom Copilot plugins and agents |
 | Microsoft Viva Suite | MS Viva | Medium | Viva Connections, Engage, Learning, Insights, Goals |
+| Training | Training | Low-Medium | M365 training and workshops |
+| Proposal Writing | Proposal | Medium | Formal proposal preparation |
+| Tender Response | Tender | High | Tender/RFP response management |
+| Ad-Hoc Support | Ad-Hoc Support | Low | Quick-turnaround support requests |
+| SLA Management | SLA | Medium | Service level agreement management |
+| Strategic Advisory | Strategic Advisory | Enterprise | Strategic consulting and roadmapping |
 
 ## Sales Funnel Workflow
 
@@ -363,14 +369,14 @@ DWx-Traffic-Manager/
 │   │   │   ├── ProductRequestForm.tsx    # Product demo/trial request form
 │   │   │   └── index.ts
 │   │   ├── ServiceCatalog/
-│   │   │   ├── ServiceCatalog.tsx        # Grid view of services
-│   │   │   ├── ServiceCard.tsx           # Service display card
+│   │   │   ├── ServiceCatalog.tsx        # Hero banner + pill filters + grid view (v2.9.1)
+│   │   │   ├── ServiceCard.tsx           # Accent-bar card with category colors (v2.9.1)
 │   │   │   ├── ServiceDetails.tsx        # Service quick-view modal
 │   │   │   ├── ServiceDetailModal.tsx    # Large detail modal (v2.8.0)
 │   │   │   ├── ServiceDetailPage.tsx     # Full-page rich service detail view
 │   │   │   └── index.ts
 │   │   ├── ServiceRequest/
-│   │   │   ├── ServiceRequestForm.tsx    # Multi-step request wizard
+│   │   │   ├── ServiceRequestForm.tsx    # Multi-step wizard + client auto-populate (v2.9.1)
 │   │   │   ├── ServiceRequirementsStep.tsx
 │   │   │   ├── ProductRequirementsStep.tsx
 │   │   │   └── index.ts
@@ -405,7 +411,7 @@ DWx-Traffic-Manager/
 │   │   │   ├── GamificationTab.tsx       # Gamification dashboard
 │   │   │   └── index.ts
 │   │   ├── Admin/
-│   │   │   ├── AdminPage.tsx             # Admin tabbed container (12 tabs)
+│   │   │   ├── AdminPage.tsx             # Admin with grouped sidebar navigation (12 tabs)
 │   │   │   ├── TeamMemberList.tsx        # Team member CRUD
 │   │   │   ├── TeamMemberForm.tsx        # Team member form dialog
 │   │   │   ├── ClientList.tsx            # Client management
@@ -424,7 +430,7 @@ DWx-Traffic-Manager/
 │   │   │   ├── DocumentManagement.tsx    # Document management
 │   │   │   ├── LandingPageManagement.tsx # Landing page content CRUD (v2.8.0)
 │   │   │   ├── KnowledgeBaseManagement.tsx # KB/FAQ/Glossary CRUD (v2.8.0)
-│   │   │   ├── DWxSharePointProvisioning.tsx  # DWx list provisioning (Graph API)
+│   │   │   ├── DWxSharePointProvisioning.tsx  # Tabbed SP provisioning (Overview/Lists/Seed Data/Tools)
 │   │   │   └── index.ts
 │   │   ├── KnowledgeBase/
 │   │   │   ├── KnowledgeBase.tsx         # Consumer page - FAQ/Glossary/Articles tabs
@@ -549,6 +555,7 @@ DWx-Traffic-Manager/
 │   └── vite-env.d.ts
 ├── mockups/
 │   ├── landing-page-variations.html      # 5 landing page design mockups (V4 approved)
+│   ├── services-page-variations.html     # 5 services page design mockups (V1 Hero approved)
 │   └── team-profile-modal.html           # 3 team profile modal variations (V2 Side-by-Side chosen)
 ├── docs/
 │   ├── agents/                           # 16 agent prompt reference documents
@@ -593,7 +600,16 @@ Services | Products | New Request | My Requests | Knowledge Base | [Dashboard | 
 
 The Knowledge Base link is visible to ALL authenticated users. Dashboard and Admin are manager-only.
 
-## Admin Panel Tabs (12 Tabs)
+## Admin Panel (12 Tabs — Grouped Sidebar Navigation)
+
+The admin panel uses a grouped sidebar navigation layout (redesigned v2.9.1) with the following groups:
+
+**People**: Team Members, Account Managers, Specialists
+**Data**: Clients, Services
+**Content**: Landing Page, Knowledge Base
+**Operations**: Checklist, Documents
+**Access**: Manager Access, Guest Invitations
+**System**: SP Provisioning
 
 | Tab | Component | Description |
 |-----|-----------|-------------|
@@ -601,14 +617,14 @@ The Knowledge Base link is visible to ALL authenticated users. Dashboard and Adm
 | Account Managers | AccountManagerManagement | AM CRUD with Entra ID picker |
 | Clients | ClientList | Client management with XLSX import + orphan protection |
 | Services | ServiceManagement | Service CRUD with rich content editing + XLSX import |
-| **Specialists** | **SpecialistManagement** | **Specialist CRUD with workload tracking (NEW)** |
+| Specialists | SpecialistManagement | Specialist CRUD with workload tracking |
 | Manager Access | ManagerSettings | Manager access control |
 | Guest Invitations | GuestInvitations | Guest user management |
 | Checklist | ChecklistManagement | Checklist management |
 | Documents | DocumentManagement | Document management |
 | Landing Page | LandingPageManagement | Landing page content CRUD (slogans, team, testimonial, etc.) |
-| Knowledge Base | KnowledgeBaseManagement | KB/FAQ/Glossary CRUD management |
-| SP Provisioning | DWxSharePointProvisioning | SharePoint list provisioning via Graph API |
+| Knowledge Base | KnowledgeBaseManagement | KB Articles/FAQ/Glossary CRUD (Articles tab default) |
+| SP Provisioning | DWxSharePointProvisioning | Tabbed layout: Overview, Lists, Seed Data, Tools |
 
 ## Environment Variables Template
 
@@ -850,6 +866,18 @@ Draft → Internal Review → Approved → Sent to Client → Accepted/Declined
 
 **Word Templates**: Standard, Enterprise, Custom (DW-branded)
 
+### Phase 10a: UI Refinements (COMPLETE - v2.9.1)
+
+- [x] **Hero Banner Services Page** — ServiceCatalog.tsx redesigned with gradient hero banner (`#0d3a5c → #1a5a8a → #1e6b7b`), embedded glassmorphic search, live stats, category pill filters with colored dots and count badges
+- [x] **Accent Card Design** — ServiceCard.tsx redesigned with 5px colored left-border accent bar using category colors, enhanced typography, "View →" footer link
+- [x] **Client Auto-Populate** — ServiceRequestForm.tsx Combobox searches DWxClients and auto-fills contact name, email, phone, and industry on selection
+- [x] **KB Tab Reorder** — KnowledgeBaseManagement.tsx default tab changed to Articles (was FAQ), tab order: Articles, FAQ, Glossary
+- [x] **Admin Sidebar Navigation** — AdminPage.tsx redesigned from horizontal TabList to grouped sidebar (People, Data, Content, Operations, Access, System)
+- [x] **SP Provisioning Tabs** — DWxSharePointProvisioning.tsx redesigned with 4-tab layout (Overview, Lists, Seed Data, Tools)
+- [x] **Admin Content Padding** — Uniform 24px padding on admin content area
+- [x] **Transparent Header** — Overlay header that blends with landing page masthead
+- [x] **5 Services Page Mockups** — V1-V5 in `mockups/services-page-variations.html`, V1 Hero approved
+
 ### Pending / Round 4
 
 - [ ] Round 4: Medium-priority enhancements (M1-M10)
@@ -858,7 +886,7 @@ Draft → Internal Review → Approved → Sent to Client → Accepted/Declined
 
 ## Key Type Definitions
 
-### Service Categories
+### Service Categories (12)
 ```typescript
 type ServiceCategory =
   | 'Power Platform'
@@ -866,7 +894,13 @@ type ServiceCategory =
   | 'SharePoint Migration'
   | 'M365 Assessment'
   | 'Copilot Agents'
-  | 'MS Viva';
+  | 'MS Viva'
+  | 'Training'
+  | 'Proposal'
+  | 'Tender'
+  | 'Ad-Hoc Support'
+  | 'SLA'
+  | 'Strategic Advisory';
 ```
 
 ### Service Durations
@@ -1036,7 +1070,7 @@ The app supports Account Managers from an external partner tenant:
 | `src/services/DWxSharePointProvisioningService.ts` | All DWx list provisioning via Graph API |
 | `src/config/environmentConfig.ts` | Environment config with all DWx list names |
 | `src/App.tsx` | Main app with routes + route-level error boundaries |
-| `src/components/Admin/AdminPage.tsx` | Admin container with 12 tabs |
+| `src/components/Admin/AdminPage.tsx` | Admin container with grouped sidebar navigation (12 tabs) |
 | `src/components/Admin/ServiceManagement.tsx` | Service CRUD list UI |
 | `src/components/Admin/ServiceForm.tsx` | 4-tab service form dialog |
 | `src/components/Admin/SpecialistManagement.tsx` | Specialist CRUD list with workload tracking |
@@ -1044,6 +1078,7 @@ The app supports Account Managers from an external partner tenant:
 | `src/components/ServiceCatalog/ServiceDetailPage.tsx` | Full-page service detail view |
 | `src/components/LandingPage/LandingPage.tsx` | V4 Magazine layout + team profile modals + slogan rotator |
 | `mockups/landing-page-variations.html` | 5 landing page design mockups (V4 approved) |
+| `mockups/services-page-variations.html` | 5 services page design mockups (V1 Hero approved) |
 | `mockups/team-profile-modal.html` | 3 team profile modal variations (V2 Side-by-Side chosen) |
 
 ## Confirmed Design Decisions
@@ -1051,7 +1086,7 @@ The app supports Account Managers from an external partner tenant:
 | Decision | Answer |
 |----------|--------|
 | **Partner Tenant** | Same as LP Booking (hallofd.com) - reuse guest invitation system |
-| **Service Catalog** | 6 categories: Power Platform, SPFx, Migrations, Assessment, Copilot, Viva |
+| **Service Catalog** | 12 categories: Power Platform, SPFx, Migrations, Assessment, Copilot, Viva, Training, Proposal, Tender, Ad-Hoc Support, SLA, Strategic Advisory |
 | **Specialist Assignment** | Manager assigns only - specialists cannot self-assign |
 | **Document Upload** | Full upload support - RFPs, requirements, proposals to SharePoint |
 | **Currency** | ZAR (South African Rand) |
@@ -1061,6 +1096,10 @@ The app supports Account Managers from an external partner tenant:
 | **Team Profile Modal** | V2 Side-by-Side — left gradient panel + right scrollable content |
 | **Landing Page Content Storage** | Key-value rows in DWxLandingPageContent with JSON payloads + hardcoded fallback |
 | **Knowledge Base Access** | Consumer UI in main nav (all users), Admin CRUD in Admin panel (managers only) |
+| **Services Page Layout** | V1 Hero Banner — gradient hero with embedded search + pill category filters (Services-only, not all pages) |
+| **Admin Panel Layout** | Grouped sidebar navigation (People, Data, Content, Operations, Access, System) |
+| **SP Provisioning Layout** | 4-tab layout: Overview, Lists, Seed Data, Tools |
+| **Client Auto-Populate** | Freeform Combobox searches DWxClients, auto-fills contact name/email/phone/industry |
 
 ## Product Catalog
 
@@ -1158,18 +1197,19 @@ DWxSupportingDocuments/
 ## Recent Commit History
 
 ```
+b085667 feat: V1 hero banner Services page + client auto-populate + KB tab reorder (v2.9.1)
+9f65ace fix: Uniform 24px padding on admin content area for consistent spacing
+130ea07 refactor: Redesign SP Provisioning with tabbed layout (Overview, Lists, Seed Data, Tools)
+74ffd60 feat: Add Fix Default Views for SP lists + admin content area padding
+11f313e feat: Add comprehensive Knowledge Base seed data (50 entries) + fix DWxProposals provisioning
+860a76d fix: Add DWxProposals to SP Provisioning UI + fix hardcoded list count
+9984057 style: Transparent overlay header that blends seamlessly with landing page masthead
+1777c4e feat: Redesign admin panel with grouped sidebar navigation
+2d638eb docs: Update CLAUDE.md to v2.9.0 with Proposal Management System
 5e69c0e feat: Proposal Management System with AI generation + internal approval workflow (v2.9.0)
 d045a72 docs: Update CLAUDE.md to v2.8.0 with complete Phase 9 status
 b4fddfa feat: Add Landing Page content management + Knowledge Base with consumer UI (v2.8.0)
-2363221 docs: Update CLAUDE.md to v2.7.0 with full project state
 0b671cf feat: V4 Magazine landing page + team profile modals + KB/LP content types (v2.7.0)
 b201029 feat: Add 5 new service categories + tabbed catalog + large detail modal
 b0b5b72 feat: Redesign email templates with LP Bookings style + add role infographics (v2.6.0)
-9d18152 feat: Redesign Session Prep dialog to use DetailModalShell layout
-a4939fa feat: Modal redesign with tabbed layout + My Drafts tab
-98eaebf fix: Switch SpecialistService to client-side filtering for SharePoint compatibility
-12f3b66 fix: Client-side filtering for service/product requests + wire Session Prep dialog
-b721eab feat: Save Draft, SP provisioning fixes, client-side filtering for non-indexed columns
-99ab0c1 fix: Resolve input focus loss and dropdown display bugs in service request form
-824fb9a feat: AI-powered session preparation with Azure OpenAI integration (v2.5.0)
 ```

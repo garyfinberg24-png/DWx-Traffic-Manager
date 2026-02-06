@@ -45,6 +45,10 @@ const interestColor = (level: string): string => {
   return '#616161';
 };
 
+/** Escape user-controlled values to prevent HTML/XSS injection in emails */
+const escapeHtml = (s: string): string =>
+  s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+
 // ============================================================================
 // Gradient presets
 // ============================================================================
@@ -173,11 +177,11 @@ const buildSlots = (s1?: string, s2?: string, s3?: string): string => {
 export const requestCreatedAM = (request: ServiceRequest): { subject: string; body: string } => {
   const isPremium = (request as any).IsPremiumClient;
   const content = `
-    <p>Hi <strong>${request.AccountManagerName}</strong>,</p>
-    <p>Your service request for <strong>${request.ClientName}</strong> has been successfully submitted and is now in the sales pipeline.</p>
-    ${row('Service', request.ServiceName)}
-    ${row('Client', request.ClientName + (isPremium ? ' ' + premium() : ''))}
-    ${row('Contact', `${request.ContactName} (${request.ContactEmail})`)}
+    <p>Hi <strong>${escapeHtml(request.AccountManagerName)}</strong>,</p>
+    <p>Your service request for <strong>${escapeHtml(request.ClientName)}</strong> has been successfully submitted and is now in the sales pipeline.</p>
+    ${row('Service', escapeHtml(request.ServiceName))}
+    ${row('Client', escapeHtml(request.ClientName) + (isPremium ? ' ' + premium() : ''))}
+    ${row('Contact', `${escapeHtml(request.ContactName)} (${escapeHtml(request.ContactEmail)})`)}
     ${row('Stage', badge(request.FunnelStage, STAGE_STYLES[request.FunnelStage] || STAGE_STYLES.Lead))}
     ${row('Interest Level', interestLabel(request.InterestLevel), `color:${interestColor(request.InterestLevel)}`)}
     ${request.DealValue ? row('Deal Value', dealValue(formatCurrency(request.DealValue))) : ''}
@@ -185,7 +189,7 @@ export const requestCreatedAM = (request: ServiceRequest): { subject: string; bo
     <p style="margin-top:20px;">Our pre-sales team will review your request and a specialist will be assigned shortly.</p>
   `;
   return {
-    subject: `[DWx] Service Request Submitted: ${request.ServiceName} for ${request.ClientName}`,
+    subject: `[DWx] Service Request Submitted: ${escapeHtml(request.ServiceName)} for ${escapeHtml(request.ClientName)}`,
     body: wrap(GRAD.standard, 'Service Request Submitted', content),
   };
 };
@@ -197,19 +201,19 @@ export const requestCreatedManager = (request: ServiceRequest): { subject: strin
   const isPremium = (request as any).IsPremiumClient;
   const content = `
     <p>A new service request has been submitted and requires your attention.</p>
-    ${row('Service', request.ServiceName)}
-    ${row('Client', request.ClientName + (isPremium ? ' ' + premium() : ''))}
-    ${row('Account Manager', `${request.AccountManagerName} (${request.AccountManagerEmail})`)}
+    ${row('Service', escapeHtml(request.ServiceName))}
+    ${row('Client', escapeHtml(request.ClientName) + (isPremium ? ' ' + premium() : ''))}
+    ${row('Account Manager', `${escapeHtml(request.AccountManagerName)} (${escapeHtml(request.AccountManagerEmail)})`)}
     ${row('Interest Level', interestLabel(request.InterestLevel), `color:${interestColor(request.InterestLevel)}`)}
     ${request.DealValue ? row('Deal Value', dealValue(formatCurrency(request.DealValue))) : ''}
     ${request.DealProbability ? row('Win Probability', `${request.DealProbability}%`) : ''}
-    ${request.Requirements ? callout('#1a5a8a', '#e8f4fc', `<strong>Requirements:</strong><p style="margin:5px 0 0;">${request.Requirements}</p>`) : ''}
+    ${request.Requirements ? callout('#1a5a8a', '#e8f4fc', `<strong>Requirements:</strong><p style="margin:5px 0 0;">${escapeHtml(request.Requirements)}</p>`) : ''}
     ${card('#1a5a8a', 'Proposed Discovery Meeting Times', buildSlots(request.ProposedSlot1, request.ProposedSlot2, request.ProposedSlot3))}
     <p style="margin-top:20px;"><strong>Actions Required:</strong></p>
     <ul><li>Review the request details</li><li>Assign a specialist</li><li>Confirm a meeting time slot</li></ul>
   `;
   return {
-    subject: `[DWx] New Request: ${request.ServiceName} - ${request.ClientName} (${request.InterestLevel})`,
+    subject: `[DWx] New Request: ${escapeHtml(request.ServiceName)} - ${escapeHtml(request.ClientName)} (${request.InterestLevel})`,
     body: wrap(GRAD.standard, 'New Service Request', content),
   };
 };
@@ -224,20 +228,20 @@ export const specialistAssignedAM = (
   specialistRole: string
 ): { subject: string; body: string } => {
   const content = `
-    <p>Hi <strong>${request.AccountManagerName}</strong>,</p>
-    <p>Great news! A specialist has been assigned to your service request for <strong>${request.ClientName}</strong>.</p>
+    <p>Hi <strong>${escapeHtml(request.AccountManagerName)}</strong>,</p>
+    <p>Great news! A specialist has been assigned to your service request for <strong>${escapeHtml(request.ClientName)}</strong>.</p>
     ${callout('#1a5a8a', '#e8f4fc',
-      row('Specialist', `<strong>${specialistName}</strong>`) +
+      row('Specialist', `<strong>${escapeHtml(specialistName)}</strong>`) +
       row('Role', specialistRole) +
-      row('Email', `<a href="mailto:${specialistEmail}" style="color:#1a5a8a;">${specialistEmail}</a>`)
+      row('Email', `<a href="mailto:${escapeHtml(specialistEmail)}" style="color:#1a5a8a;">${escapeHtml(specialistEmail)}</a>`)
     )}
-    ${row('Service', request.ServiceName)}
-    ${row('Client', request.ClientName)}
+    ${row('Service', escapeHtml(request.ServiceName))}
+    ${row('Client', escapeHtml(request.ClientName))}
     ${row('Current Stage', badge(request.FunnelStage, STAGE_STYLES[request.FunnelStage] || STAGE_STYLES.Lead))}
     <p style="margin-top:20px;">The specialist will reach out to schedule the discovery meeting. You can also contact them directly if needed.</p>
   `;
   return {
-    subject: `[DWx] Specialist Assigned: ${specialistName} for ${request.ClientName}`,
+    subject: `[DWx] Specialist Assigned: ${escapeHtml(specialistName)} for ${escapeHtml(request.ClientName)}`,
     body: wrap(GRAD.standard, 'Specialist Assigned', content),
   };
 };
@@ -251,21 +255,21 @@ export const specialistAssignedSpecialist = (
 ): { subject: string; body: string } => {
   const isPremium = (request as any).IsPremiumClient;
   const content = `
-    <p>Hi <strong>${specialistName}</strong>,</p>
+    <p>Hi <strong>${escapeHtml(specialistName)}</strong>,</p>
     <p>You have been assigned to a new service request. Please review the details below and schedule a discovery meeting with the client.</p>
-    ${row('Service', `<strong>${request.ServiceName}</strong>`)}
-    ${row('Client', request.ClientName + (isPremium ? ' ' + premium() : ''))}
-    ${row('Contact', `${request.ContactName} (<a href="mailto:${request.ContactEmail}" style="color:#1a5a8a;">${request.ContactEmail}</a>)`)}
-    ${request.ContactPhone ? row('Phone', request.ContactPhone) : ''}
+    ${row('Service', `<strong>${escapeHtml(request.ServiceName)}</strong>`)}
+    ${row('Client', escapeHtml(request.ClientName) + (isPremium ? ' ' + premium() : ''))}
+    ${row('Contact', `${escapeHtml(request.ContactName)} (<a href="mailto:${escapeHtml(request.ContactEmail)}" style="color:#1a5a8a;">${escapeHtml(request.ContactEmail)}</a>)`)}
+    ${request.ContactPhone ? row('Phone', escapeHtml(request.ContactPhone)) : ''}
     ${row('Interest Level', interestLabel(request.InterestLevel), `color:${interestColor(request.InterestLevel)}`)}
     ${request.DealValue ? row('Deal Value', dealValue(formatCurrency(request.DealValue))) : ''}
-    <p><strong>Account Manager:</strong> ${request.AccountManagerName} (<a href="mailto:${request.AccountManagerEmail}" style="color:#1a5a8a;">${request.AccountManagerEmail}</a>)</p>
-    ${request.Requirements ? callout('#616161', '#f5f5f5', `<strong>Client Requirements:</strong><p style="margin:5px 0 0;">${request.Requirements}</p>`) : ''}
+    <p><strong>Account Manager:</strong> ${escapeHtml(request.AccountManagerName)} (<a href="mailto:${escapeHtml(request.AccountManagerEmail)}" style="color:#1a5a8a;">${escapeHtml(request.AccountManagerEmail)}</a>)</p>
+    ${request.Requirements ? callout('#616161', '#f5f5f5', `<strong>Client Requirements:</strong><p style="margin:5px 0 0;">${escapeHtml(request.Requirements)}</p>`) : ''}
     ${card('#1a5a8a', 'Proposed Meeting Times (Client\'s Preference)', buildSlots(request.ProposedSlot1, request.ProposedSlot2, request.ProposedSlot3))}
     <p style="margin-top:20px;">Please confirm one of the proposed slots or coordinate with the Account Manager to find an alternative time.</p>
   `;
   return {
-    subject: `[DWx] New Assignment: ${request.ServiceName} for ${request.ClientName}`,
+    subject: `[DWx] New Assignment: ${escapeHtml(request.ServiceName)} for ${escapeHtml(request.ClientName)}`,
     body: wrap(GRAD.purple, 'New Assignment', content),
   };
 };
@@ -279,13 +283,13 @@ export const discoveryConfirmed = (
   confirmedSlot: string
 ): { subject: string; body: string } => {
   const content = `
-    <p>Hi <strong>${recipientName}</strong>,</p>
-    <p>The discovery meeting for <strong>${request.ClientName}</strong> has been confirmed.</p>
+    <p>Hi <strong>${escapeHtml(recipientName)}</strong>,</p>
+    <p>The discovery meeting for <strong>${escapeHtml(request.ClientName)}</strong> has been confirmed.</p>
     ${confirmedBanner(formatDateTime(confirmedSlot))}
-    ${row('Service', request.ServiceName)}
-    ${row('Client', request.ClientName)}
-    ${row('Contact', `${request.ContactName} (${request.ContactEmail})`)}
-    ${request.AssignedSpecialistName ? row('Specialist', request.AssignedSpecialistName) : ''}
+    ${row('Service', escapeHtml(request.ServiceName))}
+    ${row('Client', escapeHtml(request.ClientName))}
+    ${row('Contact', `${escapeHtml(request.ContactName)} (${escapeHtml(request.ContactEmail)})`)}
+    ${request.AssignedSpecialistName ? row('Specialist', escapeHtml(request.AssignedSpecialistName)) : ''}
     <p style="margin-top:20px;">A calendar invite has been sent to all participants. Please ensure you're prepared for the meeting.</p>
     ${callout('#107c10', '#dff6dd',
       `<strong>Meeting Preparation Checklist:</strong>
@@ -298,7 +302,7 @@ export const discoveryConfirmed = (
     )}
   `;
   return {
-    subject: `[DWx] Meeting Confirmed: ${request.ServiceName} - ${request.ClientName}`,
+    subject: `[DWx] Meeting Confirmed: ${escapeHtml(request.ServiceName)} - ${escapeHtml(request.ClientName)}`,
     body: wrap(GRAD.success, 'Discovery Meeting Confirmed', content),
   };
 };
@@ -316,12 +320,12 @@ export const stageChanged = (
     ['Lead', 'Qualified', 'Discovery', 'Proposal', 'Negotiation'].indexOf(previousStage);
 
   const content = `
-    <p>Hi <strong>${request.AccountManagerName}</strong>,</p>
-    <p>Your service request for <strong>${request.ClientName}</strong> has ${isProgress ? 'progressed' : 'moved'} in the pipeline.</p>
-    ${row('Service', request.ServiceName)}
+    <p>Hi <strong>${escapeHtml(request.AccountManagerName)}</strong>,</p>
+    <p>Your service request for <strong>${escapeHtml(request.ClientName)}</strong> has ${isProgress ? 'progressed' : 'moved'} in the pipeline.</p>
+    ${row('Service', escapeHtml(request.ServiceName))}
     ${row('Previous Stage', badge(previousStage, STAGE_STYLES[previousStage] || STAGE_STYLES.Lead))}
     ${row('New Stage', badge(newStage, STAGE_STYLES[newStage] || STAGE_STYLES.Lead))}
-    ${row('Updated By', changedBy)}
+    ${row('Updated By', escapeHtml(changedBy))}
     ${newStage === 'Won'
       ? `<p style="font-size:16px;color:#107c10;margin-top:20px;"><strong>Congratulations on closing this deal!</strong></p>`
       : newStage === 'Lost'
@@ -332,7 +336,7 @@ export const stageChanged = (
 
   const arrow = isProgress ? 'Progress' : 'Update';
   return {
-    subject: `[DWx] Stage ${arrow}: ${request.ClientName} moved to ${newStage}`,
+    subject: `[DWx] Stage ${arrow}: ${escapeHtml(request.ClientName)} moved to ${newStage}`,
     body: wrap(newStage === 'Won' ? GRAD.success : newStage === 'Lost' ? GRAD.danger : GRAD.standard, 'Pipeline Stage Updated', content),
   };
 };
@@ -344,17 +348,17 @@ export const dealWon = (request: ServiceRequest): { subject: string; body: strin
   const content = `
     <p>Great news! A deal has been closed successfully.</p>
     ${callout('#107c10', '#dff6dd',
-      row('Client', `<strong>${request.ClientName}</strong>`) +
-      row('Service', request.ServiceName) +
-      row('Account Manager', request.AccountManagerName) +
-      (request.AssignedSpecialistName ? row('Specialist', request.AssignedSpecialistName) : '') +
+      row('Client', `<strong>${escapeHtml(request.ClientName)}</strong>`) +
+      row('Service', escapeHtml(request.ServiceName)) +
+      row('Account Manager', escapeHtml(request.AccountManagerName)) +
+      (request.AssignedSpecialistName ? row('Specialist', escapeHtml(request.AssignedSpecialistName)) : '') +
       (request.DealValue ? row('Deal Value', dealValue(formatCurrency(request.DealValue))) : '')
     )}
-    ${request.WinLossReason ? callout('#107c10', '#dff6dd', `<strong>Win Reason:</strong><p style="margin:5px 0 0;">${request.WinLossReason}</p>`) : ''}
+    ${request.WinLossReason ? callout('#107c10', '#dff6dd', `<strong>Win Reason:</strong><p style="margin:5px 0 0;">${escapeHtml(request.WinLossReason)}</p>`) : ''}
     <p style="margin-top:20px;">Next steps: Transition to delivery team and initiate project kickoff.</p>
   `;
   return {
-    subject: `[DWx] DEAL WON: ${request.ClientName} - ${request.ServiceName} (${formatCurrency(request.DealValue)})`,
+    subject: `[DWx] DEAL WON: ${escapeHtml(request.ClientName)} - ${escapeHtml(request.ServiceName)} (${formatCurrency(request.DealValue)})`,
     body: wrap(GRAD.success, 'Deal Won', content),
   };
 };
@@ -366,16 +370,16 @@ export const dealLost = (request: ServiceRequest): { subject: string; body: stri
   const content = `
     <p>Unfortunately, a deal has been marked as lost.</p>
     <div style="padding:15px;border-left:4px solid #d13438;background:#f9f9f9;border-radius:4px;margin:15px 0;">
-      ${row('Client', `<strong>${request.ClientName}</strong>`)}
-      ${row('Service', request.ServiceName)}
-      ${row('Account Manager', request.AccountManagerName)}
+      ${row('Client', `<strong>${escapeHtml(request.ClientName)}</strong>`)}
+      ${row('Service', escapeHtml(request.ServiceName))}
+      ${row('Account Manager', escapeHtml(request.AccountManagerName))}
       ${request.DealValue ? row('Deal Value', `<span style="text-decoration:line-through;color:#888;">${formatCurrency(request.DealValue)}</span>`) : ''}
     </div>
-    ${request.WinLossReason ? callout('#d13438', '#fde7e9', `<strong>Loss Reason:</strong><p style="margin:5px 0 0;">${request.WinLossReason}</p>`) : ''}
+    ${request.WinLossReason ? callout('#d13438', '#fde7e9', `<strong>Loss Reason:</strong><p style="margin:5px 0 0;">${escapeHtml(request.WinLossReason)}</p>`) : ''}
     <p style="margin-top:20px;">Consider scheduling a post-mortem to capture learnings and identify improvement opportunities.</p>
   `;
   return {
-    subject: `[DWx] Deal Lost: ${request.ClientName} - ${request.ServiceName}`,
+    subject: `[DWx] Deal Lost: ${escapeHtml(request.ClientName)} - ${escapeHtml(request.ServiceName)}`,
     body: wrap(GRAD.danger, 'Deal Lost', content),
   };
 };
@@ -390,11 +394,11 @@ export const dealValueChanged = (
 ): { subject: string; body: string } => {
   const content = `
     <p>A deal's financial details have been updated in the pipeline.</p>
-    ${row('Service', request.ServiceName)}
-    ${row('Client', request.ClientName)}
-    ${row('Account Manager', request.AccountManagerName)}
+    ${row('Service', escapeHtml(request.ServiceName))}
+    ${row('Client', escapeHtml(request.ClientName))}
+    ${row('Account Manager', escapeHtml(request.AccountManagerName))}
     ${row('Stage', badge(request.FunnelStage, STAGE_STYLES[request.FunnelStage] || STAGE_STYLES.Lead))}
-    ${row('Updated By', changedBy)}
+    ${row('Updated By', escapeHtml(changedBy))}
     <div style="padding:15px;border-left:4px solid #f7630c;background:#fff8f0;border-radius:4px;margin:15px 0;">
       ${changes.previousDealValue !== undefined ? row('Deal Value', `<span style="text-decoration:line-through;color:#888;">${formatCurrency(changes.previousDealValue)}</span> &rarr; <strong>${formatCurrency(changes.newDealValue)}</strong>`) : ''}
       ${changes.previousProbability !== undefined ? row('Win Probability', `<span style="text-decoration:line-through;color:#888;">${changes.previousProbability}%</span> &rarr; <strong>${changes.newProbability}%</strong>`) : ''}
@@ -402,7 +406,7 @@ export const dealValueChanged = (
     </div>
   `;
   return {
-    subject: `[DWx] Deal Value Updated: ${request.ClientName} - ${request.ServiceName}`,
+    subject: `[DWx] Deal Value Updated: ${escapeHtml(request.ClientName)} - ${escapeHtml(request.ServiceName)}`,
     body: wrap(GRAD.warning, 'Deal Value Updated', content),
   };
 };
@@ -418,15 +422,15 @@ export const specialistReassigned = (
   newSpecialistName: string
 ): { subject: string; body: string } => {
   const content = `
-    <p>Hi <strong>${previousSpecialistName}</strong>,</p>
+    <p>Hi <strong>${escapeHtml(previousSpecialistName)}</strong>,</p>
     <p>You have been unassigned from the following ${entityType.toLowerCase()}. A different specialist has been assigned to continue.</p>
-    ${row(entityType, entityTitle)}
-    ${row('Client', clientName)}
-    ${row('New Specialist', newSpecialistName)}
+    ${row(entityType, escapeHtml(entityTitle))}
+    ${row('Client', escapeHtml(clientName))}
+    ${row('New Specialist', escapeHtml(newSpecialistName))}
     <p style="margin-top:20px;">Your workload has been updated accordingly. No further action is needed on this request.</p>
   `;
   return {
-    subject: `[DWx] Assignment Update: ${clientName} - reassigned to ${newSpecialistName}`,
+    subject: `[DWx] Assignment Update: ${escapeHtml(clientName)} - reassigned to ${escapeHtml(newSpecialistName)}`,
     body: wrap(GRAD.neutral, 'Assignment Update', content),
   };
 };
@@ -479,12 +483,12 @@ Managed by DWx Traffic Manager
  */
 export const productRequestCreatedAM = (request: ProductRequest): { subject: string; body: string } => {
   const content = `
-    <p>Hi <strong>${request.AccountManagerName}</strong>,</p>
-    <p>Your ${request.RequestType.toLowerCase()} request for <strong>${request.ProductName}</strong> has been successfully submitted.</p>
-    ${row('Product', request.ProductName)}
+    <p>Hi <strong>${escapeHtml(request.AccountManagerName)}</strong>,</p>
+    <p>Your ${request.RequestType.toLowerCase()} request for <strong>${escapeHtml(request.ProductName)}</strong> has been successfully submitted.</p>
+    ${row('Product', escapeHtml(request.ProductName))}
     ${row('Type', `${request.ProductType} &mdash; ${request.RequestType}`)}
-    ${row('Client', request.ClientName + (request.IsPremiumClient ? ' ' + premium() : ''))}
-    ${row('Contact', `${request.ContactName} (${request.ContactEmail})`)}
+    ${row('Client', escapeHtml(request.ClientName) + (request.IsPremiumClient ? ' ' + premium() : ''))}
+    ${row('Contact', `${escapeHtml(request.ContactName)} (${escapeHtml(request.ContactEmail)})`)}
     ${row('Status', badge(request.Status, STATUS_STYLES[request.Status] || STATUS_STYLES['Pending Review']))}
     ${request.LicenseCount ? row('Licenses', String(request.LicenseCount)) : ''}
     ${request.EstimatedValue ? row('Estimated Value', dealValue(formatCurrency(request.EstimatedValue))) : ''}
@@ -494,7 +498,7 @@ export const productRequestCreatedAM = (request: ProductRequest): { subject: str
     <p style="margin-top:20px;">You'll be notified when the request is reviewed and a specialist is assigned.</p>
   `;
   return {
-    subject: `[DWx] Product ${request.RequestType} Request Submitted - ${request.ProductName} for ${request.ClientName}`,
+    subject: `[DWx] Product ${request.RequestType} Request Submitted - ${escapeHtml(request.ProductName)} for ${escapeHtml(request.ClientName)}`,
     body: wrap(GRAD.standard, 'Product Request Submitted', content),
   };
 };
@@ -505,21 +509,21 @@ export const productRequestCreatedAM = (request: ProductRequest): { subject: str
 export const productRequestCreatedManager = (request: ProductRequest): { subject: string; body: string } => {
   const content = `
     <p>A new product request requires your review.</p>
-    ${row('Product', `${request.ProductName} (${request.ProductType})`)}
+    ${row('Product', `${escapeHtml(request.ProductName)} (${request.ProductType})`)}
     ${row('Request Type', request.RequestType)}
-    ${row('Client', request.ClientName + (request.IsPremiumClient ? ' ' + premium() : ''))}
-    ${row('Contact', `${request.ContactName} (${request.ContactEmail})`)}
-    ${row('Submitted By', `${request.AccountManagerName} (${request.AccountManagerEmail})`)}
+    ${row('Client', escapeHtml(request.ClientName) + (request.IsPremiumClient ? ' ' + premium() : ''))}
+    ${row('Contact', `${escapeHtml(request.ContactName)} (${escapeHtml(request.ContactEmail)})`)}
+    ${row('Submitted By', `${escapeHtml(request.AccountManagerName)} (${escapeHtml(request.AccountManagerEmail)})`)}
     ${request.LicenseCount ? row('Licenses', String(request.LicenseCount)) : ''}
     ${request.EstimatedValue ? row('Estimated Value', dealValue(formatCurrency(request.EstimatedValue))) : ''}
     ${request.ProposedSlot1 ? card('#1a5a8a', 'Proposed Time Slots',
       buildSlots(request.ProposedSlot1, request.ProposedSlot2, request.ProposedSlot3)
     ) : ''}
-    ${request.Comments ? callout('#616161', '#f5f5f5', `<strong>Comments:</strong><p style="margin:5px 0 0;">${request.Comments}</p>`) : ''}
+    ${request.Comments ? callout('#616161', '#f5f5f5', `<strong>Comments:</strong><p style="margin:5px 0 0;">${escapeHtml(request.Comments)}</p>`) : ''}
     <p style="margin-top:20px;">Please review this request and assign a specialist.</p>
   `;
   return {
-    subject: `[DWx] New Product ${request.RequestType} - ${request.ProductName} for ${request.ClientName}`,
+    subject: `[DWx] New Product ${request.RequestType} - ${escapeHtml(request.ProductName)} for ${escapeHtml(request.ClientName)}`,
     body: wrap(GRAD.standard, 'New Product Request', content),
   };
 };
@@ -534,20 +538,20 @@ export const productSpecialistAssignedAM = (
   specialistRole: string
 ): { subject: string; body: string } => {
   const content = `
-    <p>Hi <strong>${request.AccountManagerName}</strong>,</p>
-    <p>A specialist has been assigned to your ${request.RequestType.toLowerCase()} request for <strong>${request.ProductName}</strong>.</p>
+    <p>Hi <strong>${escapeHtml(request.AccountManagerName)}</strong>,</p>
+    <p>A specialist has been assigned to your ${request.RequestType.toLowerCase()} request for <strong>${escapeHtml(request.ProductName)}</strong>.</p>
     ${callout('#1a5a8a', '#e8f4fc',
-      row('Specialist', `<strong>${specialistName}</strong>`) +
+      row('Specialist', `<strong>${escapeHtml(specialistName)}</strong>`) +
       row('Role', specialistRole) +
-      row('Email', `<a href="mailto:${specialistEmail}" style="color:#1a5a8a;">${specialistEmail}</a>`)
+      row('Email', `<a href="mailto:${escapeHtml(specialistEmail)}" style="color:#1a5a8a;">${escapeHtml(specialistEmail)}</a>`)
     )}
-    ${row('Product', `${request.ProductName} (${request.ProductType})`)}
+    ${row('Product', `${escapeHtml(request.ProductName)} (${request.ProductType})`)}
     ${row('Request Type', request.RequestType)}
-    ${row('Client', request.ClientName)}
+    ${row('Client', escapeHtml(request.ClientName))}
     <p style="margin-top:20px;">The specialist will coordinate with you to schedule the ${request.RequestType.toLowerCase()}.</p>
   `;
   return {
-    subject: `[DWx] Specialist Assigned: ${specialistName} for ${request.ProductName} (${request.ClientName})`,
+    subject: `[DWx] Specialist Assigned: ${escapeHtml(specialistName)} for ${escapeHtml(request.ProductName)} (${escapeHtml(request.ClientName)})`,
     body: wrap(GRAD.standard, 'Specialist Assigned', content),
   };
 };
@@ -560,23 +564,23 @@ export const productSpecialistAssignedSpecialist = (
   specialistName: string
 ): { subject: string; body: string } => {
   const content = `
-    <p>Hi <strong>${specialistName}</strong>,</p>
+    <p>Hi <strong>${escapeHtml(specialistName)}</strong>,</p>
     <p>You have been assigned to a product ${request.RequestType.toLowerCase()} request. Please review the details below.</p>
-    ${row('Product', `<strong>${request.ProductName}</strong> (${request.ProductType})`)}
+    ${row('Product', `<strong>${escapeHtml(request.ProductName)}</strong> (${request.ProductType})`)}
     ${row('Request Type', request.RequestType)}
-    ${row('Client', request.ClientName + (request.IsPremiumClient ? ' ' + premium() : ''))}
-    ${row('Contact', `${request.ContactName} (<a href="mailto:${request.ContactEmail}" style="color:#1a5a8a;">${request.ContactEmail}</a>)`)}
-    ${request.ContactPhone ? row('Phone', request.ContactPhone) : ''}
+    ${row('Client', escapeHtml(request.ClientName) + (request.IsPremiumClient ? ' ' + premium() : ''))}
+    ${row('Contact', `${escapeHtml(request.ContactName)} (<a href="mailto:${escapeHtml(request.ContactEmail)}" style="color:#1a5a8a;">${escapeHtml(request.ContactEmail)}</a>)`)}
+    ${request.ContactPhone ? row('Phone', escapeHtml(request.ContactPhone)) : ''}
     ${request.LicenseCount ? row('Licenses', String(request.LicenseCount)) : ''}
     ${request.EstimatedValue ? row('Estimated Value', dealValue(formatCurrency(request.EstimatedValue))) : ''}
-    <p><strong>Account Manager:</strong> ${request.AccountManagerName} (<a href="mailto:${request.AccountManagerEmail}" style="color:#1a5a8a;">${request.AccountManagerEmail}</a>)</p>
+    <p><strong>Account Manager:</strong> ${escapeHtml(request.AccountManagerName)} (<a href="mailto:${escapeHtml(request.AccountManagerEmail)}" style="color:#1a5a8a;">${escapeHtml(request.AccountManagerEmail)}</a>)</p>
     ${request.ProposedSlot1 ? card('#1a5a8a', 'Proposed Time Slots',
       buildSlots(request.ProposedSlot1, request.ProposedSlot2, request.ProposedSlot3)
     ) : ''}
     <p style="margin-top:20px;">Please confirm one of the proposed slots or coordinate with the Account Manager.</p>
   `;
   return {
-    subject: `[DWx] New Assignment: ${request.ProductName} ${request.RequestType} for ${request.ClientName}`,
+    subject: `[DWx] New Assignment: ${escapeHtml(request.ProductName)} ${request.RequestType} for ${escapeHtml(request.ClientName)}`,
     body: wrap(GRAD.purple, 'New Product Assignment', content),
   };
 };
@@ -590,15 +594,15 @@ export const productRequestStatusChanged = (
   newStatus: string
 ): { subject: string; body: string } => {
   const content = `
-    <p>Hi <strong>${request.AccountManagerName}</strong>,</p>
+    <p>Hi <strong>${escapeHtml(request.AccountManagerName)}</strong>,</p>
     <p>The status of your product request has been updated.</p>
-    ${row('Product', `${request.ProductName} (${request.ProductType})`)}
-    ${row('Client', request.ClientName)}
+    ${row('Product', `${escapeHtml(request.ProductName)} (${request.ProductType})`)}
+    ${row('Client', escapeHtml(request.ClientName))}
     ${row('Previous Status', badge(previousStatus, STATUS_STYLES[previousStatus] || STATUS_STYLES['Pending Review']))}
     ${row('New Status', badge(newStatus, STATUS_STYLES[newStatus] || STATUS_STYLES['Pending Review']))}
   `;
   return {
-    subject: `[DWx] Product Request ${newStatus} - ${request.ProductName} for ${request.ClientName}`,
+    subject: `[DWx] Product Request ${newStatus} - ${escapeHtml(request.ProductName)} for ${escapeHtml(request.ClientName)}`,
     body: wrap(GRAD.standard, 'Product Request Status Updated', content),
   };
 };
@@ -613,17 +617,17 @@ export const productRequestStatusChangedManager = (
 ): { subject: string; body: string } => {
   const content = `
     <p>A product request status has changed and may require your attention.</p>
-    ${row('Product', `${request.ProductName} (${request.ProductType})`)}
-    ${row('Client', request.ClientName + (request.IsPremiumClient ? ' ' + premium() : ''))}
-    ${row('Account Manager', request.AccountManagerName)}
+    ${row('Product', `${escapeHtml(request.ProductName)} (${request.ProductType})`)}
+    ${row('Client', escapeHtml(request.ClientName) + (request.IsPremiumClient ? ' ' + premium() : ''))}
+    ${row('Account Manager', escapeHtml(request.AccountManagerName))}
     ${row('Previous Status', badge(previousStatus, STATUS_STYLES[previousStatus] || STATUS_STYLES['Pending Review']))}
     ${row('New Status', badge(newStatus, STATUS_STYLES[newStatus] || STATUS_STYLES['Pending Review']))}
-    ${request.AssignedSpecialistName ? row('Specialist', request.AssignedSpecialistName) : ''}
+    ${request.AssignedSpecialistName ? row('Specialist', escapeHtml(request.AssignedSpecialistName)) : ''}
   `;
 
   const statusEmoji = newStatus === 'Confirmed' ? 'Confirmed' : newStatus === 'Completed' ? 'Completed' : newStatus === 'Cancelled' ? 'Cancelled' : 'Updated';
   return {
-    subject: `[DWx] Product Request ${statusEmoji}: ${request.ProductName} - ${request.ClientName}`,
+    subject: `[DWx] Product Request ${statusEmoji}: ${escapeHtml(request.ProductName)} - ${escapeHtml(request.ClientName)}`,
     body: wrap(GRAD.standard, 'Product Request Update', content),
   };
 };
@@ -638,14 +642,14 @@ export const productDemoConfirmedSpecialist = (
 ): { subject: string; body: string } => {
   const typeLabel = request.RequestType === 'Demo' ? 'Product Demo' : 'Trial Deployment';
   const content = `
-    <p>Hi <strong>${specialistName}</strong>,</p>
-    <p>A ${typeLabel.toLowerCase()} for <strong>${request.ProductName}</strong> has been confirmed. Please ensure you are prepared for the session.</p>
+    <p>Hi <strong>${escapeHtml(specialistName)}</strong>,</p>
+    <p>A ${typeLabel.toLowerCase()} for <strong>${escapeHtml(request.ProductName)}</strong> has been confirmed. Please ensure you are prepared for the session.</p>
     ${confirmedBanner(formatDateTime(confirmedSlot))}
-    ${row('Product', `${request.ProductName} (${request.ProductType})`)}
+    ${row('Product', `${escapeHtml(request.ProductName)} (${request.ProductType})`)}
     ${row('Request Type', request.RequestType)}
-    ${row('Client', request.ClientName)}
-    ${row('Contact', `${request.ContactName} (${request.ContactEmail})`)}
-    ${row('Account Manager', `${request.AccountManagerName} (<a href="mailto:${request.AccountManagerEmail}" style="color:#1a5a8a;">${request.AccountManagerEmail}</a>)`)}
+    ${row('Client', escapeHtml(request.ClientName))}
+    ${row('Contact', `${escapeHtml(request.ContactName)} (${escapeHtml(request.ContactEmail)})`)}
+    ${row('Account Manager', `${escapeHtml(request.AccountManagerName)} (<a href="mailto:${escapeHtml(request.AccountManagerEmail)}" style="color:#1a5a8a;">${escapeHtml(request.AccountManagerEmail)}</a>)`)}
     ${callout('#107c10', '#dff6dd',
       `<strong>Preparation Checklist:</strong>
       <ul style="margin:8px 0 0;padding-left:20px;">
@@ -657,7 +661,7 @@ export const productDemoConfirmedSpecialist = (
     )}
   `;
   return {
-    subject: `[DWx] ${typeLabel} Confirmed: ${request.ProductName} for ${request.ClientName}`,
+    subject: `[DWx] ${typeLabel} Confirmed: ${escapeHtml(request.ProductName)} for ${escapeHtml(request.ClientName)}`,
     body: wrap(GRAD.success, `${typeLabel} Confirmed`, content),
   };
 };
@@ -676,13 +680,13 @@ export const sessionPrepCreated = (
 ): { subject: string; body: string } => {
   const isPremium = (request as any).IsPremiumClient;
   const content = `
-    <p>Hi <strong>${sessionPrep.SpecialistName}</strong>,</p>
-    <p>A session preparation has been created for your upcoming discovery meeting with <strong>${request.ClientName}</strong>. Use the AI-powered preparation tools to get ready for a successful meeting.</p>
+    <p>Hi <strong>${escapeHtml(sessionPrep.SpecialistName)}</strong>,</p>
+    <p>A session preparation has been created for your upcoming discovery meeting with <strong>${escapeHtml(request.ClientName)}</strong>. Use the AI-powered preparation tools to get ready for a successful meeting.</p>
     <div style="background:#f5eefa;border-left:4px solid #8b5cf6;padding:15px;border-radius:4px;margin:15px 0;">
       ${row('Meeting Date', `<strong>${formatDateTime(confirmedSlot)}</strong>`)}
-      ${row('Service', request.ServiceName)}
-      ${row('Client', request.ClientName + (isPremium ? ' ' + premium() : ''))}
-      ${row('Contact', `${request.ContactName} (${request.ContactEmail})`)}
+      ${row('Service', escapeHtml(request.ServiceName))}
+      ${row('Client', escapeHtml(request.ClientName) + (isPremium ? ' ' + premium() : ''))}
+      ${row('Contact', `${escapeHtml(request.ContactName)} (${escapeHtml(request.ContactEmail)})`)}
       ${row('Interest Level', interestLabel(request.InterestLevel), `color:${interestColor(request.InterestLevel)}`)}
       ${request.DealValue ? row('Deal Value', dealValue(formatCurrency(request.DealValue))) : ''}
     </div>
@@ -696,11 +700,11 @@ export const sessionPrepCreated = (
         <li><strong>Prep Checklist:</strong> Track your preparation progress</li>
       </ul>`
     )}
-    ${request.Requirements ? callout('#616161', '#f5f5f5', `<strong>Client Requirements:</strong><p style="margin:5px 0 0;">${request.Requirements}</p>`) : ''}
-    <p style="margin-top:20px;"><strong>Account Manager:</strong> ${request.AccountManagerName} (<a href="mailto:${request.AccountManagerEmail}" style="color:#1a5a8a;">${request.AccountManagerEmail}</a>)</p>
+    ${request.Requirements ? callout('#616161', '#f5f5f5', `<strong>Client Requirements:</strong><p style="margin:5px 0 0;">${escapeHtml(request.Requirements)}</p>`) : ''}
+    <p style="margin-top:20px;"><strong>Account Manager:</strong> ${escapeHtml(request.AccountManagerName)} (<a href="mailto:${escapeHtml(request.AccountManagerEmail)}" style="color:#1a5a8a;">${escapeHtml(request.AccountManagerEmail)}</a>)</p>
   `;
   return {
-    subject: `[DWx] Session Preparation Ready: ${request.ServiceName} - ${request.ClientName}`,
+    subject: `[DWx] Session Preparation Ready: ${escapeHtml(request.ServiceName)} - ${escapeHtml(request.ClientName)}`,
     body: wrap(GRAD.ai, 'Session Preparation Ready', content),
   };
 };
@@ -725,24 +729,24 @@ export const sessionPrepReminder = (
   const headerTitle = isReady ? `Meeting Reminder - You're All Set` : `Meeting Reminder - ${hoursUntilMeeting} Hours Away`;
 
   const content = `
-    <p>Hi <strong>${sessionPrep.SpecialistName}</strong>,</p>
-    <p>This is a reminder that your discovery meeting with <strong>${request.ClientName}</strong> is scheduled for <strong>${formatDateTime(confirmedSlot)}</strong>.</p>
+    <p>Hi <strong>${escapeHtml(sessionPrep.SpecialistName)}</strong>,</p>
+    <p>This is a reminder that your discovery meeting with <strong>${escapeHtml(request.ClientName)}</strong> is scheduled for <strong>${formatDateTime(confirmedSlot)}</strong>.</p>
     ${!isReady ? countdownBanner(`${hoursUntilMeeting} Hours Until Meeting`, '#fff4ce', '#f7630c') : ''}
     <div style="background:${isReady ? '#dff6dd' : '#fff8f0'};border-left:4px solid ${statusColor};padding:15px;border-radius:4px;margin:15px 0;">
       ${row('Preparation Status', `<strong style="color:${statusColor};">${statusLabel}</strong>`)}
       ${row('Checklist Progress', `${completedItems} of ${totalItems} items (${completionPercentage}%)`)}
       ${row('AI Content', sessionPrep.AIGeneratedAt ? 'Generated' : 'Not generated')}
     </div>
-    ${row('Service', request.ServiceName)}
-    ${row('Client', request.ClientName)}
-    ${row('Contact', `${request.ContactName} (${request.ContactEmail})`)}
+    ${row('Service', escapeHtml(request.ServiceName))}
+    ${row('Client', escapeHtml(request.ClientName))}
+    ${row('Contact', `${escapeHtml(request.ContactName)} (${escapeHtml(request.ContactEmail)})`)}
     ${!isReady
       ? callout('#f7630c', '#fef3c7', `<strong>Action Required:</strong> Your session preparation is not yet complete. Please review and complete your checklist items before the meeting.`)
       : callout('#107c10', '#d1fae5', `<strong>You're all set!</strong> Your session preparation is complete. Good luck with your meeting!`)
     }
   `;
   return {
-    subject: `[DWx] Meeting in ${hoursUntilMeeting}h: ${request.ClientName} - ${isReady ? 'Ready' : 'Prep Incomplete'}`,
+    subject: `[DWx] Meeting in ${hoursUntilMeeting}h: ${escapeHtml(request.ClientName)} - ${isReady ? 'Ready' : 'Prep Incomplete'}`,
     body: wrap(gradient, headerTitle, content),
   };
 };
@@ -764,10 +768,10 @@ export const calendarEventFailed = (
   const content = `
     <p>A calendar event could not be created automatically. Manual intervention may be needed.</p>
     <div style="background:#fde7e9;border-left:4px solid #d13438;padding:15px;border-radius:4px;margin:15px 0;">
-      ${row(entityType, entityTitle)}
-      ${row('Client', clientName)}
+      ${row(entityType, escapeHtml(entityTitle))}
+      ${row('Client', escapeHtml(clientName))}
       ${row('Confirmed Slot', `<strong>${formatDateTime(confirmedSlot)}</strong>`)}
-      ${row('Account Manager', accountManagerName)}
+      ${row('Account Manager', escapeHtml(accountManagerName))}
     </div>
     <p><strong>Recommended Actions:</strong></p>
     <ul>
@@ -777,7 +781,7 @@ export const calendarEventFailed = (
     </ul>
   `;
   return {
-    subject: `[DWx] Calendar Event Failed: ${clientName} - ${formatDateTime(confirmedSlot)}`,
+    subject: `[DWx] Calendar Event Failed: ${escapeHtml(clientName)} - ${formatDateTime(confirmedSlot)}`,
     body: wrap(GRAD.danger, 'Calendar Event Failed', content),
   };
 };
@@ -792,7 +796,7 @@ export const welcomeAccountManager = (
   source: string
 ): { subject: string; body: string } => {
   const content = `
-    <p>Hi <strong>${name}</strong>,</p>
+    <p>Hi <strong>${escapeHtml(name)}</strong>,</p>
     <p>You've been added as an Account Manager in the DWx Traffic Manager system. You can now submit service and product requests for your clients.</p>
     ${card('#1a5a8a', 'What You Can Do',
       `<ul>
@@ -802,7 +806,7 @@ export const welcomeAccountManager = (
         <li><strong>Track Progress:</strong> Monitor your requests through the sales pipeline</li>
       </ul>`
     )}
-    ${callout('#1a5a8a', '#e8f4fc', row('Email', email) + row('Your Region', region) + row('Source', source))}
+    ${callout('#1a5a8a', '#e8f4fc', row('Email', escapeHtml(email)) + row('Your Region', region) + row('Source', source))}
     <p style="margin-top:20px;">If you have any questions, please reach out to your DWx manager. Happy selling!</p>
   `;
   return {
@@ -836,7 +840,7 @@ export const weeklyPipelineDigest = (
   ).join('');
 
   const hotDealItems = hotDeals.map(d =>
-    `<li>${d.client} &mdash; ${d.service} (${formatCurrency(d.value)}) &mdash; ${d.stage}</li>`
+    `<li>${escapeHtml(d.client)} &mdash; ${escapeHtml(d.service)} (${formatCurrency(d.value)}) &mdash; ${d.stage}</li>`
   ).join('');
 
   const content = `
@@ -888,17 +892,17 @@ export interface ProposalEmailContext {
  */
 export const proposalCreated = (ctx: ProposalEmailContext): { subject: string; body: string } => {
   const content = `
-    <p>A new proposal has been created for <strong>${ctx.clientName}</strong>.</p>
-    ${row('Client', ctx.clientName)}
-    ${row('Service', ctx.serviceName)}
+    <p>A new proposal has been created for <strong>${escapeHtml(ctx.clientName)}</strong>.</p>
+    ${row('Client', escapeHtml(ctx.clientName))}
+    ${row('Service', escapeHtml(ctx.serviceName))}
     ${row('Proposal Type', ctx.proposalType)}
-    ${row('Created By', `${ctx.createdByName} (${ctx.createdByEmail})`)}
+    ${row('Created By', `${escapeHtml(ctx.createdByName)} (${escapeHtml(ctx.createdByEmail)})`)}
     ${row('Version', String(ctx.version))}
     ${row('Status', ctx.status)}
     <p style="margin-top:20px;">Open the proposal in DWx Traffic Manager to start building content.</p>
   `;
   return {
-    subject: `[DWx] New Proposal Created: ${ctx.serviceName} for ${ctx.clientName}`,
+    subject: `[DWx] New Proposal Created: ${escapeHtml(ctx.serviceName)} for ${escapeHtml(ctx.clientName)}`,
     body: wrap(GRAD.standard, 'New Proposal Created', content),
   };
 };
@@ -909,16 +913,16 @@ export const proposalCreated = (ctx: ProposalEmailContext): { subject: string; b
 export const proposalSubmittedForReview = (ctx: ProposalEmailContext): { subject: string; body: string } => {
   const content = `
     <p>A proposal has been submitted for your review and requires your approval.</p>
-    ${row('Client', ctx.clientName)}
-    ${row('Service', ctx.serviceName)}
+    ${row('Client', escapeHtml(ctx.clientName))}
+    ${row('Service', escapeHtml(ctx.serviceName))}
     ${row('Proposal Type', ctx.proposalType)}
     ${row('Version', String(ctx.version))}
-    ${row('Submitted By', `${ctx.createdByName} (${ctx.createdByEmail})`)}
+    ${row('Submitted By', `${escapeHtml(ctx.createdByName)} (${escapeHtml(ctx.createdByEmail)})`)}
     ${ctx.grandTotal ? row('Grand Total', dealValue(formatCurrency(ctx.grandTotal))) : ''}
     <p style="margin-top:20px;">Please review and approve or request revisions.</p>
   `;
   return {
-    subject: `[DWx] Proposal Awaiting Review: ${ctx.serviceName} for ${ctx.clientName}`,
+    subject: `[DWx] Proposal Awaiting Review: ${escapeHtml(ctx.serviceName)} for ${escapeHtml(ctx.clientName)}`,
     body: wrap(GRAD.warning, 'Proposal Awaiting Review', content),
   };
 };
@@ -928,15 +932,15 @@ export const proposalSubmittedForReview = (ctx: ProposalEmailContext): { subject
  */
 export const proposalRevisionRequested = (ctx: ProposalEmailContext): { subject: string; body: string } => {
   const content = `
-    <p>Hi <strong>${ctx.createdByName}</strong>,</p>
-    <p>Your proposal for <strong>${ctx.clientName}</strong> requires revisions before it can be approved.</p>
-    ${row('Client', ctx.clientName)}
-    ${row('Service', ctx.serviceName)}
-    ${ctx.internalNotes ? callout('#f7630c', '#fff8f0', `<strong>Reviewer Notes:</strong><p style="margin:5px 0 0;">${ctx.internalNotes}</p>`) : ''}
+    <p>Hi <strong>${escapeHtml(ctx.createdByName)}</strong>,</p>
+    <p>Your proposal for <strong>${escapeHtml(ctx.clientName)}</strong> requires revisions before it can be approved.</p>
+    ${row('Client', escapeHtml(ctx.clientName))}
+    ${row('Service', escapeHtml(ctx.serviceName))}
+    ${ctx.internalNotes ? callout('#f7630c', '#fff8f0', `<strong>Reviewer Notes:</strong><p style="margin:5px 0 0;">${escapeHtml(ctx.internalNotes)}</p>`) : ''}
     <p style="margin-top:20px;">Please address the feedback and re-submit.</p>
   `;
   return {
-    subject: `[DWx] Proposal Revision Requested: ${ctx.serviceName} for ${ctx.clientName}`,
+    subject: `[DWx] Proposal Revision Requested: ${escapeHtml(ctx.serviceName)} for ${escapeHtml(ctx.clientName)}`,
     body: wrap(GRAD.warning, 'Proposal Revision Requested', content),
   };
 };
@@ -946,15 +950,15 @@ export const proposalRevisionRequested = (ctx: ProposalEmailContext): { subject:
  */
 export const proposalApproved = (ctx: ProposalEmailContext): { subject: string; body: string } => {
   const content = `
-    <p>The proposal for <strong>${ctx.clientName}</strong> has been approved and is ready for delivery.</p>
-    ${row('Client', ctx.clientName)}
-    ${row('Service', ctx.serviceName)}
-    ${ctx.approvedByName ? row('Approved By', ctx.approvedByName) : ''}
+    <p>The proposal for <strong>${escapeHtml(ctx.clientName)}</strong> has been approved and is ready for delivery.</p>
+    ${row('Client', escapeHtml(ctx.clientName))}
+    ${row('Service', escapeHtml(ctx.serviceName))}
+    ${ctx.approvedByName ? row('Approved By', escapeHtml(ctx.approvedByName)) : ''}
     ${ctx.grandTotal ? row('Grand Total', dealValue(formatCurrency(ctx.grandTotal))) : ''}
     ${callout('#107c10', '#dff6dd', `<strong>Next Step:</strong> The proposal is ready to send to the Account Manager for client delivery.`)}
   `;
   return {
-    subject: `[DWx] Proposal Approved: ${ctx.serviceName} for ${ctx.clientName}`,
+    subject: `[DWx] Proposal Approved: ${escapeHtml(ctx.serviceName)} for ${escapeHtml(ctx.clientName)}`,
     body: wrap(GRAD.success, 'Proposal Approved', content),
   };
 };
@@ -964,17 +968,17 @@ export const proposalApproved = (ctx: ProposalEmailContext): { subject: string; 
  */
 export const proposalSentToClient = (ctx: ProposalEmailContext): { subject: string; body: string } => {
   const content = `
-    <p>Hi <strong>${ctx.accountManagerName}</strong>,</p>
-    <p>The proposal for <strong>${ctx.clientName}</strong> has been sent for client review.</p>
-    ${row('Client', ctx.clientName)}
-    ${row('Service', ctx.serviceName)}
-    ${row('Account Manager', `${ctx.accountManagerName} (${ctx.accountManagerEmail})`)}
+    <p>Hi <strong>${escapeHtml(ctx.accountManagerName)}</strong>,</p>
+    <p>The proposal for <strong>${escapeHtml(ctx.clientName)}</strong> has been sent for client review.</p>
+    ${row('Client', escapeHtml(ctx.clientName))}
+    ${row('Service', escapeHtml(ctx.serviceName))}
+    ${row('Account Manager', `${escapeHtml(ctx.accountManagerName)} (${escapeHtml(ctx.accountManagerEmail)})`)}
     ${ctx.validUntil ? row('Valid Until', ctx.validUntil) : ''}
     ${ctx.grandTotal ? row('Grand Total', dealValue(formatCurrency(ctx.grandTotal))) : ''}
     <p style="margin-top:20px;">The proposal has been sent. Please follow up with the client.</p>
   `;
   return {
-    subject: `[DWx] Proposal Sent for Client Review: ${ctx.serviceName} for ${ctx.clientName}`,
+    subject: `[DWx] Proposal Sent for Client Review: ${escapeHtml(ctx.serviceName)} for ${escapeHtml(ctx.clientName)}`,
     body: wrap(GRAD.standard, 'Proposal Sent for Client Review', content),
   };
 };
@@ -984,18 +988,18 @@ export const proposalSentToClient = (ctx: ProposalEmailContext): { subject: stri
  */
 export const proposalAccepted = (ctx: ProposalEmailContext): { subject: string; body: string } => {
   const content = `
-    <p>Great news! The proposal for <strong>${ctx.clientName}</strong> has been accepted by the client.</p>
+    <p>Great news! The proposal for <strong>${escapeHtml(ctx.clientName)}</strong> has been accepted by the client.</p>
     ${callout('#107c10', '#dff6dd',
-      row('Client', `<strong>${ctx.clientName}</strong>`) +
-      row('Service', ctx.serviceName) +
+      row('Client', `<strong>${escapeHtml(ctx.clientName)}</strong>`) +
+      row('Service', escapeHtml(ctx.serviceName)) +
       (ctx.grandTotal ? row('Deal Value', dealValue(formatCurrency(ctx.grandTotal))) : '')
     )}
-    ${row('Account Manager', ctx.accountManagerName)}
+    ${row('Account Manager', escapeHtml(ctx.accountManagerName))}
     ${row('Proposal Type', ctx.proposalType)}
     <p style="margin-top:20px;">The deal is moving to Negotiation stage.</p>
   `;
   return {
-    subject: `[DWx] Proposal Accepted: ${ctx.serviceName} for ${ctx.clientName}`,
+    subject: `[DWx] Proposal Accepted: ${escapeHtml(ctx.serviceName)} for ${escapeHtml(ctx.clientName)}`,
     body: wrap(GRAD.success, 'Proposal Accepted!', content),
   };
 };
@@ -1005,15 +1009,15 @@ export const proposalAccepted = (ctx: ProposalEmailContext): { subject: string; 
  */
 export const proposalDeclined = (ctx: ProposalEmailContext): { subject: string; body: string } => {
   const content = `
-    <p>Unfortunately, the proposal for <strong>${ctx.clientName}</strong> has been declined by the client.</p>
-    ${row('Client', ctx.clientName)}
-    ${row('Service', ctx.serviceName)}
-    ${row('Account Manager', ctx.accountManagerName)}
-    ${ctx.clientFeedback ? callout('#d13438', '#fde7e9', `<strong>Client Feedback:</strong><p style="margin:5px 0 0;">${ctx.clientFeedback}</p>`) : ''}
+    <p>Unfortunately, the proposal for <strong>${escapeHtml(ctx.clientName)}</strong> has been declined by the client.</p>
+    ${row('Client', escapeHtml(ctx.clientName))}
+    ${row('Service', escapeHtml(ctx.serviceName))}
+    ${row('Account Manager', escapeHtml(ctx.accountManagerName))}
+    ${ctx.clientFeedback ? callout('#d13438', '#fde7e9', `<strong>Client Feedback:</strong><p style="margin:5px 0 0;">${escapeHtml(ctx.clientFeedback)}</p>`) : ''}
     <p style="margin-top:20px;">Review the feedback and consider next steps.</p>
   `;
   return {
-    subject: `[DWx] Proposal Declined: ${ctx.serviceName} for ${ctx.clientName}`,
+    subject: `[DWx] Proposal Declined: ${escapeHtml(ctx.serviceName)} for ${escapeHtml(ctx.clientName)}`,
     body: wrap(GRAD.danger, 'Proposal Declined', content),
   };
 };
