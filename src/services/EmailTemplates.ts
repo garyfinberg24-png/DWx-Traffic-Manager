@@ -118,6 +118,10 @@ const row = (label: string, value: string, style?: string): string =>
 const badge = (text: string, styles: { bg: string; color: string }): string =>
   `<span style="display:inline-block;padding:4px 10px;border-radius:4px;font-size:11px;font-weight:600;text-transform:uppercase;background:${styles.bg};color:${styles.color};">${text}</span>`;
 
+/** Shorthand: stage badge using STAGE_STYLES lookup. */
+const stageBadge = (stage: string): string =>
+  badge(stage, STAGE_STYLES[stage] || STAGE_STYLES.Lead);
+
 /** Coloured callout box with left border. */
 const callout = (borderColor: string, bgColor: string, inner: string): string =>
   `<div style="background:${bgColor};border-left:4px solid ${borderColor};padding:15px;margin:15px 0;border-radius:4px;">${inner}</div>`;
@@ -1023,6 +1027,84 @@ export const proposalDeclined = (ctx: ProposalEmailContext): { subject: string; 
 };
 
 // ============================================================================
+// FOLLOW-UP REMINDER EMAILS
+// ============================================================================
+
+/**
+ * 31. Follow-up reminder — sent to Account Manager
+ */
+const followUpReminderAM = (
+  request: ServiceRequest,
+  urgency: { level: string; reason: string; daysSinceUpdate: number; daysOverdue?: number }
+): { subject: string; body: string } => {
+  const isOverdue = urgency.level === 'overdue';
+  const isCritical = urgency.level === 'critical';
+  const gradient = isOverdue ? GRAD.danger : isCritical ? GRAD.danger : GRAD.warning;
+  const urgencyLabel = isOverdue ? 'OVERDUE' : isCritical ? 'CRITICAL' : 'NEEDS ATTENTION';
+
+  const content = `
+    ${callout(
+      isOverdue ? '#fee2e2' : isCritical ? '#fee2e2' : '#fff4ce',
+      isOverdue ? '#dc2626' : isCritical ? '#dc2626' : '#f7630c',
+      `<strong>${urgencyLabel}:</strong> ${escapeHtml(urgency.reason)}${urgency.daysOverdue ? ` (${urgency.daysOverdue} days overdue)` : ''}`
+    )}
+    <p style="margin:0 0 16px;color:#323130;">Hi ${escapeHtml(request.AccountManagerName)},</p>
+    <p style="margin:0 0 16px;color:#323130;">The following deal requires your attention:</p>
+    ${row('Deal', escapeHtml(request.Title))}
+    ${row('Client', escapeHtml(request.ClientName))}
+    ${row('Service', escapeHtml(request.ServiceName))}
+    ${row('Stage', stageBadge(request.FunnelStage))}
+    ${row('Deal Value', formatCurrency(request.DealValue))}
+    ${row('Last Updated', formatDateTime(request.Modified || request.Created))}
+    ${request.ExpectedCloseDate ? row('Expected Close', formatDateTime(request.ExpectedCloseDate)) : ''}
+    ${row('Days Since Update', `<strong>${urgency.daysSinceUpdate}</strong>`)}
+    <p style="margin:16px 0 0;color:#323130;">Please review this deal and take appropriate action — update the status, schedule a follow-up, or close the deal.</p>
+  `;
+
+  return {
+    subject: `[${urgencyLabel}] Follow-Up Required: ${request.ClientName} - ${request.ServiceName}`,
+    body: wrap(gradient, `Follow-Up Required — ${escapeHtml(request.ClientName)}`, content),
+  };
+};
+
+/**
+ * 32. Follow-up reminder — sent to managers (stale deal alert)
+ */
+const followUpReminderManager = (
+  request: ServiceRequest,
+  urgency: { level: string; reason: string; daysSinceUpdate: number; daysOverdue?: number }
+): { subject: string; body: string } => {
+  const isOverdue = urgency.level === 'overdue';
+  const isCritical = urgency.level === 'critical';
+  const gradient = isOverdue ? GRAD.danger : isCritical ? GRAD.danger : GRAD.warning;
+  const urgencyLabel = isOverdue ? 'OVERDUE' : isCritical ? 'CRITICAL' : 'NEEDS ATTENTION';
+
+  const content = `
+    ${callout(
+      isOverdue ? '#fee2e2' : isCritical ? '#fee2e2' : '#fff4ce',
+      isOverdue ? '#dc2626' : isCritical ? '#dc2626' : '#f7630c',
+      `<strong>${urgencyLabel}:</strong> ${escapeHtml(urgency.reason)}`
+    )}
+    <p style="margin:0 0 16px;color:#323130;">A deal in the pipeline requires management attention:</p>
+    ${row('Deal', escapeHtml(request.Title))}
+    ${row('Account Manager', escapeHtml(request.AccountManagerName))}
+    ${row('Client', escapeHtml(request.ClientName))}
+    ${row('Service', escapeHtml(request.ServiceName))}
+    ${row('Stage', stageBadge(request.FunnelStage))}
+    ${row('Deal Value', formatCurrency(request.DealValue))}
+    ${row('Last Updated', formatDateTime(request.Modified || request.Created))}
+    ${request.ExpectedCloseDate ? row('Expected Close', formatDateTime(request.ExpectedCloseDate)) : ''}
+    ${row('Days Since Update', `<strong>${urgency.daysSinceUpdate}</strong>`)}
+    <p style="margin:16px 0 0;color:#323130;">A follow-up reminder has been sent to ${escapeHtml(request.AccountManagerName)}. Please consider escalating if no action is taken.</p>
+  `;
+
+  return {
+    subject: `[Manager Alert] Stale Deal: ${request.ClientName} - ${request.ServiceName} (${urgencyLabel})`,
+    body: wrap(gradient, `Stale Deal Alert — ${escapeHtml(request.ClientName)}`, content),
+  };
+};
+
+// ============================================================================
 // Export map
 // ============================================================================
 
@@ -1059,4 +1141,7 @@ export const EmailTemplates = {
   proposalSentToClient,
   proposalAccepted,
   proposalDeclined,
+  // Follow-up reminder templates
+  followUpReminderAM,
+  followUpReminderManager,
 };

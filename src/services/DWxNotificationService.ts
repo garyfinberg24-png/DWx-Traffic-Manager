@@ -574,6 +574,44 @@ class DWxNotificationService {
       console.error('[DWxNotificationService] Failed to send proposal declined notification:', error);
     }
   }
+
+  // ==========================================================================
+  // Follow-Up Reminder Notifications
+  // ==========================================================================
+
+  /**
+   * Send follow-up reminder to Account Manager about a stale deal
+   */
+  async notifyFollowUpReminderAM(
+    request: ServiceRequest,
+    urgency: { level: string; reason: string; daysSinceUpdate: number; daysOverdue?: number }
+  ): Promise<NotificationResult> {
+    try {
+      const { subject, body } = EmailTemplates.followUpReminderAM(request, urgency);
+      return await this.sendEmail([request.AccountManagerEmail], subject, body);
+    } catch (error) {
+      console.error('[DWxNotificationService] Failed to send follow-up reminder to AM:', error);
+      return { success: false, error: String(error) };
+    }
+  }
+
+  /**
+   * Send stale deal alert to all managers
+   */
+  async notifyFollowUpReminderManagers(
+    request: ServiceRequest,
+    urgency: { level: string; reason: string; daysSinceUpdate: number; daysOverdue?: number }
+  ): Promise<NotificationResult> {
+    try {
+      const managers = this.getManagerEmails();
+      if (managers.length === 0) return { success: false, error: 'No manager emails configured' };
+      const { subject, body } = EmailTemplates.followUpReminderManager(request, urgency);
+      return await this.sendEmail(managers, subject, body);
+    } catch (error) {
+      console.error('[DWxNotificationService] Failed to send stale deal alert to managers:', error);
+      return { success: false, error: String(error) };
+    }
+  }
 }
 
 export const dwxNotificationService = new DWxNotificationService();

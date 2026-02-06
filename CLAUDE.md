@@ -6,7 +6,7 @@
 
 **Project Origin**: Cloned from LP Booking App (v1.7.5) - a production Teams app for License Pulse demo scheduling.
 
-**Current Version**: v2.9.1 (February 2026) - Hero Banner Services Page + Client Auto-Populate + Admin Sidebar Nav
+**Current Version**: v2.10.0 (February 2026) - Deal Activity Timeline + Follow-Up Reminders + Win/Loss Analysis
 
 > **IMPORTANT**: We are ONLY working on the DWx Traffic Manager project. We DO NOT make any changes to the LP Booking App. The LP Booking App is a separate production application and must not be modified.
 
@@ -386,6 +386,7 @@ DWx-Traffic-Manager/
 │   │   │   ├── RequestDetails.tsx        # Full service request details modal
 │   │   │   ├── ProductRequestDetails.tsx # Full product request details modal (NEW v2.2.0)
 │   │   │   ├── StageProgressBar.tsx      # Visual funnel stage progress
+│   │   │   ├── DealActivityTimeline.tsx  # Chronological audit log feed (v2.10.0)
 │   │   │   └── index.ts
 │   │   ├── SalesFunnel/
 │   │   │   ├── SalesFunnelDashboard.tsx  # Dashboard container
@@ -409,6 +410,7 @@ DWx-Traffic-Manager/
 │   │   │   ├── CommercialTab.tsx         # Commercial metrics
 │   │   │   ├── ResourcesTab.tsx          # Resource allocation
 │   │   │   ├── GamificationTab.tsx       # Gamification dashboard
+│   │   │   ├── WinLossTab.tsx            # Win/loss analysis dashboard (v2.10.0)
 │   │   │   └── index.ts
 │   │   ├── Admin/
 │   │   │   ├── AdminPage.tsx             # Admin with grouped sidebar navigation (12 tabs)
@@ -490,7 +492,9 @@ DWx-Traffic-Manager/
 │   │   ├── PipelineService.ts            # Dashboard metrics + analytics
 │   │   ├── CommercialService.ts          # Commercial metrics
 │   │   ├── GamificationService.ts        # Gamification logic
-│   │   ├── DWxNotificationService.ts     # DW-branded notifications (25 methods)
+│   │   ├── DWxNotificationService.ts     # DW-branded notifications (27 methods)
+│   │   ├── FollowUpService.ts            # Stale deal detection + follow-up reminders (v2.10.0)
+│   │   ├── WinLossAnalysisService.ts     # Win/loss analysis computation (v2.10.0)
 │   │   ├── SessionPrepService.ts         # Session preparation CRUD + checklist management
 │   │   ├── AIPreparationService.ts       # Azure OpenAI integration for AI content generation
 │   │   ├── ProposalService.ts            # Proposal CRUD + status workflow + section persistence (v2.9.0)
@@ -509,7 +513,7 @@ DWx-Traffic-Manager/
 │   │   ├── GuestInvitationService.ts     # Guest user management
 │   │   ├── DWxSharePointProvisioningService.ts # DWx list provisioning (Graph API)
 │   │   ├── SharePointService.ts          # SharePoint REST API
-│   │   ├── EmailTemplates.ts             # Email template strings (29 templates)
+│   │   ├── EmailTemplates.ts             # Email template strings (31 templates)
 │   │   ├── PowerAutomateService.ts       # Power Automate with retry/circuit breaker
 │   │   ├── MockAuthService.ts            # Mock auth for E2E testing
 │   │   ├── MockGraphService.ts           # Mock Graph for E2E testing
@@ -528,6 +532,8 @@ DWx-Traffic-Manager/
 │   │   ├── LandingPageContent.ts         # Landing page content types + DEFAULT_LANDING_PAGE_CONTENT fallback (v2.8.0)
 │   │   ├── KnowledgeBase.ts              # KB/FAQ/Glossary types (KBEntry, KBType, KBCategory) (v2.8.0)
 │   │   ├── Proposal.ts                   # Proposal types, 11 section interfaces, defaults, templates (v2.9.0)
+│   │   ├── FollowUp.ts                   # Stale deal detection types (v2.10.0)
+│   │   ├── WinLossAnalysis.ts            # Win/loss analysis types (v2.10.0)
 │   │   ├── Product.ts                    # Product catalog types (29 products)
 │   │   ├── ProductRequirements.ts        # Product requirements form types
 │   │   ├── ServiceRequirements.ts        # Service requirements types
@@ -878,6 +884,34 @@ Draft → Internal Review → Approved → Sent to Client → Accepted/Declined
 - [x] **Transparent Header** — Overlay header that blends with landing page masthead
 - [x] **5 Services Page Mockups** — V1-V5 in `mockups/services-page-variations.html`, V1 Hero approved
 
+### Phase 11: Deal Activity Timeline + Follow-Up Reminders + Win/Loss Analysis (COMPLETE - v2.10.0)
+
+Three high-value analytics features, all purely client-side (no new SharePoint lists, no new routes, no backend changes).
+
+#### Feature 1: Deal Activity Timeline - COMPLETE
+- [x] **DealActivityTimeline.tsx** — Standalone component showing chronological audit log feed on each request
+- [x] Fetches from `auditService.getAuditLogs()`, groups by date, shows vertical timeline with action icons
+- [x] Human-readable descriptions: stage changes, specialist assignments, deal value updates, proposal status
+- [x] Wired into RequestDetails.tsx as 6th tab (Activity) with History24Regular icon
+- [x] Wired into ProductRequestDetails.tsx as 6th tab (Activity)
+- [x] Exported from MyRequests/index.ts
+
+#### Feature 2: Follow-Up Reminders / Stale Deal Detection - COMPLETE
+- [x] **FollowUp.ts types** — DealUrgencyLevel ('warning'|'critical'|'overdue'), DealUrgency, StaleDealInfo, AttentionSummary
+- [x] **FollowUpService.ts** — Pure client-side computation: getDealUrgency (7d warning, 14d critical, overdue), getStaleDeals, getAttentionSummary, sendFollowUpReminder
+- [x] **2 email templates** — followUpReminderAM + followUpReminderManager in EmailTemplates.ts
+- [x] **2 notification methods** — notifyFollowUpReminderAM + notifyFollowUpReminderManagers in DWxNotificationService.ts
+- [x] **RequestCard.tsx** — Urgency badge (orange warning, red critical, red overdue) with tooltip
+- [x] **SalesFunnelDashboard.tsx** — "Attention Required" card showing overdue/critical/warning counts + total at-risk value (ZAR)
+- [x] **RequestDetails.tsx** — Follow-up reminder button in Actions tab (manager-only, sends email + logs audit)
+
+#### Feature 3: Win/Loss Analysis Dashboard - COMPLETE
+- [x] **WinLossAnalysis.ts types** — WinLossOverviewMetrics, ServiceWinLoss, AMWinLoss, IndustryWinLoss, WinLossReasonEntry, WinLossReasons, MonthlyWinLoss, DealSizeBucket
+- [x] **WinLossAnalysisService.ts** — 7 analysis methods: calculateOverallMetrics, analyzeByService, analyzeByAM, analyzeByIndustry, analyzeReasons (top 5), analyzeTrends (monthly), analyzeByDealSize (5 ZAR buckets)
+- [x] **WinLossTab.tsx** — Full Recharts dashboard: hero cards (Win Rate + Revenue), KPI row, reasons chart, monthly trends, by-service analysis, by-deal-size, AM performance table
+- [x] Wired into ManagerDashboard.tsx as new "Win/Loss" tab with ChartMultipleRegular icon
+- [x] Exported from Dashboard/index.ts
+
 ### Pending / Round 4
 
 - [ ] Round 4: Medium-priority enhancements (M1-M10)
@@ -1061,8 +1095,14 @@ The app supports Account Managers from an external partner tenant:
 | `src/services/ProposalService.ts` | Proposal CRUD + status transitions + section persistence |
 | `src/components/Proposal/ProposalBuilder.tsx` | Main proposal dialog (11 tabs + AI generation) |
 | `src/services/AuditService.ts` | Audit logging (13 entity types) |
-| `src/services/DWxNotificationService.ts` | 25 notification methods (service + product + session prep + proposal events) |
-| `src/services/EmailTemplates.ts` | 29 DW-branded email templates |
+| `src/services/DWxNotificationService.ts` | 27 notification methods (service + product + session prep + proposal + follow-up events) |
+| `src/services/EmailTemplates.ts` | 31 DW-branded email templates |
+| `src/services/FollowUpService.ts` | Stale deal detection + follow-up reminders (v2.10.0) |
+| `src/services/WinLossAnalysisService.ts` | Win/loss analysis computation - 7 analysis methods (v2.10.0) |
+| `src/types/FollowUp.ts` | DealUrgency, StaleDealInfo, AttentionSummary types (v2.10.0) |
+| `src/types/WinLossAnalysis.ts` | Win/loss metrics, breakdown, trend types (v2.10.0) |
+| `src/components/MyRequests/DealActivityTimeline.tsx` | Chronological audit log feed component (v2.10.0) |
+| `src/components/Dashboard/WinLossTab.tsx` | Win/loss Recharts dashboard tab (v2.10.0) |
 | `src/services/SessionPrepService.ts` | Session prep CRUD + checklist management + completion tracking |
 | `src/services/AIPreparationService.ts` | Azure OpenAI integration for AI content generation |
 | `src/types/SessionPreparation.ts` | Session prep types (status, checklist, talking points, resources, agenda) |

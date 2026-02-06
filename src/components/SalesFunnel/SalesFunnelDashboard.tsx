@@ -26,6 +26,7 @@ import {
   TargetRegular,
   BoxRegular,
   ArrowDownloadRegular,
+  Warning24Regular,
 } from '@fluentui/react-icons';
 import {
   downloadServiceRequestsExcel,
@@ -47,6 +48,7 @@ import { ProductRequest } from '../../types/ProductRequest';
 import { serviceRequestService } from '../../services/ServiceRequestService';
 import { productRequestService } from '../../services/ProductRequestService';
 import { pipelineService } from '../../services/PipelineService';
+import { followUpService } from '../../services/FollowUpService';
 import { PipelineKPIs } from './PipelineKPIs';
 import { FunnelChart } from './FunnelChart';
 import { ConversionRatesCard } from './ConversionRatesCard';
@@ -198,6 +200,11 @@ export const SalesFunnelDashboard: React.FC<SalesFunnelDashboardProps> = ({
     return pipelineService.calculatePeriodComparison(requests, 30);
   }, [requests]);
 
+  // Attention summary for stale / overdue deals
+  const attentionSummary = useMemo(() => {
+    return followUpService.getAttentionSummary(requests);
+  }, [requests]);
+
   const handleRequestUpdated = (updatedRequest: ServiceRequest) => {
     setRequests((prev) =>
       prev.map((r) => (r.Id === updatedRequest.Id ? updatedRequest : r))
@@ -320,6 +327,48 @@ export const SalesFunnelDashboard: React.FC<SalesFunnelDashboardProps> = ({
           <>
             {/* KPI Cards */}
             <PipelineKPIs metrics={metrics} winRates={winRates} periodChanges={periodComparison.changes} />
+
+            {/* Attention Required Card */}
+            {(attentionSummary.warningCount > 0 || attentionSummary.criticalCount > 0 || attentionSummary.overdueCount > 0) && (
+              <div style={{
+                backgroundColor: '#fff4ce',
+                border: '1px solid #f7630c',
+                borderRadius: '12px',
+                padding: '16px 20px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '16px',
+                marginBottom: '8px',
+              }}>
+                <div style={{
+                  width: '40px',
+                  height: '40px',
+                  borderRadius: '8px',
+                  backgroundColor: '#f7630c',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0,
+                }}>
+                  <Warning24Regular style={{ color: 'white', width: '24px', height: '24px' }} />
+                </div>
+                <div style={{ flex: 1 }}>
+                  <Text style={{ fontSize: '14px', fontWeight: '600', color: '#242424', display: 'block' }}>
+                    Attention Required
+                  </Text>
+                  <Text style={{ fontSize: '13px', color: '#616161' }}>
+                    {attentionSummary.overdueCount > 0 && `${attentionSummary.overdueCount} overdue`}
+                    {attentionSummary.overdueCount > 0 && attentionSummary.criticalCount > 0 && ' \u00b7 '}
+                    {attentionSummary.criticalCount > 0 && `${attentionSummary.criticalCount} critical`}
+                    {(attentionSummary.overdueCount > 0 || attentionSummary.criticalCount > 0) && attentionSummary.warningCount > 0 && ' \u00b7 '}
+                    {attentionSummary.warningCount > 0 && `${attentionSummary.warningCount} warning`}
+                  </Text>
+                </div>
+                <Text style={{ fontSize: '16px', fontWeight: '600', color: '#d13438' }}>
+                  {new Intl.NumberFormat('en-ZA', { style: 'currency', currency: 'ZAR', minimumFractionDigits: 0 }).format(attentionSummary.totalAtRiskValue)} at risk
+                </Text>
+              </div>
+            )}
 
             {/* Funnel + Conversion Rates */}
             <div className={styles.grid}>

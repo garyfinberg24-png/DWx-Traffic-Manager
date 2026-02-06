@@ -5,3 +5,5 @@ export * from './Dashboard';
 export * from './Checklist';
 export * from './ReferenceData';
 export * from './SessionPreparation';
+export * from './FollowUp';
+export * from './WinLossAnalysis';

@@ -10,3 +10,4 @@ export { StageProgressBar } from './StageProgressBar';
 export { DetailModalShell } from './DetailModalShell';
 export { DraftCard } from './DraftCard';
 export { DraftsTabContent } from './DraftsTabContent';
+export { DealActivityTimeline } from './DealActivityTimeline';

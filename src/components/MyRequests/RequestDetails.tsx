@@ -5,7 +5,7 @@
  */
 
 import React, { useState, useCallback } from 'react';
-import { Input, Textarea, Spinner, Button } from '@fluentui/react-components';
+import { Input, Textarea, Spinner, Button, Text } from '@fluentui/react-components';
 import {
   CalendarLtr24Regular,
   PersonRegular,
@@ -21,6 +21,7 @@ import {
   ChatRegular,
   Sparkle24Regular,
   BoxRegular,
+  History24Regular,
 } from '@fluentui/react-icons';
 import { makeStyles } from '@fluentui/react-components';
 import { useAuth } from '../../contexts/AuthContext';
@@ -31,9 +32,11 @@ import {
   STAGE_TRANSITIONS,
 } from '../../types/ServiceRequest';
 import { serviceRequestService } from '../../services/ServiceRequestService';
+import { followUpService } from '../../services/FollowUpService';
 import { SessionPrepDialog } from '../SessionPrep';
 import { ProposalBuilder, ProposalTracker } from '../Proposal';
 import { format } from 'date-fns';
+import { DealActivityTimeline } from './DealActivityTimeline';
 import {
   DetailModalShell,
   DetailSection,
@@ -198,6 +201,7 @@ const TABS: ModalTab[] = [
   { value: 'commercial', label: 'Commercial', icon: <MoneyRegular style={{ width: '16px', height: '16px' }} /> },
   { value: 'schedule', label: 'Schedule', icon: <CalendarLtr24Regular style={{ width: '16px', height: '16px' }} /> },
   { value: 'actions', label: 'Actions', icon: <ArrowRightRegular style={{ width: '16px', height: '16px' }} /> },
+  { value: 'activity', label: 'Activity', icon: <History24Regular style={{ width: '16px', height: '16px' }} /> },
 ];
 
 // ============================================================================
@@ -812,8 +816,48 @@ export const RequestDetails: React.FC<RequestDetailsProps> = ({
   // Tab: Actions
   // ========================================================================
 
-  const renderActionsTab = () => (
+  const renderActionsTab = () => {
+    const urgency = followUpService.getDealUrgency(request);
+
+    return (
     <>
+      {urgency && user?.isManager && (
+        <DetailSection title="Follow-Up Required" icon={<ClockRegular style={{ width: '16px', height: '16px', color: '#f7630c' }} />}>
+          <div style={{
+            backgroundColor: urgency.level === 'overdue' ? '#fee2e2' : urgency.level === 'critical' ? '#fee2e2' : '#fff4ce',
+            border: `1px solid ${urgency.level === 'overdue' ? '#d13438' : urgency.level === 'critical' ? '#d13438' : '#f7630c'}`,
+            borderRadius: '8px',
+            padding: '12px 16px',
+            marginBottom: '12px',
+          }}>
+            <Text style={{ fontSize: '13px', fontWeight: '600', color: urgency.level === 'overdue' ? '#d13438' : '#f7630c', display: 'block', marginBottom: '4px' }}>
+              {urgency.level === 'overdue' ? 'OVERDUE' : urgency.level === 'critical' ? 'CRITICAL' : 'NEEDS ATTENTION'}
+            </Text>
+            <Text style={{ fontSize: '13px', color: '#323130' }}>{urgency.reason}</Text>
+          </div>
+          <Button
+            appearance="primary"
+            style={{ backgroundColor: urgency.level === 'overdue' ? '#d13438' : '#f7630c' }}
+            onClick={async () => {
+              if (!user) return;
+              const result = await followUpService.sendFollowUpReminder(
+                request,
+                urgency,
+                user.email,
+                user.displayName || user.email
+              );
+              if (result.success) {
+                showToast('Follow-up reminder sent successfully', 'success');
+              } else {
+                showToast(`Failed to send reminder: ${result.error}`, 'error');
+              }
+            }}
+          >
+            Send Follow-Up Reminder
+          </Button>
+        </DetailSection>
+      )}
+
       {availableTransitions.length > 0 && (
         <DetailSection
           icon={<ArrowRightRegular style={{ width: '16px', height: '16px' }} />}
@@ -903,10 +947,15 @@ export const RequestDetails: React.FC<RequestDetailsProps> = ({
       )}
     </>
   );
+  };
 
   // ========================================================================
   // Render active tab content
   // ========================================================================
+
+  const renderActivityTab = () => (
+    <DealActivityTimeline entityId={request.Id} entityType="ServiceRequest" />
+  );
 
   const renderTabContent = () => {
     switch (activeTab) {
@@ -920,6 +969,8 @@ export const RequestDetails: React.FC<RequestDetailsProps> = ({
         return renderScheduleTab();
       case 'actions':
         return renderActionsTab();
+      case 'activity':
+        return renderActivityTab();
       default:
         return renderOverviewTab();
     }

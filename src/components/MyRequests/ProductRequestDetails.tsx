@@ -27,6 +27,7 @@ import {
   ChatRegular,
   BoxRegular,
   InfoRegular,
+  History24Regular,
 } from '@fluentui/react-icons';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
@@ -35,6 +36,7 @@ import { Specialist } from '../../types/ServiceRequest';
 import { productRequestService } from '../../services/ProductRequestService';
 import { specialistService } from '../../services/SpecialistService';
 import { format } from 'date-fns';
+import { DealActivityTimeline } from './DealActivityTimeline';
 import {
   DetailModalShell,
   DetailSection,
@@ -271,6 +273,7 @@ const TABS: ModalTab[] = [
   { value: 'schedule', label: 'Schedule', icon: <CalendarLtr24Regular style={{ width: '14px', height: '14px' }} /> },
   { value: 'actions', label: 'Actions', icon: <ArrowRightRegular style={{ width: '14px', height: '14px' }} /> },
   { value: 'notes', label: 'Notes', icon: <ChatRegular style={{ width: '14px', height: '14px' }} /> },
+  { value: 'activity', label: 'Activity', icon: <History24Regular style={{ width: '14px', height: '14px' }} /> },
 ];
 
 // ============================================================================
@@ -819,6 +822,10 @@ export const ProductRequestDetails: React.FC<ProductRequestDetailsProps> = ({
     </>
   );
 
+  const renderActivityTab = () => (
+    <DealActivityTimeline entityId={request.Id} entityType="ProductRequest" />
+  );
+
   // ---- Render active tab ----
 
   const renderTabContent = () => {
@@ -833,6 +840,8 @@ export const ProductRequestDetails: React.FC<ProductRequestDetailsProps> = ({
         return renderActionsTab();
       case 'notes':
         return renderNotesTab();
+      case 'activity':
+        return renderActivityTab();
       default:
         return renderOverviewTab();
     }

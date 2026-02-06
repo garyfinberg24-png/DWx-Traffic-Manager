@@ -8,7 +8,7 @@ import {
   Tab,
   TabList,
 } from '@fluentui/react-components';
-import { ArrowClockwise24Regular, ArrowDownload24Regular, CalendarMonth24Regular, Timeline24Regular, Trophy24Regular, Money24Regular, TargetRegular, DocumentFolder24Regular } from '@fluentui/react-icons';
+import { ArrowClockwise24Regular, ArrowDownload24Regular, CalendarMonth24Regular, Timeline24Regular, Trophy24Regular, Money24Regular, TargetRegular, DocumentFolder24Regular, ChartMultipleRegular } from '@fluentui/react-icons';
 import { useAuth } from '../../contexts/AuthContext';
 import { dashboardService } from '../../services/DashboardService';
 import { DashboardData, DashboardFilters } from '../../types/Dashboard';
@@ -30,6 +30,7 @@ import { downloadBookingsExcel } from '../../utils/excelExport';
 import { GamificationTab } from './GamificationTab';
 import { CommercialTab } from './CommercialTab';
 import { ResourcesTab } from './ResourcesTab';
+import { WinLossTab } from './WinLossTab';
 import { useToast } from '../../contexts/ToastContext';
 // DWx Traffic Manager - Pipeline & Service Request Components
 import { SalesFunnelDashboard } from '../SalesFunnel/SalesFunnelDashboard';
@@ -128,7 +129,7 @@ const useStyles = makeStyles({
   },
 });
 
-type DashboardTab = 'overview' | 'pipeline' | 'approvals' | 'calendar' | 'timeline' | 'performance' | 'clients' | 'commercial' | 'gamification' | 'resources';
+type DashboardTab = 'overview' | 'pipeline' | 'approvals' | 'calendar' | 'timeline' | 'performance' | 'clients' | 'commercial' | 'gamification' | 'resources' | 'winloss';
 
 export const ManagerDashboard: React.FC = () => {
   const styles = useStyles();
@@ -143,7 +144,7 @@ export const ManagerDashboard: React.FC = () => {
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
   // Read tab from URL params, default to 'overview'
-  const validTabs = ['overview', 'pipeline', 'approvals', 'calendar', 'timeline', 'performance', 'clients', 'commercial', 'gamification', 'resources'];
+  const validTabs = ['overview', 'pipeline', 'approvals', 'calendar', 'timeline', 'performance', 'clients', 'commercial', 'gamification', 'resources', 'winloss'];
   const tabFromUrl = searchParams.get('tab') as DashboardTab | null;
   const [selectedTab, setSelectedTab] = useState<DashboardTab>(
     tabFromUrl && validTabs.includes(tabFromUrl)
@@ -351,6 +352,7 @@ export const ManagerDashboard: React.FC = () => {
         <Tab value="commercial" icon={<Money24Regular />}>Commercial</Tab>
         <Tab value="gamification" icon={<Trophy24Regular />}>Gamification</Tab>
         <Tab value="resources" icon={<DocumentFolder24Regular />}>Resources</Tab>
+        <Tab value="winloss" icon={<ChartMultipleRegular />}>Win/Loss</Tab>
       </TabList>
 
       {dashboardData && (
@@ -434,6 +436,11 @@ export const ManagerDashboard: React.FC = () => {
           {/* Resources Tab */}
           {selectedTab === 'resources' && (
             <ResourcesTab />
+          )}
+
+          {/* Win/Loss Tab */}
+          {selectedTab === 'winloss' && (
+            <WinLossTab requests={serviceRequests} />
           )}
         </div>
       )}

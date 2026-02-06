@@ -26,7 +26,9 @@ import {
   DismissRegular,
   ArrowForwardRegular,
 } from '@fluentui/react-icons';
+import { Tooltip } from '@fluentui/react-components';
 import { ServiceRequest, FunnelStage, InterestLevel, STAGE_TRANSITIONS } from '../../types/ServiceRequest';
+import { followUpService } from '../../services/FollowUpService';
 import { StageProgressBar } from './StageProgressBar';
 import { format } from 'date-fns';
 
@@ -128,6 +130,27 @@ const useStyles = makeStyles({
     fontWeight: '500',
     color: '#8a8886',
     fontStyle: 'italic',
+  },
+  urgencyBadge: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '4px',
+    padding: '4px 8px',
+    borderRadius: '4px',
+    fontSize: '11px',
+    fontWeight: '600',
+  },
+  urgencyWarning: {
+    backgroundColor: 'rgba(247, 99, 12, 0.15)',
+    color: '#ca5010',
+  },
+  urgencyCritical: {
+    backgroundColor: 'rgba(209, 52, 56, 0.15)',
+    color: '#d13438',
+  },
+  urgencyOverdue: {
+    backgroundColor: 'rgba(209, 52, 56, 0.2)',
+    color: '#a80000',
   },
   progressSection: {
     padding: '0 16px',
@@ -257,6 +280,8 @@ export const RequestCard: React.FC<RequestCardProps> = ({ request, onClick, onQu
 
   const transitions = STAGE_TRANSITIONS[request.FunnelStage] || [];
 
+  const urgency = followUpService.getDealUrgency(request);
+
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
@@ -317,6 +342,24 @@ export const RequestCard: React.FC<RequestCardProps> = ({ request, onClick, onQu
                 Unassigned
               </span>
             )
+          )}
+
+          {urgency && (
+            <Tooltip content={urgency.reason} relationship="label">
+              <span
+                className={`${styles.urgencyBadge} ${
+                  urgency.level === 'overdue' ? styles.urgencyOverdue
+                    : urgency.level === 'critical' ? styles.urgencyCritical
+                    : styles.urgencyWarning
+                }`}
+                role="listitem"
+                aria-label={`Deal urgency: ${urgency.level}`}
+              >
+                {urgency.level === 'overdue' ? 'Overdue'
+                  : urgency.level === 'critical' ? `${urgency.daysSinceUpdate}d stale`
+                  : `${urgency.daysSinceUpdate}d stale`}
+              </span>
+            </Tooltip>
           )}
         </div>
       </div>

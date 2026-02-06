@@ -12,3 +12,4 @@ export { CalendarView } from './CalendarView';
 export { TimelineView } from './TimelineView';
 export { CommercialTab } from './CommercialTab';
 export { ResourcesTab } from './ResourcesTab';
+export { WinLossTab } from './WinLossTab';
