@@ -58,6 +58,8 @@ const useStyles = makeStyles({
     gap: '20px',
     color: 'white',
     flexShrink: 0,
+    margin: '-1px -1px 0 -1px',
+    borderRadius: '12px 12px 0 0',
   },
   heroIcon: {
     width: '56px',
@@ -392,19 +394,6 @@ const useStyles = makeStyles({
       backgroundColor: '#145a7a',
     },
   },
-  // Sidebar CTA
-  sidebarCta: {
-    padding: '16px 20px',
-  },
-  sidebarCtaButton: {
-    backgroundColor: '#1a5a8a',
-    color: 'white',
-    fontWeight: '600',
-    width: '100%',
-    ':hover': {
-      backgroundColor: '#145a7a',
-    },
-  },
 });
 
 // Category-specific hero colors
@@ -705,18 +694,6 @@ export const ServiceDetailModal: React.FC<ServiceDetailModalProps> = ({
                 </div>
               )}
 
-              {/* Sidebar CTA */}
-              <div className={styles.sidebarCta}>
-                <Button
-                  className={styles.sidebarCtaButton}
-                  appearance="primary"
-                  icon={<ArrowRightRegular />}
-                  iconPosition="after"
-                  onClick={() => onRequestService(service)}
-                >
-                  Request This Service
-                </Button>
-              </div>
             </div>
           </div>
         </div>

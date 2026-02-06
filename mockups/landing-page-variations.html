@@ -1,0 +1,1176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DWx Landing Page Variations</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Segoe UI', -apple-system, sans-serif; background: #f0f0f0; }
+
+  /* Tab Navigation */
+  .tab-nav { position: sticky; top: 0; z-index: 100; background: #1a1a2e; padding: 12px 32px; display: flex; gap: 8px; box-shadow: 0 2px 12px rgba(0,0,0,0.3); flex-wrap: wrap; }
+  .tab-btn { padding: 10px 20px; border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; background: transparent; color: rgba(255,255,255,0.7); cursor: pointer; font-size: 13px; font-weight: 500; transition: all 0.2s; }
+  .tab-btn:hover { background: rgba(255,255,255,0.08); color: white; }
+  .tab-btn.active { background: #1a5a8a; color: white; border-color: #1a5a8a; }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+  .variation-label { background: #1a5a8a; color: white; text-align: center; padding: 10px; font-size: 13px; font-weight: 600; letter-spacing: 0.5px; }
+
+  /* Shared base styles */
+  .avatar { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 3px solid white; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
+  .avatar-sm { width: 56px; height: 56px; }
+  .avatar-lg { width: 96px; height: 96px; }
+  .avatar-placeholder { display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 20px; color: white; }
+
+  /* Variation 1: Hero Banner + Horizontal Team Strip */
+  .v1-hero { background: linear-gradient(135deg, #0d3a5c 0%, #1a5a8a 50%, #2980b9 100%); color: white; padding: 60px 64px 48px; position: relative; overflow: hidden; }
+  .v1-hero::before { content: ''; position: absolute; top: -50%; right: -20%; width: 600px; height: 600px; background: radial-gradient(circle, rgba(255,255,255,0.06) 0%, transparent 70%); }
+  .v1-hero-content { max-width: 700px; position: relative; z-index: 1; }
+  .v1-hero h1 { font-size: 36px; font-weight: 700; margin-bottom: 12px; }
+  .v1-hero .tagline { font-size: 18px; color: rgba(255,255,255,0.85); line-height: 1.6; margin-bottom: 20px; }
+  .v1-stats { display: flex; gap: 40px; margin-top: 24px; }
+  .v1-stat { text-align: center; }
+  .v1-stat-value { font-size: 28px; font-weight: 700; }
+  .v1-stat-label { font-size: 12px; color: rgba(255,255,255,0.7); text-transform: uppercase; letter-spacing: 0.5px; }
+  .v1-cards { display: flex; gap: 32px; justify-content: center; padding: 40px 64px; max-width: 1000px; margin: 0 auto; }
+  .v1-card { flex: 1; background: white; border-radius: 16px; padding: 32px; cursor: pointer; transition: all 0.3s; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+  .v1-card:hover { transform: translateY(-6px); box-shadow: 0 12px 40px rgba(26,90,138,0.15); }
+  .v1-card-icon { width: 56px; height: 56px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 24px; margin-bottom: 16px; }
+  .v1-card h3 { font-size: 22px; font-weight: 600; color: #242424; margin-bottom: 10px; }
+  .v1-card p { font-size: 14px; color: #616161; line-height: 1.6; margin-bottom: 16px; }
+  .v1-card-features { display: flex; flex-direction: column; gap: 6px; margin-bottom: 20px; }
+  .v1-card-features span { font-size: 13px; color: #424242; padding-left: 14px; position: relative; }
+  .v1-card-features span::before { content: ''; position: absolute; left: 0; top: 7px; width: 5px; height: 5px; border-radius: 50%; }
+  .v1-services span::before { background: #1a5a8a; }
+  .v1-products span::before { background: #0d3a5c; }
+  .v1-card-footer { display: flex; align-items: center; justify-content: space-between; padding-top: 16px; border-top: 1px solid #e0e0e0; font-size: 14px; font-weight: 600; }
+
+  .v1-team-strip { background: white; padding: 40px 64px; border-top: 1px solid #e8e8e8; }
+  .v1-team-strip h2 { font-size: 20px; font-weight: 600; color: #242424; margin-bottom: 6px; text-align: center; }
+  .v1-team-strip .subtitle { font-size: 14px; color: #616161; text-align: center; margin-bottom: 28px; }
+  .v1-team-row { display: flex; justify-content: center; gap: 40px; }
+  .v1-member { text-align: center; }
+  .v1-member .name { font-size: 14px; font-weight: 600; color: #242424; margin-top: 10px; }
+  .v1-member .role { font-size: 12px; color: #616161; }
+  .v1-member .spec { font-size: 11px; color: #1a5a8a; margin-top: 2px; }
+
+  /* Variation 2: Split Layout — About Left, Actions Right */
+  .v2-container { display: grid; grid-template-columns: 1fr 1fr; min-height: calc(100vh - 80px); }
+  .v2-left { background: linear-gradient(180deg, #0d3a5c 0%, #1a5a8a 100%); color: white; padding: 60px 48px; display: flex; flex-direction: column; justify-content: center; }
+  .v2-left h1 { font-size: 32px; font-weight: 700; margin-bottom: 16px; }
+  .v2-left .desc { font-size: 15px; color: rgba(255,255,255,0.85); line-height: 1.7; margin-bottom: 32px; }
+  .v2-pillars { display: flex; flex-direction: column; gap: 16px; margin-bottom: 36px; }
+  .v2-pillar { display: flex; align-items: flex-start; gap: 12px; }
+  .v2-pillar-icon { width: 36px; height: 36px; border-radius: 10px; background: rgba(255,255,255,0.12); display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+  .v2-pillar-text h4 { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
+  .v2-pillar-text p { font-size: 12px; color: rgba(255,255,255,0.7); }
+  .v2-team-row { display: flex; gap: 16px; padding-top: 24px; border-top: 1px solid rgba(255,255,255,0.15); }
+  .v2-mini-member { text-align: center; }
+  .v2-mini-member .name { font-size: 11px; font-weight: 600; margin-top: 6px; }
+  .v2-mini-member .role { font-size: 10px; color: rgba(255,255,255,0.6); }
+  .v2-right { background: #f5f5f5; padding: 60px 48px; display: flex; flex-direction: column; justify-content: center; gap: 24px; }
+  .v2-action-card { background: white; border-radius: 16px; padding: 28px; cursor: pointer; transition: all 0.3s; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+  .v2-action-card:hover { transform: translateY(-4px); box-shadow: 0 8px 32px rgba(26,90,138,0.12); }
+  .v2-action-header { display: flex; align-items: center; gap: 14px; margin-bottom: 12px; }
+  .v2-action-icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 22px; }
+  .v2-action-card h3 { font-size: 20px; font-weight: 600; color: #242424; }
+  .v2-action-card p { font-size: 14px; color: #616161; line-height: 1.5; }
+
+  /* Variation 3: Full-Width Hero + Cards + Team Cards Grid */
+  .v3-hero { background: linear-gradient(135deg, #0a2540 0%, #1a5a8a 60%, #2185c5 100%); color: white; padding: 56px 64px; text-align: center; }
+  .v3-hero h1 { font-size: 34px; font-weight: 700; margin-bottom: 10px; }
+  .v3-hero .tagline { font-size: 16px; color: rgba(255,255,255,0.8); max-width: 650px; margin: 0 auto 24px; line-height: 1.6; }
+  .v3-capability-chips { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+  .v3-chip { background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2); padding: 8px 18px; border-radius: 20px; font-size: 13px; color: rgba(255,255,255,0.9); }
+  .v3-body { padding: 40px 64px; max-width: 1200px; margin: 0 auto; }
+  .v3-section-title { font-size: 20px; font-weight: 600; color: #242424; margin-bottom: 6px; }
+  .v3-section-sub { font-size: 14px; color: #616161; margin-bottom: 24px; }
+  .v3-cards-row { display: flex; gap: 24px; margin-bottom: 48px; }
+  .v3-card { flex: 1; background: white; border-radius: 16px; padding: 28px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); cursor: pointer; transition: all 0.3s; border: 1px solid #e8e8e8; }
+  .v3-card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0,0,0,0.1); border-color: #1a5a8a; }
+  .v3-card-icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 22px; margin-bottom: 14px; }
+  .v3-card h3 { font-size: 20px; font-weight: 600; color: #242424; margin-bottom: 8px; }
+  .v3-card p { font-size: 14px; color: #616161; line-height: 1.5; margin-bottom: 14px; }
+  .v3-card .count { font-size: 12px; color: #1a5a8a; font-weight: 600; }
+  .v3-team-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 20px; }
+  .v3-team-card { background: white; border-radius: 12px; padding: 24px; text-align: center; box-shadow: 0 1px 4px rgba(0,0,0,0.06); border: 1px solid #e8e8e8; transition: all 0.2s; }
+  .v3-team-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.08); border-color: #1a5a8a; }
+  .v3-team-card .name { font-size: 14px; font-weight: 600; color: #242424; margin-top: 12px; }
+  .v3-team-card .role { font-size: 12px; color: #1a5a8a; font-weight: 500; margin-top: 2px; }
+  .v3-team-card .desc { font-size: 11px; color: #616161; margin-top: 6px; line-height: 1.4; }
+
+  /* Variation 4: Magazine / Editorial — Redesigned */
+  .v4-masthead { background: linear-gradient(135deg, #0d3a5c 0%, #1a5a8a 100%); color: white; padding: 64px 64px 48px; display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center; }
+  .v4-masthead h1 { font-size: 38px; font-weight: 700; line-height: 1.15; margin-bottom: 16px; }
+  .v4-masthead h1 span { color: #5bb8f5; }
+  .v4-masthead .lead { font-size: 16px; color: rgba(255,255,255,0.8); line-height: 1.7; }
+  .v4-masthead-right { display: flex; flex-direction: column; gap: 20px; justify-content: center; }
+  .v4-stats-row { display: flex; gap: 16px; }
+  .v4-stat-card { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); border-radius: 12px; padding: 20px; text-align: center; flex: 1; }
+  .v4-stat-card .value { font-size: 28px; font-weight: 700; margin-bottom: 4px; }
+  .v4-stat-card .label { font-size: 12px; color: rgba(255,255,255,0.6); text-transform: uppercase; letter-spacing: 0.5px; }
+
+  /* Content area — 3-col grid */
+  .v4-content { padding: 48px 64px; max-width: 1400px; margin: 0 auto; }
+  .v4-grid { display: grid; grid-template-columns: 5fr 2fr 2fr; gap: 28px; align-items: stretch; }
+  .v4-main-col { display: flex; flex-direction: column; gap: 24px; }
+  .v4-main-col .v4-action-card:last-child { flex: 1; }  /* stretch last card to fill */
+
+  /* Action cards with visual interest — gradient top + feature list */
+  .v4-action-card { background: white; border-radius: 16px; padding: 0; box-shadow: 0 2px 8px rgba(0,0,0,0.06); border: 1px solid #e8e8e8; cursor: pointer; transition: all 0.3s; overflow: hidden; display: flex; flex-direction: row; }
+  .v4-action-card:hover { box-shadow: 0 8px 24px rgba(0,0,0,0.1); border-color: #1a5a8a; transform: translateY(-2px); }
+  .v4-card-accent { width: 6px; flex-shrink: 0; }
+  .v4-card-inner { display: flex; gap: 20px; padding: 24px 28px; align-items: center; flex: 1; }
+  .v4-card-icon { width: 56px; height: 56px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 24px; flex-shrink: 0; position: relative; overflow: hidden; }
+  .v4-card-icon::after { content: ''; position: absolute; top: -8px; right: -8px; width: 28px; height: 28px; border-radius: 50%; background: rgba(255,255,255,0.3); }
+  .v4-card-text { flex: 1; }
+  .v4-card-text h3 { font-size: 18px; font-weight: 600; color: #242424; margin-bottom: 4px; }
+  .v4-card-text .card-meta { font-size: 12px; color: #1a5a8a; font-weight: 500; margin-bottom: 6px; }
+  .v4-card-text p { font-size: 13px; color: #616161; line-height: 1.5; }
+  .v4-card-arrow { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; transition: all 0.2s; border: 1px solid #e0e0e0; color: #616161; background: #fafafa; }
+  .v4-action-card:hover .v4-card-arrow { background: #1a5a8a; color: white; border-color: #1a5a8a; transform: translateX(2px); }
+
+  /* Sidebar — center column */
+  .v4-sidebar { display: flex; flex-direction: column; gap: 24px; }
+  .v4-sidebar-section { background: white; border-radius: 16px; padding: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); border: 1px solid #e8e8e8; }
+  .v4-sidebar-section h3 { font-size: 16px; font-weight: 600; color: #242424; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 2px solid #1a5a8a; }
+
+  /* Testimonial — right column */
+  .v4-testimonial-col { display: flex; flex-direction: column; gap: 24px; }
+  .v4-testimonial { background: linear-gradient(160deg, #f8fbff 0%, #edf4fb 100%); border-radius: 16px; padding: 28px 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); border: 1px solid #d0e4f0; position: relative; }
+  .v4-testimonial::before { content: '\201C'; position: absolute; top: 12px; left: 18px; font-size: 64px; color: #1a5a8a; opacity: 0.15; line-height: 1; font-family: Georgia, serif; }
+  .v4-testimonial-quote { font-size: 14px; color: #424242; line-height: 1.7; font-style: italic; margin-bottom: 20px; position: relative; z-index: 1; }
+  .v4-testimonial-author { display: flex; align-items: center; gap: 12px; padding-top: 16px; border-top: 1px solid #d0e4f0; }
+  .v4-testimonial-avatar { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
+  .v4-testimonial-info .t-name { font-size: 13px; font-weight: 600; color: #242424; }
+  .v4-testimonial-info .t-role { font-size: 11px; color: #1a5a8a; }
+  .v4-testimonial-info .t-company { font-size: 11px; color: #616161; }
+  .v4-testimonial-stars { display: flex; gap: 2px; margin-bottom: 12px; }
+  .v4-testimonial-stars span { color: #f59e0b; font-size: 14px; }
+
+  /* Team panel — full-width inside content area */
+  .v4-team-panel { background: white; border-radius: 16px; padding: 36px 40px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); border: 1px solid #e8e8e8; margin-top: 28px; }
+  .v4-team-header { text-align: center; margin-bottom: 24px; }
+  .v4-team-header h2 { font-size: 20px; font-weight: 700; color: #242424; margin-bottom: 8px; }
+  .v4-team-header h2 span { color: #1a5a8a; }
+  .v4-team-header p { font-size: 14px; color: #616161; line-height: 1.6; max-width: 640px; margin: 0 auto; }
+  .v4-team-row { display: flex; justify-content: center; gap: 48px; flex-wrap: wrap; }
+  .v4-team-card { display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center; min-width: 120px; }
+  .v4-team-card .name { font-size: 13px; font-weight: 600; color: #242424; }
+  .v4-team-card .role { font-size: 11px; color: #1a5a8a; font-weight: 500; }
+  .v4-team-card .spec { font-size: 11px; color: #616161; }
+
+  /* Footer */
+  .v4-footer { background: #0d2137; color: white; padding: 40px 64px; }
+  .v4-footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 40px; max-width: 1400px; margin: 0 auto; }
+  .v4-footer-brand h3 { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
+  .v4-footer-brand h3 span { color: #5bb8f5; }
+  .v4-footer-brand p { font-size: 13px; color: rgba(255,255,255,0.55); line-height: 1.6; }
+  .v4-footer-col h4 { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px; color: rgba(255,255,255,0.4); margin-bottom: 14px; }
+  .v4-footer-col a { display: block; font-size: 13px; color: rgba(255,255,255,0.7); text-decoration: none; padding: 4px 0; transition: color 0.2s; }
+  .v4-footer-col a:hover { color: #5bb8f5; }
+  .v4-footer-bottom { border-top: 1px solid rgba(255,255,255,0.08); margin-top: 32px; padding-top: 20px; display: flex; justify-content: space-between; align-items: center; max-width: 1400px; margin-left: auto; margin-right: auto; }
+  .v4-footer-bottom p { font-size: 11px; color: rgba(255,255,255,0.35); }
+  .v4-footer-bottom a { font-size: 11px; color: rgba(255,255,255,0.35); text-decoration: none; }
+  .v4-footer-bottom a:hover { color: #5bb8f5; }
+
+  /* Variation 5: Modern SaaS — Full-bleed hero + floating cards + team carousel */
+  .v5-hero { background: linear-gradient(160deg, #0a2540 0%, #0d3a5c 30%, #1a5a8a 70%, #2185c5 100%); color: white; padding: 80px 64px 100px; text-align: center; position: relative; }
+  .v5-hero::after { content: ''; position: absolute; bottom: -40px; left: 0; right: 0; height: 80px; background: #f5f5f5; clip-path: ellipse(55% 100% at 50% 100%); }
+  .v5-badge { display: inline-block; background: rgba(91,184,245,0.2); border: 1px solid rgba(91,184,245,0.3); padding: 6px 16px; border-radius: 16px; font-size: 12px; font-weight: 600; color: #5bb8f5; margin-bottom: 20px; letter-spacing: 0.5px; }
+  .v5-hero h1 { font-size: 42px; font-weight: 700; margin-bottom: 16px; line-height: 1.15; }
+  .v5-hero h1 span { background: linear-gradient(90deg, #5bb8f5, #7dd3fc); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .v5-hero .lead { font-size: 17px; color: rgba(255,255,255,0.75); max-width: 600px; margin: 0 auto 32px; line-height: 1.7; }
+  .v5-trust-row { display: flex; justify-content: center; gap: 36px; }
+  .v5-trust-item { text-align: center; }
+  .v5-trust-item .num { font-size: 22px; font-weight: 700; }
+  .v5-trust-item .label { font-size: 11px; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 0.5px; }
+  .v5-body { padding: 60px 64px 48px; max-width: 1100px; margin: 0 auto; position: relative; z-index: 1; }
+  .v5-floating-cards { display: flex; gap: 28px; margin-top: -80px; margin-bottom: 56px; }
+  .v5-fcard { flex: 1; background: white; border-radius: 20px; padding: 32px; box-shadow: 0 8px 32px rgba(0,0,0,0.1); cursor: pointer; transition: all 0.3s; border: 2px solid transparent; }
+  .v5-fcard:hover { transform: translateY(-6px); box-shadow: 0 16px 48px rgba(0,0,0,0.12); border-color: #1a5a8a; }
+  .v5-fcard-icon { width: 52px; height: 52px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 24px; margin-bottom: 16px; }
+  .v5-fcard h3 { font-size: 22px; font-weight: 600; color: #242424; margin-bottom: 8px; }
+  .v5-fcard p { font-size: 14px; color: #616161; line-height: 1.6; margin-bottom: 16px; }
+  .v5-fcard .link { font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 6px; }
+  .v5-team-section { text-align: center; }
+  .v5-team-section h2 { font-size: 24px; font-weight: 600; color: #242424; margin-bottom: 6px; }
+  .v5-team-section .sub { font-size: 14px; color: #616161; margin-bottom: 32px; }
+  .v5-team-carousel { display: flex; gap: 24px; justify-content: center; }
+  .v5-person { width: 180px; text-align: center; background: white; border-radius: 16px; padding: 28px 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); border: 1px solid #e8e8e8; transition: all 0.2s; }
+  .v5-person:hover { box-shadow: 0 6px 20px rgba(0,0,0,0.08); border-color: #1a5a8a; }
+  .v5-person .name { font-size: 14px; font-weight: 600; color: #242424; margin-top: 12px; }
+  .v5-person .role { font-size: 12px; color: #1a5a8a; font-weight: 500; margin-top: 2px; }
+  .v5-person .focus { font-size: 11px; color: #616161; margin-top: 6px; }
+  .v5-about { background: white; border-radius: 20px; padding: 40px; margin-top: 48px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); border: 1px solid #e8e8e8; display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center; }
+  .v5-about h2 { font-size: 22px; font-weight: 600; color: #242424; margin-bottom: 12px; }
+  .v5-about p { font-size: 14px; color: #616161; line-height: 1.7; }
+  .v5-about-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .v5-about-stat { background: #f8fafc; border-radius: 12px; padding: 20px; text-align: center; }
+  .v5-about-stat .val { font-size: 24px; font-weight: 700; color: #1a5a8a; }
+  .v5-about-stat .lbl { font-size: 11px; color: #616161; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px; }
+
+  /* Slogan Rotator */
+  .v4-slogan-rotator { position: relative; height: 42px; overflow: hidden; }
+  .v4-slogan {
+    position: absolute; top: 0; left: 0; width: 100%; text-align: center;
+    font-size: 24px; font-weight: 600; color: #5bb8f5;
+    letter-spacing: 0.3px; line-height: 42px;
+    opacity: 0; transform: translateY(14px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+  .v4-slogan.active {
+    opacity: 1; transform: translateY(0);
+  }
+
+  /* ═══════════════ Team Profile Modal (V2 Side-by-Side) ═══════════════ */
+  .profile-backdrop { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; backdrop-filter: blur(4px); animation: fadeIn 0.2s ease; }
+  .profile-backdrop.open { display: flex; }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes slideUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+  .profile-modal { background: white; border-radius: 20px; width: 680px; max-height: 90vh; overflow: hidden; box-shadow: 0 24px 80px rgba(0,0,0,0.25); display: grid; grid-template-columns: 220px 1fr; animation: slideUp 0.3s ease; }
+  .pm-left { background: linear-gradient(180deg, #0d3a5c, #1a5a8a); padding: 32px 24px; display: flex; flex-direction: column; align-items: center; text-align: center; }
+  .pm-avatar { width: 120px; height: 120px; border-radius: 50%; border: 4px solid rgba(255,255,255,0.3); object-fit: cover; margin-bottom: 16px; }
+  .pm-name { color: white; font-size: 20px; font-weight: 700; }
+  .pm-role { color: #5bb8f5; font-size: 13px; font-weight: 500; margin-top: 4px; }
+  .pm-spec { color: rgba(255,255,255,0.55); font-size: 11px; margin-top: 6px; line-height: 1.5; }
+  .pm-divider { width: 40px; height: 2px; background: rgba(255,255,255,0.15); margin: 20px auto; border-radius: 1px; }
+  .pm-stat { text-align: center; margin-bottom: 12px; }
+  .pm-stat-val { font-size: 20px; font-weight: 700; color: white; }
+  .pm-stat-lbl { font-size: 10px; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 0.5px; }
+  .pm-right { padding: 28px 28px 28px 24px; position: relative; overflow-y: auto; max-height: 90vh; }
+  .pm-close { position: absolute; top: 12px; right: 12px; width: 32px; height: 32px; border-radius: 50%; background: #f5f5f5; border: none; color: #616161; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.2s; }
+  .pm-close:hover { background: #e0e0e0; }
+  .pm-quote { font-size: 15px; color: #424242; line-height: 1.7; font-style: italic; margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid #e8e8e8; }
+  .pm-quote span { color: #1a5a8a; font-weight: 600; }
+  .pm-section { margin-bottom: 20px; }
+  .pm-section-title { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px; color: #999; margin-bottom: 10px; }
+  .pm-section p { font-size: 13px; color: #616161; line-height: 1.6; }
+  .pm-hobbies { display: flex; flex-wrap: wrap; gap: 6px; }
+  .pm-hobby { background: #f5f5f5; color: #424242; font-size: 12px; padding: 5px 12px; border-radius: 14px; }
+  .pm-links a { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #1a5a8a; text-decoration: none; padding: 6px 0; }
+  .pm-links a:hover { text-decoration: underline; }
+  .pm-links a::before { content: ''; width: 4px; height: 4px; border-radius: 50%; background: #1a5a8a; }
+  .v4-team-card { cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; border-radius: 12px; padding: 12px; }
+  .v4-team-card:hover { transform: translateY(-4px); background: #f8fbff; }
+
+  /* Avatar color backgrounds */
+  .av-gary { background: linear-gradient(135deg, #1a5a8a, #2980b9); }
+  .av-lebo { background: linear-gradient(135deg, #6264a7, #7c7ec9); }
+  .av-ruan { background: linear-gradient(135deg, #107c10, #16a34a); }
+  .av-thando { background: linear-gradient(135deg, #742774, #a855f7); }
+  .av-sarah { background: linear-gradient(135deg, #c42b1c, #ef4444); }
+</style>
+</head>
+<body>
+
+<!-- Tab Navigation -->
+<div class="tab-nav">
+  <button class="tab-btn active" onclick="showTab(1)">V1: Hero + Team Strip</button>
+  <button class="tab-btn" onclick="showTab(2)">V2: Split Layout</button>
+  <button class="tab-btn" onclick="showTab(3)">V3: Cards + Team Grid</button>
+  <button class="tab-btn" onclick="showTab(4)">V4: Magazine Editorial</button>
+  <button class="tab-btn" onclick="showTab(5)">V5: Modern SaaS</button>
+</div>
+
+<!-- ==================== VARIATION 1: Hero Banner + Horizontal Team Strip ==================== -->
+<div id="tab1" class="tab-content active">
+  <div class="variation-label">VARIATION 1 &mdash; Hero Banner with Stats + Horizontal Team Strip</div>
+
+  <!-- Hero -->
+  <div class="v1-hero">
+    <div class="v1-hero-content">
+      <h1>Digital Workplace</h1>
+      <p class="tagline">
+        We are First Technology Group's Microsoft 365 &amp; Power Platform practice.
+        We help organisations unlock the full value of their M365 investment through
+        consulting, custom development, migrations, and managed services.
+      </p>
+      <div class="v1-stats">
+        <div class="v1-stat">
+          <div class="v1-stat-value">12</div>
+          <div class="v1-stat-label">Service Areas</div>
+        </div>
+        <div class="v1-stat">
+          <div class="v1-stat-value">29</div>
+          <div class="v1-stat-label">Products</div>
+        </div>
+        <div class="v1-stat">
+          <div class="v1-stat-value">50+</div>
+          <div class="v1-stat-label">Engagements</div>
+        </div>
+        <div class="v1-stat">
+          <div class="v1-stat-value">8</div>
+          <div class="v1-stat-label">Specialists</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Action Cards -->
+  <div class="v1-cards">
+    <div class="v1-card v1-services">
+      <div class="v1-card-icon" style="background: #e8f4fc; color: #1a5a8a;">&#9881;</div>
+      <h3>Services</h3>
+      <p>Browse our comprehensive service catalog including consulting, development, migrations, and pre-sales support.</p>
+      <div class="v1-card-features">
+        <span>Power Platform, SPFx &amp; SharePoint</span>
+        <span>Migrations &amp; Assessments</span>
+        <span>Copilot Agents &amp; AI Solutions</span>
+        <span>Tenders, Proposals &amp; SLA</span>
+        <span>Strategic Advisory</span>
+      </div>
+      <div class="v1-card-footer">
+        <span style="color: #1a5a8a;">Explore Services</span>
+        <span style="color: #1a5a8a;">&rarr;</span>
+      </div>
+    </div>
+    <div class="v1-card v1-products">
+      <div class="v1-card-icon" style="background: #e8f0f7; color: #0d3a5c;">&#9879;</div>
+      <h3>Products</h3>
+      <p>Discover our portfolio of ready-to-deploy DWx applications, web parts, and adaptive cards.</p>
+      <div class="v1-card-features">
+        <span>15 DWx Business Applications</span>
+        <span>8 SharePoint Web Parts</span>
+        <span>6 Adaptive Cards for Teams</span>
+        <span>Contract, Policy &amp; Document Mgmt</span>
+        <span>HR, Training &amp; Engagement</span>
+      </div>
+      <div class="v1-card-footer">
+        <span style="color: #0d3a5c;">Explore Products</span>
+        <span style="color: #0d3a5c;">&rarr;</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Meet the Team Strip -->
+  <div class="v1-team-strip">
+    <h2>Meet the Team</h2>
+    <p class="subtitle">The specialists behind your Digital Workplace engagements</p>
+    <div class="v1-team-row">
+      <div class="v1-member">
+        <div class="avatar avatar-placeholder av-gary">GF</div>
+        <div class="name">Gary Finberg</div>
+        <div class="role">Solution Architect</div>
+        <div class="spec">Power Platform &bull; SPFx &bull; Copilot</div>
+      </div>
+      <div class="v1-member">
+        <div class="avatar avatar-placeholder av-lebo">LM</div>
+        <div class="name">Lebo Molefe</div>
+        <div class="role">Technical Specialist</div>
+        <div class="spec">SharePoint &bull; Migrations</div>
+      </div>
+      <div class="v1-member">
+        <div class="avatar avatar-placeholder av-ruan">RV</div>
+        <div class="name">Ruan van der Merwe</div>
+        <div class="role">Consultant</div>
+        <div class="spec">M365 Assessment &bull; Governance</div>
+      </div>
+      <div class="v1-member">
+        <div class="avatar avatar-placeholder av-thando">TN</div>
+        <div class="name">Thando Nkosi</div>
+        <div class="role">Solution Architect</div>
+        <div class="spec">Copilot &bull; AI &bull; Viva</div>
+      </div>
+      <div class="v1-member">
+        <div class="avatar avatar-placeholder av-sarah">SJ</div>
+        <div class="name">Sarah Johnson</div>
+        <div class="role">Consultant</div>
+        <div class="spec">Training &bull; Change Management</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== VARIATION 2: Split Layout ==================== -->
+<div id="tab2" class="tab-content">
+  <div class="variation-label">VARIATION 2 &mdash; Split Layout: About DWx (left) + Actions (right)</div>
+
+  <div class="v2-container">
+    <!-- Left: About DWx -->
+    <div class="v2-left">
+      <h1>Digital Workplace</h1>
+      <p class="desc">
+        We are the Microsoft 365 &amp; Power Platform practice within First Technology Group.
+        Our team delivers end-to-end solutions &mdash; from strategic advisory and pre-sales
+        discovery through to custom development, migrations, and ongoing managed support.
+      </p>
+
+      <div class="v2-pillars">
+        <div class="v2-pillar">
+          <div class="v2-pillar-icon">&#128640;</div>
+          <div class="v2-pillar-text">
+            <h4>Build &amp; Customise</h4>
+            <p>Power Apps, SPFx, Copilot Agents, adaptive cards</p>
+          </div>
+        </div>
+        <div class="v2-pillar">
+          <div class="v2-pillar-icon">&#9729;&#65039;</div>
+          <div class="v2-pillar-text">
+            <h4>Migrate &amp; Assess</h4>
+            <p>SharePoint migrations, M365 tenant assessments, governance</p>
+          </div>
+        </div>
+        <div class="v2-pillar">
+          <div class="v2-pillar-icon">&#128200;</div>
+          <div class="v2-pillar-text">
+            <h4>Advise &amp; Support</h4>
+            <p>Strategic roadmaps, tenders, proposals, SLA &amp; ad-hoc support</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mini Team -->
+      <div style="font-size: 12px; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px;">Meet the Team</div>
+      <div class="v2-team-row">
+        <div class="v2-mini-member">
+          <div class="avatar avatar-sm avatar-placeholder av-gary">GF</div>
+          <div class="name">Gary F.</div>
+          <div class="role">Solution Architect</div>
+        </div>
+        <div class="v2-mini-member">
+          <div class="avatar avatar-sm avatar-placeholder av-lebo">LM</div>
+          <div class="name">Lebo M.</div>
+          <div class="role">Technical Specialist</div>
+        </div>
+        <div class="v2-mini-member">
+          <div class="avatar avatar-sm avatar-placeholder av-ruan">RV</div>
+          <div class="name">Ruan v.d.M.</div>
+          <div class="role">Consultant</div>
+        </div>
+        <div class="v2-mini-member">
+          <div class="avatar avatar-sm avatar-placeholder av-thando">TN</div>
+          <div class="name">Thando N.</div>
+          <div class="role">Solution Architect</div>
+        </div>
+        <div class="v2-mini-member">
+          <div class="avatar avatar-sm avatar-placeholder av-sarah">SJ</div>
+          <div class="name">Sarah J.</div>
+          <div class="role">Consultant</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: Action Cards -->
+    <div class="v2-right">
+      <div style="font-size: 13px; color: #616161; text-transform: uppercase; letter-spacing: 1px; font-weight: 600; margin-bottom: -8px;">Get Started</div>
+
+      <div class="v2-action-card">
+        <div class="v2-action-header">
+          <div class="v2-action-icon" style="background: #e8f4fc; color: #1a5a8a;">&#9881;</div>
+          <h3>Browse Services</h3>
+        </div>
+        <p>Explore 12 service categories including Power Platform, SPFx, Copilot, tenders, strategic advisory, and more.</p>
+      </div>
+
+      <div class="v2-action-card">
+        <div class="v2-action-header">
+          <div class="v2-action-icon" style="background: #e8f0f7; color: #0d3a5c;">&#9879;</div>
+          <h3>Explore Products</h3>
+        </div>
+        <p>29 ready-to-deploy DWx products &mdash; business apps, web parts, and adaptive cards for Teams.</p>
+      </div>
+
+      <div class="v2-action-card">
+        <div class="v2-action-header">
+          <div class="v2-action-icon" style="background: #f0fdf4; color: #107c10;">&#128221;</div>
+          <h3>Submit a Request</h3>
+        </div>
+        <p>Start a new service request, proposal, tender response, or book a pre-sales discovery session.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== VARIATION 3: Cards + Team Grid ==================== -->
+<div id="tab3" class="tab-content">
+  <div class="variation-label">VARIATION 3 &mdash; Hero with Capability Chips + Team Cards Grid</div>
+
+  <!-- Hero -->
+  <div class="v3-hero">
+    <h1>Digital Workplace by First Technology</h1>
+    <p class="tagline">
+      Microsoft 365 &amp; Power Platform specialists delivering consulting, custom development,
+      migrations, and managed services to organisations across South Africa and the UK.
+    </p>
+    <div class="v3-capability-chips">
+      <span class="v3-chip">Power Platform</span>
+      <span class="v3-chip">SPFx Development</span>
+      <span class="v3-chip">SharePoint Migration</span>
+      <span class="v3-chip">M365 Assessment</span>
+      <span class="v3-chip">Copilot &amp; AI</span>
+      <span class="v3-chip">Microsoft Viva</span>
+      <span class="v3-chip">Training</span>
+      <span class="v3-chip">Tenders &amp; Proposals</span>
+      <span class="v3-chip">SLA Support</span>
+      <span class="v3-chip">Strategic Advisory</span>
+    </div>
+  </div>
+
+  <div class="v3-body">
+    <!-- Action Cards -->
+    <div class="v3-section-title">Where would you like to start?</div>
+    <div class="v3-section-sub">Choose a path below to explore our offerings</div>
+    <div class="v3-cards-row">
+      <div class="v3-card">
+        <div class="v3-card-icon" style="background: #e8f4fc; color: #1a5a8a;">&#9881;</div>
+        <h3>Services</h3>
+        <p>Browse our full service catalog &mdash; from pre-sales discovery through to delivery and managed support.</p>
+        <div class="count">12 categories &bull; 30+ offerings</div>
+      </div>
+      <div class="v3-card">
+        <div class="v3-card-icon" style="background: #e8f0f7; color: #0d3a5c;">&#9879;</div>
+        <h3>Products</h3>
+        <p>Discover our portfolio of ready-to-deploy DWx apps, web parts, and adaptive cards.</p>
+        <div class="count">15 apps &bull; 8 web parts &bull; 6 adaptive cards</div>
+      </div>
+    </div>
+
+    <!-- Team Grid -->
+    <div class="v3-section-title">Meet the Team</div>
+    <div class="v3-section-sub">The specialists behind your engagements &mdash; from discovery to delivery</div>
+    <div class="v3-team-grid">
+      <div class="v3-team-card">
+        <div class="avatar avatar-lg avatar-placeholder av-gary">GF</div>
+        <div class="name">Gary Finberg</div>
+        <div class="role">Solution Architect</div>
+        <div class="desc">Power Platform, SPFx, Copilot agents, Teams app development</div>
+      </div>
+      <div class="v3-team-card">
+        <div class="avatar avatar-lg avatar-placeholder av-lebo">LM</div>
+        <div class="name">Lebo Molefe</div>
+        <div class="role">Technical Specialist</div>
+        <div class="desc">SharePoint migrations, tenant-to-tenant, on-prem to cloud</div>
+      </div>
+      <div class="v3-team-card">
+        <div class="avatar avatar-lg avatar-placeholder av-ruan">RV</div>
+        <div class="name">Ruan van der Merwe</div>
+        <div class="role">Consultant</div>
+        <div class="desc">M365 assessments, governance, security &amp; compliance</div>
+      </div>
+      <div class="v3-team-card">
+        <div class="avatar avatar-lg avatar-placeholder av-thando">TN</div>
+        <div class="name">Thando Nkosi</div>
+        <div class="role">Solution Architect</div>
+        <div class="desc">Copilot agents, AI integration, Microsoft Viva suite</div>
+      </div>
+      <div class="v3-team-card">
+        <div class="avatar avatar-lg avatar-placeholder av-sarah">SJ</div>
+        <div class="name">Sarah Johnson</div>
+        <div class="role">Consultant</div>
+        <div class="desc">Training programs, adoption, change management</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== VARIATION 4: Magazine Editorial (Redesigned) ==================== -->
+<div id="tab4" class="tab-content">
+  <div class="variation-label">VARIATION 4 &mdash; Magazine / Editorial Layout (Redesigned)</div>
+
+  <!-- Masthead -->
+  <div class="v4-masthead">
+    <div>
+      <h1>Your Digital<br>Workplace <span>Partner</span></h1>
+      <p class="lead">
+        Digital Workplace is First Technology Group's Microsoft 365 practice.
+        We combine deep platform expertise with business acumen to deliver
+        solutions that drive real productivity gains &mdash; from Power Platform
+        apps to enterprise Copilot agents.
+      </p>
+    </div>
+    <div class="v4-masthead-right">
+      <div class="v4-stats-row">
+        <div class="v4-stat-card">
+          <div class="value">12</div>
+          <div class="label">Service Areas</div>
+        </div>
+        <div class="v4-stat-card">
+          <div class="value">29</div>
+          <div class="label">Products</div>
+        </div>
+        <div class="v4-stat-card">
+          <div class="value">50+</div>
+          <div class="label">Engagements</div>
+        </div>
+      </div>
+      <div class="v4-slogan-rotator">
+        <div class="v4-slogan active">Your Next Deal Starts Here</div>
+        <div class="v4-slogan">From Lead to Launch, Streamlined</div>
+        <div class="v4-slogan">Pre-Sales, Perfected</div>
+        <div class="v4-slogan">Move Deals Forward, Not Paperwork</div>
+        <div class="v4-slogan">Smart Scheduling. Smarter Selling.</div>
+        <div class="v4-slogan">Close Faster. Know More. Win Often.</div>
+        <div class="v4-slogan">Where Discovery Meets Delivery</div>
+        <div class="v4-slogan">Digital Workplace. Accelerated.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2-column grid: action cards + sidebar -->
+  <div class="v4-content">
+    <div class="v4-grid">
+      <!-- Main Column — 3 action cards with visual interest -->
+      <div class="v4-main-col">
+        <!-- Browse Services -->
+        <div class="v4-action-card">
+          <div class="v4-card-accent" style="background: linear-gradient(180deg, #1a5a8a, #2980b9);"></div>
+          <div class="v4-card-inner">
+            <div class="v4-card-icon" style="background: linear-gradient(135deg, #1a5a8a, #2980b9); color: white;">&#9881;</div>
+            <div class="v4-card-text">
+              <h3>Browse Service Catalog</h3>
+              <div class="card-meta">12 categories &bull; Pre-sales &amp; consulting</div>
+              <p>Power Platform, SPFx, Copilot, Migrations, Tenders, Strategic Advisory and more. Start a pre-sales consultation or submit a service request.</p>
+            </div>
+            <div class="v4-card-arrow">&rarr;</div>
+          </div>
+        </div>
+
+        <!-- Explore Products -->
+        <div class="v4-action-card">
+          <div class="v4-card-accent" style="background: linear-gradient(180deg, #0d3a5c, #1a5a8a);"></div>
+          <div class="v4-card-inner">
+            <div class="v4-card-icon" style="background: linear-gradient(135deg, #0d3a5c, #1a5a8a); color: white;">&#9879;</div>
+            <div class="v4-card-text">
+              <h3>Explore Product Portfolio</h3>
+              <div class="card-meta">29 products &bull; Apps, web parts &amp; cards</div>
+              <p>15 business applications, 8 SharePoint web parts, and 6 Teams adaptive cards &mdash; all built on Microsoft 365 and ready to deploy.</p>
+            </div>
+            <div class="v4-card-arrow">&rarr;</div>
+          </div>
+        </div>
+
+        <!-- Submit Request -->
+        <div class="v4-action-card">
+          <div class="v4-card-accent" style="background: linear-gradient(180deg, #107c10, #16a34a);"></div>
+          <div class="v4-card-inner">
+            <div class="v4-card-icon" style="background: linear-gradient(135deg, #107c10, #16a34a); color: white;">&#128221;</div>
+            <div class="v4-card-text">
+              <h3>Submit a New Request</h3>
+              <div class="card-meta">5-step wizard &bull; All request types</div>
+              <p>Start a service request, tender response, proposal, or book an ad-hoc support session with our team.</p>
+            </div>
+            <div class="v4-card-arrow">&rarr;</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Center column — What We Do -->
+      <div class="v4-sidebar">
+        <div class="v4-sidebar-section" style="flex: 1; display: flex; flex-direction: column;">
+          <h3>What We Do</h3>
+          <div style="display: flex; flex-direction: column; gap: 14px; font-size: 13px; color: #424242; flex: 1; justify-content: center;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="color: #1a5a8a; font-weight: 700;">&#10003;</span> Custom Power Apps &amp; Copilot agents
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="color: #1a5a8a; font-weight: 700;">&#10003;</span> SPFx web parts &amp; Teams apps
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="color: #1a5a8a; font-weight: 700;">&#10003;</span> SharePoint migrations
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="color: #1a5a8a; font-weight: 700;">&#10003;</span> M365 governance &amp; assessments
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="color: #1a5a8a; font-weight: 700;">&#10003;</span> Tender responses &amp; proposals
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="color: #1a5a8a; font-weight: 700;">&#10003;</span> Managed support &amp; SLA
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="color: #1a5a8a; font-weight: 700;">&#10003;</span> Strategic advisory &amp; roadmapping
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="color: #1a5a8a; font-weight: 700;">&#10003;</span> Training &amp; change management
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="color: #1a5a8a; font-weight: 700;">&#10003;</span> Microsoft Viva suite rollouts
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="color: #1a5a8a; font-weight: 700;">&#10003;</span> Intranet design &amp; branding
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="color: #1a5a8a; font-weight: 700;">&#10003;</span> Power BI dashboards &amp; reporting
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="color: #1a5a8a; font-weight: 700;">&#10003;</span> Security &amp; compliance reviews
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right column — Testimonial -->
+      <div class="v4-testimonial-col">
+        <div class="v4-testimonial" style="flex: 1; display: flex; flex-direction: column;">
+          <div class="v4-testimonial-stars" style="margin-top: 12px;">
+            <span>&#9733;</span><span>&#9733;</span><span>&#9733;</span><span>&#9733;</span><span>&#9733;</span>
+          </div>
+          <div class="v4-testimonial-quote" style="flex: 1;">
+            &ldquo;The DWx team transformed how we approach our M365 engagements. Their discovery process is thorough, the specialists really understand the platform, and turnaround on proposals is consistently fast. It's made a real difference to our pipeline.&rdquo;
+          </div>
+          <div class="v4-testimonial-author">
+            <img class="v4-testimonial-avatar" src="https://i.pravatar.cc/88?img=47" alt="Sindy Kotse" style="border: 2px solid #d0e4f0;">
+            <div class="v4-testimonial-info">
+              <div class="t-name">Sindy Kotse</div>
+              <div class="t-role">Senior Account Manager</div>
+              <div class="t-company">First Technology Group</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Your DWx Team — full-width panel inside content -->
+    <div class="v4-team-panel">
+      <div class="v4-team-header">
+        <h2>Your <span>DWx</span> Team</h2>
+        <p>One team, one mission &mdash; we collaborate across disciplines to deliver precision-engineered solutions. From first discovery to final deployment, every engagement is a partnership built on trust, expertise, and a shared drive for excellence.</p>
+      </div>
+      <div class="v4-team-row">
+        <div class="v4-team-card" onclick="openProfile('gary')">
+          <img class="avatar" src="https://i.pravatar.cc/128?img=11" alt="Gary Finberg" style="width:64px;height:64px;border-radius:50%;">
+          <div class="name">Gary Finberg</div>
+          <div class="role">Solution Architect</div>
+          <div class="spec">Power Platform &bull; SPFx &bull; Copilot</div>
+        </div>
+        <div class="v4-team-card" onclick="openProfile('chris')">
+          <img class="avatar" src="https://i.pravatar.cc/128?img=12" alt="Chris Botha" style="width:64px;height:64px;border-radius:50%;">
+          <div class="name">Chris Botha</div>
+          <div class="role">Technical Specialist</div>
+          <div class="spec">SharePoint &bull; Migrations</div>
+        </div>
+        <div class="v4-team-card" onclick="openProfile('shaaira')">
+          <img class="avatar" src="https://i.pravatar.cc/128?img=45" alt="Shaaira Omar" style="width:64px;height:64px;border-radius:50%;">
+          <div class="name">Shaaira Omar</div>
+          <div class="role">Consultant</div>
+          <div class="spec">M365 &bull; Governance</div>
+        </div>
+        <div class="v4-team-card" onclick="openProfile('wimpie')">
+          <img class="avatar" src="https://i.pravatar.cc/128?img=14" alt="Wimpie Baard" style="width:64px;height:64px;border-radius:50%;">
+          <div class="name">Wimpie Baard</div>
+          <div class="role">Solution Architect</div>
+          <div class="spec">Copilot &bull; AI &bull; Viva</div>
+        </div>
+        <div class="v4-team-card" onclick="openProfile('gulzar')">
+          <img class="avatar" src="https://i.pravatar.cc/128?img=59" alt="Gulzar Ismail" style="width:64px;height:64px;border-radius:50%;">
+          <div class="name">Gulzar Ismail</div>
+          <div class="role">Consultant</div>
+          <div class="spec">Training &bull; Change Mgmt</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════ Team Profile Modals ═══════════════ -->
+  <div class="profile-backdrop" id="profileBackdrop" onclick="closeProfile(event)">
+
+    <!-- Gary Finberg -->
+    <div class="profile-modal" id="profile-gary">
+      <div class="pm-left">
+        <img class="pm-avatar" src="https://i.pravatar.cc/240?img=11" alt="Gary Finberg">
+        <div class="pm-name">Gary Finberg</div>
+        <div class="pm-role">Solution Architect</div>
+        <div class="pm-spec">Power Platform &bull; SPFx &bull; Copilot Agents</div>
+        <div class="pm-divider"></div>
+        <div class="pm-stat"><div class="pm-stat-val">40+</div><div class="pm-stat-lbl">Engagements</div></div>
+        <div class="pm-stat"><div class="pm-stat-val">12+</div><div class="pm-stat-lbl">Years Experience</div></div>
+      </div>
+      <div class="pm-right">
+        <button class="pm-close" onclick="closeProfile()">&times;</button>
+        <div class="pm-quote">
+          &ldquo;I'm driven by the belief that great technology should feel invisible &mdash; it just <span>works</span>. Every engagement is a chance to solve a puzzle, collaborate with brilliant people, and deliver something the client didn't think was possible.&rdquo;
+        </div>
+        <div class="pm-section">
+          <div class="pm-section-title">What Inspires Me</div>
+          <p>Seeing a client's face light up during a demo. Collaborating with the team to crack a tough architecture problem at the whiteboard. Shipping solutions that genuinely make people's work lives easier.</p>
+        </div>
+        <div class="pm-section">
+          <div class="pm-section-title">When I'm Not Working</div>
+          <div class="pm-hobbies">
+            <span class="pm-hobby">&#127947; Mountain Biking</span>
+            <span class="pm-hobby">&#9749; Specialty Coffee</span>
+            <span class="pm-hobby">&#127911; Tech Podcasts</span>
+            <span class="pm-hobby">&#128187; Open Source</span>
+            <span class="pm-hobby">&#127758; Travel</span>
+          </div>
+        </div>
+        <div class="pm-section">
+          <div class="pm-section-title">Favourite Websites</div>
+          <div class="pm-links">
+            <a href="#">Microsoft Learn &mdash; Power Platform</a>
+            <a href="#">PnP Community &mdash; sp-dev-fx-webparts</a>
+            <a href="#">Hacker News &mdash; tech &amp; startups</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Chris Botha -->
+    <div class="profile-modal" id="profile-chris">
+      <div class="pm-left">
+        <img class="pm-avatar" src="https://i.pravatar.cc/240?img=12" alt="Chris Botha">
+        <div class="pm-name">Chris Botha</div>
+        <div class="pm-role">Technical Specialist</div>
+        <div class="pm-spec">SharePoint &bull; Migrations &bull; Hybrid</div>
+        <div class="pm-divider"></div>
+        <div class="pm-stat"><div class="pm-stat-val">35+</div><div class="pm-stat-lbl">Engagements</div></div>
+        <div class="pm-stat"><div class="pm-stat-val">10+</div><div class="pm-stat-lbl">Years Experience</div></div>
+      </div>
+      <div class="pm-right">
+        <button class="pm-close" onclick="closeProfile()">&times;</button>
+        <div class="pm-quote">
+          &ldquo;There's a real craft to migrating thousands of sites without users ever noticing. I love the <span>precision</span> it demands &mdash; planning every detail, testing every edge case, and then watching it all land perfectly on go-live day.&rdquo;
+        </div>
+        <div class="pm-section">
+          <div class="pm-section-title">What Inspires Me</div>
+          <p>Complex migration puzzles that everyone says can't be done. The satisfaction of zero-downtime cutovers. Building tooling that saves the team hundreds of hours on the next project.</p>
+        </div>
+        <div class="pm-section">
+          <div class="pm-section-title">When I'm Not Working</div>
+          <div class="pm-hobbies">
+            <span class="pm-hobby">&#127944; Rugby</span>
+            <span class="pm-hobby">&#127860; Braai Master</span>
+            <span class="pm-hobby">&#128247; Photography</span>
+            <span class="pm-hobby">&#127926; Live Music</span>
+          </div>
+        </div>
+        <div class="pm-section">
+          <div class="pm-section-title">Favourite Websites</div>
+          <div class="pm-links">
+            <a href="#">SharePoint Maven &mdash; migration guides</a>
+            <a href="#">Microsoft Tech Community</a>
+            <a href="#">Stack Overflow &mdash; SharePoint</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Shaaira Omar -->
+    <div class="profile-modal" id="profile-shaaira">
+      <div class="pm-left">
+        <img class="pm-avatar" src="https://i.pravatar.cc/240?img=45" alt="Shaaira Omar">
+        <div class="pm-name">Shaaira Omar</div>
+        <div class="pm-role">Consultant</div>
+        <div class="pm-spec">M365 &bull; Governance &bull; Compliance</div>
+        <div class="pm-divider"></div>
+        <div class="pm-stat"><div class="pm-stat-val">25+</div><div class="pm-stat-lbl">Engagements</div></div>
+        <div class="pm-stat"><div class="pm-stat-val">8+</div><div class="pm-stat-lbl">Years Experience</div></div>
+      </div>
+      <div class="pm-right">
+        <button class="pm-close" onclick="closeProfile()">&times;</button>
+        <div class="pm-quote">
+          &ldquo;Governance isn't about saying <span>no</span> &mdash; it's about creating the guardrails that let everyone say <span>yes</span> with confidence. I help organisations unlock M365's full potential while keeping their data safe and compliant.&rdquo;
+        </div>
+        <div class="pm-section">
+          <div class="pm-section-title">What Inspires Me</div>
+          <p>Helping clients realise that governance can be an enabler, not a blocker. Turning chaotic tenant sprawl into a clean, well-structured environment that teams actually enjoy using.</p>
+        </div>
+        <div class="pm-section">
+          <div class="pm-section-title">When I'm Not Working</div>
+          <div class="pm-hobbies">
+            <span class="pm-hobby">&#128218; Reading</span>
+            <span class="pm-hobby">&#127849; Baking</span>
+            <span class="pm-hobby">&#128690; Cycling</span>
+            <span class="pm-hobby">&#127793; Gardening</span>
+            <span class="pm-hobby">&#127752; Art &amp; Design</span>
+          </div>
+        </div>
+        <div class="pm-section">
+          <div class="pm-section-title">Favourite Websites</div>
+          <div class="pm-links">
+            <a href="#">Microsoft Purview documentation</a>
+            <a href="#">Practical 365 &mdash; governance deep dives</a>
+            <a href="#">The Verge &mdash; tech culture</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Wimpie Baard -->
+    <div class="profile-modal" id="profile-wimpie">
+      <div class="pm-left">
+        <img class="pm-avatar" src="https://i.pravatar.cc/240?img=14" alt="Wimpie Baard">
+        <div class="pm-name">Wimpie Baard</div>
+        <div class="pm-role">Solution Architect</div>
+        <div class="pm-spec">Copilot &bull; AI &bull; Viva Suite</div>
+        <div class="pm-divider"></div>
+        <div class="pm-stat"><div class="pm-stat-val">30+</div><div class="pm-stat-lbl">Engagements</div></div>
+        <div class="pm-stat"><div class="pm-stat-val">11+</div><div class="pm-stat-lbl">Years Experience</div></div>
+      </div>
+      <div class="pm-right">
+        <button class="pm-close" onclick="closeProfile()">&times;</button>
+        <div class="pm-quote">
+          &ldquo;AI is only as good as the problems you point it at. I love working with clients to find the <span>real</span> pain points &mdash; the ones where Copilot or a custom agent can save hours every week and make people genuinely excited about their tools.&rdquo;
+        </div>
+        <div class="pm-section">
+          <div class="pm-section-title">What Inspires Me</div>
+          <p>The AI revolution happening inside Microsoft 365 right now. Building Copilot agents that feel like magic to the end user. Helping traditional businesses take their first confident steps into AI.</p>
+        </div>
+        <div class="pm-section">
+          <div class="pm-section-title">When I'm Not Working</div>
+          <div class="pm-hobbies">
+            <span class="pm-hobby">&#127935; Golf</span>
+            <span class="pm-hobby">&#128054; Dog Dad</span>
+            <span class="pm-hobby">&#127909; Sci-Fi Films</span>
+            <span class="pm-hobby">&#128187; Side Projects</span>
+            <span class="pm-hobby">&#127860; Wine Tasting</span>
+          </div>
+        </div>
+        <div class="pm-section">
+          <div class="pm-section-title">Favourite Websites</div>
+          <div class="pm-links">
+            <a href="#">Microsoft Copilot Studio docs</a>
+            <a href="#">AI Blog &mdash; Microsoft Research</a>
+            <a href="#">Ars Technica &mdash; AI coverage</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Gulzar Ismail -->
+    <div class="profile-modal" id="profile-gulzar">
+      <div class="pm-left">
+        <img class="pm-avatar" src="https://i.pravatar.cc/240?img=59" alt="Gulzar Ismail">
+        <div class="pm-name">Gulzar Ismail</div>
+        <div class="pm-role">Consultant</div>
+        <div class="pm-spec">Training &bull; Change Mgmt &bull; Adoption</div>
+        <div class="pm-divider"></div>
+        <div class="pm-stat"><div class="pm-stat-val">20+</div><div class="pm-stat-lbl">Engagements</div></div>
+        <div class="pm-stat"><div class="pm-stat-val">9+</div><div class="pm-stat-lbl">Years Experience</div></div>
+      </div>
+      <div class="pm-right">
+        <button class="pm-close" onclick="closeProfile()">&times;</button>
+        <div class="pm-quote">
+          &ldquo;The best technology in the world is worthless if people don't <span>use</span> it. I specialise in the human side of digital transformation &mdash; getting buy-in, building confidence, and making sure every rollout sticks.&rdquo;
+        </div>
+        <div class="pm-section">
+          <div class="pm-section-title">What Inspires Me</div>
+          <p>Watching the 'light-bulb moment' when a sceptical user discovers a feature that changes their day. Designing training programmes that people actually enjoy attending. Turning resistance into enthusiasm.</p>
+        </div>
+        <div class="pm-section">
+          <div class="pm-section-title">When I'm Not Working</div>
+          <div class="pm-hobbies">
+            <span class="pm-hobby">&#9917; Football</span>
+            <span class="pm-hobby">&#127859; Cooking</span>
+            <span class="pm-hobby">&#128218; History Books</span>
+            <span class="pm-hobby">&#128663; Road Trips</span>
+            <span class="pm-hobby">&#127911; Podcasts</span>
+          </div>
+        </div>
+        <div class="pm-section">
+          <div class="pm-section-title">Favourite Websites</div>
+          <div class="pm-links">
+            <a href="#">Prosci &mdash; change management</a>
+            <a href="#">LinkedIn Learning</a>
+            <a href="#">Harvard Business Review</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Footer -->
+  <div class="v4-footer">
+    <div class="v4-footer-grid">
+      <div class="v4-footer-brand">
+        <h3>Digital <span>Workplace</span></h3>
+        <p>A practice of First Technology Group. We design, build, and support modern workplace solutions on the Microsoft 365 platform &mdash; serving organisations across South Africa and the United Kingdom.</p>
+      </div>
+      <div class="v4-footer-col">
+        <h4>Services</h4>
+        <a href="#">Power Platform</a>
+        <a href="#">SPFx Development</a>
+        <a href="#">SharePoint Migration</a>
+        <a href="#">M365 Assessment</a>
+        <a href="#">Copilot Agents</a>
+        <a href="#">Microsoft Viva</a>
+      </div>
+      <div class="v4-footer-col">
+        <h4>Products</h4>
+        <a href="#">DWx Business Apps</a>
+        <a href="#">SharePoint Web Parts</a>
+        <a href="#">Teams Adaptive Cards</a>
+        <a href="#">License Pulse</a>
+        <a href="#">Knowledge Base</a>
+      </div>
+      <div class="v4-footer-col">
+        <h4>Resources</h4>
+        <a href="#">Submit a Request</a>
+        <a href="#">My Requests</a>
+        <a href="#">Contact the Team</a>
+        <a href="#">About DWx</a>
+      </div>
+    </div>
+    <div class="v4-footer-bottom">
+      <p>&copy; 2026 First Technology Group &bull; Digital Workplace</p>
+      <a href="#">Privacy Policy</a>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== VARIATION 5: Modern SaaS ==================== -->
+<div id="tab5" class="tab-content">
+  <div class="variation-label">VARIATION 5 &mdash; Modern SaaS: Full-bleed Hero + Floating Cards + About Section</div>
+
+  <!-- Hero -->
+  <div class="v5-hero">
+    <div class="v5-badge">FIRST TECHNOLOGY GROUP &bull; DIGITAL WORKPLACE</div>
+    <h1>Microsoft 365 expertise,<br><span>delivered with precision</span></h1>
+    <p class="lead">
+      From strategic advisory to hands-on development &mdash; we help organisations unlock the
+      full value of their Microsoft 365 investment. 12 service areas, 29 products, one team.
+    </p>
+    <div class="v5-trust-row">
+      <div class="v5-trust-item">
+        <div class="num">12</div>
+        <div class="label">Service Areas</div>
+      </div>
+      <div class="v5-trust-item">
+        <div class="num">29</div>
+        <div class="label">Products</div>
+      </div>
+      <div class="v5-trust-item">
+        <div class="num">50+</div>
+        <div class="label">Engagements</div>
+      </div>
+      <div class="v5-trust-item">
+        <div class="num">3</div>
+        <div class="label">Regions</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="v5-body">
+    <!-- Floating Cards -->
+    <div class="v5-floating-cards">
+      <div class="v5-fcard">
+        <div class="v5-fcard-icon" style="background: #e8f4fc; color: #1a5a8a;">&#9881;</div>
+        <h3>Services</h3>
+        <p>Browse 12 service categories &mdash; Power Platform, SPFx, Copilot, migrations, tenders, strategic advisory and more.</p>
+        <div class="link" style="color: #1a5a8a;">Explore Services &rarr;</div>
+      </div>
+      <div class="v5-fcard">
+        <div class="v5-fcard-icon" style="background: #e8f0f7; color: #0d3a5c;">&#9879;</div>
+        <h3>Products</h3>
+        <p>Discover 29 ready-to-deploy DWx apps, SharePoint web parts, and Teams adaptive cards.</p>
+        <div class="link" style="color: #0d3a5c;">Explore Products &rarr;</div>
+      </div>
+    </div>
+
+    <!-- Meet the Team -->
+    <div class="v5-team-section">
+      <h2>Meet the Team</h2>
+      <div class="sub">The specialists who will work with you &mdash; from discovery to delivery</div>
+      <div class="v5-team-carousel">
+        <div class="v5-person">
+          <div class="avatar avatar-lg avatar-placeholder av-gary">GF</div>
+          <div class="name">Gary Finberg</div>
+          <div class="role">Solution Architect</div>
+          <div class="focus">Power Platform &bull; SPFx &bull; Copilot</div>
+        </div>
+        <div class="v5-person">
+          <div class="avatar avatar-lg avatar-placeholder av-lebo">LM</div>
+          <div class="name">Lebo Molefe</div>
+          <div class="role">Technical Specialist</div>
+          <div class="focus">SharePoint &bull; Migrations</div>
+        </div>
+        <div class="v5-person">
+          <div class="avatar avatar-lg avatar-placeholder av-ruan">RV</div>
+          <div class="name">Ruan van der Merwe</div>
+          <div class="role">Consultant</div>
+          <div class="focus">M365 &bull; Governance</div>
+        </div>
+        <div class="v5-person">
+          <div class="avatar avatar-lg avatar-placeholder av-thando">TN</div>
+          <div class="name">Thando Nkosi</div>
+          <div class="role">Solution Architect</div>
+          <div class="focus">Copilot &bull; AI &bull; Viva</div>
+        </div>
+        <div class="v5-person">
+          <div class="avatar avatar-lg avatar-placeholder av-sarah">SJ</div>
+          <div class="name">Sarah Johnson</div>
+          <div class="role">Consultant</div>
+          <div class="focus">Training &bull; Change Mgmt</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- About Section -->
+    <div class="v5-about">
+      <div>
+        <h2>About Digital Workplace</h2>
+        <p>
+          Digital Workplace (DWx) is First Technology Group's dedicated Microsoft 365 &amp;
+          Power Platform practice. We work with organisations across South Africa and the UK
+          to design, build, and support modern workplace solutions.
+        </p>
+        <p style="margin-top: 12px;">
+          Whether you need a custom Power App, an enterprise Copilot agent, a SharePoint
+          migration, or a strategic technology roadmap &mdash; our team brings deep platform
+          expertise and a structured engagement model to every project.
+        </p>
+      </div>
+      <div class="v5-about-stats">
+        <div class="v5-about-stat">
+          <div class="val">&#9881;</div>
+          <div class="lbl">Custom Development</div>
+        </div>
+        <div class="v5-about-stat">
+          <div class="val">&#9729;&#65039;</div>
+          <div class="lbl">Cloud Migrations</div>
+        </div>
+        <div class="v5-about-stat">
+          <div class="val">&#129302;</div>
+          <div class="lbl">AI &amp; Copilot</div>
+        </div>
+        <div class="v5-about-stat">
+          <div class="val">&#128200;</div>
+          <div class="lbl">Advisory &amp; Strategy</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function showTab(n) {
+  document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+  document.getElementById('tab' + n).classList.add('active');
+  document.querySelectorAll('.tab-btn')[n - 1].classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// Team Profile Modals
+function openProfile(id) {
+  document.querySelectorAll('.profile-modal').forEach(m => m.style.display = 'none');
+  document.getElementById('profile-' + id).style.display = 'grid';
+  document.getElementById('profileBackdrop').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeProfile(e) {
+  if (e && e.target !== e.currentTarget && !e.target.classList.contains('pm-close')) return;
+  document.getElementById('profileBackdrop').classList.remove('open');
+  document.body.style.overflow = '';
+}
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeProfile();
+});
+
+// Slogan Rotator
+(function() {
+  const slogans = document.querySelectorAll('.v4-slogan');
+  let current = 0;
+
+  setInterval(function() {
+    slogans[current].classList.remove('active');
+    current = (current + 1) % slogans.length;
+    slogans[current].classList.add('active');
+  }, 5000);
+})();
+</script>
+</body>
+</html>
