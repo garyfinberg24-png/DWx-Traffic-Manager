@@ -58,6 +58,7 @@ import { RequestsQueue } from './RequestsQueue';
 import { ProductRequestsQueue } from './ProductRequestsQueue';
 import KanbanBoard from './KanbanBoard';
 import QuickCreateDialog from './QuickCreateDialog';
+import { RequestDetails } from '../MyRequests/RequestDetails';
 
 const useStyles = makeStyles({
   container: {
@@ -153,6 +154,7 @@ export const SalesFunnelDashboard: React.FC<SalesFunnelDashboardProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<DashboardTab>('overview');
   const [showQuickCreate, setShowQuickCreate] = useState(false);
+  const [selectedRequest, setSelectedRequest] = useState<ServiceRequest | null>(null);
 
   // Load all requests on mount
   useEffect(() => {
@@ -539,7 +541,7 @@ export const SalesFunnelDashboard: React.FC<SalesFunnelDashboardProps> = ({
         )}
 
         {activeTab === 'board' && isManager && (
-          <KanbanBoard requests={requests} onRequestUpdated={handleRequestUpdated} />
+          <KanbanBoard requests={requests} onRequestUpdated={handleRequestUpdated} onCardClick={setSelectedRequest} />
         )}
       </div>
 
@@ -549,6 +551,16 @@ export const SalesFunnelDashboard: React.FC<SalesFunnelDashboardProps> = ({
         onClose={() => setShowQuickCreate(false)}
         onDealCreated={handleDealCreated}
       />
+
+      {/* Request Details Modal (from Board card click) */}
+      {selectedRequest && (
+        <RequestDetails
+          request={selectedRequest}
+          isOpen={true}
+          onClose={() => setSelectedRequest(null)}
+          onRequestUpdated={handleRequestUpdated}
+        />
+      )}
     </div>
   );
 };

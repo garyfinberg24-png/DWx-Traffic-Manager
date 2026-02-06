@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LP Booking App - Icon Generator</title>
+    <title>DWx Traffic Manager - Icon Generator</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -66,7 +66,7 @@
     </style>
 </head>
 <body>
-    <h1>🎨 LP Booking App - Icon Generator</h1>
+    <h1>🎨 DWx Traffic Manager - Icon Generator</h1>
     <p>Click the download buttons to save the icons for your Teams app package.</p>
 
     <div class="icon-container">
@@ -91,8 +91,8 @@
         <strong>📋 Instructions:</strong>
         <ol>
             <li>Click both download buttons above</li>
-            <li>Save the files to: <code>LP_Booking_App/appPackage/</code></li>
-            <li>Then run: <code>cd appPackage && Compress-Archive -Path manifest.json, color.png, outline.png -DestinationPath ../LPBookingApp.zip -Force</code></li>
+            <li>Save the files to: <code>DWx-Traffic-Manager/appPackage/</code></li>
+            <li>Then run: <code>cd appPackage && Compress-Archive -Path manifest.json, color.png, outline.png -DestinationPath ../DWxTrafficManager.zip -Force</code></li>
         </ol>
     </div>
 
@@ -120,7 +120,7 @@
             ctx.quadraticCurveTo(0, 0, radius, 0);
             ctx.closePath();
 
-            // Gradient background (License Pulse blue)
+            // Gradient background (DWx blue)
             const gradient = ctx.createLinearGradient(0, 0, size, size);
             gradient.addColorStop(0, '#0078D4');
             gradient.addColorStop(1, '#005A9E');
@@ -131,16 +131,16 @@
             ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
             ctx.fillRect(30, 120, 132, 50);
 
-            // "LP" text
+            // "DWx" text
             ctx.fillStyle = '#FFFFFF';
             ctx.font = 'bold 80px Segoe UI, Arial, sans-serif';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
-            ctx.fillText('LP', size / 2, size / 2 - 15);
+            ctx.fillText('DWx', size / 2, size / 2 - 15);
 
-            // "Booking" text (smaller)
+            // "Traffic" text (smaller)
             ctx.font = '600 22px Segoe UI, Arial, sans-serif';
-            ctx.fillText('Booking', size / 2, size / 2 + 50);
+            ctx.fillText('Traffic', size / 2, size / 2 + 50);
         }
 
         // Generate Outline Icon (32x32)
@@ -173,12 +173,12 @@
             ctx.closePath();
             ctx.stroke();
 
-            // "LP" text
+            // "DWx" text
             ctx.fillStyle = '#FFFFFF';
-            ctx.font = 'bold 13px Segoe UI, Arial, sans-serif';
+            ctx.font = 'bold 11px Segoe UI, Arial, sans-serif';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
-            ctx.fillText('LP', size / 2, size / 2 + 1);
+            ctx.fillText('DWx', size / 2, size / 2 + 1);
         }
 
         // Download function
@@ -192,7 +192,7 @@
             // Update instructions
             document.getElementById('instructions').innerHTML = `
                 <strong>✅ Downloaded: ${filename}</strong>
-                <p>Save it to: <code>LP_Booking_App/appPackage/${filename}</code></p>
+                <p>Save it to: <code>DWx-Traffic-Manager/appPackage/${filename}</code></p>
             `;
             document.getElementById('instructions').className = 'instructions success';
         }

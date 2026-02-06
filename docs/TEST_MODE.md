@@ -11,7 +11,7 @@ Test Mode bypasses Microsoft Authentication Library (MSAL) authentication and us
 ### Running in Test Mode (Account Manager)
 
 ```bash
-cd LP_Booking_App
+cd DWx-Traffic-Manager
 npm run dev:test
 ```
 

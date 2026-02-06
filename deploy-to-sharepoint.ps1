@@ -1,14 +1,14 @@
-# LP Booking App - SharePoint Deployment Script
+# DWx Traffic Manager - SharePoint Deployment Script
 # This script uploads the built app files to a SharePoint document library
 
 param(
-    [string]$SiteUrl = "https://hallofd.sharepoint.com/sites/LicensePulseDemoScheduler",
-    [string]$LibraryName = "LPBookingApp",
+    [string]$SiteUrl = "https://hallofd.sharepoint.com/sites/DWxTrafficManager",
+    [string]$LibraryName = "DWxTrafficManagerApp",
     [string]$BuildFolder = ".\build"
 )
 
 Write-Host "========================================" -ForegroundColor Cyan
-Write-Host "LP Booking App - SharePoint Deployment" -ForegroundColor Cyan
+Write-Host "DWx Traffic Manager - SharePoint Deployment" -ForegroundColor Cyan
 Write-Host "========================================" -ForegroundColor Cyan
 Write-Host ""
 
@@ -86,7 +86,7 @@ Write-Host "App URL: $SiteUrl/$LibraryName/index.html" -ForegroundColor Cyan
 Write-Host ""
 Write-Host "Next Steps:" -ForegroundColor Yellow
 Write-Host "1. Update Azure AD app redirect URI to include:" -ForegroundColor White
-Write-Host "   https://hallofd.sharepoint.com/sites/LicensePulseDemoScheduler/LPBookingApp/index.html" -ForegroundColor Gray
+Write-Host "   https://hallofd.sharepoint.com/sites/DWxTrafficManager/DWxTrafficManagerApp/index.html" -ForegroundColor Gray
 Write-Host ""
 Write-Host "2. Create the Teams app package and upload to Teams Admin Center" -ForegroundColor White
 Write-Host ""

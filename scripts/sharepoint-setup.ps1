@@ -1,5 +1,5 @@
-# LP_Booking_App - SharePoint Setup Script
-# This script helps configure the SharePoint list for the License Pulse Booking App
+# DWx Traffic Manager - SharePoint Setup Script
+# This script helps configure the SharePoint list for the DWx Traffic Manager
 
 param(
     [Parameter(Mandatory=$false)]
@@ -10,8 +10,8 @@ param(
 # Configuration - Update these values as needed
 $clientId = "617ebc47-16a0-457c-94ad-919b2e6827d9"
 $tenantId = "ac8e7aa0-66a4-48cb-9769-f638ba74eb3e"
-$siteUrl = "https://hallofd.sharepoint.com/sites/LicensePulseDemoScheduler"
-$listName = "LPDemoScheduler"
+$siteUrl = "https://hallofd.sharepoint.com/sites/DWxTrafficManager"
+$listName = "DWxServiceRequests"
 
 function Connect-ToSharePoint {
     Write-Host "Connecting to SharePoint..." -ForegroundColor Cyan

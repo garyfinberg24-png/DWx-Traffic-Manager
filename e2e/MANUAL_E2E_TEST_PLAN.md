@@ -39,7 +39,7 @@
 2. Observe the login page
 
 **Expected Results:**
-- [ ] License Pulse logo is displayed
+- [ ] DWx Traffic Manager logo is displayed
 - [ ] "Sign in with Microsoft" button is visible
 - [ ] Marketing stats are shown (2,500+ Bookings, 98% Success, etc.)
 - [ ] Testimonial section is displayed

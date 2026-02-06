@@ -61,7 +61,7 @@ export const loginRequest = {
 
 export const graphScopes = {
   // Include Sites.ReadWrite.All for SharePoint list operations via Graph API
-  // Calendars.ReadWrite.Shared enables access to shared mailbox calendars (lpbookings@firsttech.digital)
+  // Calendars.ReadWrite.Shared enables access to shared mailbox calendars (pre-sales calendar)
   // User.Invite.All enables inviting external/guest users to the tenant
   // User.Read.All enables listing all users in the tenant directory (for "Book on Behalf" and Entra ID browsing)
   scopes: [

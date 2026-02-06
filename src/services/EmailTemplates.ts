@@ -1,6 +1,6 @@
 /**
  * DWx Traffic Manager - Email Templates
- * LP Bookings-style inline HTML email templates with gradient headers,
+ * DWx-branded inline HTML email templates with gradient headers,
  * key-value rows, coloured callout boxes, and grey footers.
  *
  * Icon style: simple text markers (no emoji). Headers use plain text titles.

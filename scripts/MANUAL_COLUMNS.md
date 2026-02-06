@@ -1,9 +1,9 @@
-# LPDemoScheduler List - Manual Column Setup
+# DWxServiceRequests List - Manual Column Setup
 
 Since the app-only authentication has limited permissions, please add these columns manually through the SharePoint UI.
 
 ## Go to your list
-<https://hallofd.sharepoint.com/sites/LicensePulseDemoScheduler/Lists/LPDemoScheduler/AllItems.aspx>
+<https://hallofd.sharepoint.com/sites/DWxTrafficManager/Lists/DWxServiceRequests/AllItems.aspx>
 
 ## Add Columns
 

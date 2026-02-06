@@ -1,11 +1,11 @@
-# LP Demo Scheduler - End-to-End Test Plan
+# DWx Traffic Manager - End-to-End Test Plan
 
 ## Overview
-This document outlines the comprehensive testing approach to ensure the LP Demo Scheduler is production-ready with zero defects.
+This document outlines the comprehensive testing approach to ensure the DWx Traffic Manager is production-ready with zero defects.
 
 ## Test Environment
 - **App URL**: http://localhost:5173 (dev) or deployed URL
-- **SharePoint Site**: https://hallofd.sharepoint.com/sites/LicensePulseDemoScheduler
+- **SharePoint Site**: https://hallofd.sharepoint.com/sites/DWxTrafficManager
 - **Shared Calendar**: lpbookings@firsttech.digital
 - **Test User**: Account Manager with appropriate permissions
 

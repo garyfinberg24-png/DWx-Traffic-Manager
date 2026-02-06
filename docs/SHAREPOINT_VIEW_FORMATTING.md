@@ -1,6 +1,6 @@
 # SharePoint List View Formatting
 
-This document contains JSON formatting for the LPDemoScheduler SharePoint list columns and views.
+This document contains JSON formatting for the DWxServiceRequests SharePoint list columns and views.
 
 ## Column Formatting
 

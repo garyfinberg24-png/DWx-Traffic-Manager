@@ -75,7 +75,7 @@ Write-Host "Manifest updated!" -ForegroundColor Green
 # Recreate ZIP package
 Write-Host ""
 Write-Host "Creating new Teams package..." -ForegroundColor Yellow
-$zipPath = Join-Path $PSScriptRoot "LPBookingApp.zip"
+$zipPath = Join-Path $PSScriptRoot "DWxTrafficManager.zip"
 $appPackagePath = Join-Path $PSScriptRoot "appPackage"
 
 # Remove old ZIP if exists
@@ -86,7 +86,7 @@ if (Test-Path $zipPath) {
 # Create new ZIP
 Compress-Archive -Path (Join-Path $appPackagePath "manifest.json"), (Join-Path $appPackagePath "color.png"), (Join-Path $appPackagePath "outline.png") -DestinationPath $zipPath -Force
 
-Write-Host "Created: LPBookingApp.zip" -ForegroundColor Green
+Write-Host "Created: DWxTrafficManager.zip" -ForegroundColor Green
 Write-Host ""
 Write-Host "========================================" -ForegroundColor Cyan
 Write-Host "Next Steps:" -ForegroundColor Cyan
@@ -95,6 +95,6 @@ Write-Host ""
 Write-Host "1. Add redirect URI to Azure AD:" -ForegroundColor White
 Write-Host "   $AzureUrl" -ForegroundColor Yellow
 Write-Host ""
-Write-Host "2. Upload LPBookingApp.zip to Teams Admin Center:" -ForegroundColor White
+Write-Host "2. Upload DWxTrafficManager.zip to Teams Admin Center:" -ForegroundColor White
 Write-Host "   https://admin.teams.microsoft.com/" -ForegroundColor Yellow
 Write-Host ""

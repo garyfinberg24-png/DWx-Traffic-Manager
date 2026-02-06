@@ -3,7 +3,7 @@
     "manifestVersion":  "1.16",
     "version":  "1.7.5",
     "id":  "617ebc47-16a0-457c-94ad-919b2e6827d9",
-    "packageName":  "com.firsttech.lpbookingapp",
+    "packageName":  "com.firsttech.dwxtrafficmanager",
     "developer":  {
                       "name":  "FirstTech Digital",
                       "websiteUrl":  "https://firsttech.digital",
@@ -11,12 +11,12 @@
                       "termsOfUseUrl":  "https://firsttech.digital/terms"
                   },
     "name":  {
-                 "short":  "LP Booking",
-                 "full":  "License Pulse Demo Booking App"
+                 "short":  "DWx Traffic Manager",
+                 "full":  "Digital Workplace Traffic Manager"
              },
     "description":  {
-                        "short":  "Book License Pulse demos and deployments",
-                        "full":  "A Microsoft Teams application for account managers to book product demos and deployments. Integrates with SharePoint for data storage and Microsoft Graph for calendar management."
+                        "short":  "Pre-sales coordination and service requests",
+                        "full":  "A Microsoft Teams application for Digital Workplace pre-sales coordination, service requests, and time scheduling. Integrates with SharePoint for data storage and Microsoft Graph for calendar management."
                     },
     "icons":  {
                   "color":  "color.png",
@@ -26,7 +26,7 @@
     "staticTabs":  [
                        {
                            "entityId":  "home",
-                           "name":  "License Pulse Scheduler",
+                           "name":  "DWx Traffic Manager",
                            "contentUrl":  "https://wonderful-ocean-036cdeb10.4.azurestaticapps.net/index.html",
                            "websiteUrl":  "https://wonderful-ocean-036cdeb10.4.azurestaticapps.net/index.html",
                            "scopes":  [

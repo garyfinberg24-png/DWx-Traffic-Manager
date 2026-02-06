@@ -26,6 +26,7 @@ import KanbanColumn from './KanbanColumn';
 interface KanbanBoardProps {
   requests: ServiceRequest[];
   onRequestUpdated: (r: ServiceRequest) => void;
+  onCardClick?: (request: ServiceRequest) => void;
 }
 
 // ============================================================================
@@ -59,7 +60,7 @@ const useStyles = makeStyles({
 // Component
 // ============================================================================
 
-const KanbanBoard: React.FC<KanbanBoardProps> = ({ requests, onRequestUpdated }) => {
+const KanbanBoard: React.FC<KanbanBoardProps> = ({ requests, onRequestUpdated, onCardClick }) => {
   const styles = useStyles();
   const { user } = useAuth();
   const { showError, showSuccess } = useToast();
@@ -253,11 +254,9 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ requests, onRequestUpdated })
     [onRequestUpdated, user, showError, showSuccess]
   );
 
-  // Card click handler — placeholder for parent to handle (e.g. open detail modal)
-  const handleCardClick = useCallback((_request: ServiceRequest) => {
-    // The parent component (SalesFunnelDashboard) will wire this up
-    // to open RequestDetails modal once integrated
-  }, []);
+  const handleCardClick = useCallback((request: ServiceRequest) => {
+    onCardClick?.(request);
+  }, [onCardClick]);
 
   return (
     <DragDropContext onDragEnd={handleDragEnd}>

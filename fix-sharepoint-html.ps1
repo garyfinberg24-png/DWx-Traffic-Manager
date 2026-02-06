@@ -3,7 +3,7 @@
 # Requires: SharePoint Administrator or Site Collection Administrator
 
 param(
-    [string]$SiteUrl = "https://hallofd.sharepoint.com/sites/LicensePulseDemoScheduler"
+    [string]$SiteUrl = "https://hallofd.sharepoint.com/sites/DWxTrafficManager"
 )
 
 Write-Host "========================================" -ForegroundColor Cyan

@@ -583,7 +583,7 @@ export const BookingDetails: React.FC<BookingDetailsProps> = ({
               <div className={styles.modalSubtitle}>
                 <span className={styles.bookingTypeBadge}>
                   <CalendarLtr24Regular style={{ width: '14px', height: '14px' }} />
-                  License Pulse {booking.BookingType}
+                  DWx {booking.BookingType}
                 </span>
                 {booking.IsPremiumClient && (
                   <span className={styles.premiumBadgeHeader}>

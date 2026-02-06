@@ -1,6 +1,6 @@
 # SharePoint List Columns for Deployment Checklist
 
-Add the following columns to your `LPDemoScheduler` SharePoint list to support the Deployment Readiness Checklist feature.
+Add the following columns to your `DWxServiceRequests` SharePoint list to support the Deployment Readiness Checklist feature.
 
 ## Required New Columns
 
@@ -26,8 +26,8 @@ Add the following columns to your `LPDemoScheduler` SharePoint list to support t
 
 ## Steps to Add Columns in SharePoint
 
-1. Go to your SharePoint site: `https://hallofd.sharepoint.com/sites/LicensePulseDemoScheduler`
-2. Navigate to the `LPDemoScheduler` list
+1. Go to your SharePoint site: `https://hallofd.sharepoint.com/sites/DWxTrafficManager`
+2. Navigate to the `DWxServiceRequests` list
 3. Click the **+** icon to add a column
 
 ### Adding ChecklistData Column:

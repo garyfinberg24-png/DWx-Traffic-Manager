@@ -999,10 +999,10 @@ class GraphService {
     const siteUrl = config.sharepoint.siteUrl;
 
     // Extract hostname and site path from URL
-    // e.g., "https://hallofd.sharepoint.com/sites/LicensePulseDemoScheduler"
+    // e.g., "https://hallofd.sharepoint.com/sites/DWxTrafficManager"
     const url = new URL(siteUrl);
     const hostname = url.hostname; // hallofd.sharepoint.com
-    const sitePath = url.pathname; // /sites/LicensePulseDemoScheduler
+    const sitePath = url.pathname; // /sites/DWxTrafficManager
 
     const response = await client
       .api(`/sites/${hostname}:${sitePath}`)

@@ -410,8 +410,8 @@ class MockGraphService {
     // Return appropriate mock data based on list name (case-insensitive)
     const normalizedListName = listName.toLowerCase();
 
-    // DWx Traffic Manager lists (also handles legacy LP list names)
-    if (normalizedListName.includes('servicerequests') || normalizedListName.startsWith('lpdemo')) {
+    // DWx Traffic Manager lists
+    if (normalizedListName.includes('servicerequests')) {
       return this.transformBookingsToListItems(getTestBookings());
     }
 
@@ -473,8 +473,8 @@ class MockGraphService {
   ): Promise<{ id: string; fields: Record<string, unknown> }> {
     console.log('[MockGraphService] Creating list item', { listName, fields });
 
-    // Handle booking creation (LPDemoScheduler list)
-    if (listName.toLowerCase().startsWith('lpdemo')) {
+    // Handle service request creation (DWxServiceRequests list)
+    if (listName.toLowerCase().includes('servicerequests')) {
       const booking = createTestBooking({
         Title: fields.Title as string || '',
         AccountManagerName: fields.AccountManagerName as string || '',
@@ -504,8 +504,8 @@ class MockGraphService {
       };
     }
 
-    // Handle client creation
-    if (listName.toLowerCase() === 'clients') {
+    // Handle client creation (DWxClients list)
+    if (listName.toLowerCase().includes('clients')) {
       const client = createTestClient({
         Title: fields.Title as string || '',
         PrimaryContactName: fields.PrimaryContactName as string || '',
@@ -539,8 +539,8 @@ class MockGraphService {
   ): Promise<{ id: string; fields: Record<string, unknown> }> {
     console.log('[MockGraphService] Updating list item', { listName, itemId, fields });
 
-    // Handle booking update (LPDemoScheduler list)
-    if (listName.toLowerCase().startsWith('lpdemo')) {
+    // Handle service request update (DWxServiceRequests list)
+    if (listName.toLowerCase().includes('servicerequests')) {
       const updated = updateTestBooking(Number(itemId), fields as Partial<Booking>);
       if (!updated) {
         throw new Error(`Booking ${itemId} not found`);
@@ -562,8 +562,8 @@ class MockGraphService {
   async deleteListItem(listName: string, itemId: string | number): Promise<void> {
     console.log('[MockGraphService] Deleting list item', { listName, itemId });
 
-    // Handle booking deletion (LPDemoScheduler list)
-    if (listName.toLowerCase().startsWith('lpdemo')) {
+    // Handle service request deletion (DWxServiceRequests list)
+    if (listName.toLowerCase().includes('servicerequests')) {
       const deleted = deleteTestBooking(Number(itemId));
       if (!deleted) {
         throw new Error(`Booking ${itemId} not found`);

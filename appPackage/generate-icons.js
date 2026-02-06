@@ -1,4 +1,4 @@
-// Generate Teams app icons for LP Booking App
+// Generate Teams app icons for DWx Traffic Manager
 // Run with: node generate-icons.js
 
 const fs = require('fs');
@@ -24,7 +24,7 @@ function generateColorIcon() {
   ctx.quadraticCurveTo(0, 0, radius, 0);
   ctx.closePath();
 
-  // Gradient background (License Pulse blue)
+  // Gradient background (DWx blue)
   const gradient = ctx.createLinearGradient(0, 0, size, size);
   gradient.addColorStop(0, '#0078D4');  // Microsoft Blue
   gradient.addColorStop(1, '#106EBE');  // Darker blue
@@ -36,7 +36,7 @@ function generateColorIcon() {
   ctx.shadowBlur = 4;
   ctx.shadowOffsetY = 2;
 
-  // "LP" text
+  // "DWx" text
   ctx.fillStyle = '#FFFFFF';
   ctx.font = 'bold 72px Segoe UI, Arial, sans-serif';
   ctx.textAlign = 'center';
@@ -44,11 +44,11 @@ function generateColorIcon() {
   ctx.shadowColor = 'rgba(0, 0, 0, 0.2)';
   ctx.shadowBlur = 2;
   ctx.shadowOffsetY = 1;
-  ctx.fillText('LP', size / 2, size / 2 - 10);
+  ctx.fillText('DWx', size / 2, size / 2 - 10);
 
-  // "Booking" text (smaller)
+  // "Traffic" text (smaller)
   ctx.font = '600 24px Segoe UI, Arial, sans-serif';
-  ctx.fillText('Booking', size / 2, size / 2 + 45);
+  ctx.fillText('Traffic', size / 2, size / 2 + 45);
 
   // Save to file
   const buffer = canvas.toBuffer('image/png');
@@ -85,12 +85,12 @@ function generateOutlineIcon() {
   ctx.closePath();
   ctx.stroke();
 
-  // "LP" text
+  // "DWx" text
   ctx.fillStyle = '#FFFFFF';
-  ctx.font = 'bold 14px Segoe UI, Arial, sans-serif';
+  ctx.font = 'bold 12px Segoe UI, Arial, sans-serif';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  ctx.fillText('LP', size / 2, size / 2);
+  ctx.fillText('DWx', size / 2, size / 2);
 
   // Save to file
   const buffer = canvas.toBuffer('image/png');

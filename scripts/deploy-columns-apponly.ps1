@@ -3,7 +3,7 @@
 
 param(
     [Parameter(Mandatory=$false)]
-    [string]$ListName = "LPDemoScheduler"
+    [string]$ListName = "DWxServiceRequests"
 )
 
 # Configuration - IMPORTANT: Set these via environment variables or replace with your values

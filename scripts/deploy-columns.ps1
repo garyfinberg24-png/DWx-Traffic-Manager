@@ -1,10 +1,10 @@
-# LP_Booking_App - Deploy SharePoint List and Columns
+# DWx Traffic Manager - Deploy SharePoint List and Columns
 # This script creates the list if it doesn't exist, then adds required columns
 # Prerequisites: You must already be connected to SharePoint via Connect-PnPOnline
 
 param(
     [Parameter(Mandatory=$false)]
-    [string]$ListName = "LPDemoScheduler"
+    [string]$ListName = "DWxServiceRequests"
 )
 
 # Helper function to check if a field exists

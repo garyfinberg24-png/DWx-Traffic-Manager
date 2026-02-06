@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LP Booking - Download Icons</title>
+    <title>DWx Traffic Manager - Download Icons</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -73,7 +73,7 @@
     </style>
 </head>
 <body>
-    <h1>🗓️ LP Booking - Classic Blue with Calendar</h1>
+    <h1>🗓️ DWx Traffic Manager - Icons</h1>
     <p>Your selected icon design - click to download</p>
 
     <div class="preview-container">
@@ -94,7 +94,7 @@
     </div>
 
     <div class="success" id="success">
-        ✅ Icon downloaded! Save it to <code>LP_Booking_App/appPackage/</code>
+        ✅ Icon downloaded! Save it to <code>DWx-Traffic-Manager/appPackage/</code>
     </div>
 
     <div class="instructions">
@@ -103,8 +103,8 @@
             <li>Download both <code>color.png</code> and <code>outline.png</code></li>
             <li>Save them to the <code>appPackage</code> folder</li>
             <li>Run this PowerShell command to create the Teams package:
-                <pre style="background:#1e1e1e; color:#d4d4d4; padding:10px; border-radius:6px; overflow-x:auto;">cd LP_Booking_App/appPackage
-Compress-Archive -Path manifest.json, color.png, outline.png -DestinationPath ../LPBookingApp.zip -Force</pre>
+                <pre style="background:#1e1e1e; color:#d4d4d4; padding:10px; border-radius:6px; overflow-x:auto;">cd DWx-Traffic-Manager/appPackage
+Compress-Archive -Path manifest.json, color.png, outline.png -DestinationPath ../DWxTrafficManager.zip -Force</pre>
             </li>
         </ol>
     </div>
@@ -177,16 +177,16 @@ Compress-Archive -Path manifest.json, color.png, outline.png -DestinationPath ..
             ctx.arc(gridStartX + 3 * dotSpacing, gridStartY, 10, 0, Math.PI * 2);
             ctx.fill();
 
-            // "LP" text
+            // "DWx" text
             ctx.fillStyle = '#FFFFFF';
             ctx.font = 'bold 72px Segoe UI, Arial, sans-serif';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
-            ctx.fillText('LP', size / 2, size / 2 - 8);
+            ctx.fillText('DWx', size / 2, size / 2 - 8);
 
-            // "Booking" text
+            // "Traffic" text
             ctx.font = '600 20px Segoe UI, Arial, sans-serif';
-            ctx.fillText('Booking', size / 2, size / 2 + 45);
+            ctx.fillText('Traffic', size / 2, size / 2 + 45);
         }
 
         // Draw Outline Icon (32x32) - With calendar element
@@ -211,11 +211,11 @@ Compress-Archive -Path manifest.json, color.png, outline.png -DestinationPath ..
             ctx.fillRect(8, 1, 2, 4);
             ctx.fillRect(size - 10, 1, 2, 4);
 
-            // "LP" text
-            ctx.font = 'bold 12px Segoe UI, Arial, sans-serif';
+            // "DWx" text
+            ctx.font = 'bold 10px Segoe UI, Arial, sans-serif';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
-            ctx.fillText('LP', size / 2, size / 2 + 3);
+            ctx.fillText('DWx', size / 2, size / 2 + 3);
         }
 
         // Helper: Rounded rectangle

@@ -1,13 +1,13 @@
 # SharePoint Reference Lists Setup
 
-This document provides instructions for creating the **TeamMembers** and **Clients** SharePoint lists for the LP Demo Scheduler application.
+This document provides instructions for creating the **TeamMembers** and **Clients** SharePoint lists for the DWx Traffic Manager application.
 
 ---
 
 ## 1. TeamMembers List
 
 ### Create the List
-1. Go to SharePoint site: `https://hallofd.sharepoint.com/sites/LicensePulseDemoScheduler`
+1. Go to SharePoint site: `https://hallofd.sharepoint.com/sites/DWxTrafficManager`
 2. Click **New** → **List**
 3. Name: `TeamMembers`
 4. Description: `Internal team members including Account Managers, Developers, and Demo Specialists`
@@ -116,7 +116,7 @@ This document provides instructions for creating the **TeamMembers** and **Clien
 ## 2. Clients List
 
 ### Create the List
-1. Go to SharePoint site: `https://hallofd.sharepoint.com/sites/LicensePulseDemoScheduler`
+1. Go to SharePoint site: `https://hallofd.sharepoint.com/sites/DWxTrafficManager`
 2. Click **New** → **List**
 3. Name: `Clients`
 4. Description: `Client organizations and their primary contacts`
