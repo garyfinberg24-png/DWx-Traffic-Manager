@@ -29,6 +29,7 @@ import {
   GridRegular,
   Apps24Regular,
   ArrowDownloadRegular,
+  SaveRegular,
 } from '@fluentui/react-icons';
 import { downloadServiceRequestsExcel, downloadProductRequestsExcel } from '../../utils/excelExport';
 import { useAuth } from '../../contexts/AuthContext';
@@ -49,6 +50,7 @@ import { ConfirmDialog } from '../Common/ConfirmDialog';
 import { RequestCardSkeleton } from '../Common/CardSkeleton';
 import { Pagination, usePagination } from '../Common/Pagination';
 import { AdvancedFilterPanel, useAdvancedFilters, FilterConfig } from '../Common/AdvancedFilterPanel';
+import { DraftsTabContent } from './DraftsTabContent';
 
 const useStyles = makeStyles({
   container: {
@@ -319,7 +321,8 @@ export const MyRequests: React.FC<MyRequestsProps> = ({ onNewRequest }) => {
   const { user, isManager } = useAuth();
   const { showToast } = useToast();
 
-  const [activeTab, setActiveTab] = useState<'service' | 'product'>('service');
+  const [activeTab, setActiveTab] = useState<'service' | 'product' | 'drafts'>('service');
+  const [draftCount, setDraftCount] = useState(0);
   const [requests, setRequests] = useState<ServiceRequest[]>([]);
   const [productRequests, setProductRequests] = useState<ProductRequest[]>([]);
   const [loading, setLoading] = useState(true);
@@ -664,7 +667,7 @@ export const MyRequests: React.FC<MyRequestsProps> = ({ onNewRequest }) => {
         className={styles.tabList}
         selectedValue={activeTab}
         onTabSelect={(_: SelectTabEvent, data: SelectTabData) =>
-          setActiveTab(data.value as 'service' | 'product')
+          setActiveTab(data.value as 'service' | 'product' | 'drafts')
         }
       >
         <Tab value="service">
@@ -672,6 +675,9 @@ export const MyRequests: React.FC<MyRequestsProps> = ({ onNewRequest }) => {
         </Tab>
         <Tab value="product" icon={<Apps24Regular />}>
           Product Requests ({productRequests.length})
+        </Tab>
+        <Tab value="drafts" icon={<SaveRegular />}>
+          My Drafts{draftCount > 0 ? ` (${draftCount})` : ''}
         </Tab>
       </TabList>
 
@@ -683,6 +689,11 @@ export const MyRequests: React.FC<MyRequestsProps> = ({ onNewRequest }) => {
             {error}
           </MessageBarBody>
         </MessageBar>
+      )}
+
+      {/* Drafts Tab */}
+      {activeTab === 'drafts' && (
+        <DraftsTabContent onDraftCountChange={setDraftCount} />
       )}
 
       {/* Product Requests Tab */}

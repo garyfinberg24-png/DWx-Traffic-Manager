@@ -383,7 +383,7 @@ export const ProductRequestForm: React.FC = () => {
   const DRAFT_MAX_AGE = 7 * 24 * 60 * 60 * 1000; // 7 days
   const DATE_FIELDS = ['proposedDate1', 'proposedDate2', 'proposedDate3'] as const;
 
-  // Check for existing draft on mount
+  // Check for existing draft on mount (or auto-restore from My Drafts navigation)
   useEffect(() => {
     if (!preSelectedProduct) {
       try {
@@ -392,7 +392,15 @@ export const ProductRequestForm: React.FC = () => {
           const draft = JSON.parse(stored);
           const age = Date.now() - new Date(draft.timestamp).getTime();
           if (age < DRAFT_MAX_AGE && draft.version === 1) {
-            setShowDraftBanner(true);
+            // Auto-restore if navigated from My Drafts tab
+            if (location.state?.restoreDraft) {
+              // Clear navigation state to prevent re-restore on refresh
+              navigate(location.pathname, { replace: true, state: {} });
+              // Defer restore to next tick so state is set
+              setTimeout(() => restoreDraft(), 0);
+            } else {
+              setShowDraftBanner(true);
+            }
           } else {
             localStorage.removeItem(DRAFT_KEY);
           }
