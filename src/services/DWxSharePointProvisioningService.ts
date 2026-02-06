@@ -939,6 +939,194 @@ class DWxSharePointProvisioningService {
     return { results };
   }
 
+  // ==================== DEFAULT VIEW CONFIGURATION ====================
+
+  /**
+   * Get the default view ID for a list
+   */
+  private async getDefaultViewId(listTitle: string): Promise<string | null> {
+    try {
+      const client = this.getClient();
+      const siteId = await this.getSiteId();
+      const encodedListName = encodeURIComponent(listTitle);
+
+      // Get all views and find the default one (usually "All Items")
+      const response = await client
+        .api(`/sites/${siteId}/lists/${encodedListName}/views`)
+        .select('id,displayName,defaultView')
+        .get();
+
+      const views = response.value || [];
+      // Prefer the view explicitly marked as default
+      const defaultView = views.find((v: { defaultView?: boolean }) => v.defaultView);
+      if (defaultView) return defaultView.id;
+
+      // Fallback: find "All Items" or first view
+      const allItemsView = views.find((v: { displayName?: string }) =>
+        v.displayName === 'All Items' || v.displayName === 'All Documents'
+      );
+      return allItemsView?.id || views[0]?.id || null;
+    } catch (error) {
+      console.error(`[DWx Provisioning] Failed to get default view for '${listTitle}':`, error);
+      return null;
+    }
+  }
+
+  /**
+   * Configure the default view for a list to show all custom columns.
+   * Uses SharePoint REST via Graph to set the view fields.
+   */
+  async configureDefaultView(listTitle: string): Promise<ProvisionResult> {
+    try {
+      const client = this.getClient();
+      const siteId = await this.getSiteId();
+      const encodedListName = encodeURIComponent(listTitle);
+
+      // Get the default view ID
+      const viewId = await this.getDefaultViewId(listTitle);
+      if (!viewId) {
+        return { success: false, message: `No default view found for "${listTitle}"` };
+      }
+
+      // Get all columns on this list (to find custom column internal names)
+      const columnsResponse = await client
+        .api(`/sites/${siteId}/lists/${encodedListName}/columns`)
+        .select('name,displayName,readOnly,columnGroup')
+        .top(100)
+        .get();
+
+      const columns = columnsResponse.value || [];
+
+      // Find the list definition to get the expected custom field names
+      const listDef = this.getListDefinitionByTitle(listTitle);
+
+      // Build the view fields array: start with LinkTitle (clickable Title), then add all custom fields
+      const viewFields: string[] = ['LinkTitle'];
+
+      if (listDef) {
+        // Use the known field internal names from our definition (guaranteed correct order)
+        for (const field of listDef.fields) {
+          // Verify the column actually exists on the list
+          const exists = columns.find((c: { name?: string }) => c.name === field.internalName);
+          if (exists) {
+            viewFields.push(field.internalName);
+          }
+        }
+      } else {
+        // Fallback for lists without a definition (e.g., doc library):
+        // Add all non-system columns
+        const systemColumns = new Set([
+          'ContentType', 'Title', 'Modified', 'Created', 'Author', 'Editor',
+          '_ModerationComments', '_ModerationStatus', 'LinkTitle', 'LinkTitleNoMenu',
+          'Edit', 'DocIcon', 'ItemChildCount', 'FolderChildCount', 'AppAuthor', 'AppEditor',
+          '_ComplianceFlags', '_ComplianceTag', '_ComplianceTagWrittenTime', '_ComplianceTagUserId',
+          '_IsRecord', '_UIVersionString', 'ID', 'ContentTypeId', 'Attachments',
+          '_HasCopyDestinations', '_CopySource',
+        ]);
+
+        for (const col of columns) {
+          if (col.name && !systemColumns.has(col.name) && !col.readOnly) {
+            viewFields.push(col.name);
+          }
+        }
+      }
+
+      // Update the default view with these fields using Graph API
+      // Graph API: PATCH /sites/{siteId}/lists/{listId}/views/{viewId}
+      // The viewQuery property accepts CAML-based column refs
+      // But the simpler approach is to use the columns endpoint on the view
+
+      // First, get current view columns to know what's there
+      const currentViewCols = await client
+        .api(`/sites/${siteId}/lists/${encodedListName}/views/${viewId}/columns`)
+        .select('name')
+        .top(100)
+        .get();
+
+      const currentNames = new Set(
+        (currentViewCols.value || []).map((c: { name?: string }) => c.name)
+      );
+
+      // Add missing columns to the view
+      let addedCount = 0;
+      for (const fieldName of viewFields) {
+        if (!currentNames.has(fieldName)) {
+          try {
+            await client
+              .api(`/sites/${siteId}/lists/${encodedListName}/views/${viewId}/columns`)
+              .post({ name: fieldName });
+            addedCount++;
+          } catch (err) {
+            const error = err as { statusCode?: number; message?: string };
+            // 409 = already exists, skip
+            if (error.statusCode !== 409) {
+              console.warn(`[DWx Provisioning] Could not add '${fieldName}' to view of '${listTitle}':`, error.message);
+            }
+          }
+        }
+      }
+
+      if (addedCount === 0) {
+        return { success: true, message: `"${listTitle}" default view already has all columns` };
+      }
+
+      return { success: true, message: `"${listTitle}" — added ${addedCount} column(s) to default view` };
+    } catch (error) {
+      return {
+        success: false,
+        message: error instanceof Error ? error.message : `Failed to configure view for "${listTitle}"`,
+      };
+    }
+  }
+
+  /**
+   * Look up a list definition by its title
+   */
+  private getListDefinitionByTitle(title: string): ListDefinition | null {
+    const map: Record<string, ListDefinition> = {
+      DWxServices: this.servicesListDefinition,
+      DWxServiceRequests: this.serviceRequestsListDefinition,
+      DWxProductRequests: this.productRequestsListDefinition,
+      DWxClients: this.clientsListDefinition,
+      DWxSpecialists: this.specialistsListDefinition,
+      DWxManagers: this.managersListDefinition,
+      DWxTeamMembers: this.teamMembersListDefinition,
+      DWxAccountManagers: this.accountManagersListDefinition,
+      DWxAuditLog: this.auditLogListDefinition,
+      DWxSessionPrep: this.sessionPrepListDefinition,
+      DWxLandingPageContent: this.landingPageContentListDefinition,
+      DWxKnowledgeBase: this.knowledgeBaseListDefinition,
+      DWxProposals: this.proposalsListDefinition,
+    };
+    return map[title] || null;
+  }
+
+  /**
+   * Configure default views for all DWx lists
+   */
+  async configureAllDefaultViews(
+    onProgress?: (listName: string, current: number, total: number) => void
+  ): Promise<{ results: Array<{ list: string; success: boolean; message: string }> }> {
+    const results: Array<{ list: string; success: boolean; message: string }> = [];
+
+    const listNames = [
+      'DWxServices', 'DWxServiceRequests', 'DWxProductRequests', 'DWxClients',
+      'DWxSpecialists', 'DWxManagers', 'DWxTeamMembers', 'DWxAccountManagers',
+      'DWxAuditLog', 'DWxSessionPrep', 'DWxLandingPageContent', 'DWxKnowledgeBase',
+      'DWxProposals',
+    ];
+
+    for (let i = 0; i < listNames.length; i++) {
+      const listName = listNames[i];
+      if (onProgress) onProgress(listName, i + 1, listNames.length);
+
+      const result = await this.configureDefaultView(listName);
+      results.push({ list: listName, ...result });
+    }
+
+    return { results };
+  }
+
   /**
    * Seed the DWxServices list with default services
    */

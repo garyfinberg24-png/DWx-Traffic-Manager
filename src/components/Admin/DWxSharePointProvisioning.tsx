@@ -37,6 +37,7 @@ import {
   Home24Regular,
   BookOpen24Regular,
   DocumentText24Regular,
+  Eye24Regular,
 } from '@fluentui/react-icons';
 import { dwxSharePointProvisioningService } from '../../services/DWxSharePointProvisioningService';
 
@@ -261,6 +262,9 @@ export const DWxSharePointProvisioning: React.FC = () => {
   const [landingPageContentCount, setLandingPageContentCount] = useState<number>(0);
   const [knowledgeBaseCount, setKnowledgeBaseCount] = useState<number>(0);
   const [proposalsCount, setProposalsCount] = useState<number>(0);
+  const [isFixingViews, setIsFixingViews] = useState(false);
+  const [viewFixProgress, setViewFixProgress] = useState<string>('');
+  const [viewFixResults, setViewFixResults] = useState<ProvisionResult[] | null>(null);
 
   const checkListStatus = async () => {
     setIsChecking(true);
@@ -567,6 +571,29 @@ export const DWxSharePointProvisioning: React.FC = () => {
     }
   };
 
+  const fixDefaultViews = async () => {
+    setIsFixingViews(true);
+    setError(null);
+    setViewFixResults(null);
+    try {
+      const { results } = await dwxSharePointProvisioningService.configureAllDefaultViews(
+        (listName, current, total) => {
+          setViewFixProgress(`${listName} (${current}/${total})`);
+        }
+      );
+      setViewFixResults(results.map(r => ({
+        list: r.list,
+        success: r.success,
+        message: r.message,
+      })));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to fix default views');
+    } finally {
+      setIsFixingViews(false);
+      setViewFixProgress('');
+    }
+  };
+
   useEffect(() => {
     checkListStatus();
   }, []);
@@ -766,12 +793,56 @@ export const DWxSharePointProvisioning: React.FC = () => {
           {isProvisioning ? 'Provisioning...' : 'Provision All Lists'}
         </Button>
 
+        <Button
+          appearance="outline"
+          icon={<Eye24Regular />}
+          onClick={fixDefaultViews}
+          disabled={isFixingViews || isProvisioning || isChecking}
+        >
+          {isFixingViews ? (
+            <>
+              <Spinner size="tiny" style={{ marginRight: '8px' }} />
+              {viewFixProgress || 'Fixing views...'}
+            </>
+          ) : (
+            'Fix Default Views'
+          )}
+        </Button>
+
         {allListsExist && (
           <Badge appearance="filled" color="success" size="large">
             All lists are provisioned
           </Badge>
         )}
       </div>
+
+      {/* Fix Views Info */}
+      {isFixingViews && viewFixProgress && (
+        <MessageBar intent="info">
+          <MessageBarBody>Configuring views: {viewFixProgress}</MessageBarBody>
+        </MessageBar>
+      )}
+
+      {/* View Fix Results */}
+      {viewFixResults && viewFixResults.length > 0 && (
+        <div className={styles.resultsContainer}>
+          <Text weight="semibold" block style={{ marginBottom: '8px' }}>
+            Default View Results
+          </Text>
+          {viewFixResults.map((result, idx) => (
+            <div key={idx} className={styles.resultItem}>
+              {result.success ? (
+                <Checkmark24Regular className={styles.successIcon} />
+              ) : (
+                <Dismiss24Regular className={styles.errorIcon} />
+              )}
+              <Text>
+                <strong>{result.list}:</strong> {result.message}
+              </Text>
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* Provision Results */}
       {provisionResults && provisionResults.length > 0 && (
