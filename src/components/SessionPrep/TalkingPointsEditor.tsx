@@ -1,17 +1,16 @@
 /**
  * DWx Traffic Manager - Talking Points Editor
- * Edit and manage AI-generated talking points
+ * Edit and manage AI-generated talking points with category grouping.
+ * Styled to match DetailModalShell section patterns.
  */
 
 import React, { useState } from 'react';
 import {
   Text,
   Button,
-  Card,
   Input,
   Textarea,
   makeStyles,
-  tokens,
   Badge,
   Menu,
   MenuTrigger,
@@ -27,6 +26,7 @@ import {
   SparkleRegular,
   CheckmarkRegular,
   DismissRegular,
+  ChatRegular,
 } from '@fluentui/react-icons';
 import {
   TalkingPoint,
@@ -35,107 +35,110 @@ import {
   AIGenerationContext,
 } from '../../types/SessionPreparation';
 import { aiPreparationService } from '../../services/AIPreparationService';
+import { DetailSection } from '../MyRequests/DetailModalShell';
 
 const useStyles = makeStyles({
-  container: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: tokens.spacingVerticalM,
-  },
-  header: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  headerTitle: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: tokens.spacingHorizontalS,
-  },
-  headerActions: {
-    display: 'flex',
-    gap: tokens.spacingHorizontalS,
-  },
   emptyState: {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
-    padding: tokens.spacingVerticalXXL,
-    gap: tokens.spacingVerticalM,
+    padding: '48px',
+    gap: '16px',
     textAlign: 'center',
-    color: tokens.colorNeutralForeground3,
+    color: '#888',
   },
-  categorySection: {
-    marginBottom: tokens.spacingVerticalL,
+  category: {
+    marginBottom: '20px',
+    borderRadius: '8px',
+    border: '1px solid #eee',
+    overflow: 'hidden',
   },
   categoryHeader: {
     display: 'flex',
     alignItems: 'center',
-    gap: tokens.spacingHorizontalS,
-    marginBottom: tokens.spacingVerticalS,
-    padding: `${tokens.spacingVerticalXS} ${tokens.spacingHorizontalS}`,
-    backgroundColor: tokens.colorNeutralBackground2,
-    borderRadius: tokens.borderRadiusMedium,
+    gap: '10px',
+    padding: '10px 16px',
+    backgroundColor: '#f9f9f9',
+    borderBottom: '1px solid #eee',
   },
-  categoryTitle: {
+  colorBar: {
+    width: '4px',
+    height: '24px',
+    borderRadius: '2px',
+  },
+  categoryName: {
+    fontSize: '13px',
     fontWeight: '600',
-    fontSize: '14px',
+    color: '#424242',
+    flex: 1,
   },
-  categoryDescription: {
+  categoryDesc: {
     fontSize: '12px',
-    color: tokens.colorNeutralForeground3,
+    color: '#888',
   },
-  pointCard: {
+  point: {
     display: 'flex',
     alignItems: 'flex-start',
-    gap: tokens.spacingHorizontalM,
-    padding: tokens.spacingVerticalS,
-    marginBottom: tokens.spacingVerticalXS,
-    borderLeft: `3px solid ${tokens.colorBrandStroke1}`,
+    gap: '12px',
+    padding: '12px 16px',
+    borderBottom: '1px solid #f0f0f0',
+  },
+  pointNum: {
+    width: '24px',
+    height: '24px',
+    borderRadius: '50%',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontSize: '11px',
+    fontWeight: '600',
+    color: 'white',
+    flexShrink: 0,
+    marginTop: '1px',
   },
   pointContent: {
     flex: 1,
+    fontSize: '13px',
+    color: '#424242',
     lineHeight: '1.5',
   },
   pointActions: {
     display: 'flex',
-    gap: tokens.spacingHorizontalXS,
+    gap: '2px',
     flexShrink: 0,
+    opacity: 0.4,
+    transition: 'opacity 0.15s',
   },
-  pointNumber: {
-    width: '24px',
-    height: '24px',
-    borderRadius: '50%',
-    backgroundColor: tokens.colorBrandBackground,
-    color: 'white',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    fontSize: '12px',
-    fontWeight: '600',
-    flexShrink: 0,
-  },
-  customBadge: {
-    marginLeft: tokens.spacingHorizontalS,
+  actionBtn: {
+    minWidth: '28px',
+    height: '28px',
+    padding: 0,
   },
   editForm: {
+    flex: 1,
     display: 'flex',
     flexDirection: 'column',
-    gap: tokens.spacingVerticalS,
-    padding: tokens.spacingVerticalM,
+    gap: '8px',
+    padding: '4px 0',
   },
   editActions: {
     display: 'flex',
-    gap: tokens.spacingHorizontalS,
+    gap: '8px',
     justifyContent: 'flex-end',
   },
   addForm: {
     display: 'flex',
-    gap: tokens.spacingHorizontalS,
-    padding: tokens.spacingVerticalS,
-    backgroundColor: tokens.colorNeutralBackground2,
-    borderRadius: tokens.borderRadiusMedium,
+    gap: '8px',
+    padding: '10px 16px',
+    backgroundColor: '#f9f9f9',
+    borderTop: '1px solid #eee',
+  },
+  emptyCategory: {
+    padding: '12px 16px',
+    fontSize: '13px',
+    color: '#aaa',
+    fontStyle: 'italic',
   },
 });
 
@@ -170,7 +173,6 @@ export const TalkingPointsEditor: React.FC<TalkingPointsEditorProps> = ({
   const [newContent, setNewContent] = useState('');
   const [generating, setGenerating] = useState(false);
 
-  // Group points by category
   const pointsByCategory = CATEGORY_ORDER.reduce((acc, category) => {
     acc[category] = talkingPoints
       .filter((p) => p.category === category)
@@ -185,7 +187,6 @@ export const TalkingPointsEditor: React.FC<TalkingPointsEditorProps> = ({
 
   const handleSaveEdit = () => {
     if (!editingId) return;
-
     const updated = talkingPoints.map((p) =>
       p.id === editingId ? { ...p, content: editContent, isCustom: true } : p
     );
@@ -200,17 +201,13 @@ export const TalkingPointsEditor: React.FC<TalkingPointsEditorProps> = ({
   };
 
   const handleDelete = (pointId: string) => {
-    const updated = talkingPoints.filter((p) => p.id !== pointId);
-    onUpdate(updated);
+    onUpdate(talkingPoints.filter((p) => p.id !== pointId));
   };
 
   const handleAddPoint = () => {
     if (!addingCategory || !newContent.trim()) return;
-
     const categoryPoints = pointsByCategory[addingCategory];
-    const maxOrder = categoryPoints.length > 0
-      ? Math.max(...categoryPoints.map((p) => p.order))
-      : 0;
+    const maxOrder = categoryPoints.length > 0 ? Math.max(...categoryPoints.map((p) => p.order)) : 0;
 
     const newPoint: TalkingPoint = {
       id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
@@ -229,12 +226,9 @@ export const TalkingPointsEditor: React.FC<TalkingPointsEditorProps> = ({
     try {
       setGenerating(true);
       const point = await aiPreparationService.generateCustomTalkingPoint(category, context, instruction);
-
       if (point) {
         const categoryPoints = pointsByCategory[category];
-        const maxOrder = categoryPoints.length > 0
-          ? Math.max(...categoryPoints.map((p) => p.order))
-          : 0;
+        const maxOrder = categoryPoints.length > 0 ? Math.max(...categoryPoints.map((p) => p.order)) : 0;
         point.order = maxOrder + 1;
         onUpdate([...talkingPoints, point]);
       }
@@ -249,69 +243,50 @@ export const TalkingPointsEditor: React.FC<TalkingPointsEditorProps> = ({
     return (
       <div className={styles.emptyState}>
         <SparkleRegular style={{ fontSize: '48px' }} />
-        <Text size={400} weight="semibold">
-          No Talking Points Generated
-        </Text>
-        <Text>
-          Click "Generate AI Content" to create talking points based on the client and service.
-        </Text>
+        <Text size={400} weight="semibold">No Talking Points Generated</Text>
+        <Text>Click "Generate AI Content" to create talking points based on the client and service.</Text>
       </div>
     );
   }
 
   return (
-    <div className={styles.container}>
-      {/* Header */}
-      <div className={styles.header}>
-        <div className={styles.headerTitle}>
-          <Text weight="semibold">Talking Points</Text>
-          <Badge appearance="filled" color="informative">
+    <DetailSection
+      icon={<ChatRegular />}
+      title="Talking Points"
+      editButton={
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <span style={{
+            display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+            minWidth: 20, height: 20, padding: '0 6px', borderRadius: 10,
+            fontSize: 11, fontWeight: 600, background: 'rgba(26,90,138,0.1)', color: '#1a5a8a',
+          }}>
             {talkingPoints.length} points
-          </Badge>
-        </div>
-        <div className={styles.headerActions}>
-          <Button
-            appearance="subtle"
-            icon={<ArrowSyncRegular />}
-            onClick={onRegenerate}
-            size="small"
-          >
+          </span>
+          <Button appearance="subtle" icon={<ArrowSyncRegular />} onClick={onRegenerate} size="small">
             Regenerate
           </Button>
         </div>
-      </div>
-
-      {/* Categories */}
+      }
+      last
+    >
       {CATEGORY_ORDER.map((category) => {
         const points = pointsByCategory[category];
         const categoryInfo = TALKING_POINT_CATEGORIES[category];
+        const color = CATEGORY_COLORS[category];
 
         return (
-          <div key={category} className={styles.categorySection}>
+          <div key={category} className={styles.category}>
             <div className={styles.categoryHeader}>
-              <div
-                style={{
-                  width: '4px',
-                  height: '24px',
-                  backgroundColor: CATEGORY_COLORS[category],
-                  borderRadius: '2px',
-                }}
-              />
-              <div style={{ flex: 1 }}>
-                <Text className={styles.categoryTitle}>{categoryInfo.label}</Text>
-                <Text className={styles.categoryDescription}>{categoryInfo.description}</Text>
-              </div>
+              <div className={styles.colorBar} style={{ backgroundColor: color }} />
+              <span className={styles.categoryName}>{categoryInfo.label}</span>
+              <span className={styles.categoryDesc}>{categoryInfo.description}</span>
               <Menu>
                 <MenuTrigger disableButtonEnhancement>
-                  <Button appearance="subtle" icon={<AddRegular />} size="small">
-                    Add
-                  </Button>
+                  <Button appearance="subtle" icon={<AddRegular />} size="small">Add</Button>
                 </MenuTrigger>
                 <MenuPopover>
                   <MenuList>
-                    <MenuItem onClick={() => setAddingCategory(category)}>
-                      Add Custom Point
-                    </MenuItem>
+                    <MenuItem onClick={() => setAddingCategory(category)}>Add Custom Point</MenuItem>
                     <MenuItem
                       onClick={() => handleGenerateCustomPoint(category, 'Generate a relevant talking point')}
                       disabled={generating}
@@ -324,76 +299,58 @@ export const TalkingPointsEditor: React.FC<TalkingPointsEditorProps> = ({
               </Menu>
             </div>
 
-            {/* Points */}
-            {points.map((point, index) => (
-              <Card
-                key={point.id}
-                className={styles.pointCard}
-                style={{ borderLeftColor: CATEGORY_COLORS[category] }}
-              >
-                {editingId === point.id ? (
-                  <div className={styles.editForm} style={{ flex: 1 }}>
-                    <Textarea
-                      value={editContent}
-                      onChange={(_, data) => setEditContent(data.value)}
-                      rows={3}
-                    />
-                    <div className={styles.editActions}>
-                      <Button
-                        appearance="subtle"
-                        icon={<DismissRegular />}
-                        onClick={handleCancelEdit}
-                        size="small"
-                      >
-                        Cancel
-                      </Button>
-                      <Button
-                        appearance="primary"
-                        icon={<CheckmarkRegular />}
-                        onClick={handleSaveEdit}
-                        size="small"
-                      >
-                        Save
-                      </Button>
-                    </div>
-                  </div>
-                ) : (
-                  <>
-                    <span className={styles.pointNumber}>{index + 1}</span>
-                    <Text className={styles.pointContent}>
-                      {point.content}
-                      {point.isCustom && (
-                        <Badge
-                          appearance="outline"
-                          size="small"
-                          className={styles.customBadge}
-                        >
-                          Custom
-                        </Badge>
-                      )}
-                    </Text>
-                    <div className={styles.pointActions}>
-                      <Button
-                        appearance="subtle"
-                        icon={<EditRegular />}
-                        onClick={() => handleStartEdit(point)}
-                        size="small"
-                        aria-label="Edit"
+            <div>
+              {points.map((point, index) => (
+                <div
+                  key={point.id}
+                  className={styles.point}
+                  style={index === points.length - 1 && addingCategory !== category ? { borderBottom: 'none' } : undefined}
+                  onMouseEnter={(e) => {
+                    const actions = e.currentTarget.querySelector('[data-actions]') as HTMLElement;
+                    if (actions) actions.style.opacity = '1';
+                  }}
+                  onMouseLeave={(e) => {
+                    const actions = e.currentTarget.querySelector('[data-actions]') as HTMLElement;
+                    if (actions) actions.style.opacity = '0.4';
+                  }}
+                >
+                  {editingId === point.id ? (
+                    <div className={styles.editForm}>
+                      <Textarea
+                        value={editContent}
+                        onChange={(_, data) => setEditContent(data.value)}
+                        rows={3}
                       />
-                      <Button
-                        appearance="subtle"
-                        icon={<DeleteRegular />}
-                        onClick={() => handleDelete(point.id)}
-                        size="small"
-                        aria-label="Delete"
-                      />
+                      <div className={styles.editActions}>
+                        <Button appearance="subtle" icon={<DismissRegular />} onClick={handleCancelEdit} size="small">Cancel</Button>
+                        <Button appearance="primary" icon={<CheckmarkRegular />} onClick={handleSaveEdit} size="small">Save</Button>
+                      </div>
                     </div>
-                  </>
-                )}
-              </Card>
-            ))}
+                  ) : (
+                    <>
+                      <div className={styles.pointNum} style={{ backgroundColor: color }}>{index + 1}</div>
+                      <div className={styles.pointContent}>
+                        {point.content}
+                        {point.isCustom && (
+                          <Badge appearance="outline" size="small" style={{ marginLeft: '8px' }}>Custom</Badge>
+                        )}
+                      </div>
+                      <div className={styles.pointActions} data-actions>
+                        <Button className={styles.actionBtn} appearance="subtle" icon={<EditRegular />} onClick={() => handleStartEdit(point)} size="small" aria-label="Edit" />
+                        <Button className={styles.actionBtn} appearance="subtle" icon={<DeleteRegular />} onClick={() => handleDelete(point.id)} size="small" aria-label="Delete" />
+                      </div>
+                    </>
+                  )}
+                </div>
+              ))}
 
-            {/* Add form */}
+              {points.length === 0 && addingCategory !== category && (
+                <div className={styles.emptyCategory}>
+                  No {categoryInfo.label.toLowerCase()} talking points yet
+                </div>
+              )}
+            </div>
+
             {addingCategory === category && (
               <div className={styles.addForm}>
                 <Input
@@ -402,39 +359,13 @@ export const TalkingPointsEditor: React.FC<TalkingPointsEditorProps> = ({
                   onChange={(_, data) => setNewContent(data.value)}
                   style={{ flex: 1 }}
                 />
-                <Button
-                  appearance="subtle"
-                  icon={<DismissRegular />}
-                  onClick={() => {
-                    setAddingCategory(null);
-                    setNewContent('');
-                  }}
-                  size="small"
-                />
-                <Button
-                  appearance="primary"
-                  icon={<CheckmarkRegular />}
-                  onClick={handleAddPoint}
-                  size="small"
-                  disabled={!newContent.trim()}
-                />
+                <Button appearance="subtle" icon={<DismissRegular />} onClick={() => { setAddingCategory(null); setNewContent(''); }} size="small" />
+                <Button appearance="primary" icon={<CheckmarkRegular />} onClick={handleAddPoint} size="small" disabled={!newContent.trim()} />
               </div>
-            )}
-
-            {points.length === 0 && addingCategory !== category && (
-              <Text
-                style={{
-                  color: tokens.colorNeutralForeground4,
-                  fontStyle: 'italic',
-                  padding: tokens.spacingVerticalS,
-                }}
-              >
-                No {categoryInfo.label.toLowerCase()} talking points yet
-              </Text>
             )}
           </div>
         );
       })}
-    </div>
+    </DetailSection>
   );
 };

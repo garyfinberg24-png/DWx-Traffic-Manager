@@ -1,27 +1,17 @@
 /**
  * DWx Traffic Manager - Session Preparation Dialog
- * Main dialog for AI-powered session preparation
+ * Main dialog for AI-powered session preparation.
+ * Uses DetailModalShell for consistent modal layout.
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
 import {
-  Dialog,
-  DialogSurface,
-  DialogBody,
-  DialogTitle,
-  DialogContent,
   Button,
-  Text,
   Spinner,
-  TabList,
-  Tab,
-  Badge,
+  Text,
   makeStyles,
-  tokens,
-  ProgressBar,
 } from '@fluentui/react-components';
 import {
-  Dismiss16Regular,
   PersonRegular,
   ChatRegular,
   FolderRegular,
@@ -30,6 +20,7 @@ import {
   SparkleRegular,
   ArrowSyncRegular,
   CheckmarkCircleRegular,
+  Sparkle24Regular,
 } from '@fluentui/react-icons';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
@@ -42,122 +33,73 @@ import {
 } from '../../types/SessionPreparation';
 import { sessionPrepService } from '../../services/SessionPrepService';
 import { aiPreparationService, isAIConfigured } from '../../services/AIPreparationService';
+import {
+  DetailModalShell,
+  StepperStep,
+  ModalTab,
+} from '../MyRequests/DetailModalShell';
 import { ClientProfileCard } from './ClientProfileCard';
 import { TalkingPointsEditor } from './TalkingPointsEditor';
 import { ResourcePicker } from './ResourcePicker';
 import { MeetingAgendaView } from './MeetingAgendaView';
 import { PrepChecklist } from './PrepChecklist';
+import { format } from 'date-fns';
+
+// ============================================================================
+// Local styles (only things NOT in DetailModalShell)
+// ============================================================================
 
 const useStyles = makeStyles({
-  surface: {
-    maxWidth: '900px',
-    width: '95vw',
-    maxHeight: '90vh',
-  },
-  header: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    paddingBottom: tokens.spacingVerticalM,
-    borderBottom: `1px solid ${tokens.colorNeutralStroke1}`,
-  },
-  headerLeft: {
+  loadingOverlay: {
     display: 'flex',
     flexDirection: 'column',
-    gap: tokens.spacingVerticalXS,
-  },
-  headerTitle: {
-    display: 'flex',
     alignItems: 'center',
-    gap: tokens.spacingHorizontalS,
-  },
-  statusBadge: {
-    marginLeft: tokens.spacingHorizontalS,
-  },
-  headerMeta: {
-    color: tokens.colorNeutralForeground3,
-    fontSize: '13px',
-  },
-  closeButton: {
-    minWidth: 'auto',
-    padding: tokens.spacingHorizontalXS,
-  },
-  content: {
-    paddingTop: tokens.spacingVerticalM,
-    minHeight: '400px',
-    display: 'flex',
-    flexDirection: 'column',
-    gap: tokens.spacingVerticalM,
-  },
-  progressSection: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: tokens.spacingHorizontalM,
-    padding: tokens.spacingVerticalS,
-    backgroundColor: tokens.colorNeutralBackground2,
-    borderRadius: tokens.borderRadiusMedium,
-  },
-  progressLabel: {
-    fontSize: '13px',
-    fontWeight: '500',
-    minWidth: '120px',
-  },
-  progressBar: {
-    flex: 1,
-  },
-  progressPercent: {
-    fontSize: '13px',
-    fontWeight: '600',
-    minWidth: '50px',
-    textAlign: 'right',
-  },
-  tabContent: {
-    flex: 1,
-    overflow: 'auto',
-    padding: tokens.spacingVerticalS,
-  },
-  footer: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingTop: tokens.spacingVerticalM,
-    borderTop: `1px solid ${tokens.colorNeutralStroke1}`,
-  },
-  footerLeft: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: tokens.spacingHorizontalS,
-  },
-  footerActions: {
-    display: 'flex',
-    gap: tokens.spacingHorizontalS,
+    justifyContent: 'center',
+    padding: '48px',
+    gap: '16px',
   },
   aiNotConfigured: {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
-    padding: tokens.spacingVerticalXXL,
-    gap: tokens.spacingVerticalM,
+    padding: '48px',
+    gap: '16px',
     textAlign: 'center',
-  },
-  loadingOverlay: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: tokens.spacingVerticalXXL,
-    gap: tokens.spacingVerticalM,
   },
 });
 
+// ============================================================================
+// Tabs
+// ============================================================================
+
 type TabValue = 'profile' | 'talking-points' | 'resources' | 'agenda' | 'checklist';
 
-const STATUS_COLORS: Record<SessionPrepStatus, 'warning' | 'informative' | 'success'> = {
-  'Not Started': 'warning',
-  'In Progress': 'informative',
-  'Ready': 'success',
-};
+const TABS: ModalTab[] = [
+  { value: 'profile', label: 'Client Profile', icon: <PersonRegular style={{ width: 16, height: 16 }} /> },
+  { value: 'talking-points', label: 'Talking Points', icon: <ChatRegular style={{ width: 16, height: 16 }} /> },
+  { value: 'resources', label: 'Resources', icon: <FolderRegular style={{ width: 16, height: 16 }} /> },
+  { value: 'agenda', label: 'Agenda', icon: <CalendarRegular style={{ width: 16, height: 16 }} /> },
+  { value: 'checklist', label: 'Checklist', icon: <CheckmarkRegular style={{ width: 16, height: 16 }} /> },
+];
+
+// ============================================================================
+// Progress stepper builder
+// ============================================================================
+
+const PREP_STEPS: SessionPrepStatus[] = ['Not Started', 'In Progress', 'Ready'];
+
+function buildPrepSteps(currentStatus: SessionPrepStatus): StepperStep[] {
+  const currentIdx = PREP_STEPS.indexOf(currentStatus);
+  return PREP_STEPS.map((label, i) => ({
+    label,
+    status: i < currentIdx ? 'completed' as const : i === currentIdx ? 'current' as const : 'future' as const,
+  }));
+}
+
+// ============================================================================
+// Component
+// ============================================================================
 
 interface SessionPrepDialogProps {
   open: boolean;
@@ -189,11 +131,9 @@ export const SessionPrepDialog: React.FC<SessionPrepDialogProps> = ({
     try {
       setLoading(true);
 
-      // Check if session prep exists for this service request
       let prep = await sessionPrepService.getSessionPrepByServiceRequest(serviceRequest.Id);
 
       if (!prep && user) {
-        // Create new session prep
         const clientName = serviceRequest.ClientName || 'Unknown Client';
         const meetingDate = serviceRequest.ConfirmedDateTime || new Date().toISOString();
 
@@ -238,7 +178,7 @@ export const SessionPrepDialog: React.FC<SessionPrepDialogProps> = ({
       serviceEngagementPhases: serviceRequest.EngagementPhases ? JSON.parse(serviceRequest.EngagementPhases) : [],
       dealValue: serviceRequest.DealValue || 0,
       accountManagerName: serviceRequest.AccountManagerName || 'Unknown',
-      previousEngagements: [], // Would be fetched from client history
+      previousEngagements: [],
       meetingDuration: serviceRequest.DefaultDuration || 60,
       meetingDateTime: serviceRequest.ConfirmedDateTime || new Date().toISOString(),
       additionalNotes: serviceRequest.Comments || undefined,
@@ -373,197 +313,158 @@ export const SessionPrepDialog: React.FC<SessionPrepDialogProps> = ({
 
   const aiConfigured = isAIConfigured();
 
+  // Build subtitle
+  const subtitle = [
+    serviceRequest.ServiceName,
+    serviceRequest.AssignedSpecialistName ? `Specialist: ${serviceRequest.AssignedSpecialistName}` : undefined,
+    serviceRequest.ConfirmedDateTime
+      ? format(new Date(serviceRequest.ConfirmedDateTime), 'MMM d, yyyy')
+      : undefined,
+  ].filter(Boolean).join(' \u00B7 ');
+
+  // Build status badge content
+  const statusBadge = sessionPrep ? (
+    <>
+      <span style={{
+        width: 8,
+        height: 8,
+        borderRadius: '50%',
+        background: sessionPrep.Status === 'Ready' ? '#4ade80'
+          : sessionPrep.Status === 'In Progress' ? '#60a5fa'
+          : 'rgba(255,255,255,0.5)',
+      }} />
+      {sessionPrep.Status}
+    </>
+  ) : 'Loading...';
+
+  // Build footer left
+  const footerLeft = sessionPrep?.AIGeneratedAt
+    ? `AI generated ${format(new Date(sessionPrep.AIGeneratedAt), 'MMM d, yyyy')}`
+    : 'No AI content generated yet';
+
+  // Build footer right
+  const footerRight = sessionPrep && aiConfigured ? (
+    <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+      {!sessionPrep.AIGeneratedAt ? (
+        <Button
+          appearance="primary"
+          icon={<SparkleRegular />}
+          onClick={handleGenerateContent}
+          disabled={generating || saving}
+          style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)' }}
+          size="small"
+        >
+          Generate AI Content
+        </Button>
+      ) : (
+        <Button
+          appearance="subtle"
+          icon={<ArrowSyncRegular />}
+          onClick={handleGenerateContent}
+          disabled={generating || saving}
+          size="small"
+        >
+          Regenerate All
+        </Button>
+      )}
+      <Button appearance="secondary" onClick={onClose} size="small">
+        Close
+      </Button>
+      {sessionPrep.Status !== 'Ready' && (
+        <Button
+          appearance="primary"
+          icon={<CheckmarkCircleRegular />}
+          onClick={handleMarkAsReady}
+          disabled={generating || saving || completionPercent < 50}
+          style={{ backgroundColor: '#107c10' }}
+          size="small"
+        >
+          Mark as Ready
+        </Button>
+      )}
+    </div>
+  ) : (
+    <Button appearance="primary" onClick={onClose} style={{ backgroundColor: '#1a5a8a' }}>
+      Done
+    </Button>
+  );
+
   return (
-    <Dialog open={open} onOpenChange={(_, data) => !data.open && onClose()}>
-      <DialogSurface className={styles.surface}>
-        <DialogBody>
-          {/* Header */}
-          <div className={styles.header}>
-            <div className={styles.headerLeft}>
-              <div className={styles.headerTitle}>
-                <DialogTitle>Session Preparation</DialogTitle>
-                {sessionPrep && (
-                  <Badge
-                    appearance="filled"
-                    color={STATUS_COLORS[sessionPrep.Status]}
-                    className={styles.statusBadge}
-                  >
-                    {sessionPrep.Status}
-                  </Badge>
-                )}
-              </div>
-              <Text className={styles.headerMeta}>
-                {serviceRequest.ClientName} • {serviceRequest.ServiceName}
-                {serviceRequest.ConfirmedDateTime && (
-                  <> • {new Date(serviceRequest.ConfirmedDateTime).toLocaleDateString()}</>
-                )}
-              </Text>
-            </div>
-            <Button
-              appearance="subtle"
-              icon={<Dismiss16Regular />}
-              onClick={onClose}
-              className={styles.closeButton}
-              aria-label="Close"
+    <DetailModalShell
+      isOpen={open}
+      onClose={onClose}
+      icon={<Sparkle24Regular style={{ width: 28, height: 28 }} />}
+      title={`Session Preparation \u2014 ${serviceRequest.ClientName || 'Client'}`}
+      subtitle={subtitle}
+      statusBadge={statusBadge}
+      steps={sessionPrep ? buildPrepSteps(sessionPrep.Status) : undefined}
+      tabs={TABS}
+      activeTab={activeTab}
+      onTabChange={(tab) => setActiveTab(tab as TabValue)}
+      footerLeft={footerLeft}
+      footerRight={footerRight}
+    >
+      {loading ? (
+        <div className={styles.loadingOverlay}>
+          <Spinner size="large" />
+          <Text>Loading session preparation...</Text>
+        </div>
+      ) : !aiConfigured ? (
+        <div className={styles.aiNotConfigured}>
+          <SparkleRegular style={{ fontSize: '48px', color: '#888' }} />
+          <Text size={500} weight="semibold">AI Features Not Configured</Text>
+          <Text style={{ color: '#888' }}>
+            Azure OpenAI is not configured. Please add the required environment variables
+            to enable AI-powered session preparation.
+          </Text>
+        </div>
+      ) : generating ? (
+        <div className={styles.loadingOverlay}>
+          <Spinner size="large" />
+          <Text>Generating AI content...</Text>
+          <Text size={200} style={{ color: '#888' }}>This may take a moment</Text>
+        </div>
+      ) : sessionPrep ? (
+        <>
+          {activeTab === 'profile' && (
+            <ClientProfileCard
+              profile={sessionPrep.ClientProfile}
+              onRegenerate={() => handleRegenerateSection('clientProfile')}
             />
-          </div>
-
-          <DialogContent className={styles.content}>
-            {loading ? (
-              <div className={styles.loadingOverlay}>
-                <Spinner size="large" />
-                <Text>Loading session preparation...</Text>
-              </div>
-            ) : !aiConfigured ? (
-              <div className={styles.aiNotConfigured}>
-                <SparkleRegular style={{ fontSize: '48px', color: tokens.colorNeutralForeground3 }} />
-                <Text size={500} weight="semibold">
-                  AI Features Not Configured
-                </Text>
-                <Text style={{ color: tokens.colorNeutralForeground3 }}>
-                  Azure OpenAI is not configured. Please add the required environment variables
-                  to enable AI-powered session preparation.
-                </Text>
-                <Text size={200} style={{ color: tokens.colorNeutralForeground4 }}>
-                  See the infrastructure/README.md for deployment instructions.
-                </Text>
-              </div>
-            ) : sessionPrep ? (
-              <>
-                {/* Progress Section */}
-                <div className={styles.progressSection}>
-                  <Text className={styles.progressLabel}>Preparation Progress</Text>
-                  <ProgressBar
-                    className={styles.progressBar}
-                    value={completionPercent / 100}
-                    color={completionPercent >= 100 ? 'success' : 'brand'}
-                  />
-                  <Text className={styles.progressPercent}>{completionPercent}%</Text>
-                </div>
-
-                {/* Tabs */}
-                <TabList
-                  selectedValue={activeTab}
-                  onTabSelect={(_, data) => setActiveTab(data.value as TabValue)}
-                >
-                  <Tab value="profile" icon={<PersonRegular />}>
-                    Client Profile
-                  </Tab>
-                  <Tab value="talking-points" icon={<ChatRegular />}>
-                    Talking Points
-                  </Tab>
-                  <Tab value="resources" icon={<FolderRegular />}>
-                    Resources
-                  </Tab>
-                  <Tab value="agenda" icon={<CalendarRegular />}>
-                    Agenda
-                  </Tab>
-                  <Tab value="checklist" icon={<CheckmarkRegular />}>
-                    Checklist
-                  </Tab>
-                </TabList>
-
-                {/* Tab Content */}
-                <div className={styles.tabContent}>
-                  {generating ? (
-                    <div className={styles.loadingOverlay}>
-                      <Spinner size="large" />
-                      <Text>Generating AI content...</Text>
-                      <Text size={200} style={{ color: tokens.colorNeutralForeground3 }}>
-                        This may take a moment
-                      </Text>
-                    </div>
-                  ) : (
-                    <>
-                      {activeTab === 'profile' && (
-                        <ClientProfileCard
-                          profile={sessionPrep.ClientProfile}
-                          onRegenerate={() => handleRegenerateSection('clientProfile')}
-                        />
-                      )}
-                      {activeTab === 'talking-points' && (
-                        <TalkingPointsEditor
-                          talkingPoints={sessionPrep.TalkingPoints}
-                          context={buildAIContext()}
-                          onUpdate={(points) => handleUpdateSessionPrep({ talkingPoints: points })}
-                          onRegenerate={() => handleRegenerateSection('talkingPoints')}
-                        />
-                      )}
-                      {activeTab === 'resources' && (
-                        <ResourcePicker
-                          resources={sessionPrep.SuggestedResources}
-                          onUpdate={(resources) => handleUpdateSessionPrep({ suggestedResources: resources })}
-                          onRegenerate={() => handleRegenerateSection('suggestedResources')}
-                        />
-                      )}
-                      {activeTab === 'agenda' && (
-                        <MeetingAgendaView
-                          agenda={sessionPrep.MeetingAgenda}
-                          onRegenerate={() => handleRegenerateSection('meetingAgenda')}
-                        />
-                      )}
-                      {activeTab === 'checklist' && (
-                        <PrepChecklist
-                          items={sessionPrep.ChecklistItems}
-                          onUpdate={(items) => handleUpdateSessionPrep({ checklistItems: items })}
-                        />
-                      )}
-                    </>
-                  )}
-                </div>
-              </>
-            ) : (
-              <div className={styles.loadingOverlay}>
-                <Text>Unable to load session preparation</Text>
-              </div>
-            )}
-          </DialogContent>
-
-          {/* Footer */}
-          {sessionPrep && aiConfigured && (
-            <div className={styles.footer}>
-              <div className={styles.footerLeft}>
-                {!sessionPrep.AIGeneratedAt && (
-                  <Button
-                    appearance="primary"
-                    icon={<SparkleRegular />}
-                    onClick={handleGenerateContent}
-                    disabled={generating || saving}
-                  >
-                    Generate AI Content
-                  </Button>
-                )}
-                {sessionPrep.AIGeneratedAt && (
-                  <Button
-                    appearance="subtle"
-                    icon={<ArrowSyncRegular />}
-                    onClick={handleGenerateContent}
-                    disabled={generating || saving}
-                  >
-                    Regenerate All
-                  </Button>
-                )}
-              </div>
-              <div className={styles.footerActions}>
-                <Button appearance="secondary" onClick={onClose}>
-                  Close
-                </Button>
-                {sessionPrep.Status !== 'Ready' && (
-                  <Button
-                    appearance="primary"
-                    icon={<CheckmarkCircleRegular />}
-                    onClick={handleMarkAsReady}
-                    disabled={generating || saving || completionPercent < 50}
-                    style={{ backgroundColor: '#107c10' }}
-                  >
-                    Mark as Ready
-                  </Button>
-                )}
-              </div>
-            </div>
           )}
-        </DialogBody>
-      </DialogSurface>
-    </Dialog>
+          {activeTab === 'talking-points' && (
+            <TalkingPointsEditor
+              talkingPoints={sessionPrep.TalkingPoints}
+              context={buildAIContext()}
+              onUpdate={(points) => handleUpdateSessionPrep({ talkingPoints: points })}
+              onRegenerate={() => handleRegenerateSection('talkingPoints')}
+            />
+          )}
+          {activeTab === 'resources' && (
+            <ResourcePicker
+              resources={sessionPrep.SuggestedResources}
+              onUpdate={(resources) => handleUpdateSessionPrep({ suggestedResources: resources })}
+              onRegenerate={() => handleRegenerateSection('suggestedResources')}
+            />
+          )}
+          {activeTab === 'agenda' && (
+            <MeetingAgendaView
+              agenda={sessionPrep.MeetingAgenda}
+              onRegenerate={() => handleRegenerateSection('meetingAgenda')}
+            />
+          )}
+          {activeTab === 'checklist' && (
+            <PrepChecklist
+              items={sessionPrep.ChecklistItems}
+              onUpdate={(items) => handleUpdateSessionPrep({ checklistItems: items })}
+            />
+          )}
+        </>
+      ) : (
+        <div className={styles.loadingOverlay}>
+          <Text>Unable to load session preparation</Text>
+        </div>
+      )}
+    </DetailModalShell>
   );
 };

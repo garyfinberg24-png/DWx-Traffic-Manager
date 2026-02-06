@@ -1,150 +1,125 @@
 /**
  * DWx Traffic Manager - Resource Picker
- * Select and manage suggested resources for session preparation
+ * Select and manage suggested resources for session preparation.
+ * Styled to match DetailModalShell section patterns.
  */
 
 import React from 'react';
 import {
   Text,
   Button,
-  Card,
-  Checkbox,
   makeStyles,
-  tokens,
-  Badge,
 } from '@fluentui/react-components';
 import {
-  DocumentRegular,
-  BookRegular,
-  TableRegular,
-  VideoRegular,
-  DocumentBulletListRegular,
-  TextBulletListLtrRegular,
   ArrowSyncRegular,
   SparkleRegular,
   OpenRegular,
   StarRegular,
+  FolderRegular,
 } from '@fluentui/react-icons';
 import { SuggestedResource, ResourceType, RESOURCE_TYPE_LABELS } from '../../types/SessionPreparation';
+import { DetailSection } from '../MyRequests/DetailModalShell';
 
 const useStyles = makeStyles({
-  container: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: tokens.spacingVerticalM,
-  },
-  header: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  headerTitle: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: tokens.spacingHorizontalS,
-  },
   emptyState: {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
-    padding: tokens.spacingVerticalXXL,
-    gap: tokens.spacingVerticalM,
+    padding: '48px',
+    gap: '16px',
     textAlign: 'center',
-    color: tokens.colorNeutralForeground3,
+    color: '#888',
   },
   resourceGrid: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
-    gap: tokens.spacingVerticalM,
+    gridTemplateColumns: '1fr 1fr',
+    gap: '12px',
   },
   resourceCard: {
+    padding: '14px',
+    border: '1px solid #eee',
+    borderRadius: '8px',
     display: 'flex',
-    flexDirection: 'column',
-    gap: tokens.spacingVerticalS,
-    padding: tokens.spacingVerticalM,
+    gap: '12px',
     cursor: 'pointer',
-    transition: 'background-color 0.1s ease',
-    '&:hover': {
-      backgroundColor: tokens.colorNeutralBackground1Hover,
-    },
+    transition: 'all 0.15s',
   },
-  selectedCard: {
-    border: `1px solid ${tokens.colorBrandStroke1}`,
-    backgroundColor: 'rgba(30, 107, 123, 0.05)',
-  },
-  resourceHeader: {
+  resourceCardSelected: {
+    padding: '14px',
+    border: '1px solid #1a5a8a',
+    borderRadius: '8px',
     display: 'flex',
-    alignItems: 'flex-start',
-    gap: tokens.spacingHorizontalM,
+    gap: '12px',
+    cursor: 'pointer',
+    backgroundColor: '#e8f4fc',
+    transition: 'all 0.15s',
   },
-  resourceIcon: {
-    width: '40px',
-    height: '40px',
-    borderRadius: tokens.borderRadiusMedium,
+  checkbox: {
+    width: '18px',
+    height: '18px',
+    borderRadius: '4px',
+    border: '2px solid #ccc',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
     flexShrink: 0,
+    marginTop: '1px',
+    transition: 'all 0.15s',
+  },
+  checkboxSelected: {
+    width: '18px',
+    height: '18px',
+    borderRadius: '4px',
+    border: '2px solid #1a5a8a',
+    backgroundColor: '#1a5a8a',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
+    marginTop: '1px',
   },
   resourceInfo: {
     flex: 1,
     minWidth: 0,
   },
   resourceName: {
+    fontSize: '13px',
     fontWeight: '600',
-    fontSize: '14px',
-    display: '-webkit-box',
-    WebkitLineClamp: 2,
-    WebkitBoxOrient: 'vertical',
-    overflow: 'hidden',
-  },
-  resourceType: {
+    color: '#242424',
+    marginBottom: '4px',
     display: 'flex',
     alignItems: 'center',
-    gap: tokens.spacingHorizontalXS,
-    marginTop: tokens.spacingVerticalXXS,
+    gap: '8px',
+  },
+  typeBadge: {
+    fontSize: '10px',
+    fontWeight: '600',
+    padding: '2px 8px',
+    borderRadius: '3px',
+    textTransform: 'uppercase',
+    letterSpacing: '0.3px',
   },
   resourceReason: {
-    fontSize: '13px',
-    color: tokens.colorNeutralForeground2,
-    lineHeight: '1.4',
-  },
-  resourceFooter: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginTop: tokens.spacingVerticalXS,
-  },
-  relevanceScore: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: tokens.spacingHorizontalXS,
     fontSize: '12px',
-    color: tokens.colorNeutralForeground3,
+    color: '#616161',
+    lineHeight: '1.4',
+    marginBottom: '6px',
   },
-  selectedCount: {
-    padding: `${tokens.spacingVerticalXS} ${tokens.spacingHorizontalM}`,
-    backgroundColor: tokens.colorNeutralBackground2,
-    borderRadius: tokens.borderRadiusMedium,
-    fontSize: '13px',
+  relevance: {
+    fontSize: '11px',
+    color: '#888',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '4px',
   },
 });
-
-const RESOURCE_ICONS: Record<ResourceType, React.ReactElement> = {
-  slide_deck: <BookRegular />,
-  case_study: <DocumentRegular />,
-  datasheet: <TableRegular />,
-  demo_script: <TextBulletListLtrRegular />,
-  proposal_template: <DocumentBulletListRegular />,
-  video: <VideoRegular />,
-};
 
 const RESOURCE_COLORS: Record<ResourceType, { bg: string; text: string }> = {
   slide_deck: { bg: '#e8f4f6', text: '#1e6b7b' },
   case_study: { bg: '#e8f6e8', text: '#107c10' },
   datasheet: { bg: '#f5eefa', text: '#8b5cf6' },
-  demo_script: { bg: '#fff4e5', text: '#f59e0b' },
+  demo_script: { bg: '#fff4e5', text: '#d97706' },
   proposal_template: { bg: '#fde7e9', text: '#d13438' },
   video: { bg: '#e6f2ff', text: '#0078d4' },
 };
@@ -175,102 +150,86 @@ export const ResourcePicker: React.FC<ResourcePickerProps> = ({
     return (
       <div className={styles.emptyState}>
         <SparkleRegular style={{ fontSize: '48px' }} />
-        <Text size={400} weight="semibold">
-          No Resources Suggested
-        </Text>
-        <Text>
-          Click "Generate AI Content" to get resource suggestions based on the meeting context.
-        </Text>
+        <Text size={400} weight="semibold">No Resources Suggested</Text>
+        <Text>Click "Generate AI Content" to get resource suggestions based on the meeting context.</Text>
       </div>
     );
   }
 
   return (
-    <div className={styles.container}>
-      {/* Header */}
-      <div className={styles.header}>
-        <div className={styles.headerTitle}>
-          <Text weight="semibold">Suggested Resources</Text>
-          <Badge appearance="filled" color="informative">
-            {resources.length} suggestions
-          </Badge>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: tokens.spacingHorizontalM }}>
-          <div className={styles.selectedCount}>
-            <Text weight="medium">{selectedCount}</Text> selected
-          </div>
-          <Button
-            appearance="subtle"
-            icon={<ArrowSyncRegular />}
-            onClick={onRegenerate}
-            size="small"
-          >
+    <DetailSection
+      icon={<FolderRegular />}
+      title="Suggested Resources"
+      editButton={
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <span style={{
+            display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+            minWidth: 20, height: 20, padding: '0 6px', borderRadius: 10,
+            fontSize: 11, fontWeight: 600, background: 'rgba(26,90,138,0.1)', color: '#1a5a8a',
+          }}>
+            {selectedCount} of {resources.length} selected
+          </span>
+          <Button appearance="subtle" icon={<ArrowSyncRegular />} onClick={onRegenerate} size="small">
             Regenerate
           </Button>
         </div>
-      </div>
-
-      {/* Resources Grid */}
+      }
+      last
+    >
       <div className={styles.resourceGrid}>
         {resources
           .sort((a, b) => b.relevanceScore - a.relevanceScore)
           .map((resource) => {
             const colors = RESOURCE_COLORS[resource.type];
             const typeLabel = RESOURCE_TYPE_LABELS[resource.type];
+            const isSelected = resource.selected;
 
             return (
-              <Card
+              <div
                 key={resource.id}
-                className={`${styles.resourceCard} ${resource.selected ? styles.selectedCard : ''}`}
+                className={isSelected ? styles.resourceCardSelected : styles.resourceCard}
                 onClick={() => handleToggleSelect(resource.id)}
               >
-                <div className={styles.resourceHeader}>
-                  <Checkbox
-                    checked={resource.selected}
-                    onChange={() => handleToggleSelect(resource.id)}
-                    aria-label={`Select ${resource.name}`}
-                  />
-                  <div
-                    className={styles.resourceIcon}
-                    style={{ backgroundColor: colors.bg, color: colors.text }}
-                  >
-                    {RESOURCE_ICONS[resource.type]}
-                  </div>
-                  <div className={styles.resourceInfo}>
-                    <Text className={styles.resourceName}>{resource.name}</Text>
-                    <div className={styles.resourceType}>
-                      <Badge appearance="outline" size="small">
-                        {typeLabel.label}
-                      </Badge>
-                    </div>
-                  </div>
-                </div>
-
-                <Text className={styles.resourceReason}>{resource.reason}</Text>
-
-                <div className={styles.resourceFooter}>
-                  <div className={styles.relevanceScore}>
-                    <StarRegular style={{ width: '14px', height: '14px' }} />
-                    {resource.relevanceScore}% match
-                  </div>
-                  {resource.url && (
-                    <Button
-                      appearance="subtle"
-                      icon={<OpenRegular />}
-                      size="small"
-                      as="a"
-                      href={resource.url}
-                      target="_blank"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      Open
-                    </Button>
+                <div className={isSelected ? styles.checkboxSelected : styles.checkbox}>
+                  {isSelected && (
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round">
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
                   )}
                 </div>
-              </Card>
+                <div className={styles.resourceInfo}>
+                  <div className={styles.resourceName}>
+                    {resource.name}
+                    <span className={styles.typeBadge} style={{ background: colors.bg, color: colors.text }}>
+                      {typeLabel.label}
+                    </span>
+                  </div>
+                  <div className={styles.resourceReason}>{resource.reason}</div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div className={styles.relevance}>
+                      <StarRegular style={{ width: 12, height: 12, color: '#f59e0b' }} />
+                      {resource.relevanceScore}% relevance
+                    </div>
+                    {resource.url && (
+                      <Button
+                        appearance="subtle"
+                        icon={<OpenRegular />}
+                        size="small"
+                        as="a"
+                        href={resource.url}
+                        target="_blank"
+                        onClick={(e) => e.stopPropagation()}
+                        style={{ minWidth: 'auto', padding: '2px 6px', fontSize: '11px' }}
+                      >
+                        Open
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              </div>
             );
           })}
       </div>
-    </div>
+    </DetailSection>
   );
 };

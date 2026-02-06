@@ -1,16 +1,14 @@
 /**
  * DWx Traffic Manager - Meeting Agenda View
- * Display and manage AI-generated meeting agenda
+ * Display AI-generated meeting agenda as a visual timeline.
+ * Styled to match DetailModalShell section patterns.
  */
 
 import React from 'react';
 import {
   Text,
   Button,
-  Card,
   makeStyles,
-  tokens,
-  Badge,
 } from '@fluentui/react-components';
 import {
   CalendarRegular,
@@ -19,109 +17,111 @@ import {
   SparkleRegular,
 } from '@fluentui/react-icons';
 import { MeetingAgenda } from '../../types/SessionPreparation';
-import { format } from 'date-fns';
+import { DetailSection } from '../MyRequests/DetailModalShell';
 
 const useStyles = makeStyles({
-  container: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: tokens.spacingVerticalM,
-  },
-  header: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  headerTitle: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: tokens.spacingHorizontalS,
-  },
-  generatedAt: {
-    fontSize: '12px',
-    color: tokens.colorNeutralForeground3,
-  },
   emptyState: {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
-    padding: tokens.spacingVerticalXXL,
-    gap: tokens.spacingVerticalM,
+    padding: '48px',
+    gap: '16px',
     textAlign: 'center',
-    color: tokens.colorNeutralForeground3,
+    color: '#888',
   },
-  totalDuration: {
+  totalBox: {
     display: 'flex',
     alignItems: 'center',
-    gap: tokens.spacingHorizontalS,
-    padding: tokens.spacingVerticalS,
-    backgroundColor: tokens.colorNeutralBackground2,
-    borderRadius: tokens.borderRadiusMedium,
-    marginBottom: tokens.spacingVerticalM,
+    gap: '10px',
+    padding: '12px 16px',
+    backgroundColor: '#e8f4fc',
+    borderRadius: '8px',
+    border: '1px solid #cce4f0',
+    marginBottom: '20px',
   },
-  agendaTimeline: {
+  totalIcon: {
+    width: '18px',
+    height: '18px',
+    color: '#1a5a8a',
+  },
+  totalLabel: {
+    fontSize: '13px',
+    color: '#616161',
+    flex: 1,
+  },
+  totalValue: {
+    fontSize: '14px',
+    fontWeight: '600',
+    color: '#1a5a8a',
     display: 'flex',
-    flexDirection: 'column',
-    gap: tokens.spacingVerticalXS,
+    alignItems: 'center',
+    gap: '8px',
+  },
+  totalBadge: {
+    fontSize: '11px',
+    padding: '2px 8px',
+    backgroundColor: 'rgba(26,90,138,0.1)',
+    borderRadius: '4px',
+    color: '#1a5a8a',
   },
   agendaItem: {
     display: 'flex',
-    gap: tokens.spacingHorizontalM,
-    padding: tokens.spacingVerticalM,
+    gap: '16px',
+    marginBottom: '4px',
   },
-  timeColumn: {
-    width: '80px',
-    flexShrink: 0,
+  agendaLeft: {
+    width: '60px',
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-  },
-  timeIndicator: {
-    width: '12px',
-    height: '12px',
-    borderRadius: '50%',
-    backgroundColor: tokens.colorBrandBackground,
     flexShrink: 0,
   },
-  timeLine: {
-    width: '2px',
-    flex: 1,
-    backgroundColor: tokens.colorNeutralStroke2,
-    marginTop: tokens.spacingVerticalXS,
-  },
-  durationBadge: {
-    fontSize: '12px',
-    fontWeight: '600',
-    color: tokens.colorBrandForeground1,
-    marginTop: tokens.spacingVerticalXXS,
-  },
-  itemContent: {
-    flex: 1,
-    paddingBottom: tokens.spacingVerticalM,
-  },
-  itemTitle: {
-    fontWeight: '600',
-    fontSize: '14px',
-    marginBottom: tokens.spacingVerticalXXS,
-  },
-  itemDescription: {
-    fontSize: '13px',
-    color: tokens.colorNeutralForeground2,
-    lineHeight: '1.5',
-  },
-  itemOrder: {
+  agendaNum: {
     width: '28px',
     height: '28px',
     borderRadius: '50%',
-    backgroundColor: tokens.colorBrandBackground,
+    backgroundColor: '#1a5a8a',
     color: 'white',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    fontSize: '12px',
+    fontSize: '11px',
     fontWeight: '600',
-    flexShrink: 0,
+    zIndex: 1,
+  },
+  connector: {
+    width: '2px',
+    flex: 1,
+    backgroundColor: '#e0e0e0',
+    margin: '4px 0',
+  },
+  agendaRight: {
+    flex: 1,
+    padding: '8px 16px 16px',
+    backgroundColor: '#f9f9f9',
+    borderRadius: '8px',
+    border: '1px solid #eee',
+    marginBottom: '8px',
+  },
+  agendaTitle: {
+    fontSize: '14px',
+    fontWeight: '600',
+    color: '#242424',
+    marginBottom: '4px',
+  },
+  agendaDesc: {
+    fontSize: '13px',
+    color: '#616161',
+    lineHeight: '1.5',
+    marginBottom: '6px',
+  },
+  agendaTime: {
+    fontSize: '11px',
+    color: '#888',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '4px',
   },
 });
 
@@ -140,17 +140,12 @@ export const MeetingAgendaView: React.FC<MeetingAgendaViewProps> = ({
     return (
       <div className={styles.emptyState}>
         <SparkleRegular style={{ fontSize: '48px' }} />
-        <Text size={400} weight="semibold">
-          No Meeting Agenda Generated
-        </Text>
-        <Text>
-          Click "Generate AI Content" to create a meeting agenda tailored to this session.
-        </Text>
+        <Text size={400} weight="semibold">No Meeting Agenda Generated</Text>
+        <Text>Click "Generate AI Content" to create a meeting agenda tailored to this session.</Text>
       </div>
     );
   }
 
-  // Calculate cumulative time for each item
   let cumulativeMinutes = 0;
   const itemsWithTime = agenda.items
     .sort((a, b) => a.order - b.order)
@@ -163,69 +158,53 @@ export const MeetingAgendaView: React.FC<MeetingAgendaViewProps> = ({
   const formatTime = (minutes: number): string => {
     const hours = Math.floor(minutes / 60);
     const mins = minutes % 60;
-    if (hours > 0) {
-      return `${hours}h ${mins}m`;
-    }
+    if (hours > 0) return `${hours}h ${mins}m`;
     return `${mins}m`;
   };
 
   return (
-    <div className={styles.container}>
-      {/* Header */}
-      <div className={styles.header}>
-        <div className={styles.headerTitle}>
-          <CalendarRegular />
-          <Text weight="semibold">Meeting Agenda</Text>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: tokens.spacingHorizontalS }}>
-          {agenda.generatedAt && (
-            <Text className={styles.generatedAt}>
-              Generated {format(new Date(agenda.generatedAt), 'MMM d, yyyy h:mm a')}
-            </Text>
-          )}
-          <Button
-            appearance="subtle"
-            icon={<ArrowSyncRegular />}
-            onClick={onRegenerate}
-            size="small"
-          >
-            Regenerate
-          </Button>
-        </div>
-      </div>
-
+    <DetailSection
+      icon={<CalendarRegular />}
+      title="Meeting Agenda"
+      editButton={
+        <Button appearance="subtle" icon={<ArrowSyncRegular />} onClick={onRegenerate} size="small">
+          Regenerate
+        </Button>
+      }
+      last
+    >
       {/* Total Duration */}
-      <div className={styles.totalDuration}>
-        <ClockRegular />
-        <Text weight="medium">Total Duration:</Text>
-        <Badge appearance="filled" color="brand">
+      <div className={styles.totalBox}>
+        <ClockRegular className={styles.totalIcon} />
+        <span className={styles.totalLabel}>Total Duration</span>
+        <span className={styles.totalValue}>
           {formatTime(agenda.totalDuration)}
-        </Badge>
-        <Text size={200} style={{ color: tokens.colorNeutralForeground3 }}>
-          ({agenda.items.length} agenda items)
-        </Text>
+          <span className={styles.totalBadge}>{agenda.items.length} items</span>
+        </span>
       </div>
 
-      {/* Agenda Timeline */}
-      <div className={styles.agendaTimeline}>
-        {itemsWithTime.map((item, index) => (
-          <Card key={item.id} className={styles.agendaItem}>
-            <div className={styles.timeColumn}>
-              <span className={styles.itemOrder}>{index + 1}</span>
-              <span className={styles.durationBadge}>{formatTime(item.duration)}</span>
-            </div>
-            <div className={styles.itemContent}>
-              <Text className={styles.itemTitle}>{item.title}</Text>
-              <Text className={styles.itemDescription}>{item.description}</Text>
-              <div style={{ marginTop: tokens.spacingVerticalXS }}>
-                <Text size={200} style={{ color: tokens.colorNeutralForeground4 }}>
-                  {formatTime(item.startMinutes)} - {formatTime(item.endMinutes)} mark
-                </Text>
+      {/* Timeline */}
+      <div>
+        {itemsWithTime.map((item, index) => {
+          const isLast = index === itemsWithTime.length - 1;
+          return (
+            <div key={item.id} className={styles.agendaItem}>
+              <div className={styles.agendaLeft}>
+                <div className={styles.agendaNum}>{index + 1}</div>
+                {!isLast && <div className={styles.connector} />}
+              </div>
+              <div className={styles.agendaRight}>
+                <div className={styles.agendaTitle}>{item.title}</div>
+                <div className={styles.agendaDesc}>{item.description}</div>
+                <div className={styles.agendaTime}>
+                  <ClockRegular style={{ width: 12, height: 12 }} />
+                  {formatTime(item.duration)} &middot; {formatTime(item.startMinutes)} &ndash; {formatTime(item.endMinutes)} mark
+                </div>
               </div>
             </div>
-          </Card>
-        ))}
+          );
+        })}
       </div>
-    </div>
+    </DetailSection>
   );
 };

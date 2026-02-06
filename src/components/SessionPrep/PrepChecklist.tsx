@@ -1,132 +1,147 @@
 /**
  * DWx Traffic Manager - Preparation Checklist
- * Interactive checklist for session preparation tasks
+ * Interactive checklist for session preparation tasks.
+ * Styled to match DetailModalShell section patterns.
  */
 
 import React from 'react';
 import {
   Text,
-  Checkbox,
-  Card,
   makeStyles,
-  tokens,
-  Badge,
-  ProgressBar,
 } from '@fluentui/react-components';
 import {
   SearchRegular,
   DesktopRegular,
   FolderRegular,
   CalendarRegular,
+  CheckmarkRegular,
 } from '@fluentui/react-icons';
 import { PrepChecklistItem, PrepChecklistCategory } from '../../types/SessionPreparation';
+import { DetailSection } from '../MyRequests/DetailModalShell';
 import { format } from 'date-fns';
 
 const useStyles = makeStyles({
-  container: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: tokens.spacingVerticalM,
-  },
-  header: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  headerTitle: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: tokens.spacingHorizontalS,
-  },
-  progressSection: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: tokens.spacingHorizontalM,
-    padding: tokens.spacingVerticalS,
-    backgroundColor: tokens.colorNeutralBackground2,
-    borderRadius: tokens.borderRadiusMedium,
-  },
-  progressLabel: {
-    fontSize: '13px',
-    fontWeight: '500',
-    minWidth: '80px',
-  },
-  progressBar: {
-    flex: 1,
-  },
-  progressPercent: {
-    fontSize: '13px',
-    fontWeight: '600',
-    minWidth: '50px',
-    textAlign: 'right',
-  },
-  categorySection: {
-    marginBottom: tokens.spacingVerticalL,
-  },
-  categoryHeader: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: tokens.spacingHorizontalS,
-    marginBottom: tokens.spacingVerticalS,
-    padding: `${tokens.spacingVerticalXS} ${tokens.spacingHorizontalS}`,
-  },
-  categoryIcon: {
-    width: '32px',
-    height: '32px',
-    borderRadius: tokens.borderRadiusMedium,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  categoryInfo: {
-    flex: 1,
-  },
-  categoryTitle: {
-    fontWeight: '600',
-    fontSize: '14px',
-  },
-  categoryProgress: {
-    fontSize: '12px',
-    color: tokens.colorNeutralForeground3,
-  },
-  checklistItem: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: tokens.spacingHorizontalM,
-    padding: `${tokens.spacingVerticalS} ${tokens.spacingHorizontalS}`,
-    borderRadius: tokens.borderRadiusMedium,
-    transition: 'background-color 0.1s ease',
-    cursor: 'pointer',
-    '&:hover': {
-      backgroundColor: tokens.colorNeutralBackground1Hover,
-    },
-  },
-  completedItem: {
-    textDecoration: 'line-through',
-    color: tokens.colorNeutralForeground3,
-  },
-  itemInfo: {
-    flex: 1,
-    display: 'flex',
-    flexDirection: 'column',
-  },
-  itemLabel: {
-    fontSize: '14px',
-  },
-  completedMeta: {
-    fontSize: '11px',
-    color: tokens.colorNeutralForeground4,
-    marginTop: '2px',
-  },
   emptyState: {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
-    padding: tokens.spacingVerticalXXL,
-    gap: tokens.spacingVerticalM,
+    padding: '48px',
+    gap: '16px',
     textAlign: 'center',
-    color: tokens.colorNeutralForeground3,
+    color: '#888',
+  },
+  progressBar: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '12px',
+    padding: '12px 16px',
+    backgroundColor: '#f5f5f5',
+    borderRadius: '8px',
+    marginBottom: '20px',
+  },
+  progressLabel: {
+    fontSize: '13px',
+    fontWeight: '500',
+    color: '#424242',
+    minWidth: '60px',
+  },
+  progressTrack: {
+    flex: 1,
+    height: '8px',
+    backgroundColor: '#e0e0e0',
+    borderRadius: '4px',
+    overflow: 'hidden',
+  },
+  progressFill: {
+    height: '100%',
+    borderRadius: '4px',
+    transition: 'width 0.3s',
+  },
+  progressPct: {
+    fontSize: '13px',
+    fontWeight: '600',
+    color: '#1a5a8a',
+    minWidth: '40px',
+    textAlign: 'right',
+  },
+  category: {
+    marginBottom: '16px',
+    border: '1px solid #eee',
+    borderRadius: '8px',
+    overflow: 'hidden',
+  },
+  categoryHeader: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '10px',
+    padding: '10px 16px',
+    backgroundColor: '#f9f9f9',
+    borderBottom: '1px solid #eee',
+  },
+  catIcon: {
+    width: '28px',
+    height: '28px',
+    borderRadius: '6px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  catName: {
+    fontSize: '13px',
+    fontWeight: '600',
+    color: '#424242',
+    flex: 1,
+  },
+  catProgress: {
+    fontSize: '12px',
+    color: '#888',
+  },
+  item: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '12px',
+    padding: '10px 16px',
+    borderBottom: '1px solid #f5f5f5',
+    cursor: 'pointer',
+    transition: 'background 0.1s',
+  },
+  checkbox: {
+    width: '20px',
+    height: '20px',
+    borderRadius: '4px',
+    border: '2px solid #ccc',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
+    transition: 'all 0.15s',
+  },
+  checkboxDone: {
+    width: '20px',
+    height: '20px',
+    borderRadius: '4px',
+    border: '2px solid #107c10',
+    backgroundColor: '#107c10',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
+  },
+  label: {
+    flex: 1,
+    fontSize: '13px',
+    color: '#424242',
+  },
+  labelDone: {
+    flex: 1,
+    fontSize: '13px',
+    color: '#888',
+    textDecoration: 'line-through',
+  },
+  meta: {
+    fontSize: '11px',
+    color: '#aaa',
   },
 });
 
@@ -137,22 +152,22 @@ const CATEGORY_CONFIG: Record<PrepChecklistCategory, {
 }> = {
   research: {
     label: 'Client Research',
-    icon: <SearchRegular />,
+    icon: <SearchRegular style={{ width: 14, height: 14 }} />,
     color: { bg: '#e8f4f6', text: '#1e6b7b' },
   },
   technical: {
     label: 'Technical Preparation',
-    icon: <DesktopRegular />,
+    icon: <DesktopRegular style={{ width: 14, height: 14 }} />,
     color: { bg: '#f5eefa', text: '#8b5cf6' },
   },
   resources: {
     label: 'Resource Gathering',
-    icon: <FolderRegular />,
+    icon: <FolderRegular style={{ width: 14, height: 14 }} />,
     color: { bg: '#e8f6e8', text: '#107c10' },
   },
   logistics: {
     label: 'Meeting Logistics',
-    icon: <CalendarRegular />,
+    icon: <CalendarRegular style={{ width: 14, height: 14 }} />,
     color: { bg: '#fff4e5', text: '#f59e0b' },
   },
 };
@@ -170,13 +185,11 @@ export const PrepChecklist: React.FC<PrepChecklistProps> = ({
 }) => {
   const styles = useStyles();
 
-  // Group items by category
   const itemsByCategory = CATEGORY_ORDER.reduce((acc, category) => {
     acc[category] = items.filter((item) => item.category === category);
     return acc;
   }, {} as Record<PrepChecklistCategory, PrepChecklistItem[]>);
 
-  // Calculate overall progress
   const completedCount = items.filter((item) => item.completed).length;
   const totalCount = items.length;
   const overallProgress = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
@@ -197,37 +210,40 @@ export const PrepChecklist: React.FC<PrepChecklistProps> = ({
   if (items.length === 0) {
     return (
       <div className={styles.emptyState}>
-        <Text size={400} weight="semibold">
-          No Checklist Items
-        </Text>
-        <Text>
-          Checklist items will be created automatically when the session preparation is initialized.
-        </Text>
+        <Text size={400} weight="semibold">No Checklist Items</Text>
+        <Text>Checklist items will be created automatically when the session preparation is initialized.</Text>
       </div>
     );
   }
 
   return (
-    <div className={styles.container}>
-      {/* Header */}
-      <div className={styles.header}>
-        <div className={styles.headerTitle}>
-          <Text weight="semibold">Preparation Checklist</Text>
-          <Badge appearance="filled" color={overallProgress >= 100 ? 'success' : 'informative'}>
-            {completedCount}/{totalCount} complete
-          </Badge>
+    <DetailSection
+      icon={<CheckmarkRegular />}
+      title="Preparation Checklist"
+      editButton={
+        <span style={{
+          display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+          minWidth: 20, height: 20, padding: '0 6px', borderRadius: 10,
+          fontSize: 11, fontWeight: 600, background: 'rgba(26,90,138,0.1)', color: '#1a5a8a',
+        }}>
+          {completedCount} of {totalCount}
+        </span>
+      }
+      last
+    >
+      {/* Overall progress bar */}
+      <div className={styles.progressBar}>
+        <span className={styles.progressLabel}>Progress</span>
+        <div className={styles.progressTrack}>
+          <div
+            className={styles.progressFill}
+            style={{
+              width: `${overallProgress}%`,
+              backgroundColor: overallProgress >= 100 ? '#107c10' : '#1a5a8a',
+            }}
+          />
         </div>
-      </div>
-
-      {/* Overall Progress */}
-      <div className={styles.progressSection}>
-        <Text className={styles.progressLabel}>Progress</Text>
-        <ProgressBar
-          className={styles.progressBar}
-          value={overallProgress / 100}
-          color={overallProgress >= 100 ? 'success' : 'brand'}
-        />
-        <Text className={styles.progressPercent}>{overallProgress}%</Text>
+        <span className={styles.progressPct}>{overallProgress}%</span>
       </div>
 
       {/* Categories */}
@@ -239,55 +255,47 @@ export const PrepChecklist: React.FC<PrepChecklistProps> = ({
         if (categoryItems.length === 0) return null;
 
         return (
-          <Card key={category} className={styles.categorySection}>
+          <div key={category} className={styles.category}>
             <div className={styles.categoryHeader}>
               <div
-                className={styles.categoryIcon}
+                className={styles.catIcon}
                 style={{ backgroundColor: config.color.bg, color: config.color.text }}
               >
                 {config.icon}
               </div>
-              <div className={styles.categoryInfo}>
-                <Text className={styles.categoryTitle}>{config.label}</Text>
-                <Text className={styles.categoryProgress}>
-                  {categoryCompleted} of {categoryItems.length} complete
-                </Text>
-              </div>
-              <Badge
-                appearance="outline"
-                color={categoryCompleted === categoryItems.length ? 'success' : 'warning'}
-              >
-                {categoryCompleted === categoryItems.length ? 'Done' : `${categoryItems.length - categoryCompleted} left`}
-              </Badge>
+              <span className={styles.catName}>{config.label}</span>
+              <span className={styles.catProgress}>{categoryCompleted} of {categoryItems.length} complete</span>
             </div>
 
-            {categoryItems.map((item) => (
-              <div
-                key={item.id}
-                className={styles.checklistItem}
-                onClick={() => handleToggleItem(item.id)}
-              >
-                <Checkbox
-                  checked={item.completed}
-                  onChange={() => handleToggleItem(item.id)}
-                  aria-label={item.label}
-                />
-                <div className={styles.itemInfo}>
-                  <Text className={`${styles.itemLabel} ${item.completed ? styles.completedItem : ''}`}>
+            <div>
+              {categoryItems.map((item, index) => (
+                <div
+                  key={item.id}
+                  className={styles.item}
+                  onClick={() => handleToggleItem(item.id)}
+                  style={index === categoryItems.length - 1 ? { borderBottom: 'none' } : undefined}
+                >
+                  <div className={item.completed ? styles.checkboxDone : styles.checkbox}>
+                    {item.completed && (
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round">
+                        <polyline points="20 6 9 17 4 12" />
+                      </svg>
+                    )}
+                  </div>
+                  <span className={item.completed ? styles.labelDone : styles.label}>
                     {item.label}
-                  </Text>
+                  </span>
                   {item.completed && item.completedAt && (
-                    <Text className={styles.completedMeta}>
-                      Completed {format(new Date(item.completedAt), 'MMM d, h:mm a')}
-                      {item.completedBy && ` by ${item.completedBy}`}
-                    </Text>
+                    <span className={styles.meta}>
+                      {format(new Date(item.completedAt), 'MMM d')}
+                    </span>
                   )}
                 </div>
-              </div>
-            ))}
-          </Card>
+              ))}
+            </div>
+          </div>
         );
       })}
-    </div>
+    </DetailSection>
   );
 };

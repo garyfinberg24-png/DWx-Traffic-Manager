@@ -1,20 +1,17 @@
 /**
  * DWx Traffic Manager - Client Profile Card
- * Displays AI-generated client profile
+ * Displays AI-generated client profile using DetailModalShell section patterns.
  */
 
 import React from 'react';
 import {
   Text,
   Button,
-  Card,
-  makeStyles,
-  tokens,
   Badge,
+  makeStyles,
 } from '@fluentui/react-components';
 import {
   BuildingRegular,
-  PeopleRegular,
   HistoryRegular,
   NewsRegular,
   TargetRegular,
@@ -23,97 +20,93 @@ import {
   SparkleRegular,
 } from '@fluentui/react-icons';
 import { ClientProfile, EngagementSummary } from '../../types/SessionPreparation';
+import { DetailSection, DetailGrid, DetailField } from '../MyRequests/DetailModalShell';
 import { format } from 'date-fns';
 
 const useStyles = makeStyles({
-  container: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: tokens.spacingVerticalM,
-  },
-  header: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  headerTitle: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: tokens.spacingHorizontalS,
-  },
-  generatedAt: {
-    fontSize: '12px',
-    color: tokens.colorNeutralForeground3,
-  },
   emptyState: {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
-    padding: tokens.spacingVerticalXXL,
-    gap: tokens.spacingVerticalM,
+    padding: '48px',
+    gap: '16px',
     textAlign: 'center',
-    color: tokens.colorNeutralForeground3,
+    color: '#888',
   },
-  section: {
-    padding: tokens.spacingVerticalM,
+  profileCards: {
+    display: 'grid',
+    gridTemplateColumns: '1fr 1fr',
+    gap: '16px',
   },
-  sectionTitle: {
+  profileCard: {
+    padding: '16px',
+    backgroundColor: '#f9f9f9',
+    borderRadius: '8px',
+    border: '1px solid #eee',
+  },
+  profileCardFull: {
+    padding: '16px',
+    backgroundColor: '#f9f9f9',
+    borderRadius: '8px',
+    border: '1px solid #eee',
+    gridColumn: '1 / -1',
+  },
+  cardHeader: {
     display: 'flex',
     alignItems: 'center',
-    gap: tokens.spacingHorizontalS,
-    marginBottom: tokens.spacingVerticalS,
+    gap: '8px',
+    marginBottom: '10px',
+    fontSize: '13px',
     fontWeight: '600',
-    fontSize: '14px',
+    color: '#424242',
   },
-  sectionIcon: {
-    color: tokens.colorBrandForeground1,
+  cardHeaderIcon: {
+    width: '16px',
+    height: '16px',
+    color: '#1a5a8a',
   },
-  content: {
-    color: tokens.colorNeutralForeground2,
-    lineHeight: '1.5',
+  cardText: {
+    fontSize: '13px',
+    color: '#616161',
+    lineHeight: '1.6',
   },
-  list: {
+  bulletList: {
+    listStyle: 'none',
+    padding: 0,
     margin: 0,
-    paddingLeft: tokens.spacingHorizontalL,
   },
-  listItem: {
-    marginBottom: tokens.spacingVerticalXS,
+  bulletItem: {
+    fontSize: '13px',
+    color: '#616161',
+    padding: '4px 0',
+    display: 'flex',
+    alignItems: 'flex-start',
+    gap: '8px',
   },
-  grid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-    gap: tokens.spacingVerticalM,
+  bullet: {
+    width: '6px',
+    height: '6px',
+    borderRadius: '50%',
+    backgroundColor: '#1a5a8a',
+    flexShrink: 0,
+    marginTop: '6px',
   },
-  engagementItem: {
+  engagementRow: {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: tokens.spacingVerticalXS,
-    borderBottom: `1px solid ${tokens.colorNeutralStroke2}`,
-    '&:last-child': {
-      borderBottom: 'none',
-    },
+    padding: '6px 0',
+    borderBottom: '1px solid #eee',
   },
   engagementInfo: {
     display: 'flex',
     flexDirection: 'column',
     gap: '2px',
   },
-  engagementValue: {
+  engagementMeta: {
     fontSize: '12px',
-    color: tokens.colorNeutralForeground3,
-  },
-  metaRow: {
-    display: 'flex',
-    gap: tokens.spacingHorizontalL,
-    marginBottom: tokens.spacingVerticalS,
-  },
-  metaItem: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: tokens.spacingHorizontalXS,
-    fontSize: '13px',
+    color: '#888',
   },
 });
 
@@ -138,154 +131,133 @@ export const ClientProfileCard: React.FC<ClientProfileCardProps> = ({
     return (
       <div className={styles.emptyState}>
         <SparkleRegular style={{ fontSize: '48px' }} />
-        <Text size={400} weight="semibold">
-          No Client Profile Generated
-        </Text>
-        <Text>
-          Click "Generate AI Content" to create a client profile based on available data.
-        </Text>
+        <Text size={400} weight="semibold">No Client Profile Generated</Text>
+        <Text>Click "Generate AI Content" to create a client profile based on available data.</Text>
       </div>
     );
   }
 
   return (
-    <div className={styles.container}>
-      {/* Header */}
-      <div className={styles.header}>
-        <div className={styles.headerTitle}>
-          <BuildingRegular />
-          <Text weight="semibold">Client Profile</Text>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: tokens.spacingHorizontalS }}>
-          {profile.generatedAt && (
-            <Text className={styles.generatedAt}>
-              Generated {format(new Date(profile.generatedAt), 'MMM d, yyyy h:mm a')}
-            </Text>
-          )}
-          <Button
-            appearance="subtle"
-            icon={<ArrowSyncRegular />}
-            onClick={onRegenerate}
-            size="small"
-          >
-            Regenerate
-          </Button>
-        </div>
-      </div>
+    <DetailSection
+      icon={<BuildingRegular />}
+      title="Client Overview"
+      editButton={
+        <Button appearance="subtle" icon={<ArrowSyncRegular />} onClick={onRegenerate} size="small">
+          Regenerate
+        </Button>
+      }
+    >
+      <DetailGrid columns={2}>
+        <DetailField label="Industry">
+          <span style={{ background: '#e8f4f6', color: '#1e6b7b', padding: '2px 8px', borderRadius: '4px', fontSize: '12px', fontWeight: 500 }}>
+            {profile.industry}
+          </span>
+        </DetailField>
+        <DetailField label="Company Size">{profile.companySize}</DetailField>
+      </DetailGrid>
 
-      {/* Meta Info */}
-      <div className={styles.metaRow}>
-        <div className={styles.metaItem}>
-          <BuildingRegular style={{ width: '16px', height: '16px' }} />
-          <Text weight="semibold">{profile.industry}</Text>
-        </div>
-        <div className={styles.metaItem}>
-          <PeopleRegular style={{ width: '16px', height: '16px' }} />
-          <Text>{profile.companySize}</Text>
-        </div>
-      </div>
-
-      <div className={styles.grid}>
-        {/* Company Overview */}
-        <Card className={styles.section}>
-          <div className={styles.sectionTitle}>
-            <BuildingRegular className={styles.sectionIcon} />
-            Company Overview
+      <div style={{ marginTop: '16px' }}>
+        <div className={styles.profileCards}>
+          {/* Company Overview - full width */}
+          <div className={styles.profileCardFull}>
+            <div className={styles.cardHeader}>
+              <BuildingRegular className={styles.cardHeaderIcon} />
+              Company Overview
+            </div>
+            <span className={styles.cardText}>{profile.companyOverview}</span>
           </div>
-          <Text className={styles.content}>{profile.companyOverview}</Text>
-        </Card>
 
-        {/* Key Stakeholders */}
-        <Card className={styles.section}>
-          <div className={styles.sectionTitle}>
-            <PeopleTeamRegular className={styles.sectionIcon} />
-            Key Stakeholders
+          {/* Key Stakeholders */}
+          <div className={styles.profileCard}>
+            <div className={styles.cardHeader}>
+              <PeopleTeamRegular className={styles.cardHeaderIcon} />
+              Key Stakeholders
+            </div>
+            {profile.keyStakeholders.length > 0 ? (
+              <ul className={styles.bulletList}>
+                {profile.keyStakeholders.map((s, i) => (
+                  <li key={i} className={styles.bulletItem}>
+                    <span className={styles.bullet} />
+                    {s}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <span className={styles.cardText}>No stakeholders identified</span>
+            )}
           </div>
-          {profile.keyStakeholders.length > 0 ? (
-            <ul className={styles.list}>
-              {profile.keyStakeholders.map((stakeholder, index) => (
-                <li key={index} className={styles.listItem}>
-                  <Text className={styles.content}>{stakeholder}</Text>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <Text className={styles.content}>No stakeholders identified</Text>
-          )}
-        </Card>
 
-        {/* Pain Points */}
-        <Card className={styles.section}>
-          <div className={styles.sectionTitle}>
-            <TargetRegular className={styles.sectionIcon} />
-            Potential Pain Points
+          {/* Pain Points */}
+          <div className={styles.profileCard}>
+            <div className={styles.cardHeader}>
+              <TargetRegular className={styles.cardHeaderIcon} />
+              Potential Pain Points
+            </div>
+            {profile.potentialPainPoints.length > 0 ? (
+              <ul className={styles.bulletList}>
+                {profile.potentialPainPoints.map((p, i) => (
+                  <li key={i} className={styles.bulletItem}>
+                    <span className={styles.bullet} />
+                    {p}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <span className={styles.cardText}>No pain points identified</span>
+            )}
           </div>
-          {profile.potentialPainPoints.length > 0 ? (
-            <ul className={styles.list}>
-              {profile.potentialPainPoints.map((painPoint, index) => (
-                <li key={index} className={styles.listItem}>
-                  <Text className={styles.content}>{painPoint}</Text>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <Text className={styles.content}>No pain points identified</Text>
-          )}
-        </Card>
 
-        {/* Recent News */}
-        <Card className={styles.section}>
-          <div className={styles.sectionTitle}>
-            <NewsRegular className={styles.sectionIcon} />
-            Recent News & Developments
+          {/* Recent News */}
+          <div className={styles.profileCard}>
+            <div className={styles.cardHeader}>
+              <NewsRegular className={styles.cardHeaderIcon} />
+              Recent News
+            </div>
+            {profile.recentNews.length > 0 ? (
+              <ul className={styles.bulletList}>
+                {profile.recentNews.map((n, i) => (
+                  <li key={i} className={styles.bulletItem}>
+                    <span className={styles.bullet} />
+                    {n}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <span className={styles.cardText}>No recent news found</span>
+            )}
           </div>
-          {profile.recentNews.length > 0 ? (
-            <ul className={styles.list}>
-              {profile.recentNews.map((news, index) => (
-                <li key={index} className={styles.listItem}>
-                  <Text className={styles.content}>{news}</Text>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <Text className={styles.content}>No recent news found</Text>
-          )}
-        </Card>
 
-        {/* Competitor Context */}
-        <Card className={styles.section}>
-          <div className={styles.sectionTitle}>
-            <PeopleTeamRegular className={styles.sectionIcon} />
-            Competitive Landscape
+          {/* Competitive Landscape */}
+          <div className={styles.profileCard}>
+            <div className={styles.cardHeader}>
+              <PeopleTeamRegular className={styles.cardHeaderIcon} />
+              Competitive Landscape
+            </div>
+            <span className={styles.cardText}>{profile.competitorContext || 'No competitor information available'}</span>
           </div>
-          <Text className={styles.content}>{profile.competitorContext || 'No competitor information available'}</Text>
-        </Card>
 
-        {/* Previous Engagements */}
-        <Card className={styles.section}>
-          <div className={styles.sectionTitle}>
-            <HistoryRegular className={styles.sectionIcon} />
-            Previous Engagements
-          </div>
-          {profile.previousEngagements.length > 0 ? (
-            profile.previousEngagements.map((engagement: EngagementSummary) => (
-              <div key={engagement.id} className={styles.engagementItem}>
-                <div className={styles.engagementInfo}>
-                  <Text weight="medium">{engagement.serviceName}</Text>
-                  <Text className={styles.engagementValue}>
-                    {format(new Date(engagement.date), 'MMM d, yyyy')} • R{engagement.value.toLocaleString()}
-                  </Text>
-                </div>
-                <Badge appearance="filled" color={OUTCOME_COLORS[engagement.outcome]}>
-                  {engagement.outcome}
-                </Badge>
+          {/* Previous Engagements */}
+          {profile.previousEngagements.length > 0 && (
+            <div className={styles.profileCard}>
+              <div className={styles.cardHeader}>
+                <HistoryRegular className={styles.cardHeaderIcon} />
+                Previous Engagements
               </div>
-            ))
-          ) : (
-            <Text className={styles.content}>No previous engagements on record</Text>
+              {profile.previousEngagements.map((eng: EngagementSummary) => (
+                <div key={eng.id} className={styles.engagementRow}>
+                  <div className={styles.engagementInfo}>
+                    <Text weight="medium" size={200}>{eng.serviceName}</Text>
+                    <span className={styles.engagementMeta}>
+                      {format(new Date(eng.date), 'MMM d, yyyy')} &middot; R{eng.value.toLocaleString()}
+                    </span>
+                  </div>
+                  <Badge appearance="filled" color={OUTCOME_COLORS[eng.outcome]}>{eng.outcome}</Badge>
+                </div>
+              ))}
+            </div>
           )}
-        </Card>
+        </div>
       </div>
-    </div>
+    </DetailSection>
   );
 };
