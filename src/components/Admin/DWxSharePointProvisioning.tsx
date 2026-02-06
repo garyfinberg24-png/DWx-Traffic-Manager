@@ -36,6 +36,7 @@ import {
   Sparkle24Regular,
   Home24Regular,
   BookOpen24Regular,
+  DocumentText24Regular,
 } from '@fluentui/react-icons';
 import { dwxSharePointProvisioningService } from '../../services/DWxSharePointProvisioningService';
 
@@ -225,6 +226,10 @@ const LIST_INFO: Record<string, { description: string; icon: React.ReactElement 
     description: 'FAQ, Glossary, and Articles for Account Managers',
     icon: <BookOpen24Regular />,
   },
+  DWxProposals: {
+    description: 'Proposal management with AI content, internal approval, and client distribution',
+    icon: <DocumentText24Regular />,
+  },
   DWxSupportingDocuments: {
     description: 'Document library for RFPs, requirements, and proposals',
     icon: <FolderOpen24Regular />,
@@ -255,6 +260,7 @@ export const DWxSharePointProvisioning: React.FC = () => {
   const [sessionPrepCount, setSessionPrepCount] = useState<number>(0);
   const [landingPageContentCount, setLandingPageContentCount] = useState<number>(0);
   const [knowledgeBaseCount, setKnowledgeBaseCount] = useState<number>(0);
+  const [proposalsCount, setProposalsCount] = useState<number>(0);
 
   const checkListStatus = async () => {
     setIsChecking(true);
@@ -280,6 +286,7 @@ export const DWxSharePointProvisioning: React.FC = () => {
         { listName: 'DWxSessionPrep', setter: setSessionPrepCount },
         { listName: 'DWxLandingPageContent', setter: setLandingPageContentCount },
         { listName: 'DWxKnowledgeBase', setter: setKnowledgeBaseCount },
+        { listName: 'DWxProposals', setter: setProposalsCount },
       ];
 
       await Promise.all(
@@ -554,7 +561,8 @@ export const DWxSharePointProvisioning: React.FC = () => {
   };
 
   const allLists = [...listStatuses, docLibraryStatus].filter(Boolean) as ListStatus[];
-  const allListsExist = allLists.length === 11 && allLists.every((s) => s.exists);
+  const expectedListCount = Object.keys(LIST_INFO).length;
+  const allListsExist = allLists.length === expectedListCount && allLists.every((s) => s.exists);
   const missingLists = allLists.filter((s) => !s.exists);
   const servicesExists = getStatusForList('DWxServices');
   const teamMembersExists = getStatusForList('DWxTeamMembers');
@@ -569,7 +577,7 @@ export const DWxSharePointProvisioning: React.FC = () => {
 
   const totalSeedItems = servicesCount + teamMembersCount + clientsCount + accountManagersCount +
     specialistsCount + managersCount + serviceRequestsCount + productRequestsCount + sessionPrepCount +
-    landingPageContentCount + knowledgeBaseCount;
+    landingPageContentCount + knowledgeBaseCount + proposalsCount;
 
   return (
     <div className={styles.container}>
@@ -597,7 +605,7 @@ export const DWxSharePointProvisioning: React.FC = () => {
       {/* Stats */}
       <div className={styles.statsContainer}>
         <div className={styles.statCard}>
-          <Text className={styles.statValue}>{allLists.filter(l => l.exists).length}/11</Text>
+          <Text className={styles.statValue}>{allLists.filter(l => l.exists).length}/{expectedListCount}</Text>
           <Text className={styles.statLabel}>Lists Ready</Text>
         </div>
         <div className={styles.statCard}>
@@ -635,6 +643,10 @@ export const DWxSharePointProvisioning: React.FC = () => {
         <div className={styles.statCard}>
           <Text className={styles.statValue}>{knowledgeBaseCount}</Text>
           <Text className={styles.statLabel}>KB Entries</Text>
+        </div>
+        <div className={styles.statCard}>
+          <Text className={styles.statValue}>{proposalsCount}</Text>
+          <Text className={styles.statLabel}>Proposals</Text>
         </div>
       </div>
 
