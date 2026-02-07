@@ -14,6 +14,7 @@ import {
   Button,
 } from '@fluentui/react-components';
 import { Dismiss24Regular, EditRegular, SaveRegular } from '@fluentui/react-icons';
+import { DW_COLORS } from '../../utils/buttonStyles';
 
 // ============================================================================
 // Styles
@@ -26,6 +27,7 @@ const useStyles = makeStyles({
     maxHeight: '92vh',
     padding: '0',
     borderRadius: '12px',
+    border: 'none',
     boxShadow: '0 8px 40px rgba(0,0,0,0.25)',
     overflow: 'hidden',
   },
@@ -42,7 +44,7 @@ const useStyles = makeStyles({
     display: 'flex',
     alignItems: 'center',
     gap: '16px',
-    backgroundColor: '#1a5a8a',
+    backgroundColor: DW_COLORS.primary,
     color: 'white',
     flexShrink: 0,
   },
@@ -59,6 +61,8 @@ const useStyles = makeStyles({
   headerContent: {
     flex: 1,
     minWidth: 0,
+    display: 'flex',
+    flexDirection: 'column',
   },
   headerTitle: {
     fontSize: '18px',
@@ -69,9 +73,10 @@ const useStyles = makeStyles({
     textOverflow: 'ellipsis',
   },
   headerSubtitle: {
-    fontSize: '13px',
+    fontSize: '14px',
     color: 'rgba(255, 255, 255, 0.75)',
-    marginTop: '2px',
+    marginTop: '6px',
+    display: 'block',
   },
   headerRight: {
     display: 'flex',
@@ -82,13 +87,15 @@ const useStyles = makeStyles({
   statusBadge: {
     display: 'inline-flex',
     alignItems: 'center',
-    gap: '6px',
-    padding: '6px 14px',
-    borderRadius: '6px',
+    padding: '4px 12px',
+    borderRadius: '16px',
     fontSize: '12px',
     fontWeight: '600',
     backgroundColor: 'rgba(255, 255, 255, 0.2)',
     color: 'white',
+    border: '1px solid rgba(255, 255, 255, 0.3)',
+    backdropFilter: 'blur(4px)',
+    letterSpacing: '0.3px',
   },
   closeBtn: {
     minWidth: '36px',
@@ -144,11 +151,11 @@ const useStyles = makeStyles({
     position: 'relative',
   },
   progressDotCompleted: {
-    backgroundColor: '#107c10',
+    backgroundColor: DW_COLORS.success,
     color: 'white',
   },
   progressDotCurrent: {
-    backgroundColor: '#1a5a8a',
+    backgroundColor: DW_COLORS.primary,
     color: 'white',
     boxShadow: '0 0 0 3px rgba(26,90,138,0.25)',
   },
@@ -162,7 +169,7 @@ const useStyles = makeStyles({
     margin: '0 4px',
   },
   progressLineCompleted: {
-    backgroundColor: '#107c10',
+    backgroundColor: DW_COLORS.success,
   },
   progressLineFuture: {
     backgroundColor: '#e0e0e0',
@@ -344,7 +351,7 @@ const useSectionStyles = makeStyles({
     marginTop: '8px',
   },
   saveButton: {
-    backgroundColor: '#107c10',
+    backgroundColor: DW_COLORS.success,
     ':hover': {
       backgroundColor: '#0b5a0b',
     },
@@ -589,6 +596,7 @@ interface DetailModalShellProps {
   children: ReactNode;
   footerLeft?: ReactNode;
   footerRight?: ReactNode;
+  maxWidth?: string;
 }
 
 export const DetailModalShell: React.FC<DetailModalShellProps> = ({
@@ -605,12 +613,13 @@ export const DetailModalShell: React.FC<DetailModalShellProps> = ({
   children,
   footerLeft,
   footerRight,
+  maxWidth,
 }) => {
   const styles = useStyles();
 
   return (
     <Dialog open={isOpen} onOpenChange={(_, data) => !data.open && onClose()}>
-      <DialogSurface className={styles.dialogSurface}>
+      <DialogSurface className={styles.dialogSurface} style={maxWidth ? { maxWidth } : undefined}>
         <DialogBody className={styles.dialogBody} style={{ padding: 0 }}>
           {/* Header */}
           <div className={styles.header}>
@@ -653,7 +662,7 @@ export const DetailModalShell: React.FC<DetailModalShellProps> = ({
           <div className={styles.footer}>
             <span className={styles.footerMeta}>{footerLeft}</span>
             <div>{footerRight || (
-              <Button appearance="primary" onClick={onClose} style={{ backgroundColor: '#1a5a8a' }}>
+              <Button appearance="primary" onClick={onClose} style={{ backgroundColor: DW_COLORS.primary }}>
                 Done
               </Button>
             )}</div>

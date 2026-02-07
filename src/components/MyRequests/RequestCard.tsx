@@ -30,6 +30,7 @@ import { Tooltip } from '@fluentui/react-components';
 import { ServiceRequest, FunnelStage, InterestLevel, STAGE_TRANSITIONS } from '../../types/ServiceRequest';
 import { followUpService } from '../../services/FollowUpService';
 import { StageProgressBar } from './StageProgressBar';
+import { DW_COLORS } from '../../utils/buttonStyles';
 import { format } from 'date-fns';
 
 const useStyles = makeStyles({
@@ -40,7 +41,7 @@ const useStyles = makeStyles({
     overflow: 'hidden',
     cursor: 'pointer',
     transition: 'all 0.2s ease',
-    borderLeft: '4px solid #1e6b7b',
+    borderLeft: `4px solid ${DW_COLORS.teal}`,
     ':hover': {
       boxShadow: '0 3.2px 7.2px 0 rgba(0,0,0,.13), 0 0.6px 1.8px 0 rgba(0,0,0,.11)',
       transform: 'translateY(-2px)',
@@ -117,7 +118,7 @@ const useStyles = makeStyles({
     borderRadius: '4px',
     fontSize: '11px',
     fontWeight: '500',
-    color: '#1e6b7b',
+    color: DW_COLORS.teal,
   },
   unassignedBadge: {
     display: 'inline-flex',
@@ -199,13 +200,13 @@ const useStyles = makeStyles({
   viewDetailsBtn: {
     padding: '4px 12px',
     backgroundColor: 'transparent',
-    border: '1px solid #1e6b7b',
-    color: '#1e6b7b',
+    border: `1px solid ${DW_COLORS.teal}`,
+    color: DW_COLORS.teal,
     fontSize: '12px',
     fontWeight: '500',
     borderRadius: '4px',
     ':hover': {
-      backgroundColor: '#1e6b7b',
+      backgroundColor: DW_COLORS.teal,
       color: 'white',
     },
   },

@@ -13,7 +13,6 @@ import {
   Option,
   makeStyles,
   tokens,
-  Badge,
 } from '@fluentui/react-components';
 import {
   DocumentBulletList24Regular,
@@ -25,6 +24,8 @@ import {
   ArrowDownload24Regular,
 } from '@fluentui/react-icons';
 import { generateProposalPdf } from '../../utils/proposalPdfGenerator';
+import { generateProposalWord } from '../../utils/proposalWordGenerator';
+import { DW_COLORS } from '../../utils/buttonStyles';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
 import { proposalService } from '../../services/ProposalService';
@@ -168,19 +169,6 @@ function buildSteps(currentStatus: ProposalStatus): StepperStep[] {
       : i === effectiveIdx ? 'current' as const
       : 'future' as const,
   }));
-}
-
-function getStatusColor(status: ProposalStatus): string {
-  switch (status) {
-    case 'Draft': return 'informative';
-    case 'Internal Review': return 'warning';
-    case 'Revision Requested': return 'warning';
-    case 'Approved': return 'success';
-    case 'Sent to Client': return 'brand';
-    case 'Accepted': return 'success';
-    case 'Declined': return 'danger';
-    default: return 'informative';
-  }
 }
 
 // ============================================================================
@@ -489,13 +477,33 @@ export const ProposalBuilder: React.FC<ProposalBuilderProps> = ({
           </Button>
         )}
 
+        {/* Word Download button (same visibility as PDF) */}
+        {['Approved', 'Sent to Client', 'Accepted', 'Declined'].includes(status) && (
+          <Button
+            appearance="outline"
+            icon={<ArrowDownload24Regular />}
+            onClick={() => {
+              generateProposalWord({
+                proposal,
+                clientName: serviceRequest.ClientName,
+                serviceName: serviceRequest.ServiceName,
+                accountManagerName: serviceRequest.AccountManagerName || '',
+                proposalType: proposal.ProposalType || 'Standard',
+              });
+            }}
+          >
+            Download Word
+          </Button>
+        )}
+
         {/* AI Generate button (only in editable states) */}
         {isEditable && isAIConfigured() && (
           <Button
-            appearance="subtle"
+            appearance="primary"
             icon={<Sparkle24Regular />}
             onClick={handleGenerateAI}
             disabled={generating || saving}
+            style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)' }}
           >
             {generating ? 'Generating...' : 'Generate AI Content'}
           </Button>
@@ -508,7 +516,7 @@ export const ProposalBuilder: React.FC<ProposalBuilderProps> = ({
             icon={<Send24Regular />}
             onClick={handleSubmitForReview}
             disabled={saving}
-            style={{ backgroundColor: '#1a5a8a' }}
+            style={{ backgroundColor: DW_COLORS.primary }}
           >
             Submit for Review
           </Button>
@@ -529,7 +537,7 @@ export const ProposalBuilder: React.FC<ProposalBuilderProps> = ({
               icon={<Checkmark24Regular />}
               onClick={handleApprove}
               disabled={saving}
-              style={{ backgroundColor: '#107c10' }}
+              style={{ backgroundColor: DW_COLORS.success }}
             >
               Approve
             </Button>
@@ -542,7 +550,7 @@ export const ProposalBuilder: React.FC<ProposalBuilderProps> = ({
             icon={<Send24Regular />}
             onClick={handleSendToClient}
             disabled={saving}
-            style={{ backgroundColor: '#1a5a8a' }}
+            style={{ backgroundColor: DW_COLORS.primary }}
           >
             Send to AM
           </Button>
@@ -563,7 +571,7 @@ export const ProposalBuilder: React.FC<ProposalBuilderProps> = ({
               icon={<Checkmark24Regular />}
               onClick={handleMarkAccepted}
               disabled={saving}
-              style={{ backgroundColor: '#107c10' }}
+              style={{ backgroundColor: DW_COLORS.success }}
             >
               Accepted
             </Button>
@@ -571,7 +579,7 @@ export const ProposalBuilder: React.FC<ProposalBuilderProps> = ({
         )}
 
         {isTerminal && (
-          <Button appearance="primary" onClick={onClose} style={{ backgroundColor: '#1a5a8a' }}>
+          <Button appearance="primary" onClick={onClose} style={{ backgroundColor: DW_COLORS.primary }}>
             Done
           </Button>
         )}
@@ -598,7 +606,6 @@ export const ProposalBuilder: React.FC<ProposalBuilderProps> = ({
             onOptionSelect={(_, data) => {
               if (data.optionValue) handleTemplateChange(data.optionValue);
             }}
-            size="small"
           >
             {PROPOSAL_TEMPLATES.map((t) => (
               <Option key={t.id} value={t.name} text={t.name}>
@@ -737,6 +744,7 @@ export const ProposalBuilder: React.FC<ProposalBuilderProps> = ({
         tabs={TABS}
         activeTab={activeTab}
         onTabChange={(tab) => setActiveTab(tab as TabValue)}
+        maxWidth="1200px"
       >
         <div className={styles.loadingContainer}>
           <Spinner size="large" label="Loading proposal..." />
@@ -752,23 +760,14 @@ export const ProposalBuilder: React.FC<ProposalBuilderProps> = ({
       icon={<DocumentBulletList24Regular />}
       title={`Proposal — ${serviceRequest.ClientName}`}
       subtitle={subtitle}
-      statusBadge={
-        proposal ? (
-          <Badge
-            appearance="tint"
-            color={getStatusColor(proposal.Status) as 'informative' | 'warning' | 'success' | 'danger' | 'brand'}
-            size="medium"
-          >
-            {proposal.Status}
-          </Badge>
-        ) : 'New'
-      }
+      statusBadge={proposal ? proposal.Status : 'New'}
       steps={proposal ? buildSteps(proposal.Status) : undefined}
       tabs={TABS}
       activeTab={activeTab}
       onTabChange={(tab) => setActiveTab(tab as TabValue)}
       footerLeft={footerLeft}
       footerRight={footerRight}
+      maxWidth="1200px"
     >
       {renderTabContent()}
     </DetailModalShell>
