@@ -25,19 +25,19 @@ import { DW_COLORS } from '../../utils/buttonStyles';
 
 const useStyles = makeStyles({
   container: {
-    backgroundColor: '#fafafa',
-    borderRadius: '8px',
-    border: '1px solid #e1e1e1',
+    backgroundColor: '#f9fafb',
+    borderRadius: '10px',
+    border: '1px solid #e5e7eb',
     overflow: 'hidden',
   },
   header: {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: '12px 16px',
+    padding: '10px 16px',
     cursor: 'pointer',
     ':hover': {
-      backgroundColor: '#f0f0f0',
+      backgroundColor: '#f3f4f6',
     },
   },
   headerLeft: {
@@ -47,8 +47,8 @@ const useStyles = makeStyles({
   },
   headerTitle: {
     fontWeight: '600',
-    fontSize: '14px',
-    color: '#242424',
+    fontSize: '13px',
+    color: '#374151',
   },
   activeFiltersBadge: {
     backgroundColor: DW_COLORS.teal,
@@ -56,24 +56,28 @@ const useStyles = makeStyles({
   },
   content: {
     padding: '16px',
-    borderTop: '1px solid #e1e1e1',
+    borderTop: '1px solid #e5e7eb',
     display: 'flex',
     flexDirection: 'column',
-    gap: '16px',
+    gap: '14px',
   },
   filterRow: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
+    gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))',
     gap: '16px',
+    alignItems: 'end',
   },
   filterField: {
     display: 'flex',
     flexDirection: 'column',
     gap: '4px',
   },
+  dateRangeWrapper: {
+    gridColumn: 'span 2',
+  },
   dateRange: {
     display: 'flex',
-    gap: '8px',
+    gap: '10px',
     alignItems: 'center',
   },
   actions: {
@@ -81,14 +85,13 @@ const useStyles = makeStyles({
     justifyContent: 'flex-end',
     gap: '8px',
     paddingTop: '8px',
-    borderTop: '1px solid #e1e1e1',
+    borderTop: '1px solid #e5e7eb',
   },
   checkboxGroup: {
     display: 'flex',
-    flexWrap: 'wrap',
-    gap: '12px',
-    alignSelf: 'flex-end',
-    paddingBottom: '6px',
+    alignItems: 'center',
+    paddingBottom: '4px',
+    whiteSpace: 'nowrap',
   },
   clearButton: {
     color: '#d13438',
@@ -194,21 +197,23 @@ export const AdvancedFilterPanel: React.FC<AdvancedFilterPanelProps> = ({
       case 'daterange':
         const dateRange = (value as [string | null, string | null]) || [null, null];
         return (
-          <Field label={filter.label} key={filter.key}>
-            <div className={styles.dateRange}>
-              <Input
-                type="date"
-                value={dateRange[0] || ''}
-                onChange={(_, data) => onChange(filter.key, [data.value || null, dateRange[1]])}
-              />
-              <Text size={200}>to</Text>
-              <Input
-                type="date"
-                value={dateRange[1] || ''}
-                onChange={(_, data) => onChange(filter.key, [dateRange[0], data.value || null])}
-              />
-            </div>
-          </Field>
+          <div key={filter.key} className={styles.dateRangeWrapper}>
+            <Field label={filter.label}>
+              <div className={styles.dateRange}>
+                <Input
+                  type="date"
+                  value={dateRange[0] || ''}
+                  onChange={(_, data) => onChange(filter.key, [data.value || null, dateRange[1]])}
+                />
+                <Text size={200}>to</Text>
+                <Input
+                  type="date"
+                  value={dateRange[1] || ''}
+                  onChange={(_, data) => onChange(filter.key, [dateRange[0], data.value || null])}
+                />
+              </div>
+            </Field>
+          </div>
         );
 
       case 'number':

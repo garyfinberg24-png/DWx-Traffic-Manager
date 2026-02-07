@@ -33,6 +33,10 @@ import {
   ArrowDownloadRegular,
   SaveRegular,
   DocumentMultiple24Regular,
+  DocumentBulletListRegular,
+  MoneyRegular,
+  FlashRegular,
+  ArrowTrendingRegular,
 } from '@fluentui/react-icons';
 import { DW_COLORS } from '../../utils/buttonStyles';
 import { slaService } from '../../services/SLAService';
@@ -186,58 +190,82 @@ const useStyles = makeStyles({
   filterSection: {
     display: 'flex',
     flexDirection: 'column',
-    gap: '12px',
+    gap: '10px',
   },
   stageFilters: {
     display: 'flex',
     flexWrap: 'wrap',
-    gap: '8px',
+    gap: '6px',
+    backgroundColor: '#f8f9fa',
+    ...shorthands.padding('6px'),
+    borderRadius: '10px',
   },
   stageChip: {
-    padding: '6px 12px',
-    borderRadius: '16px',
+    ...shorthands.padding('6px', '0'),
+    borderRadius: '8px',
     fontSize: '13px',
     fontWeight: '500',
     cursor: 'pointer',
-    transition: 'all 0.2s ease',
-    border: '1px solid #d0d0d0',
-    backgroundColor: 'white',
+    transition: 'all 0.15s ease',
+    border: '1px solid #e5e7eb',
+    backgroundColor: 'transparent',
     display: 'flex',
     alignItems: 'center',
+    justifyContent: 'center',
     gap: '6px',
+    color: '#4b5563',
+    minWidth: '120px',
+    ':hover': {
+      backgroundColor: 'rgba(0,0,0,0.03)',
+    },
   },
   stageChipActive: {
-    backgroundColor: DW_COLORS.teal,
-    color: 'white',
-    ...shorthands.borderColor('#1e6b7b'),
+    backgroundColor: 'white',
+    color: '#111827',
+    fontWeight: '600',
+    boxShadow: '0 1px 3px rgba(0,0,0,0.08)',
+    border: '1px solid #d1d5db',
+  },
+  stageDot: {
+    width: '8px',
+    height: '8px',
+    borderRadius: '50%',
+    flexShrink: 0,
   },
   stageCount: {
     fontSize: '11px',
-    padding: '2px 6px',
+    ...shorthands.padding('1px', '6px'),
     borderRadius: '10px',
-    backgroundColor: 'rgba(0,0,0,0.1)',
+    backgroundColor: 'rgba(0,0,0,0.06)',
+    fontWeight: '600',
+    color: '#6b7280',
+  },
+  stageCountActive: {
+    backgroundColor: '#e0f2fe',
+    color: '#0369a1',
   },
   toolbar: {
     display: 'flex',
-    gap: '12px',
+    gap: '10px',
     flexWrap: 'wrap',
     alignItems: 'center',
   },
   searchBox: {
-    minWidth: '280px',
-    flex: '1 1 280px',
-    maxWidth: '400px',
+    minWidth: '260px',
+    flex: '1 1 260px',
+    maxWidth: '380px',
   },
   dropdownFilter: {
     minWidth: '150px',
   },
   resultsInfo: {
     marginLeft: 'auto',
-    fontSize: '13px',
-    color: '#616161',
+    fontSize: '12px',
+    color: '#9ca3af',
+    fontWeight: '500',
     display: 'flex',
     alignItems: 'center',
-    gap: '6px',
+    gap: '8px',
   },
   grid: {
     display: 'grid',
@@ -257,61 +285,99 @@ const useStyles = makeStyles({
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
-    padding: '60px 20px',
+    ...shorthands.padding('48px', '24px'),
     textAlign: 'center',
-    backgroundColor: '#fafafa',
+    backgroundColor: '#fafbfc',
     borderRadius: '12px',
-    border: '1px dashed #d0d0d0',
+    border: '1px dashed #d1d5db',
+  },
+  emptyIconWrapper: {
+    width: '64px',
+    height: '64px',
+    borderRadius: '16px',
+    backgroundColor: '#f0f9ff',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: '16px',
   },
   emptyIcon: {
-    width: '48px',
-    height: '48px',
-    color: '#8a8886',
-    marginBottom: '12px',
+    width: '32px',
+    height: '32px',
+    color: '#0284c7',
   },
   emptyTitle: {
-    fontSize: '18px',
+    fontSize: '16px',
     fontWeight: '600',
-    color: '#242424',
-    marginBottom: '8px',
+    color: '#111827',
+    marginBottom: '6px',
   },
   emptyText: {
-    fontSize: '14px',
-    color: '#616161',
-    maxWidth: '400px',
+    fontSize: '13px',
+    color: '#6b7280',
+    maxWidth: '360px',
+    lineHeight: '1.5',
     marginBottom: '16px',
   },
   statsRow: {
     display: 'flex',
-    gap: '16px',
+    gap: '12px',
     flexWrap: 'wrap',
   },
   statCard: {
-    padding: '16px 20px',
+    flex: '1 1 0',
+    minWidth: '180px',
     backgroundColor: '#ffffff',
-    borderRadius: '8px',
-    boxShadow: '0 1px 2px rgba(0,0,0,0.08)',
-    border: '1px solid #e1e1e1',
+    borderRadius: '10px',
+    boxShadow: '0 1px 3px rgba(0,0,0,0.06)',
+    border: '1px solid #e8eaed',
+    borderLeft: '4px solid transparent',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '14px',
+    ...shorthands.padding('14px', '16px'),
+    transition: 'box-shadow 0.2s ease',
+    ':hover': {
+      boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+    },
+  },
+  statIconBox: {
+    width: '40px',
+    height: '40px',
+    borderRadius: '10px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
+  },
+  statContent: {
     display: 'flex',
     flexDirection: 'column',
-    gap: '4px',
-    minWidth: '140px',
+    gap: '1px',
+    minWidth: 0,
   },
   statLabel: {
-    fontSize: '12px',
-    color: '#616161',
+    fontSize: '11px',
+    fontWeight: '500',
+    color: '#6b7280',
+    textTransform: 'uppercase' as const,
+    letterSpacing: '0.3px',
   },
   statValue: {
-    fontSize: '24px',
-    fontWeight: '600',
-    color: '#242424',
+    fontSize: '22px',
+    fontWeight: '700',
+    color: '#111827',
+    lineHeight: '1.1',
   },
   statSubtext: {
     fontSize: '11px',
     color: '#107c10',
+    fontWeight: '500',
   },
   tabList: {
-    marginBottom: '8px',
+    marginBottom: '4px',
+    borderBottom: '1px solid #e5e7eb',
+    ...shorthands.padding('0', '4px'),
   },
   productGrid: {
     display: 'grid',
@@ -319,19 +385,20 @@ const useStyles = makeStyles({
     gap: '16px',
   },
   productCard: {
-    padding: '20px',
+    ...shorthands.padding('18px'),
     backgroundColor: '#ffffff',
-    borderRadius: '8px',
-    boxShadow: '0 1px 2px rgba(0,0,0,0.08)',
-    border: '1px solid #e1e1e1',
+    borderRadius: '10px',
+    boxShadow: '0 1px 3px rgba(0,0,0,0.06)',
+    border: '1px solid #e5e7eb',
     display: 'flex',
     flexDirection: 'column',
-    gap: '12px',
+    gap: '10px',
     cursor: 'pointer',
-    transition: 'box-shadow 0.2s ease, border-color 0.2s ease',
+    transition: 'all 0.2s ease',
     ':hover': {
-      boxShadow: '0 4px 12px rgba(0,0,0,0.12)',
-      ...shorthands.borderColor('#1e6b7b'),
+      boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+      transform: 'translateY(-2px)',
+      border: '1px solid #d1d5db',
     },
   },
   productCardHeader: {
@@ -355,51 +422,53 @@ const useStyles = makeStyles({
   },
   viewToggleGroup: {
     display: 'flex',
-    gap: '2px',
-    backgroundColor: '#f0f0f0',
-    borderRadius: '6px',
-    padding: '2px',
+    gap: '1px',
+    backgroundColor: '#f3f4f6',
+    borderRadius: '8px',
+    ...shorthands.padding('3px'),
   },
   viewToggleBtn: {
-    border: 'none',
+    ...shorthands.border('none'),
     backgroundColor: 'transparent',
-    padding: '4px 8px',
-    borderRadius: '4px',
+    ...shorthands.padding('5px', '10px'),
+    borderRadius: '6px',
     cursor: 'pointer',
     display: 'flex',
     alignItems: 'center',
-    color: '#616161',
+    color: '#9ca3af',
     transition: 'all 0.15s ease',
   },
   viewToggleBtnActive: {
     backgroundColor: 'white',
     color: DW_COLORS.teal,
-    boxShadow: '0 1px 2px rgba(0,0,0,0.1)',
+    boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
   },
   listTable: {
     width: '100%',
     borderCollapse: 'collapse',
     backgroundColor: '#ffffff',
-    borderRadius: '8px',
-    overflow: 'hidden',
-    boxShadow: '0 1px 2px rgba(0,0,0,0.08)',
-    border: '1px solid #e1e1e1',
+    borderRadius: '10px',
+    ...shorthands.overflow('hidden'),
+    boxShadow: '0 1px 3px rgba(0,0,0,0.06)',
+    border: '1px solid #e5e7eb',
   },
   listTh: {
-    padding: '10px 14px',
+    ...shorthands.padding('10px', '14px'),
     textAlign: 'left',
-    fontSize: '12px',
+    fontSize: '11px',
     fontWeight: '600',
-    color: '#616161',
-    backgroundColor: '#fafafa',
-    borderBottom: '1px solid #e1e1e1',
+    color: '#6b7280',
+    backgroundColor: '#f9fafb',
+    borderBottom: '1px solid #e5e7eb',
     whiteSpace: 'nowrap',
+    textTransform: 'uppercase' as const,
+    letterSpacing: '0.3px',
   },
   listTd: {
-    padding: '10px 14px',
+    ...shorthands.padding('10px', '14px'),
     fontSize: '13px',
-    color: '#242424',
-    borderBottom: '1px solid #f0f0f0',
+    color: '#374151',
+    borderBottom: '1px solid #f3f4f6',
   },
   listRow: {
     cursor: 'pointer',
@@ -480,11 +549,7 @@ const ADVANCED_FILTER_CONFIG: FilterConfig[] = [
 
 type AdvancedFilterValues = Record<string, string | number | boolean | string[] | [string | null, string | null] | null>;
 
-interface MyRequestsProps {
-  onNewRequest?: () => void;
-}
-
-export const MyRequests: React.FC<MyRequestsProps> = ({ onNewRequest }) => {
+export const MyRequests: React.FC = () => {
   const styles = useStyles();
   const { isCollapsed, toggle } = useHeroCollapse('my-requests');
   const navigate = useNavigate();
@@ -977,11 +1042,22 @@ export const MyRequests: React.FC<MyRequestsProps> = ({ onNewRequest }) => {
             </>
           ) : (
             <div className={styles.emptyState}>
-              <Apps24Regular className={styles.emptyIcon} />
+              <div className={styles.emptyIconWrapper}>
+                <Apps24Regular className={styles.emptyIcon} />
+              </div>
               <Text className={styles.emptyTitle}>No product requests yet</Text>
               <Text className={styles.emptyText}>
-                Browse the product catalog to request demos or trial deployments
+                Browse the product catalog to request demos or trial deployments for your clients.
               </Text>
+              <Button
+                appearance="primary"
+                icon={<Apps24Regular />}
+                onClick={() => navigate('/products')}
+                size="medium"
+                style={{ backgroundColor: DW_COLORS.teal }}
+              >
+                Browse Products
+              </Button>
             </div>
           )}
         </>
@@ -991,53 +1067,83 @@ export const MyRequests: React.FC<MyRequestsProps> = ({ onNewRequest }) => {
       {activeTab === 'service' && <>
       {/* Summary Stats */}
       <div className={styles.statsRow}>
-        <div className={styles.statCard}>
-          <Text className={styles.statLabel}>Open Requests</Text>
-          <Text className={styles.statValue}>{stats.open}</Text>
+        <div className={styles.statCard} style={{ borderLeftColor: '#2563eb' }}>
+          <div className={styles.statIconBox} style={{ backgroundColor: '#eff6ff' }}>
+            <DocumentBulletListRegular style={{ width: '20px', height: '20px', color: '#2563eb' }} />
+          </div>
+          <div className={styles.statContent}>
+            <Text className={styles.statLabel}>Open Requests</Text>
+            <Text className={styles.statValue}>{stats.open}</Text>
+          </div>
         </div>
-        <div className={styles.statCard}>
-          <Text className={styles.statLabel}>Pipeline Value</Text>
-          <Text className={styles.statValue}>{formatCurrency(stats.totalValue)}</Text>
-          <Text className={styles.statSubtext}>
-            Weighted: {formatCurrency(stats.weightedValue)}
-          </Text>
+        <div className={styles.statCard} style={{ borderLeftColor: '#16a34a' }}>
+          <div className={styles.statIconBox} style={{ backgroundColor: '#f0fdf4' }}>
+            <MoneyRegular style={{ width: '20px', height: '20px', color: '#16a34a' }} />
+          </div>
+          <div className={styles.statContent}>
+            <Text className={styles.statLabel}>Pipeline Value</Text>
+            <Text className={styles.statValue}>{formatCurrency(stats.totalValue)}</Text>
+            <Text className={styles.statSubtext}>
+              Weighted: {formatCurrency(stats.weightedValue)}
+            </Text>
+          </div>
         </div>
-        <div className={styles.statCard}>
-          <Text className={styles.statLabel}>Hot Leads</Text>
-          <Text className={styles.statValue} style={{ color: '#d13438' }}>
-            {stats.hotLeads}
-          </Text>
+        <div className={styles.statCard} style={{ borderLeftColor: '#dc2626' }}>
+          <div className={styles.statIconBox} style={{ backgroundColor: '#fef2f2' }}>
+            <FlashRegular style={{ width: '20px', height: '20px', color: '#dc2626' }} />
+          </div>
+          <div className={styles.statContent}>
+            <Text className={styles.statLabel}>Hot Leads</Text>
+            <Text className={styles.statValue} style={{ color: '#dc2626' }}>
+              {stats.hotLeads}
+            </Text>
+          </div>
+        </div>
+        <div className={styles.statCard} style={{ borderLeftColor: '#7c3aed' }}>
+          <div className={styles.statIconBox} style={{ backgroundColor: '#faf5ff' }}>
+            <ArrowTrendingRegular style={{ width: '20px', height: '20px', color: '#7c3aed' }} />
+          </div>
+          <div className={styles.statContent}>
+            <Text className={styles.statLabel}>Win Rate</Text>
+            <Text className={styles.statValue} style={{ color: '#7c3aed' }}>
+              {heroStats.winRate}%
+            </Text>
+          </div>
         </div>
       </div>
 
       {/* Stage Filters */}
       <div className={styles.filterSection}>
         <div className={styles.stageFilters} role="group" aria-label="Filter by stage">
-          {STAGE_OPTIONS.map((stage) => (
-            <span
-              key={stage}
-              className={`${styles.stageChip} ${selectedStage === stage ? styles.stageChipActive : ''}`}
-              onClick={() => setSelectedStage(stage)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.preventDefault();
-                  setSelectedStage(stage);
-                }
-              }}
-              style={
-                stage !== 'All' && selectedStage !== stage
-                  ? { borderColor: STAGE_METADATA[stage as FunnelStage]?.color }
-                  : {}
-              }
-              role="button"
-              tabIndex={0}
-              aria-pressed={selectedStage === stage}
-              aria-label={`${stage}: ${stageCounts[stage] || 0} requests`}
-            >
-              {stage}
-              <span className={styles.stageCount} aria-hidden="true">{stageCounts[stage] || 0}</span>
-            </span>
-          ))}
+          {STAGE_OPTIONS.map((stage) => {
+            const isActive = selectedStage === stage;
+            const stageColor = stage !== 'All' ? STAGE_METADATA[stage as FunnelStage]?.color : undefined;
+            return (
+              <span
+                key={stage}
+                className={`${styles.stageChip} ${isActive ? styles.stageChipActive : ''}`}
+                onClick={() => setSelectedStage(stage)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    setSelectedStage(stage);
+                  }
+                }}
+                role="button"
+                tabIndex={0}
+                aria-pressed={isActive}
+                aria-label={`${stage}: ${stageCounts[stage] || 0} requests`}
+              >
+                {stageColor && (
+                  <span className={styles.stageDot} style={{ backgroundColor: stageColor }} />
+                )}
+                {stage}
+                <span className={`${styles.stageCount} ${isActive ? styles.stageCountActive : ''}`} aria-hidden="true">
+                  {stageCounts[stage] || 0}
+                </span>
+              </span>
+            );
+          })}
         </div>
       </div>
 
@@ -1220,21 +1326,28 @@ export const MyRequests: React.FC<MyRequestsProps> = ({ onNewRequest }) => {
         </>
       ) : (
         <div className={styles.emptyState}>
-          <FilterRegular className={styles.emptyIcon} />
+          <div className={styles.emptyIconWrapper}>
+            {requests.length === 0 ? (
+              <DocumentMultiple24Regular className={styles.emptyIcon} />
+            ) : (
+              <FilterRegular className={styles.emptyIcon} />
+            )}
+          </div>
           <Text className={styles.emptyTitle}>
             {requests.length === 0 ? 'No service requests yet' : 'No matching requests'}
           </Text>
           <Text className={styles.emptyText}>
             {requests.length === 0
-              ? 'Create your first service request to start tracking opportunities'
-              : 'Try adjusting your filters or search criteria'}
+              ? 'Create your first service request to start tracking opportunities in your pipeline.'
+              : 'Try adjusting your filters or search criteria to find what you\'re looking for.'}
           </Text>
-          {requests.length === 0 && onNewRequest && (
+          {requests.length === 0 && (
             <Button
               className={styles.newRequestBtn}
               appearance="primary"
               icon={<AddRegular />}
-              onClick={onNewRequest}
+              onClick={() => navigate('/request')}
+              size="medium"
             >
               Create First Request
             </Button>
