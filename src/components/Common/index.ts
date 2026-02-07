@@ -9,3 +9,4 @@ export { RequestCardSkeleton, KPICardSkeleton, TableRowSkeleton } from './CardSk
 export { Pagination, usePagination } from './Pagination';
 export { AdvancedFilterPanel, useAdvancedFilters } from './AdvancedFilterPanel';
 export type { FilterConfig, FilterValue } from './AdvancedFilterPanel';
+export { AIChatPanel } from './AIChatPanel';

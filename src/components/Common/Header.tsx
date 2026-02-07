@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   makeStyles,
   Text,
@@ -10,6 +10,7 @@ import {
   MenuItem,
   Button,
   Divider,
+  Tooltip,
   shorthands,
 } from '@fluentui/react-components';
 import {
@@ -23,11 +24,15 @@ import {
   ArrowTrendingRegular,
   Apps24Regular,
   BookOpen24Regular,
+  ChatBubblesQuestion24Regular,
+  ChatBubblesQuestion24Filled,
 } from '@fluentui/react-icons';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { NotificationCenter } from './NotificationCenter';
 import { RecentActivity } from './RecentActivity';
+import { AIChatPanel } from './AIChatPanel';
+import { ChatContext } from '../../types/AIChat';
 
 const useStyles = makeStyles({
   header: {
@@ -92,6 +97,19 @@ const useStyles = makeStyles({
     color: 'rgba(255, 255, 255, 0.8)',
     fontSize: '13px',
   },
+  chatIconBtn: {
+    color: 'rgba(255, 255, 255, 0.75)',
+    minWidth: 'auto',
+    ...shorthands.padding('4px'),
+    ':hover': {
+      backgroundColor: 'rgba(255, 255, 255, 0.1)',
+      color: 'white',
+    },
+  },
+  chatIconActive: {
+    color: 'white',
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+  },
 });
 
 export const Header: React.FC = () => {
@@ -99,6 +117,7 @@ export const Header: React.FC = () => {
   const { user, logout, isManager } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const [isChatOpen, setIsChatOpen] = useState(false);
 
   const handleLogout = async () => {
     await logout();
@@ -106,6 +125,12 @@ export const Header: React.FC = () => {
   };
 
   const isActive = (path: string) => location.pathname === path;
+
+  const chatContext: ChatContext = {
+    currentPage: location.pathname,
+    userRole: isManager ? 'manager' : 'account_manager',
+    userName: user?.displayName || 'User',
+  };
 
   return (
     <header className={styles.header}>
@@ -191,6 +216,15 @@ export const Header: React.FC = () => {
           <>
             <NotificationCenter />
             <RecentActivity />
+            <Tooltip content="DWx Copilot" relationship="label">
+              <Button
+                appearance="subtle"
+                icon={isChatOpen ? <ChatBubblesQuestion24Filled /> : <ChatBubblesQuestion24Regular />}
+                className={`${styles.chatIconBtn} ${isChatOpen ? styles.chatIconActive : ''}`}
+                onClick={() => setIsChatOpen(prev => !prev)}
+                size="small"
+              />
+            </Tooltip>
             <Text className={styles.userName}>
               {user.displayName}
             </Text>
@@ -217,6 +251,13 @@ export const Header: React.FC = () => {
           </>
         )}
       </div>
+
+      {/* AI Chat Side Panel */}
+      <AIChatPanel
+        isOpen={isChatOpen}
+        onClose={() => setIsChatOpen(false)}
+        context={chatContext}
+      />
     </header>
   );
 };
