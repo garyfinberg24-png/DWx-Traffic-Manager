@@ -1754,13 +1754,15 @@ export const ServiceRequestForm: React.FC<ServiceRequestFormProps> = ({
                 Back
               </Button>
             )}
-            <Button
-              appearance="outline"
-              icon={<SaveRegular />}
-              onClick={saveDraft}
-            >
-              Save Draft
-            </Button>
+            {currentStep > 1 && (
+              <Button
+                appearance="outline"
+                icon={<SaveRegular />}
+                onClick={saveDraft}
+              >
+                Save Draft
+              </Button>
+            )}
           </div>
 
           <div style={{ display: 'flex', gap: '12px' }}>
