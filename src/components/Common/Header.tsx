@@ -97,18 +97,22 @@ const useStyles = makeStyles({
     color: 'rgba(255, 255, 255, 0.8)',
     fontSize: '13px',
   },
-  chatIconBtn: {
-    color: 'rgba(255, 255, 255, 0.75)',
-    minWidth: 'auto',
-    ...shorthands.padding('4px'),
-    ':hover': {
-      backgroundColor: 'rgba(255, 255, 255, 0.1)',
+  chatTrigger: {
+    position: 'relative',
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    cursor: 'pointer',
+    color: 'white',
+    '& svg': {
       color: 'white',
     },
-  },
-  chatIconActive: {
-    color: 'white',
-    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    ':hover': {
+      color: 'white',
+    },
+    ':hover svg': {
+      color: 'white',
+    },
   },
 });
 
@@ -217,13 +221,12 @@ export const Header: React.FC = () => {
             <NotificationCenter />
             <RecentActivity />
             <Tooltip content="DWx Copilot" relationship="label">
-              <Button
-                appearance="subtle"
-                icon={isChatOpen ? <ChatBubblesQuestion24Filled /> : <ChatBubblesQuestion24Regular />}
-                className={`${styles.chatIconBtn} ${isChatOpen ? styles.chatIconActive : ''}`}
+              <span
+                className={styles.chatTrigger}
                 onClick={() => setIsChatOpen(prev => !prev)}
-                size="small"
-              />
+              >
+                {isChatOpen ? <ChatBubblesQuestion24Filled /> : <ChatBubblesQuestion24Regular />}
+              </span>
             </Tooltip>
             <Text className={styles.userName}>
               {user.displayName}
