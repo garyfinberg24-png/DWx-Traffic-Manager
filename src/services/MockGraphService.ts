@@ -699,6 +699,7 @@ class MockGraphService {
         WinLossReason: req.WinLossReason,
         NextSteps: req.NextSteps,
         Comments: req.Comments,
+        StageTimestamps_JSON: req.StageTimestamps ? JSON.stringify(req.StageTimestamps) : undefined,
         Created: req.Created,
         Modified: req.Modified,
       },
