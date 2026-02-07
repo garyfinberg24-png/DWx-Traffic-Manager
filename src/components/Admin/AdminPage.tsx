@@ -37,6 +37,8 @@ import { SpecialistManagement } from './SpecialistManagement';
 import { LandingPageManagement } from './LandingPageManagement';
 import { KnowledgeBaseManagement } from './KnowledgeBaseManagement';
 import { SLAManagement } from './SLAManagement';
+import { useHeroCollapse } from '../../hooks/useHeroCollapse';
+import { HeroCollapseToggle } from '../Common/HeroCollapseToggle';
 
 // ============================================================================
 // Types
@@ -109,31 +111,101 @@ const useStyles = makeStyles({
     display: 'flex',
     flexDirection: 'column',
     ...shorthands.gap(tokens.spacingVerticalL),
-    ...shorthands.padding('24px', '64px'),
+    ...shorthands.padding('0', '64px', '24px'),
     maxWidth: '1400px',
     ...shorthands.margin('0', 'auto'),
     width: '100%',
   },
-  header: {
+  heroWrapper: {
+    position: 'relative',
+    marginBottom: '20px',
+  },
+  heroBanner: {
+    ...shorthands.borderRadius('0', '0', '16px', '16px'),
+    ...shorthands.padding('0'),
+    position: 'relative',
+    ...shorthands.overflow('hidden'),
+    background: 'linear-gradient(135deg, #0d3a5c 0%, #1a5a8a 100%)',
+  },
+  heroExpanded: {
+    maxHeight: '200px',
+    transitionProperty: 'max-height',
+    transitionDuration: '350ms',
+    transitionTimingFunction: 'ease',
+  },
+  heroCollapsed: {
+    maxHeight: '56px',
+    transitionProperty: 'max-height',
+    transitionDuration: '350ms',
+    transitionTimingFunction: 'ease',
+  },
+  heroDecoration: {
+    position: 'absolute',
+    top: '-80px',
+    right: '-40px',
+    width: '300px',
+    height: '300px',
+    ...shorthands.borderRadius('50%'),
+    background: 'radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 70%)',
+    pointerEvents: 'none',
+  },
+  heroContent: {
+    position: 'relative',
+    zIndex: 1,
     display: 'flex',
     alignItems: 'center',
-    ...shorthands.gap(tokens.spacingHorizontalM),
-    paddingBottom: tokens.spacingVerticalM,
-    borderBottom: `1px solid ${tokens.colorNeutralStroke1}`,
+    justifyContent: 'space-between',
+    ...shorthands.gap('32px'),
+    ...shorthands.padding('24px', '32px'),
   },
-  headerIcon: {
-    color: tokens.colorBrandForeground1,
-    fontSize: '28px',
-  },
-  headerText: {
+  heroTitle: {
+    fontSize: '22px',
+    fontWeight: '700',
+    color: 'white',
     display: 'flex',
-    flexDirection: 'column',
+    alignItems: 'center',
+    ...shorthands.gap('10px'),
+    whiteSpace: 'nowrap',
+    marginBottom: '4px',
   },
-  title: {
-    ...shorthands.margin('0'),
+  heroTitleAccent: {
+    color: '#7dd3fc',
   },
-  subtitle: {
-    color: tokens.colorNeutralForeground3,
+  heroSubtitle: {
+    fontSize: '13px',
+    color: 'rgba(255,255,255,0.6)',
+  },
+  heroIcon: {
+    color: 'rgba(255,255,255,0.7)',
+    fontSize: '22px',
+  },
+  heroRightSection: {
+    display: 'flex',
+    alignItems: 'center',
+    ...shorthands.gap('10px'),
+    flexShrink: 0,
+  },
+  collapsedStrip: {
+    display: 'flex',
+    alignItems: 'center',
+    ...shorthands.gap('16px'),
+    ...shorthands.padding('0', '32px'),
+    height: '56px',
+    position: 'relative',
+    zIndex: 2,
+  },
+  collapsedTitle: {
+    fontSize: '16px',
+    fontWeight: '700',
+    color: 'white',
+  },
+  collapsedBadge: {
+    fontSize: '11px',
+    fontWeight: '600',
+    color: 'rgba(255,255,255,0.9)',
+    backgroundColor: 'rgba(255,255,255,0.15)',
+    ...shorthands.padding('3px', '10px'),
+    ...shorthands.borderRadius('10px'),
   },
 
   // Layout: sidebar + content
@@ -243,8 +315,17 @@ const useStyles = makeStyles({
 // Component
 // ============================================================================
 
+const getTabLabel = (tab: TabValue): string => {
+  for (const group of NAV_GROUPS) {
+    const item = group.items.find(i => i.value === tab);
+    if (item) return item.label;
+  }
+  return '';
+};
+
 export const AdminPage: React.FC = () => {
   const styles = useStyles();
+  const { isCollapsed, toggle } = useHeroCollapse('admin');
   const [selectedTab, setSelectedTab] = useState<TabValue>('team');
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(
     new Set(NAV_GROUPS.map(g => g.id))
@@ -268,16 +349,31 @@ export const AdminPage: React.FC = () => {
 
   return (
     <div className={styles.container}>
-      <div className={styles.header}>
-        <Settings24Regular className={styles.headerIcon} />
-        <div className={styles.headerText}>
-          <Text as="h1" size={600} weight="semibold" className={styles.title}>
-            Administration
-          </Text>
-          <Text size={300} className={styles.subtitle}>
-            Manage team members, services, and system configuration
-          </Text>
+      {/* Hero Banner */}
+      <div className={styles.heroWrapper}>
+        <div className={`${styles.heroBanner} ${isCollapsed ? styles.heroCollapsed : styles.heroExpanded}`}>
+          <div className={styles.heroDecoration} />
+          {isCollapsed ? (
+            <div className={styles.collapsedStrip}>
+              <span className={styles.collapsedTitle}>Administration</span>
+              <span className={styles.collapsedBadge}>{getTabLabel(selectedTab)}</span>
+            </div>
+          ) : (
+            <div className={styles.heroContent}>
+              <div>
+                <div className={styles.heroTitle}>
+                  <Settings24Regular className={styles.heroIcon} />
+                  <span><span className={styles.heroTitleAccent}>Admin</span>istration</span>
+                </div>
+                <div className={styles.heroSubtitle}>Manage team, services, and system configuration</div>
+              </div>
+              <div className={styles.heroRightSection}>
+                <span className={styles.collapsedBadge}>{getTabLabel(selectedTab)}</span>
+              </div>
+            </div>
+          )}
         </div>
+        <HeroCollapseToggle isCollapsed={isCollapsed} onToggle={toggle} />
       </div>
 
       <Card>

@@ -32,6 +32,7 @@ import {
   Apps24Regular,
   ArrowDownloadRegular,
   SaveRegular,
+  DocumentMultiple24Regular,
 } from '@fluentui/react-icons';
 import { DW_COLORS } from '../../utils/buttonStyles';
 import { slaService } from '../../services/SLAService';
@@ -79,7 +80,7 @@ const useStyles = makeStyles({
     background: 'linear-gradient(135deg, #0d3a5c 0%, #1a5a8a 100%)',
   },
   heroExpanded: {
-    maxHeight: '300px',
+    maxHeight: '200px',
     transitionProperty: 'max-height',
     transitionDuration: '350ms',
     transitionTimingFunction: 'ease',
@@ -104,57 +105,35 @@ const useStyles = makeStyles({
     position: 'relative',
     zIndex: 1,
     display: 'flex',
-    justifyContent: 'space-between',
     alignItems: 'center',
+    justifyContent: 'space-between',
     ...shorthands.gap('32px'),
-    ...shorthands.padding('32px', '32px'),
-  },
-  heroLeft: {
-    flex: '1',
-    minWidth: '0',
+    ...shorthands.padding('24px', '32px'),
   },
   heroTitle: {
-    fontSize: '24px',
+    fontSize: '22px',
     fontWeight: '700',
     color: 'white',
-    marginBottom: '8px',
+    display: 'flex',
+    alignItems: 'center',
+    ...shorthands.gap('10px'),
+    whiteSpace: 'nowrap',
+    marginBottom: '4px',
   },
   heroTitleAccent: {
     color: '#7dd3fc',
   },
+  heroIcon: {
+    color: 'rgba(255,255,255,0.7)',
+    fontSize: '22px',
+  },
   heroSubtitle: {
-    fontSize: '14px',
+    fontSize: '13px',
     color: 'rgba(255,255,255,0.6)',
-    marginBottom: '16px',
   },
-  heroStats: {
+  heroRightSection: {
     display: 'flex',
-    ...shorthands.gap('24px'),
-  },
-  heroStat: {
-    display: 'flex',
-    flexDirection: 'column',
     alignItems: 'center',
-    ...shorthands.padding('10px', '16px'),
-    ...shorthands.borderRadius('10px'),
-    backgroundColor: 'rgba(255,255,255,0.08)',
-    minWidth: '80px',
-  },
-  heroStatValue: {
-    fontSize: '20px',
-    fontWeight: '700',
-    color: 'white',
-  },
-  heroStatLabel: {
-    fontSize: '10px',
-    color: 'rgba(255,255,255,0.5)',
-    textTransform: 'uppercase',
-    letterSpacing: '0.5px',
-    marginTop: '2px',
-  },
-  heroRight: {
-    display: 'flex',
-    flexDirection: 'column',
     ...shorthands.gap('10px'),
     flexShrink: 0,
   },
@@ -843,33 +822,36 @@ export const MyRequests: React.FC<MyRequestsProps> = ({ onNewRequest }) => {
             </div>
           ) : (
             <div className={styles.heroContent}>
-              <div className={styles.heroLeft}>
+              <div>
                 <div className={styles.heroTitle}>
-                  My <span className={styles.heroTitleAccent}>Requests</span>
+                  <DocumentMultiple24Regular className={styles.heroIcon} />
+                  <span>My <span className={styles.heroTitleAccent}>Requests</span></span>
                 </div>
-                <div className={styles.heroSubtitle}>
-                  Track your service and product requests through the sales pipeline
-                </div>
-                <div className={styles.heroStats}>
-                  <div className={styles.heroStat}>
-                    <span className={styles.heroStatValue}>{heroStats.activeCount}</span>
-                    <span className={styles.heroStatLabel}>Active Deals</span>
-                  </div>
-                  <div className={styles.heroStat}>
-                    <span className={styles.heroStatValue}>R{heroStats.pipelineValue.toLocaleString()}</span>
-                    <span className={styles.heroStatLabel}>Pipeline</span>
-                  </div>
-                  <div className={styles.heroStat}>
-                    <span className={styles.heroStatValue}>{heroStats.winRate}%</span>
-                    <span className={styles.heroStatLabel}>Win Rate</span>
-                  </div>
-                </div>
+                <div className={styles.heroSubtitle}>Track your service and product requests</div>
               </div>
-              <div className={styles.heroRight}>
+              <div className={styles.heroRightSection}>
+                <span className={styles.collapsedBadge}>{heroStats.activeCount} Active</span>
+                <span className={styles.collapsedBadge}>R{heroStats.pipelineValue.toLocaleString()}</span>
+                <span className={styles.collapsedBadge}>{heroStats.winRate}% Win Rate</span>
+                <Button
+                  appearance="primary"
+                  icon={<ArrowDownloadRegular />}
+                  onClick={() =>
+                    activeTab === 'service'
+                      ? downloadServiceRequestsExcel(filteredRequests)
+                      : downloadProductRequestsExcel(productRequests)
+                  }
+                  disabled={activeTab === 'service' ? filteredRequests.length === 0 : productRequests.length === 0}
+                  size="small"
+                  style={{ backgroundColor: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.3)', color: 'white' }}
+                >
+                  Export
+                </Button>
                 <Button
                   appearance="primary"
                   icon={<AddRegular />}
                   onClick={() => navigate('/request')}
+                  size="small"
                   style={{ backgroundColor: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.3)' }}
                 >
                   New Request
@@ -879,41 +861,6 @@ export const MyRequests: React.FC<MyRequestsProps> = ({ onNewRequest }) => {
           )}
         </div>
         <HeroCollapseToggle isCollapsed={isCollapsed} onToggle={toggle} />
-      </div>
-
-      {/* Header */}
-      <div className={styles.header}>
-        <div className={styles.headerLeft}>
-          <Text className={styles.title}>My Service Requests</Text>
-          <Text className={styles.subtitle}>
-            Manage and track your pre-sales service requests
-          </Text>
-        </div>
-        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-          <Button
-            appearance="outline"
-            icon={<ArrowDownloadRegular />}
-            size="small"
-            onClick={() =>
-              activeTab === 'service'
-                ? downloadServiceRequestsExcel(filteredRequests)
-                : downloadProductRequestsExcel(productRequests)
-            }
-            disabled={activeTab === 'service' ? filteredRequests.length === 0 : productRequests.length === 0}
-          >
-            Export
-          </Button>
-          {onNewRequest && (
-            <Button
-              className={styles.newRequestBtn}
-              appearance="primary"
-              icon={<AddRegular />}
-              onClick={onNewRequest}
-            >
-              New Request
-            </Button>
-          )}
-        </div>
       </div>
 
       {/* Tab Navigation */}

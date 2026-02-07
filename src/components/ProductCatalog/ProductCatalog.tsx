@@ -204,7 +204,7 @@ const useStyles = makeStyles({
   collapsedStrip: {
     display: 'flex',
     alignItems: 'center',
-    ...shorthands.gap('12px'),
+    ...shorthands.gap('16px'),
     ...shorthands.padding('0', '32px'),
     height: '56px',
     position: 'relative',
@@ -214,7 +214,6 @@ const useStyles = makeStyles({
     fontSize: '16px',
     fontWeight: '700',
     color: 'white',
-    marginRight: '4px',
   },
   collapsedBadge: {
     fontSize: '11px',
@@ -270,7 +269,7 @@ const useStyles = makeStyles({
     zIndex: 2,
   },
   heroHeaderTitle: {
-    fontSize: '22px',
+    fontSize: '28px',
     fontWeight: '700',
     color: 'white',
     letterSpacing: '-0.3px',
@@ -300,7 +299,7 @@ const useStyles = makeStyles({
   tabsRow: {
     display: 'flex',
     gap: '6px',
-    ...shorthands.padding('14px', '32px', '0'),
+    ...shorthands.padding('20px', '32px', '0'),
     position: 'relative',
     zIndex: 2,
   },

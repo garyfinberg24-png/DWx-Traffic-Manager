@@ -28,7 +28,6 @@ import { DWService, ServiceCategory, ServiceComplexity } from '../../types/Servi
 
 const useStyles = makeStyles({
   card: {
-    backgroundColor: '#ffffff',
     borderRadius: '12px',
     boxShadow: '0 1px 3px rgba(0,0,0,0.08), 0 4px 12px rgba(0,0,0,0.04)',
     overflow: 'hidden',
@@ -140,9 +139,7 @@ const useStyles = makeStyles({
   },
   viewLink: {
     fontSize: '12px',
-    fontWeight: '700',
-    color: '#ffffff',
-    backgroundColor: '#1a5a8a',
+    fontWeight: '600',
     display: 'inline-flex',
     alignItems: 'center',
     gap: '5px',
@@ -209,7 +206,7 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({ service, onClick }) =>
   const categoryColor = categoryColors[service.Category] || '#1e6b7b';
 
   return (
-    <div className={styles.card} onClick={() => onClick(service)}>
+    <div className={styles.card} onClick={() => onClick(service)} style={{ backgroundColor: `${categoryColor}12` }}>
       {/* Colored left accent bar */}
       <div className={styles.accent} style={{ backgroundColor: categoryColor }} />
 
@@ -243,7 +240,7 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({ service, onClick }) =>
         </div>
 
         <div className={styles.footer}>
-          <span className={styles.viewLink}>
+          <span className={styles.viewLink} style={{ color: categoryColor, backgroundColor: `${categoryColor}1a` }}>
             View
             <ArrowRightRegular style={{ width: '12px', height: '12px' }} />
           </span>

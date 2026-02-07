@@ -138,7 +138,7 @@ const useStyles = makeStyles({
   },
   heroWrapper: {
     position: 'relative',
-    marginBottom: '16px',
+    marginBottom: '20px',
   },
   heroBanner: {
     ...shorthands.borderRadius('0', '0', '16px', '16px'),
@@ -148,7 +148,7 @@ const useStyles = makeStyles({
     background: 'linear-gradient(135deg, #0d3a5c 0%, #1a5a8a 100%)',
   },
   heroExpanded: {
-    maxHeight: '300px',
+    maxHeight: '200px',
     transitionProperty: 'max-height',
     transitionDuration: '350ms',
     transitionTimingFunction: 'ease',
@@ -173,57 +173,36 @@ const useStyles = makeStyles({
     position: 'relative',
     zIndex: 1,
     display: 'flex',
-    justifyContent: 'space-between',
     alignItems: 'center',
+    justifyContent: 'space-between',
     ...shorthands.gap('32px'),
-    ...shorthands.padding('32px', '32px'),
-  },
-  heroLeft: {
-    flex: '1',
-    minWidth: '0',
+    ...shorthands.padding('24px', '32px'),
   },
   heroTitle: {
-    fontSize: '24px',
+    fontSize: '22px',
     fontWeight: '700',
     color: 'white',
-    marginBottom: '8px',
+    display: 'flex',
+    alignItems: 'center',
+    ...shorthands.gap('10px'),
+    whiteSpace: 'nowrap',
+    marginBottom: '4px',
   },
   heroTitleAccent: {
     color: '#7dd3fc',
   },
+  heroIcon: {
+    color: 'rgba(255,255,255,0.7)',
+    fontSize: '22px',
+  },
   heroSubtitle: {
-    fontSize: '14px',
+    fontSize: '13px',
     color: 'rgba(255,255,255,0.6)',
   },
-  heroStats: {
+  heroRightSection: {
     display: 'flex',
-    ...shorthands.gap('24px'),
-    marginTop: '16px',
-  },
-  heroStat: {
-    display: 'flex',
-    flexDirection: 'column',
     alignItems: 'center',
-    ...shorthands.padding('10px', '16px'),
-    ...shorthands.borderRadius('10px'),
-    backgroundColor: 'rgba(255,255,255,0.08)',
-    minWidth: '80px',
-  },
-  heroStatValue: {
-    fontSize: '20px',
-    fontWeight: '700',
-    color: 'white',
-  },
-  heroStatLabel: {
-    fontSize: '10px',
-    color: 'rgba(255,255,255,0.5)',
-    textTransform: 'uppercase',
-    letterSpacing: '0.5px',
-    marginTop: '2px',
-  },
-  heroRight: {
-    display: 'flex',
-    ...shorthands.gap('8px'),
+    ...shorthands.gap('10px'),
     flexShrink: 0,
   },
   collapsedStrip: {
@@ -631,82 +610,47 @@ export const ManagerDashboard: React.FC = () => {
             </div>
           ) : (
             <div className={styles.heroContent}>
-              <div className={styles.heroLeft}>
+              <div>
                 <div className={styles.heroTitle}>
-                  Manager <span className={styles.heroTitleAccent}>Dashboard</span>
+                  <Board24Regular className={styles.heroIcon} />
+                  <span>Manager <span className={styles.heroTitleAccent}>Dashboard</span></span>
                 </div>
-                <div className={styles.heroSubtitle}>
-                  Monitor pipeline performance, approvals, and team activity
-                </div>
-                <div className={styles.heroStats}>
-                  <div className={styles.heroStat}>
-                    <span className={styles.heroStatValue}>{heroStats.total}</span>
-                    <span className={styles.heroStatLabel}>Total Requests</span>
-                  </div>
-                  <div className={styles.heroStat}>
-                    <span className={styles.heroStatValue}>{heroStats.pending}</span>
-                    <span className={styles.heroStatLabel}>Pending</span>
-                  </div>
-                </div>
+                <div className={styles.heroSubtitle}>Overview of bookings, metrics, and team performance</div>
               </div>
-              <div className={styles.heroRight}>
-                <Button
-                  appearance="primary"
-                  icon={<ArrowClockwise24Regular />}
-                  onClick={handleRefresh}
-                  style={{ backgroundColor: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.3)', color: 'white' }}
-                >
-                  Refresh
-                </Button>
+              <div className={styles.heroRightSection}>
+                <span className={styles.collapsedBadge}>{heroStats.total} Total</span>
+                <span className={styles.collapsedBadge}>{heroStats.pending} Pending</span>
+                {lastUpdated && (
+                  <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.5)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <ArrowClockwise24Regular style={{ width: '12px', height: '12px' }} />
+                    {lastUpdated.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  </span>
+                )}
                 <Button
                   appearance="primary"
                   icon={<ArrowDownload24Regular />}
                   onClick={handleExport}
+                  size="small"
+                  disabled={isLoading || bookings.length === 0}
                   style={{ backgroundColor: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.3)', color: 'white' }}
                 >
                   Export
+                </Button>
+                <Button
+                  appearance="primary"
+                  icon={<ArrowClockwise24Regular />}
+                  onClick={handleRefresh}
+                  size="small"
+                  disabled={isLoading}
+                  style={{ backgroundColor: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.3)', color: 'white' }}
+                >
+                  {isLoading ? 'Refreshing...' : 'Refresh'}
                 </Button>
               </div>
             </div>
           )}
         </div>
         <HeroCollapseToggle isCollapsed={isCollapsed} onToggle={toggle} />
-      </div>
-
-      {/* Header */}
-      <div className={styles.header}>
-        <div className={styles.titleSection}>
-          <Text className={styles.title}>Manager Dashboard</Text>
-          <Text className={styles.subtitle}>
-            Overview of pipeline, performance, and team analytics
-          </Text>
-        </div>
-        <div className={styles.actions}>
-          {lastUpdated && (
-            <span className={styles.refreshTime}>
-              <ArrowClockwise24Regular style={{ width: '14px', height: '14px' }} />
-              Updated {lastUpdated.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-            </span>
-          )}
-          <Button
-            appearance="primary"
-            className={styles.exportBtn}
-            icon={<ArrowDownload24Regular />}
-            onClick={handleExport}
-            disabled={isLoading || bookings.length === 0}
-          >
-            Export
-          </Button>
-          <Button
-            appearance="primary"
-            className={styles.refreshBtn}
-            icon={<ArrowClockwise24Regular />}
-            onClick={handleRefresh}
-            disabled={isLoading}
-          >
-            {isLoading ? 'Refreshing...' : 'Refresh'}
-          </Button>
-        </div>
       </div>
 
       {/* Debug info */}

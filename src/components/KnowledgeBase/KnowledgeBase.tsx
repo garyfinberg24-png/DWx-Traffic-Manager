@@ -7,6 +7,7 @@
  */
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Text,
   makeStyles,
@@ -14,10 +15,9 @@ import {
   Spinner,
 } from '@fluentui/react-components';
 import {
-  QuestionCircle24Regular,
   BookOpen24Regular,
-  BookLetter24Regular,
-  Search24Regular,
+  SearchRegular,
+  ArrowLeft24Regular,
 } from '@fluentui/react-icons';
 import { KBEntry } from '../../types/KnowledgeBase';
 import { knowledgeBaseService } from '../../services/KnowledgeBaseService';
@@ -100,119 +100,156 @@ const useStyles = makeStyles({
     width: '300px',
     height: '300px',
     ...shorthands.borderRadius('50%'),
-    background: 'radial-gradient(circle, rgba(91,184,245,0.12) 0%, transparent 70%)',
+    background: 'radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 70%)',
     pointerEvents: 'none',
   },
-  heroContent: {
-    position: 'relative',
-    zIndex: 1,
+
+  // Row 1: Page header (matches ServiceCatalog/ProductCatalog heroHeaderRow)
+  heroHeaderRow: {
     display: 'flex',
     justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    ...shorthands.padding('20px', '32px', '0'),
+    position: 'relative',
+    zIndex: 2,
+  },
+  heroHeaderTitle: {
+    fontSize: '28px',
+    fontWeight: '700',
+    color: 'white',
+    letterSpacing: '-0.3px',
+  },
+  heroHeaderSubtitle: {
+    fontSize: '13px',
+    color: 'rgba(255,255,255,0.6)',
+    marginTop: '2px',
+  },
+  backButtonHero: {
+    ...shorthands.padding('6px', '14px'),
+    ...shorthands.borderRadius('8px'),
+    ...shorthands.border('1px', 'solid', 'rgba(255,255,255,0.25)'),
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    color: 'rgba(255,255,255,0.85)',
+    fontSize: '13px',
+    fontWeight: '500',
+    cursor: 'pointer',
+    transitionProperty: 'all',
+    transitionDuration: '0.2s',
+    display: 'inline-flex',
     alignItems: 'center',
-    ...shorthands.gap('40px'),
-    ...shorthands.padding('48px', '48px', '48px', '48px'),
+    gap: '6px',
+    flexShrink: 0,
+  },
+
+  // Row 2: Glassmorphic search bar (matches ServiceCatalog heroSearchRow)
+  heroSearchRow: {
+    ...shorthands.padding('14px', '32px', '0'),
+    position: 'relative',
+    zIndex: 2,
+    display: 'flex',
+    alignItems: 'center',
+    gap: '16px',
+  },
+  heroSearchBar: {
+    display: 'flex',
+    alignItems: 'center',
+    flex: '1',
+    maxWidth: '560px',
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    ...shorthands.border('1px', 'solid', 'rgba(255,255,255,0.25)'),
+    ...shorthands.borderRadius('20px'),
+    backdropFilter: 'blur(8px)',
+    ...shorthands.overflow('hidden'),
+  },
+  heroSearchIcon: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingLeft: '16px',
+    color: 'rgba(255,255,255,0.5)',
+  },
+  heroSearchInput: {
+    flex: 1,
+    backgroundColor: 'transparent',
+    ...shorthands.border('none'),
+    ...shorthands.padding('10px', '16px'),
+    fontSize: '13px',
+    color: '#ffffff',
+    ...shorthands.outline('none'),
+  },
+  heroSearchCount: {
+    fontSize: '12px',
+    color: 'rgba(255,255,255,0.5)',
+    whiteSpace: 'nowrap',
+  },
+
+  // Row 3: Hero content (icon + title + desc | stats) — matches ServiceCatalog/ProductCatalog
+  heroContentRow: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '32px',
+    ...shorthands.padding('18px', '32px', '22px'),
+    position: 'relative',
+    zIndex: 2,
   },
   heroLeft: {
     flex: '1',
     minWidth: '0',
   },
-  heroBreadcrumb: {
-    fontSize: '12px',
-    color: 'rgba(255,255,255,0.4)',
-    marginBottom: '16px',
-  },
-  heroBreadcrumbLink: {
-    color: 'rgba(255,255,255,0.5)',
-    textDecoration: 'none',
-    cursor: 'pointer',
-    ':hover': {
-      color: '#5bb8f5',
-    },
-  },
-  heroTitle: {
-    fontSize: '36px',
-    fontWeight: '700',
-    color: 'white',
-    marginBottom: '12px',
-    lineHeight: '1.2',
-  },
-  heroTitleAccent: {
-    color: '#5bb8f5',
-  },
-  heroSubtitle: {
-    fontSize: '16px',
-    color: 'rgba(255,255,255,0.6)',
-    lineHeight: '1.6',
-    maxWidth: '520px',
-  },
-  heroSearchContainer: {
-    marginTop: '28px',
-    position: 'relative',
-    maxWidth: '520px',
-  },
-  heroSearchIcon: {
-    position: 'absolute',
-    left: '18px',
-    top: '50%',
-    transform: 'translateY(-50%)',
-    color: 'rgba(255,255,255,0.4)',
-    fontSize: '18px',
-    pointerEvents: 'none',
-  },
-  heroRight: {
-    display: 'flex',
-    flexDirection: 'column',
-    ...shorthands.gap('12px'),
-    flexShrink: 0,
-  },
-  quickLink: {
+  heroTop: {
     display: 'flex',
     alignItems: 'center',
-    ...shorthands.gap('12px'),
-    ...shorthands.padding('14px', '20px'),
-    ...shorthands.borderRadius('12px'),
-    backgroundColor: 'rgba(255,255,255,0.06)',
-    ...shorthands.border('1px', 'solid', 'rgba(255,255,255,0.1)'),
-    color: 'rgba(255,255,255,0.8)',
-    fontSize: '14px',
-    cursor: 'pointer',
-    transitionProperty: 'background-color, color, border-color',
-    transitionDuration: '150ms',
-    minWidth: '240px',
-    ':hover': {
-      backgroundColor: 'rgba(255,255,255,0.12)',
-      color: 'white',
-      ...shorthands.border('1px', 'solid', 'rgba(255,255,255,0.2)'),
-    },
+    gap: '12px',
+    marginBottom: '8px',
   },
-  quickLinkIcon: {
+  heroIcon: {
     width: '36px',
     height: '36px',
     ...shorthands.borderRadius('10px'),
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    ...shorthands.border('1px', 'solid', 'rgba(255,255,255,0.15)'),
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    fontSize: '18px',
     flexShrink: 0,
   },
-  quickLinkIconFaq: {
-    backgroundColor: 'rgba(91,184,245,0.15)',
-    color: '#5bb8f5',
+  heroTitle: {
+    fontSize: '20px',
+    fontWeight: '700',
+    color: 'white',
+    letterSpacing: '-0.3px',
   },
-  quickLinkIconGlossary: {
-    backgroundColor: 'rgba(122,204,155,0.15)',
-    color: '#7acc9b',
+  heroDesc: {
+    fontSize: '13px',
+    lineHeight: '1.6',
+    color: 'rgba(255,255,255,0.7)',
+    maxWidth: '700px',
   },
-  quickLinkIconArticles: {
-    backgroundColor: 'rgba(247,163,79,0.15)',
-    color: '#f7a34f',
+  heroStats: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '10px',
+    flexShrink: 0,
+    paddingLeft: '32px',
+    ...shorthands.borderLeft('1px', 'solid', 'rgba(255,255,255,0.12)'),
   },
-  quickLinkText: {
-    fontWeight: '500',
+  heroStat: {
+    display: 'flex',
+    alignItems: 'baseline',
+    gap: '8px',
   },
-  quickLinkCount: {
-    fontSize: '11px',
-    color: 'rgba(255,255,255,0.4)',
+  heroStatValue: {
+    fontSize: '18px',
+    fontWeight: '700',
+    color: 'white',
+    whiteSpace: 'nowrap',
+  },
+  heroStatLabel: {
+    fontSize: '10px',
+    color: 'rgba(255,255,255,0.45)',
+    textTransform: 'uppercase',
+    letterSpacing: '0.5px',
+    whiteSpace: 'nowrap',
   },
 
   // Body content area
@@ -260,6 +297,7 @@ const useStyles = makeStyles({
 
 export const KnowledgeBase: React.FC = () => {
   const styles = useStyles();
+  const navigate = useNavigate();
   const { isCollapsed, toggle } = useHeroCollapse('knowledge-base');
   const [searchQuery, setSearchQuery] = useState('');
   const [entries, setEntries] = useState<KBEntry[]>([]);
@@ -284,12 +322,6 @@ export const KnowledgeBase: React.FC = () => {
   const glossaryEntries = useMemo(() => entries.filter((e) => e.Type === 'Glossary'), [entries]);
   const articleEntries = useMemo(() => entries.filter((e) => e.Type === 'Article'), [entries]);
 
-  const scrollToSection = (section: KBSection) => {
-    const ref = section === 'faq' ? faqRef : section === 'glossary' ? glossaryRef : articlesRef;
-    setExpandedSection(section);
-    ref.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  };
-
   if (loading) {
     return (
       <div className={styles.container}>
@@ -311,78 +343,80 @@ export const KnowledgeBase: React.FC = () => {
 
           {isCollapsed ? (
             <div className={styles.collapsedStrip}>
-              <span className={styles.collapsedTitle}>DWx Knowledge Centre</span>
+              <span className={styles.collapsedTitle}>Knowledge Centre</span>
               <span className={styles.collapsedBadge}>{faqEntries.length} FAQs</span>
               <span className={styles.collapsedBadge}>{glossaryEntries.length} Terms</span>
               <span className={styles.collapsedBadge}>{articleEntries.length} Articles</span>
             </div>
           ) : (
-            <div className={styles.heroContent}>
-              <div className={styles.heroLeft}>
-                <div className={styles.heroBreadcrumb}>
-                  <span className={styles.heroBreadcrumbLink}>Home</span> &rsaquo; Knowledge Base
+            <>
+              {/* Row 1: Page header */}
+              <div className={styles.heroHeaderRow}>
+                <div>
+                  <div className={styles.heroHeaderTitle}>Knowledge Centre</div>
+                  <div className={styles.heroHeaderSubtitle}>
+                    FAQs, terminology, and in-depth guides for the DWx platform
+                  </div>
                 </div>
-                <div className={styles.heroTitle}>
-                  DWx Knowledge <span className={styles.heroTitleAccent}>Centre</span>
-                </div>
-                <Text className={styles.heroSubtitle}>
-                  Your one-stop resource for FAQs, terminology, and in-depth guides to master the DWx Traffic Manager platform and sales process.
-                </Text>
-                <div className={styles.heroSearchContainer}>
-                  <Search24Regular
-                    className={styles.heroSearchIcon}
-                    style={{ position: 'absolute', left: 18, top: '50%', transform: 'translateY(-50%)' }}
-                  />
+                <button
+                  className={styles.backButtonHero}
+                  onClick={() => navigate('/')}
+                >
+                  <ArrowLeft24Regular style={{ fontSize: '16px' }} />
+                  Back to Home
+                </button>
+              </div>
+
+              {/* Row 2: Glassmorphic search bar */}
+              <div className={styles.heroSearchRow}>
+                <div className={styles.heroSearchBar}>
+                  <div className={styles.heroSearchIcon}>
+                    <SearchRegular style={{ width: '16px', height: '16px' }} />
+                  </div>
                   <input
-                    type="text"
-                    placeholder="What are you looking for?"
+                    className={styles.heroSearchInput}
+                    placeholder="Search FAQs, glossary terms, and articles..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    style={{
-                      width: '100%',
-                      padding: '16px 20px 16px 48px',
-                      borderRadius: 14,
-                      border: '1px solid rgba(255,255,255,0.15)',
-                      background: 'rgba(255,255,255,0.08)',
-                      backdropFilter: 'blur(12px)',
-                      color: 'white',
-                      fontSize: 15,
-                      outline: 'none',
-                      fontFamily: 'inherit',
-                    }}
                   />
                 </div>
+                <span className={styles.heroSearchCount}>
+                  {entries.length} entries available
+                </span>
               </div>
-              <div className={styles.heroRight}>
-                <div className={styles.quickLink} onClick={() => scrollToSection('faq')}>
-                  <div className={`${styles.quickLinkIcon} ${styles.quickLinkIconFaq}`}>
-                    <QuestionCircle24Regular />
+
+              {/* Row 3: Content — icon + title + desc | stats */}
+              <div className={styles.heroContentRow}>
+                <div className={styles.heroLeft}>
+                  <div className={styles.heroTop}>
+                    <div className={styles.heroIcon}>
+                      <BookOpen24Regular style={{ color: '#7dd3fc', fontSize: '18px' }} />
+                    </div>
+                    <Text className={styles.heroTitle}>
+                      DWx Knowledge{' '}
+                      <span style={{ color: '#7dd3fc' }}>Centre</span>
+                    </Text>
                   </div>
-                  <div>
-                    <div className={styles.quickLinkText}>Browse FAQs</div>
-                    <div className={styles.quickLinkCount}>{faqEntries.length} questions</div>
-                  </div>
-                </div>
-                <div className={styles.quickLink} onClick={() => scrollToSection('glossary')}>
-                  <div className={`${styles.quickLinkIcon} ${styles.quickLinkIconGlossary}`}>
-                    <BookLetter24Regular />
-                  </div>
-                  <div>
-                    <div className={styles.quickLinkText}>Glossary</div>
-                    <div className={styles.quickLinkCount}>{glossaryEntries.length} terms</div>
+                  <div className={styles.heroDesc}>
+                    Your one-stop resource for FAQs, terminology, and in-depth guides to master the DWx Traffic Manager platform and sales process.
                   </div>
                 </div>
-                <div className={styles.quickLink} onClick={() => scrollToSection('articles')}>
-                  <div className={`${styles.quickLinkIcon} ${styles.quickLinkIconArticles}`}>
-                    <BookOpen24Regular />
+                <div className={styles.heroStats}>
+                  <div className={styles.heroStat}>
+                    <Text className={styles.heroStatValue}>{articleEntries.length}</Text>
+                    <Text className={styles.heroStatLabel}>Articles</Text>
                   </div>
-                  <div>
-                    <div className={styles.quickLinkText}>Read Articles</div>
-                    <div className={styles.quickLinkCount}>{articleEntries.length} guides</div>
+                  <div className={styles.heroStat}>
+                    <Text className={styles.heroStatValue}>{faqEntries.length}</Text>
+                    <Text className={styles.heroStatLabel}>FAQs</Text>
+                  </div>
+                  <div className={styles.heroStat}>
+                    <Text className={styles.heroStatValue}>{glossaryEntries.length}</Text>
+                    <Text className={styles.heroStatLabel}>Terms</Text>
                   </div>
                 </div>
               </div>
-            </div>
+            </>
           )}
         </div>
         <HeroCollapseToggle isCollapsed={isCollapsed} onToggle={toggle} />

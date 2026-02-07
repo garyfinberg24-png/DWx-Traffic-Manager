@@ -130,7 +130,7 @@ const useStyles = makeStyles({
     zIndex: 2,
   },
   heroHeaderTitle: {
-    fontSize: '22px',
+    fontSize: '28px',
     fontWeight: '700',
     color: 'white',
     letterSpacing: '-0.3px',

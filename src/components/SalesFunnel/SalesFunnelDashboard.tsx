@@ -37,7 +37,6 @@ import {
   downloadProductRequestsExcel,
   downloadProductRequestsCSV,
 } from '../../utils/excelExport';
-import { DW_COLORS } from '../../utils/buttonStyles';
 import { KPICardSkeleton } from '../Common/CardSkeleton';
 import { useAuth } from '../../contexts/AuthContext';
 import {
@@ -85,7 +84,7 @@ const useStyles = makeStyles({
     background: 'linear-gradient(135deg, #0d3a5c 0%, #1e6b7b 100%)',
   },
   heroExpanded: {
-    maxHeight: '300px',
+    maxHeight: '200px',
     transitionProperty: 'max-height',
     transitionDuration: '350ms',
     transitionTimingFunction: 'ease',
@@ -110,73 +109,46 @@ const useStyles = makeStyles({
     position: 'relative',
     zIndex: 1,
     display: 'flex',
-    justifyContent: 'space-between',
     alignItems: 'center',
+    justifyContent: 'space-between',
     ...shorthands.gap('32px'),
-    ...shorthands.padding('32px', '32px'),
-  },
-  heroLeft: {
-    flex: '1',
-    minWidth: '0',
+    ...shorthands.padding('24px', '32px'),
   },
   heroTitle: {
-    fontSize: '24px',
+    fontSize: '22px',
     fontWeight: '700',
     color: 'white',
-    marginBottom: '8px',
+    display: 'flex',
+    alignItems: 'center',
+    ...shorthands.gap('10px'),
+    whiteSpace: 'nowrap',
+    marginBottom: '4px',
   },
   heroTitleAccent: {
     color: '#5eead4',
   },
-  heroStats: {
-    display: 'flex',
-    ...shorthands.gap('24px'),
-    marginTop: '12px',
+  heroIcon: {
+    color: 'rgba(255,255,255,0.7)',
+    fontSize: '22px',
   },
-  heroStat: {
+  heroSubtitle: {
+    fontSize: '13px',
+    color: 'rgba(255,255,255,0.6)',
+  },
+  heroRightSection: {
     display: 'flex',
-    flexDirection: 'column',
     alignItems: 'center',
-    ...shorthands.padding('10px', '16px'),
-    ...shorthands.borderRadius('10px'),
-    backgroundColor: 'rgba(255,255,255,0.08)',
-    minWidth: '90px',
-  },
-  heroStatValue: {
-    fontSize: '20px',
-    fontWeight: '700',
-    color: 'white',
-  },
-  heroStatLabel: {
-    fontSize: '10px',
-    color: 'rgba(255,255,255,0.5)',
-    textTransform: 'uppercase',
-    letterSpacing: '0.5px',
-    marginTop: '2px',
-  },
-  heroRight: {
-    display: 'flex',
-    flexDirection: 'column',
     ...shorthands.gap('10px'),
     flexShrink: 0,
-    alignItems: 'flex-end',
-  },
-  heroUrgencyPills: {
-    display: 'flex',
-    ...shorthands.gap('8px'),
   },
   urgencyPill: {
     fontSize: '11px',
     fontWeight: '600',
-    ...shorthands.padding('4px', '12px'),
-    ...shorthands.borderRadius('12px'),
+    ...shorthands.padding('3px', '10px'),
+    ...shorthands.borderRadius('10px'),
     display: 'flex',
     alignItems: 'center',
     ...shorthands.gap('4px'),
-  },
-  heroActions: {
-    display: 'flex',
-    ...shorthands.gap('8px'),
   },
   collapsedStrip: {
     display: 'flex',
@@ -409,110 +381,76 @@ export const SalesFunnelDashboard: React.FC<SalesFunnelDashboardProps> = ({
             </div>
           ) : (
             <div className={styles.heroContent}>
-              <div className={styles.heroLeft}>
+              <div>
                 <div className={styles.heroTitle}>
-                  Sales <span className={styles.heroTitleAccent}>Pipeline</span>
+                  <TargetRegular className={styles.heroIcon} />
+                  <span>Sales <span className={styles.heroTitleAccent}>Pipeline</span></span>
                 </div>
-                <div className={styles.heroStats}>
-                  <div className={styles.heroStat}>
-                    <span className={styles.heroStatValue}>R{heroStats.totalPipeline.toLocaleString()}</span>
-                    <span className={styles.heroStatLabel}>Total Pipeline</span>
-                  </div>
-                  <div className={styles.heroStat}>
-                    <span className={styles.heroStatValue}>R{heroStats.weightedPipeline.toLocaleString()}</span>
-                    <span className={styles.heroStatLabel}>Weighted</span>
-                  </div>
-                  <div className={styles.heroStat}>
-                    <span className={styles.heroStatValue}>{heroStats.activeCount}</span>
-                    <span className={styles.heroStatLabel}>Active Deals</span>
-                  </div>
-                </div>
+                <div className={styles.heroSubtitle}>Manage deals and track funnel progression</div>
               </div>
-              <div className={styles.heroRight}>
-                {attentionSummary && (attentionSummary.overdueCount > 0 || attentionSummary.criticalCount > 0) && (
-                  <div className={styles.heroUrgencyPills}>
-                    {attentionSummary.overdueCount > 0 && (
-                      <span className={styles.urgencyPill} style={{ backgroundColor: 'rgba(209,52,56,0.2)', color: '#ff8a8a' }}>
-                        <Warning24Regular style={{ fontSize: '14px' }} />
-                        {attentionSummary.overdueCount} Overdue
-                      </span>
-                    )}
-                    {attentionSummary.criticalCount > 0 && (
-                      <span className={styles.urgencyPill} style={{ backgroundColor: 'rgba(255,170,0,0.2)', color: '#ffcc4d' }}>
-                        {attentionSummary.criticalCount} At Risk
-                      </span>
-                    )}
-                  </div>
+              <div className={styles.heroRightSection}>
+                <span className={styles.collapsedBadge}>R{heroStats.totalPipeline.toLocaleString()}</span>
+                <span className={styles.collapsedBadge}>R{heroStats.weightedPipeline.toLocaleString()} Weighted</span>
+                <span className={styles.collapsedBadge}>{heroStats.activeCount} Active</span>
+                {attentionSummary && attentionSummary.overdueCount > 0 && (
+                  <span className={styles.urgencyPill} style={{ backgroundColor: 'rgba(209,52,56,0.2)', color: '#ff8a8a' }}>
+                    <Warning24Regular style={{ fontSize: '14px' }} />
+                    {attentionSummary.overdueCount} Overdue
+                  </span>
                 )}
-                <div className={styles.heroActions}>
+                {attentionSummary && attentionSummary.criticalCount > 0 && (
+                  <span className={styles.urgencyPill} style={{ backgroundColor: 'rgba(255,170,0,0.2)', color: '#ffcc4d' }}>
+                    {attentionSummary.criticalCount} At Risk
+                  </span>
+                )}
+                <Menu>
+                  <MenuTrigger disableButtonEnhancement>
+                    <Button
+                      appearance="primary"
+                      icon={<ArrowDownloadRegular />}
+                      size="small"
+                      style={{ backgroundColor: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.3)', color: 'white' }}
+                    >
+                      Export
+                    </Button>
+                  </MenuTrigger>
+                  <MenuPopover>
+                    <MenuList>
+                      <MenuItem onClick={() => downloadServiceRequestsExcel(requests)}>
+                        Service Requests (.xls)
+                      </MenuItem>
+                      <MenuItem onClick={() => downloadServiceRequestsCSV(requests)}>
+                        Service Requests (.csv)
+                      </MenuItem>
+                      {productRequests.length > 0 && (
+                        <MenuItem onClick={() => downloadProductRequestsExcel(productRequests)}>
+                          Product Requests (.xls)
+                        </MenuItem>
+                      )}
+                      {productRequests.length > 0 && (
+                        <MenuItem onClick={() => downloadProductRequestsCSV(productRequests)}>
+                          Product Requests (.csv)
+                        </MenuItem>
+                      )}
+                    </MenuList>
+                  </MenuPopover>
+                </Menu>
+                {isManager && (
                   <Button
                     appearance="primary"
                     icon={<AddRegular />}
                     onClick={() => setShowQuickCreate(true)}
+                    size="small"
                     style={{ backgroundColor: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.3)', color: 'white' }}
                   >
                     Quick Create
                   </Button>
-                </div>
+                )}
               </div>
             </div>
           )}
         </div>
         <HeroCollapseToggle isCollapsed={isCollapsed} onToggle={toggle} />
-      </div>
-
-      {/* Header */}
-      <div className={styles.header}>
-        <div className={styles.headerLeft}>
-          <Text className={styles.title}>Sales Pipeline</Text>
-          <Text className={styles.subtitle}>
-            {isManager ? 'Organization-wide' : 'Your'} pre-sales pipeline and performance metrics
-          </Text>
-        </div>
-        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-        {isManager && (
-          <Button
-            appearance="primary"
-            icon={<AddRegular />}
-            size="small"
-            style={{ backgroundColor: DW_COLORS.primary }}
-            onClick={() => setShowQuickCreate(true)}
-          >
-            Quick Create
-          </Button>
-        )}
-        <Menu>
-          <MenuTrigger disableButtonEnhancement>
-            <Button
-              appearance="outline"
-              icon={<ArrowDownloadRegular />}
-              size="small"
-            >
-              Export
-            </Button>
-          </MenuTrigger>
-          <MenuPopover>
-            <MenuList>
-              <MenuItem onClick={() => downloadServiceRequestsExcel(requests)}>
-                Service Requests (.xls)
-              </MenuItem>
-              <MenuItem onClick={() => downloadServiceRequestsCSV(requests)}>
-                Service Requests (.csv)
-              </MenuItem>
-              {productRequests.length > 0 && (
-                <MenuItem onClick={() => downloadProductRequestsExcel(productRequests)}>
-                  Product Requests (.xls)
-                </MenuItem>
-              )}
-              {productRequests.length > 0 && (
-                <MenuItem onClick={() => downloadProductRequestsCSV(productRequests)}>
-                  Product Requests (.csv)
-                </MenuItem>
-              )}
-            </MenuList>
-          </MenuPopover>
-        </Menu>
-        </div>
       </div>
 
       {/* Error Message */}

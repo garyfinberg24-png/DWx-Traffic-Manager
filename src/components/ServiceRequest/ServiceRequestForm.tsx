@@ -25,7 +25,7 @@ import {
   shorthands,
   Text,
   Spinner,
-  ProgressBar,
+
   MessageBar,
   MessageBarBody,
   MessageBarTitle,
@@ -55,6 +55,7 @@ import {
   BriefcaseRegular,
   CalendarLtrRegular,
   SaveRegular,
+  DocumentAdd24Regular,
 } from '@fluentui/react-icons';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
@@ -134,7 +135,14 @@ const useStyles = makeStyles({
     fontSize: '22px',
     fontWeight: '700',
     color: 'white',
+    display: 'flex',
+    alignItems: 'center',
+    ...shorthands.gap('10px'),
     marginBottom: '4px',
+  },
+  heroIconSR: {
+    color: 'rgba(255,255,255,0.7)',
+    fontSize: '22px',
   },
   heroTitleAccentSR: {
     color: '#86efac',
@@ -212,58 +220,37 @@ const useStyles = makeStyles({
     boxShadow: '0 1.6px 3.6px 0 rgba(0,0,0,.13), 0 0.3px 0.9px 0 rgba(0,0,0,.11)',
     overflow: 'hidden',
   },
-  cardHeader: {
-    display: 'flex',
-    alignItems: 'flex-start',
-    gap: '16px',
-    padding: '24px',
-    borderBottom: '1px solid #e1e1e1',
-    backgroundColor: '#fafafa',
-  },
-  cardHeaderIcon: {
-    width: '48px',
-    height: '48px',
-    borderRadius: '10px',
-    background: 'linear-gradient(135deg, #1e6b7b 0%, #2d8a9c 100%)',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexShrink: 0,
-    color: 'white',
-  },
-  cardHeaderContent: {
-    flex: 1,
-  },
-  cardTitle: {
-    fontSize: '22px',
-    fontWeight: '600',
-    color: '#242424',
-    marginBottom: '4px',
-  },
-  cardSubtitle: {
-    fontSize: '14px',
-    color: '#616161',
-  },
   progressContainer: {
-    padding: '16px 24px',
+    padding: '14px 24px 10px',
     backgroundColor: '#f5f5f5',
-    borderBottom: '1px solid #e1e1e1',
   },
   progressSteps: {
     display: 'flex',
     justifyContent: 'space-between',
-    marginBottom: '12px',
+    marginBottom: '6px',
+    position: 'relative',
+  },
+  progressConnector: {
+    position: 'absolute',
+    top: '12px',
+    left: '10%',
+    right: '10%',
+    height: '2px',
+    backgroundColor: '#e1e1e1',
+    zIndex: 0,
   },
   progressStep: {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    gap: '4px',
+    gap: '3px',
     flex: 1,
+    position: 'relative',
+    zIndex: 1,
   },
   progressStepNumber: {
-    width: '28px',
-    height: '28px',
+    width: '24px',
+    height: '24px',
     borderRadius: '50%',
     display: 'flex',
     alignItems: 'center',
@@ -826,6 +813,11 @@ export const ServiceRequestForm: React.FC<ServiceRequestFormProps> = ({
   };
 
   const handleServiceSelect = (service: DWService) => {
+    if (selectedService?.Id === service.Id) {
+      // Already selected — advance to next step
+      handleNext();
+      return;
+    }
     setSelectedService(service);
     setValue('serviceId', service.Id);
     setValue('serviceName', service.Title);
@@ -1057,18 +1049,41 @@ export const ServiceRequestForm: React.FC<ServiceRequestFormProps> = ({
         </div>
       ) : (
         <div className={styles.servicesGrid}>
-          {services.map((service) => (
-            <div
-              key={service.Id}
-              onClick={() => handleServiceSelect(service)}
-              style={{
-                border: selectedService?.Id === service.Id ? '2px solid #1e6b7b' : '2px solid transparent',
-                borderRadius: '14px',
-              }}
-            >
-              <ServiceCard service={service} onClick={handleServiceSelect} />
-            </div>
-          ))}
+          {services.map((service) => {
+            const isSelected = selectedService?.Id === service.Id;
+            return (
+              <div
+                key={service.Id}
+                style={{
+                  position: 'relative',
+                  borderRadius: '14px',
+                  boxShadow: isSelected ? '0 0 0 2px #1e6b7b, 0 4px 16px rgba(30,107,123,0.18)' : 'none',
+                  transform: isSelected ? 'scale(1.02)' : 'none',
+                  transition: 'box-shadow 0.2s ease, transform 0.2s ease',
+                }}
+              >
+                {isSelected && (
+                  <div style={{
+                    position: 'absolute',
+                    top: '-6px',
+                    right: '-6px',
+                    width: '22px',
+                    height: '22px',
+                    borderRadius: '50%',
+                    backgroundColor: '#1e6b7b',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    zIndex: 2,
+                    boxShadow: '0 2px 6px rgba(0,0,0,0.2)',
+                  }}>
+                    <CheckmarkRegular style={{ color: 'white', width: '14px', height: '14px' }} />
+                  </div>
+                )}
+                <ServiceCard service={service} onClick={handleServiceSelect} />
+              </div>
+            );
+          })}
         </div>
       )}
     </div>
@@ -1790,10 +1805,11 @@ export const ServiceRequestForm: React.FC<ServiceRequestFormProps> = ({
             <div className={styles.heroContentSR}>
               <div className={styles.heroLeftSR}>
                 <div className={styles.heroTitleSR}>
-                  New Service <span className={styles.heroTitleAccentSR}>Request</span>
+                  <DocumentAdd24Regular className={styles.heroIconSR} />
+                  <span>New Service <span className={styles.heroTitleAccentSR}>Request</span></span>
                 </div>
                 <div className={styles.heroSubtitleSR}>
-                  Submit a request for DWx pre-sales services
+                  Select and submit a request for a DWx pre-sales service
                 </div>
               </div>
               <div className={styles.heroSteps}>
@@ -1824,24 +1840,10 @@ export const ServiceRequestForm: React.FC<ServiceRequestFormProps> = ({
       </div>
 
       <div className={styles.card}>
-        {/* Header */}
-        <div className={styles.cardHeader}>
-          <div className={styles.cardHeaderIcon}>
-            <DocumentRegular style={{ width: '24px', height: '24px' }} />
-          </div>
-          <div className={styles.cardHeaderContent}>
-            <Text className={styles.cardTitle}>
-              New Service Request{selectedService ? ` - ${selectedService.Title}` : ''}
-            </Text>
-            <Text className={styles.cardSubtitle} block>
-              Request a pre-sales consultation for DW services
-            </Text>
-          </div>
-        </div>
-
         {/* Progress Indicator */}
         <div className={styles.progressContainer}>
           <div className={styles.progressSteps}>
+            <div className={styles.progressConnector} />
             {STEPS.map((step) => {
               const status = getStepStatus(step.id);
               return (
@@ -1866,7 +1868,6 @@ export const ServiceRequestForm: React.FC<ServiceRequestFormProps> = ({
               );
             })}
           </div>
-          <ProgressBar value={(currentStep - 1) / 5} />
         </div>
 
         {/* Error Message */}
@@ -1898,16 +1899,6 @@ export const ServiceRequestForm: React.FC<ServiceRequestFormProps> = ({
                 </div>
               </MessageBarBody>
             </MessageBar>
-          </div>
-        )}
-
-        {/* Service Step Instruction (shown below stepper, above cards) */}
-        {currentStep === 1 && (
-          <div style={{ padding: '12px 24px 0' }}>
-            <Text className={styles.sectionTitle}>Select a Service</Text>
-            <Text className={styles.sectionHint}>
-              Choose the service you'd like to request a pre-sales consultation for.
-            </Text>
           </div>
         )}
 
