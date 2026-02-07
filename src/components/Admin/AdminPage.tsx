@@ -22,6 +22,7 @@ import {
   BookOpen24Regular,
   ChevronDownRegular,
   ChevronRightRegular,
+  Clock24Regular,
 } from '@fluentui/react-icons';
 import { TeamMemberList } from './TeamMemberList';
 import { ClientList } from './ClientList';
@@ -35,12 +36,13 @@ import { ServiceManagement } from './ServiceManagement';
 import { SpecialistManagement } from './SpecialistManagement';
 import { LandingPageManagement } from './LandingPageManagement';
 import { KnowledgeBaseManagement } from './KnowledgeBaseManagement';
+import { SLAManagement } from './SLAManagement';
 
 // ============================================================================
 // Types
 // ============================================================================
 
-type TabValue = 'team' | 'clients' | 'account-managers' | 'services' | 'specialists' | 'managers' | 'guests' | 'checklist' | 'documents' | 'landing-page' | 'knowledge-base' | 'provisioning';
+type TabValue = 'team' | 'clients' | 'account-managers' | 'services' | 'specialists' | 'managers' | 'guests' | 'checklist' | 'documents' | 'landing-page' | 'knowledge-base' | 'sla-config' | 'provisioning';
 
 interface NavItem {
   value: TabValue;
@@ -84,6 +86,7 @@ const NAV_GROUPS: NavGroup[] = [
     label: 'Data & Operations',
     items: [
       { value: 'clients', label: 'Clients', icon: Building24Regular },
+      { value: 'sla-config', label: 'SLA Configuration', icon: Clock24Regular },
       { value: 'checklist', label: 'Checklist', icon: CheckboxChecked24Regular },
       { value: 'documents', label: 'Documents', icon: FolderOpen24Regular },
     ],
@@ -344,6 +347,7 @@ export const AdminPage: React.FC = () => {
             {selectedTab === 'documents' && <DocumentManagement />}
             {selectedTab === 'landing-page' && <LandingPageManagement />}
             {selectedTab === 'knowledge-base' && <KnowledgeBaseManagement />}
+            {selectedTab === 'sla-config' && <SLAManagement />}
             {selectedTab === 'provisioning' && <DWxSharePointProvisioning />}
           </div>
         </div>

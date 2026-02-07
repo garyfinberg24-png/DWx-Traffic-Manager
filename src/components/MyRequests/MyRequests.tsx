@@ -1003,6 +1003,7 @@ export const MyRequests: React.FC<MyRequestsProps> = ({ onNewRequest }) => {
                   <th className={styles.listTh}>Service</th>
                   <th className={styles.listTh}>Stage</th>
                   <th className={styles.listTh}>Interest</th>
+                  <th className={styles.listTh}>Account Manager</th>
                   <th className={styles.listTh}>Specialist</th>
                   <th className={styles.listTh} style={{ textAlign: 'right' }}>Deal Value</th>
                   <th className={styles.listTh} style={{ textAlign: 'right' }}>Probability</th>
@@ -1050,8 +1051,19 @@ export const MyRequests: React.FC<MyRequestsProps> = ({ onNewRequest }) => {
                         {request.InterestLevel}
                       </span>
                     </td>
+                    <td className={styles.listTd}>
+                      <div style={{ lineHeight: '1.3' }}>
+                        <div style={{ fontWeight: 500 }}>{request.AccountManagerName}</div>
+                        <div style={{ fontSize: '11px', color: '#616161' }}>{request.AccountManagerEmail}</div>
+                      </div>
+                    </td>
                     <td className={styles.listTd} style={{ color: request.AssignedSpecialistName ? '#242424' : '#a0a0a0' }}>
-                      {request.AssignedSpecialistName || 'Unassigned'}
+                      {request.AssignedSpecialistName ? (
+                        <div style={{ lineHeight: '1.3' }}>
+                          <div style={{ fontWeight: 500 }}>{request.AssignedSpecialistName}</div>
+                          <div style={{ fontSize: '11px', color: '#616161' }}>{request.AssignedSpecialistEmail || ''}</div>
+                        </div>
+                      ) : 'Unassigned'}
                     </td>
                     <td className={styles.listTd} style={{ textAlign: 'right', fontWeight: '500' }}>
                       {request.DealValue ? formatCurrency(request.DealValue) : '—'}
