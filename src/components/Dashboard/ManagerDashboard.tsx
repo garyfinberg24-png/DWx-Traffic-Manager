@@ -5,10 +5,28 @@ import {
   Text,
   Spinner,
   Button,
-  Tab,
-  TabList,
+  tokens,
+  shorthands,
+  Badge,
 } from '@fluentui/react-components';
-import { ArrowClockwise24Regular, ArrowDownload24Regular, CalendarMonth24Regular, Timeline24Regular, Trophy24Regular, Money24Regular, TargetRegular, DocumentFolder24Regular, ChartMultipleRegular, Clock24Regular } from '@fluentui/react-icons';
+import {
+  ArrowClockwise24Regular,
+  ArrowDownload24Regular,
+  CalendarMonth24Regular,
+  Timeline24Regular,
+  Trophy24Regular,
+  Money24Regular,
+  TargetRegular,
+  DocumentFolder24Regular,
+  ChartMultipleRegular,
+  Clock24Regular,
+  Board24Regular,
+  People24Regular,
+  Building24Regular,
+  CheckboxChecked24Regular,
+  ChevronDownRegular,
+  ChevronRightRegular,
+} from '@fluentui/react-icons';
 import { useAuth } from '../../contexts/AuthContext';
 import { dashboardService } from '../../services/DashboardService';
 import { DashboardData, DashboardFilters } from '../../types/Dashboard';
@@ -39,35 +57,106 @@ import { SalesFunnelDashboard } from '../SalesFunnel/SalesFunnelDashboard';
 import { RequestsQueue } from '../SalesFunnel/RequestsQueue';
 import { serviceRequestService } from '../../services/ServiceRequestService';
 
+// ============================================================================
+// Types
+// ============================================================================
+
+type DashboardTab = 'overview' | 'pipeline' | 'approvals' | 'calendar' | 'timeline' | 'performance' | 'clients' | 'commercial' | 'gamification' | 'resources' | 'winloss' | 'sla';
+
+interface NavItem {
+  value: DashboardTab;
+  label: string;
+  icon: React.ElementType;
+  badge?: 'count' | 'warning';
+}
+
+interface NavGroup {
+  id: string;
+  label: string;
+  items: NavItem[];
+}
+
+// ============================================================================
+// Navigation Structure
+// ============================================================================
+
+const NAV_GROUPS: NavGroup[] = [
+  {
+    id: 'pipeline',
+    label: 'Pipeline',
+    items: [
+      { value: 'overview', label: 'Overview', icon: Board24Regular },
+      { value: 'pipeline', label: 'Sales Pipeline', icon: TargetRegular },
+      { value: 'approvals', label: 'Action Queue', icon: CheckboxChecked24Regular, badge: 'count' },
+    ],
+  },
+  {
+    id: 'schedule',
+    label: 'Schedule',
+    items: [
+      { value: 'calendar', label: 'Calendar', icon: CalendarMonth24Regular },
+      { value: 'timeline', label: 'Timeline', icon: Timeline24Regular },
+    ],
+  },
+  {
+    id: 'analytics',
+    label: 'Analytics',
+    items: [
+      { value: 'performance', label: 'AM Performance', icon: People24Regular },
+      { value: 'clients', label: 'Client Activity', icon: Building24Regular },
+      { value: 'winloss', label: 'Win/Loss', icon: ChartMultipleRegular },
+    ],
+  },
+  {
+    id: 'operations',
+    label: 'Operations',
+    items: [
+      { value: 'commercial', label: 'Commercial', icon: Money24Regular },
+      { value: 'gamification', label: 'Gamification', icon: Trophy24Regular },
+      { value: 'resources', label: 'Resources', icon: DocumentFolder24Regular },
+      { value: 'sla', label: 'SLA Tracking', icon: Clock24Regular, badge: 'warning' },
+    ],
+  },
+];
+
+const VALID_TABS = NAV_GROUPS.flatMap(g => g.items.map(i => i.value));
+
+// ============================================================================
+// Styles
+// ============================================================================
+
 const useStyles = makeStyles({
   container: {
+    display: 'flex',
+    flexDirection: 'column',
+    ...shorthands.padding('24px', '64px'),
     maxWidth: '1400px',
-    margin: '0 auto',
-    padding: '24px 64px',
+    ...shorthands.margin('0', 'auto'),
+    width: '100%',
   },
   header: {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    marginBottom: '24px',
+    marginBottom: '16px',
   },
   titleSection: {
     display: 'flex',
     flexDirection: 'column',
   },
   title: {
-    fontSize: '24px',
+    fontSize: '22px',
     fontWeight: '600',
     color: '#242424',
-    marginBottom: '4px',
+    marginBottom: '2px',
   },
   subtitle: {
-    fontSize: '14px',
+    fontSize: '13px',
     color: '#616161',
   },
   actions: {
     display: 'flex',
-    gap: '12px',
+    gap: '10px',
     alignItems: 'center',
   },
   refreshBtn: {
@@ -83,11 +172,21 @@ const useStyles = makeStyles({
     },
   },
   refreshTime: {
-    fontSize: '12px',
-    color: '#616161',
+    fontSize: '11px',
+    color: '#9e9e9e',
     display: 'flex',
     alignItems: 'center',
     gap: '4px',
+  },
+  debugBar: {
+    ...shorthands.padding('6px', '12px'),
+    backgroundColor: '#f3f2f1',
+    ...shorthands.borderRadius('4px'),
+    marginBottom: '12px',
+    fontSize: '11px',
+    color: '#616161',
+    display: 'flex',
+    gap: '16px',
   },
   loadingContainer: {
     display: 'flex',
@@ -98,10 +197,125 @@ const useStyles = makeStyles({
   errorContainer: {
     backgroundColor: '#fde7e9',
     borderLeft: '4px solid #d13438',
-    padding: '16px',
-    marginBottom: '24px',
-    borderRadius: '4px',
+    ...shorthands.padding('16px'),
+    marginBottom: '16px',
+    ...shorthands.borderRadius('4px'),
   },
+
+  // Layout: sidebar + content
+  layoutCard: {
+    backgroundColor: '#ffffff',
+    ...shorthands.border('1px', 'solid', '#e1e1e1'),
+    ...shorthands.borderRadius('8px'),
+    boxShadow: '0 1px 3px rgba(0,0,0,0.08)',
+    ...shorthands.overflow('hidden'),
+  },
+  layoutWrapper: {
+    display: 'flex',
+    minHeight: '600px',
+  },
+
+  // Sidebar
+  sidebar: {
+    width: '220px',
+    flexShrink: 0,
+    borderRight: `1px solid ${tokens.colorNeutralStroke2}`,
+    overflowY: 'auto',
+    overflowX: 'hidden',
+    backgroundColor: '#fafbfc',
+    ...shorthands.padding('8px', '0'),
+  },
+  navGroup: {
+    borderBottom: `1px solid ${tokens.colorNeutralStroke2}`,
+    '&:last-child': {
+      borderBottom: 'none',
+    },
+  },
+  groupHeader: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    ...shorthands.padding('10px', '16px'),
+    cursor: 'pointer',
+    backgroundColor: 'transparent',
+    ...shorthands.border('none'),
+    width: '100%',
+    textAlign: 'left' as const,
+    ':hover': {
+      backgroundColor: tokens.colorNeutralBackground2Hover,
+    },
+  },
+  groupLabel: {
+    fontSize: tokens.fontSizeBase200,
+    fontWeight: tokens.fontWeightSemibold,
+    color: tokens.colorNeutralForeground2,
+    textTransform: 'uppercase' as const,
+    letterSpacing: '0.5px',
+  },
+  chevronIcon: {
+    color: tokens.colorNeutralForeground3,
+    width: '14px',
+    height: '14px',
+  },
+  navItems: {
+    display: 'flex',
+    flexDirection: 'column',
+    ...shorthands.padding('2px', '0', '8px'),
+  },
+  navItem: {
+    display: 'flex',
+    alignItems: 'center',
+    ...shorthands.gap('10px'),
+    ...shorthands.padding('9px', '16px', '9px', '20px'),
+    cursor: 'pointer',
+    ...shorthands.border('none'),
+    backgroundColor: 'transparent',
+    width: '100%',
+    textAlign: 'left' as const,
+    borderLeft: '3px solid transparent',
+    ':hover': {
+      backgroundColor: tokens.colorNeutralBackground2Hover,
+    },
+  },
+  navItemActive: {
+    backgroundColor: 'rgba(30, 107, 123, 0.08)',
+    borderLeft: `3px solid ${DW_COLORS.teal}`,
+    ':hover': {
+      backgroundColor: 'rgba(30, 107, 123, 0.12)',
+    },
+  },
+  navIcon: {
+    width: '18px',
+    height: '18px',
+    color: tokens.colorNeutralForeground2,
+    flexShrink: 0,
+  },
+  navIconActive: {
+    color: DW_COLORS.teal,
+  },
+  navLabel: {
+    fontSize: tokens.fontSizeBase300,
+    fontWeight: tokens.fontWeightRegular,
+    color: tokens.colorNeutralForeground1,
+  },
+  navLabelActive: {
+    fontWeight: tokens.fontWeightSemibold,
+    color: DW_COLORS.teal,
+  },
+  navBadge: {
+    marginLeft: 'auto',
+  },
+
+  // Content area
+  contentArea: {
+    flex: 1,
+    overflowY: 'auto',
+    overflowX: 'hidden',
+    ...shorthands.padding('24px'),
+    maxHeight: 'calc(100vh - 220px)',
+  },
+
+  // Overview tab sub-styles
   chartsRow: {
     display: 'grid',
     gridTemplateColumns: '1fr 1fr',
@@ -114,24 +328,11 @@ const useStyles = makeStyles({
   trendsSection: {
     marginBottom: '24px',
   },
-  tablesRow: {
-    display: 'grid',
-    gridTemplateColumns: '1fr 1fr',
-    gap: '16px',
-    '@media (max-width: 1100px)': {
-      gridTemplateColumns: '1fr',
-    },
-  },
-  tabContent: {
-    marginTop: '24px',
-  },
-  tabList: {
-    borderBottom: '1px solid #e1e1e1',
-    marginBottom: '0',
-  },
 });
 
-type DashboardTab = 'overview' | 'pipeline' | 'approvals' | 'calendar' | 'timeline' | 'performance' | 'clients' | 'commercial' | 'gamification' | 'resources' | 'winloss' | 'sla';
+// ============================================================================
+// Component
+// ============================================================================
 
 export const ManagerDashboard: React.FC = () => {
   const styles = useStyles();
@@ -146,22 +347,38 @@ export const ManagerDashboard: React.FC = () => {
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
   // Read tab from URL params, default to 'overview'
-  const validTabs = ['overview', 'pipeline', 'approvals', 'calendar', 'timeline', 'performance', 'clients', 'commercial', 'gamification', 'resources', 'winloss', 'sla'];
   const tabFromUrl = searchParams.get('tab') as DashboardTab | null;
   const [selectedTab, setSelectedTab] = useState<DashboardTab>(
-    tabFromUrl && validTabs.includes(tabFromUrl)
+    tabFromUrl && VALID_TABS.includes(tabFromUrl)
       ? tabFromUrl
       : 'overview'
   );
 
+  // Sidebar group expand/collapse
+  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(
+    new Set(NAV_GROUPS.map(g => g.id))
+  );
+
+  const toggleGroup = (groupId: string) => {
+    setExpandedGroups(prev => {
+      const next = new Set(prev);
+      if (next.has(groupId)) {
+        next.delete(groupId);
+      } else {
+        next.add(groupId);
+      }
+      return next;
+    });
+  };
+
   // Handle URL parameters for deep linking
   useEffect(() => {
     const tab = searchParams.get('tab') as DashboardTab | null;
-
-    if (tab && validTabs.includes(tab)) {
+    if (tab && VALID_TABS.includes(tab)) {
       setSelectedTab(tab);
     }
   }, [searchParams]);
+
   const [filters, setFilters] = useState<DashboardFilters>({
     dateRange: {
       start: startOfDay(subDays(new Date(), 30)),
@@ -182,7 +399,6 @@ export const ManagerDashboard: React.FC = () => {
         allRequests = await serviceRequestService.getRequests();
       } catch (requestErr) {
         console.warn('Could not load service requests:', requestErr);
-        // Continue with empty requests - list may not exist yet
       }
       setServiceRequests(allRequests);
 
@@ -192,7 +408,6 @@ export const ManagerDashboard: React.FC = () => {
         allBookings = await dashboardService.getAllBookings(filters);
       } catch (bookingErr) {
         console.warn('Could not load legacy bookings:', bookingErr);
-        // Continue with empty bookings - this is expected for new DWx TM deployments
       }
       setBookings(allBookings);
 
@@ -253,6 +468,23 @@ export const ManagerDashboard: React.FC = () => {
     setSelectedBooking(null);
   };
 
+  // Helper to get badge for nav item
+  const renderNavBadge = (item: NavItem) => {
+    if (item.badge === 'count' && pendingRequestsCount > 0) {
+      return (
+        <Badge
+          size="small"
+          appearance="filled"
+          color="danger"
+          className={styles.navBadge}
+        >
+          {pendingRequestsCount}
+        </Badge>
+      );
+    }
+    return null;
+  };
+
   if (isLoading && !dashboardData) {
     return (
       <div className={styles.container}>
@@ -270,7 +502,7 @@ export const ManagerDashboard: React.FC = () => {
         <div className={styles.titleSection}>
           <Text className={styles.title}>Manager Dashboard</Text>
           <Text className={styles.subtitle}>
-            Overview of bookings, pipeline, and team performance
+            Overview of pipeline, performance, and team analytics
           </Text>
         </div>
         <div className={styles.actions}>
@@ -287,7 +519,7 @@ export const ManagerDashboard: React.FC = () => {
             onClick={handleExport}
             disabled={isLoading || bookings.length === 0}
           >
-            Export to Excel
+            Export
           </Button>
           <Button
             appearance="primary"
@@ -301,17 +533,8 @@ export const ManagerDashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* Debug info - helps diagnose user-specific issues */}
-      <div style={{
-        padding: '6px 12px',
-        backgroundColor: '#f3f2f1',
-        borderRadius: '4px',
-        marginBottom: '12px',
-        fontSize: '11px',
-        color: '#616161',
-        display: 'flex',
-        gap: '16px',
-      }}>
+      {/* Debug info */}
+      <div className={styles.debugBar}>
         <span>Logged in: <strong>{user?.email || 'unknown'}</strong></span>
         <span>Manager: <strong>{user?.isManager ? 'Yes' : 'No'}</strong></span>
         <span>Service Requests: <strong>{serviceRequests.length}</strong></span>
@@ -336,122 +559,152 @@ export const ManagerDashboard: React.FC = () => {
         accountManagers={accountManagers}
       />
 
-      {/* Tabs */}
-      <TabList
-        className={styles.tabList}
-        selectedValue={selectedTab}
-        onTabSelect={(_, data) => setSelectedTab(data.value as DashboardTab)}
-      >
-        <Tab value="overview">Overview</Tab>
-        <Tab value="pipeline" icon={<TargetRegular />}>Pipeline</Tab>
-        <Tab value="approvals">
-          Action Queue {pendingRequestsCount > 0 && `(${pendingRequestsCount})`}
-        </Tab>
-        <Tab value="calendar" icon={<CalendarMonth24Regular />}>Calendar</Tab>
-        <Tab value="timeline" icon={<Timeline24Regular />}>Timeline</Tab>
-        <Tab value="performance">Account Manager Performance</Tab>
-        <Tab value="clients">Client Activity</Tab>
-        <Tab value="commercial" icon={<Money24Regular />}>Commercial</Tab>
-        <Tab value="gamification" icon={<Trophy24Regular />}>Gamification</Tab>
-        <Tab value="resources" icon={<DocumentFolder24Regular />}>Resources</Tab>
-        <Tab value="winloss" icon={<ChartMultipleRegular />}>Win/Loss</Tab>
-        <Tab value="sla" icon={<Clock24Regular />}>SLA</Tab>
-      </TabList>
+      {/* Sidebar + Content Layout */}
+      <div className={styles.layoutCard}>
+        <div className={styles.layoutWrapper}>
+          {/* Sidebar Navigation */}
+          <nav className={styles.sidebar}>
+            {NAV_GROUPS.map((group) => {
+              const isExpanded = expandedGroups.has(group.id);
+              return (
+                <div key={group.id} className={styles.navGroup}>
+                  <button
+                    className={styles.groupHeader}
+                    onClick={() => toggleGroup(group.id)}
+                    aria-expanded={isExpanded}
+                    aria-label={`${group.label} section`}
+                  >
+                    <Text className={styles.groupLabel}>{group.label}</Text>
+                    {isExpanded ? (
+                      <ChevronDownRegular className={styles.chevronIcon} />
+                    ) : (
+                      <ChevronRightRegular className={styles.chevronIcon} />
+                    )}
+                  </button>
 
-      {dashboardData && (
-        <div className={styles.tabContent}>
-          {/* Overview Tab */}
-          {selectedTab === 'overview' && (
-            <>
-              {/* KPI Cards */}
-              <KPICards
-                kpis={dashboardData.kpis}
-                recentBookings={dashboardData.recentBookings}
-                bookingsThisMonth={dashboardData.bookingsThisMonth}
-              />
+                  {isExpanded && (
+                    <div className={styles.navItems}>
+                      {group.items.map((item) => {
+                        const isActive = selectedTab === item.value;
+                        const IconComponent = item.icon;
+                        return (
+                          <button
+                            key={item.value}
+                            className={`${styles.navItem} ${isActive ? styles.navItemActive : ''}`}
+                            onClick={() => setSelectedTab(item.value)}
+                            aria-current={isActive ? 'page' : undefined}
+                          >
+                            <IconComponent
+                              className={`${styles.navIcon} ${isActive ? styles.navIconActive : ''}`}
+                            />
+                            <Text
+                              className={`${styles.navLabel} ${isActive ? styles.navLabelActive : ''}`}
+                            >
+                              {item.label}
+                            </Text>
+                            {renderNavBadge(item)}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </nav>
 
-              {/* Charts Row */}
-              <div className={styles.chartsRow}>
-                <StatusChart data={dashboardData.statusBreakdown} />
-                <TypeChart data={dashboardData.typeDistribution} />
-              </div>
+          {/* Content Area */}
+          {dashboardData && (
+            <div className={styles.contentArea}>
+              {/* Overview Tab */}
+              {selectedTab === 'overview' && (
+                <>
+                  <KPICards
+                    kpis={dashboardData.kpis}
+                    recentBookings={dashboardData.recentBookings}
+                    bookingsThisMonth={dashboardData.bookingsThisMonth}
+                  />
+                  <div className={styles.chartsRow}>
+                    <StatusChart data={dashboardData.statusBreakdown} />
+                    <TypeChart data={dashboardData.typeDistribution} />
+                  </div>
+                  <div className={styles.trendsSection}>
+                    <TrendsChart data={dashboardData.trends} />
+                  </div>
+                </>
+              )}
 
-              {/* Trends Chart */}
-              <div className={styles.trendsSection}>
-                <TrendsChart data={dashboardData.trends} />
-              </div>
-            </>
-          )}
+              {/* Pipeline Tab */}
+              {selectedTab === 'pipeline' && (
+                <SalesFunnelDashboard />
+              )}
 
-          {/* Pipeline Tab - DWx Traffic Manager Sales Funnel */}
-          {selectedTab === 'pipeline' && (
-            <SalesFunnelDashboard />
-          )}
+              {/* Action Queue Tab */}
+              {selectedTab === 'approvals' && (
+                <RequestsQueue
+                  requests={serviceRequests}
+                  onRequestUpdated={handleRequestUpdated}
+                />
+              )}
 
-          {/* Action Queue Tab - DWx Service Requests */}
-          {selectedTab === 'approvals' && (
-            <RequestsQueue
-              requests={serviceRequests}
-              onRequestUpdated={handleRequestUpdated}
-            />
-          )}
+              {/* Performance Tab */}
+              {selectedTab === 'performance' && (
+                <AccountManagerTable data={dashboardData.accountManagerMetrics} />
+              )}
 
-          {/* Performance Tab */}
-          {selectedTab === 'performance' && (
-            <AccountManagerTable data={dashboardData.accountManagerMetrics} />
-          )}
+              {/* Clients Tab */}
+              {selectedTab === 'clients' && (
+                <ClientTable data={dashboardData.clientMetrics} />
+              )}
 
-          {/* Clients Tab */}
-          {selectedTab === 'clients' && (
-            <ClientTable data={dashboardData.clientMetrics} />
-          )}
+              {/* Calendar Tab */}
+              {selectedTab === 'calendar' && (
+                <CalendarView
+                  bookings={bookings}
+                  onBookingClick={handleBookingClick}
+                />
+              )}
 
-          {/* Calendar Tab */}
-          {selectedTab === 'calendar' && (
-            <CalendarView
-              bookings={bookings}
-              onBookingClick={handleBookingClick}
-            />
-          )}
+              {/* Timeline Tab */}
+              {selectedTab === 'timeline' && (
+                <TimelineView
+                  bookings={bookings}
+                  onBookingClick={handleBookingClick}
+                />
+              )}
 
-          {/* Timeline Tab */}
-          {selectedTab === 'timeline' && (
-            <TimelineView
-              bookings={bookings}
-              onBookingClick={handleBookingClick}
-            />
-          )}
+              {/* Commercial Tab */}
+              {selectedTab === 'commercial' && (
+                <CommercialTab bookings={bookings} />
+              )}
 
-          {/* Commercial Tab */}
-          {selectedTab === 'commercial' && (
-            <CommercialTab bookings={bookings} />
-          )}
+              {/* Gamification Tab */}
+              {selectedTab === 'gamification' && (
+                <GamificationTab
+                  bookings={bookings}
+                  currentUserEmail={user?.email}
+                  isManager={true}
+                />
+              )}
 
-          {/* Gamification Tab */}
-          {selectedTab === 'gamification' && (
-            <GamificationTab
-              bookings={bookings}
-              currentUserEmail={user?.email}
-              isManager={true}
-            />
-          )}
+              {/* Resources Tab */}
+              {selectedTab === 'resources' && (
+                <ResourcesTab />
+              )}
 
-          {/* Resources Tab */}
-          {selectedTab === 'resources' && (
-            <ResourcesTab />
-          )}
+              {/* Win/Loss Tab */}
+              {selectedTab === 'winloss' && (
+                <WinLossTab requests={serviceRequests} />
+              )}
 
-          {/* Win/Loss Tab */}
-          {selectedTab === 'winloss' && (
-            <WinLossTab requests={serviceRequests} />
-          )}
-
-          {/* SLA Tab */}
-          {selectedTab === 'sla' && (
-            <SLADashboardTab requests={serviceRequests} />
+              {/* SLA Tab */}
+              {selectedTab === 'sla' && (
+                <SLADashboardTab requests={serviceRequests} />
+              )}
+            </div>
           )}
         </div>
-      )}
+      </div>
 
       {/* Booking Details Modal */}
       <BookingDetails

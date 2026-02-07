@@ -1105,6 +1105,82 @@ const followUpReminderManager = (
 };
 
 // ============================================================================
+// SLA Breach / At-Risk Templates
+// ============================================================================
+
+/**
+ * 33. SLA breach/at-risk alert — sent to Account Manager
+ */
+const slaBreachAlertAM = (
+  request: ServiceRequest,
+  slaInfo: { status: 'at-risk' | 'breached'; daysInStage: number; targetDays: number; stage: string }
+): { subject: string; body: string } => {
+  const isBreached = slaInfo.status === 'breached';
+  const gradient = isBreached ? GRAD.danger : GRAD.warning;
+  const statusLabel = isBreached ? 'SLA BREACHED' : 'SLA AT RISK';
+  const overBy = slaInfo.daysInStage - slaInfo.targetDays;
+
+  const content = `
+    ${callout(
+      isBreached ? '#dc2626' : '#f7630c',
+      isBreached ? '#fee2e2' : '#fff4ce',
+      `<strong>${statusLabel}:</strong> This deal has been in the ${escapeHtml(slaInfo.stage)} stage for ${slaInfo.daysInStage} business days (target: ${slaInfo.targetDays} days)${isBreached ? ` — ${overBy} day${overBy !== 1 ? 's' : ''} over target` : ''}`
+    )}
+    <p style="margin:0 0 16px;color:#323130;">Hi ${escapeHtml(request.AccountManagerName)},</p>
+    <p style="margin:0 0 16px;color:#323130;">The following deal ${isBreached ? 'has breached' : 'is approaching'} its SLA target and requires your immediate attention:</p>
+    ${row('Deal', escapeHtml(request.Title))}
+    ${row('Client', escapeHtml(request.ClientName))}
+    ${row('Service', escapeHtml(request.ServiceName))}
+    ${row('Current Stage', stageBadge(slaInfo.stage))}
+    ${row('Days in Stage', `<strong style="color:${isBreached ? '#dc2626' : '#f7630c'};">${slaInfo.daysInStage}</strong> / ${slaInfo.targetDays} target`)}
+    ${row('Deal Value', formatCurrency(request.DealValue))}
+    ${request.AssignedSpecialistName ? row('Specialist', escapeHtml(request.AssignedSpecialistName)) : ''}
+    <p style="margin:16px 0 0;color:#323130;">${isBreached ? 'Please take immediate action to progress this deal or update the pipeline.' : 'Please review and take action before the SLA target is exceeded.'}</p>
+  `;
+
+  return {
+    subject: `[${statusLabel}] ${request.ClientName} - ${request.ServiceName} (${slaInfo.stage}: ${slaInfo.daysInStage}/${slaInfo.targetDays} days)`,
+    body: wrap(gradient, `${statusLabel} — ${escapeHtml(request.ClientName)}`, content),
+  };
+};
+
+/**
+ * 34. SLA breach/at-risk alert — sent to managers (escalation)
+ */
+const slaBreachAlertManagers = (
+  request: ServiceRequest,
+  slaInfo: { status: 'at-risk' | 'breached'; daysInStage: number; targetDays: number; stage: string }
+): { subject: string; body: string } => {
+  const isBreached = slaInfo.status === 'breached';
+  const gradient = isBreached ? GRAD.danger : GRAD.warning;
+  const statusLabel = isBreached ? 'SLA BREACHED' : 'SLA AT RISK';
+  const overBy = slaInfo.daysInStage - slaInfo.targetDays;
+
+  const content = `
+    ${callout(
+      isBreached ? '#dc2626' : '#f7630c',
+      isBreached ? '#fee2e2' : '#fff4ce',
+      `<strong>${statusLabel}:</strong> ${slaInfo.daysInStage} business days in ${escapeHtml(slaInfo.stage)} stage (target: ${slaInfo.targetDays} days)${isBreached ? ` — ${overBy} day${overBy !== 1 ? 's' : ''} over target` : ''}`
+    )}
+    <p style="margin:0 0 16px;color:#323130;">A deal in the pipeline ${isBreached ? 'has breached' : 'is approaching'} its SLA target:</p>
+    ${row('Deal', escapeHtml(request.Title))}
+    ${row('Account Manager', escapeHtml(request.AccountManagerName))}
+    ${row('Client', escapeHtml(request.ClientName))}
+    ${row('Service', escapeHtml(request.ServiceName))}
+    ${row('Current Stage', stageBadge(slaInfo.stage))}
+    ${row('Days in Stage', `<strong style="color:${isBreached ? '#dc2626' : '#f7630c'};">${slaInfo.daysInStage}</strong> / ${slaInfo.targetDays} target`)}
+    ${row('Deal Value', formatCurrency(request.DealValue))}
+    ${request.AssignedSpecialistName ? row('Specialist', escapeHtml(request.AssignedSpecialistName)) : ''}
+    <p style="margin:16px 0 0;color:#323130;">${isBreached ? 'This deal has exceeded its SLA target. Please escalate or reassign as needed.' : 'An SLA alert has been sent to the Account Manager. Please monitor for follow-up.'}</p>
+  `;
+
+  return {
+    subject: `[Manager Alert] ${statusLabel}: ${request.ClientName} - ${request.ServiceName} (${slaInfo.stage})`,
+    body: wrap(gradient, `${statusLabel} — ${escapeHtml(request.ClientName)}`, content),
+  };
+};
+
+// ============================================================================
 // Export map
 // ============================================================================
 
@@ -1144,4 +1220,7 @@ export const EmailTemplates = {
   // Follow-up reminder templates
   followUpReminderAM,
   followUpReminderManager,
+  // SLA breach/at-risk templates
+  slaBreachAlertAM,
+  slaBreachAlertManagers,
 };

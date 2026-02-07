@@ -619,6 +619,65 @@ class DWxNotificationService {
   }
 
   // ==========================================================================
+  // SLA Breach / At-Risk Notifications
+  // ==========================================================================
+
+  /**
+   * Send SLA breach/at-risk alert to the Account Manager
+   */
+  async notifySLABreachAM(
+    request: ServiceRequest,
+    slaInfo: { status: 'at-risk' | 'breached'; daysInStage: number; targetDays: number; stage: string }
+  ): Promise<NotificationResult> {
+    try {
+      const { subject, body } = EmailTemplates.slaBreachAlertAM(request, slaInfo);
+      return await this.sendEmail([request.AccountManagerEmail], subject, body, undefined, {
+        requestId: request.Id,
+        emailType: 'sla_breach_alert',
+        sentBy: 'System',
+      });
+    } catch (error) {
+      console.error('[DWxNotificationService] Failed to send SLA breach alert to AM:', error);
+      return { success: false, error: String(error) };
+    }
+  }
+
+  /**
+   * Send SLA breach/at-risk escalation alert to all managers
+   */
+  async notifySLABreachManagers(
+    request: ServiceRequest,
+    slaInfo: { status: 'at-risk' | 'breached'; daysInStage: number; targetDays: number; stage: string }
+  ): Promise<NotificationResult> {
+    try {
+      const managers = this.getManagerEmails();
+      if (managers.length === 0) return { success: false, error: 'No manager emails configured' };
+      const { subject, body } = EmailTemplates.slaBreachAlertManagers(request, slaInfo);
+      return await this.sendEmail(managers, subject, body, undefined, {
+        requestId: request.Id,
+        emailType: 'sla_breach_alert',
+        sentBy: 'System',
+      });
+    } catch (error) {
+      console.error('[DWxNotificationService] Failed to send SLA breach alert to managers:', error);
+      return { success: false, error: String(error) };
+    }
+  }
+
+  /**
+   * Send SLA alerts to both AM and managers for a breaching/at-risk deal
+   */
+  async sendSLAAlertNotifications(
+    request: ServiceRequest,
+    slaInfo: { status: 'at-risk' | 'breached'; daysInStage: number; targetDays: number; stage: string }
+  ): Promise<NotificationResult[]> {
+    const results: NotificationResult[] = [];
+    results.push(await this.notifySLABreachAM(request, slaInfo));
+    results.push(await this.notifySLABreachManagers(request, slaInfo));
+    return results;
+  }
+
+  // ==========================================================================
   // Follow-Up Reminder Notifications
   // ==========================================================================
 

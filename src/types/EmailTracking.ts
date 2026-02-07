@@ -16,6 +16,7 @@ export type EmailType =
   | 'proposal_approved'
   | 'proposal_sent'
   | 'follow_up_reminder'
+  | 'sla_breach_alert'
   | 'other';
 
 export interface EmailRecord {
@@ -41,6 +42,7 @@ export const EMAIL_TYPE_LABELS: Record<EmailType, string> = {
   proposal_approved: 'Proposal Approved',
   proposal_sent: 'Proposal Sent',
   follow_up_reminder: 'Follow-Up Reminder',
+  sla_breach_alert: 'SLA Breach Alert',
   other: 'Other',
 };
 
@@ -58,5 +60,6 @@ export const EMAIL_TYPE_COLORS: Record<EmailType, { bg: string; text: string }> 
   proposal_approved: { bg: 'rgba(16, 185, 129, 0.1)', text: '#10B981' },
   proposal_sent: { bg: 'rgba(30, 107, 123, 0.1)', text: '#1e6b7b' },
   follow_up_reminder: { bg: 'rgba(247, 99, 12, 0.1)', text: '#f7630c' },
+  sla_breach_alert: { bg: 'rgba(239, 68, 68, 0.1)', text: '#EF4444' },
   other: { bg: 'rgba(107, 114, 128, 0.1)', text: '#6B7280' },
 };

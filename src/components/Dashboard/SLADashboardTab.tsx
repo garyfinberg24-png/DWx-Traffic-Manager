@@ -3,14 +3,18 @@
  * Shows SLA tracking metrics: compliance summary, bottleneck analysis, and active deal SLA status
  */
 
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import {
   Text,
   makeStyles,
   Spinner,
   Badge,
   Tooltip,
+  Button,
 } from '@fluentui/react-components';
+import {
+  MailAlertRegular,
+} from '@fluentui/react-icons';
 import {
   ServiceRequest,
   DWService,
@@ -20,6 +24,7 @@ import {
 } from '../../types/ServiceRequest';
 import { slaService } from '../../services/SLAService';
 import { serviceCatalogService } from '../../services/ServiceCatalogService';
+import { dwxNotificationService } from '../../services/DWxNotificationService';
 import { DW_COLORS } from '../../utils/buttonStyles';
 
 // ---------------------------------------------------------------------------
@@ -145,6 +150,17 @@ const useStyles = makeStyles({
     color: '#616161',
     fontSize: '13px',
   },
+  sectionHeader: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: '12px',
+  },
+  alertSent: {
+    fontSize: '12px',
+    color: '#10B981',
+    fontWeight: 500 as unknown as 'normal',
+  },
 });
 
 // ---------------------------------------------------------------------------
@@ -170,6 +186,8 @@ export const SLADashboardTab: React.FC<SLADashboardTabProps> = ({ requests }) =>
   const styles = useStyles();
   const [services, setServices] = useState<DWService[]>([]);
   const [loading, setLoading] = useState(true);
+  const [sendingAlerts, setSendingAlerts] = useState(false);
+  const [alertsSentCount, setAlertsSentCount] = useState<number | null>(null);
 
   // Load services on mount
   useEffect(() => {
@@ -217,6 +235,48 @@ export const SLADashboardTab: React.FC<SLADashboardTabProps> = ({ requests }) =>
       })
       .sort((a, b) => STATUS_PRIORITY[a.slaStatus] - STATUS_PRIORITY[b.slaStatus]);
   }, [requests, serviceMap]);
+
+  // Deals that need alerts (at-risk or breached only)
+  const alertableDeals = useMemo(
+    () => activeDeals.filter(d => d.slaStatus === 'at-risk' || d.slaStatus === 'breached'),
+    [activeDeals]
+  );
+
+  // Send SLA alerts for all at-risk and breached deals
+  const handleSendAlerts = useCallback(async () => {
+    if (alertableDeals.length === 0) return;
+    setSendingAlerts(true);
+    setAlertsSentCount(null);
+    let sentCount = 0;
+    for (const deal of alertableDeals) {
+      const service = deal.request.ServiceId ? serviceMap.get(deal.request.ServiceId) : undefined;
+      const targets = slaService.getEffectiveSLATargets(service);
+      const slaKey = deal.request.FunnelStage === 'Lead'
+        ? 'LeadToQualified'
+        : (['Qualified', 'Discovery', 'Proposal', 'Negotiation'] as FunnelStage[]).includes(deal.request.FunnelStage)
+          ? {
+              Qualified: 'LeadToQualified',
+              Discovery: 'QualifiedToDiscovery',
+              Proposal: 'DiscoveryToProposal',
+              Negotiation: 'ProposalToNegotiation',
+            }[deal.request.FunnelStage as string] || 'LeadToQualified'
+          : 'LeadToQualified';
+      const targetDays = targets[slaKey as keyof typeof targets] || 5;
+      try {
+        await dwxNotificationService.sendSLAAlertNotifications(deal.request, {
+          status: deal.slaStatus as 'at-risk' | 'breached',
+          daysInStage: deal.daysInStage,
+          targetDays,
+          stage: deal.request.FunnelStage,
+        });
+        sentCount++;
+      } catch (err) {
+        console.error('Failed to send SLA alert for', deal.request.Title, err);
+      }
+    }
+    setSendingAlerts(false);
+    setAlertsSentCount(sentCount);
+  }, [alertableDeals, serviceMap]);
 
   // ---------- Loading state ----------
   if (loading) {
@@ -369,7 +429,28 @@ export const SLADashboardTab: React.FC<SLADashboardTabProps> = ({ requests }) =>
       {/* Active Deals SLA Status                                            */}
       {/* ------------------------------------------------------------------ */}
       <div className={styles.section}>
-        <Text className={styles.sectionTitle}>Active Deals SLA Status</Text>
+        <div className={styles.sectionHeader}>
+          <Text className={styles.sectionTitle} style={{ marginBottom: 0 }}>Active Deals SLA Status</Text>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            {alertsSentCount !== null && (
+              <span className={styles.alertSent}>
+                {alertsSentCount} alert{alertsSentCount !== 1 ? 's' : ''} sent
+              </span>
+            )}
+            <Tooltip content="Send SLA breach/at-risk email alerts to AMs and managers" relationship="description">
+              <Button
+                appearance="primary"
+                icon={<MailAlertRegular />}
+                size="small"
+                disabled={alertableDeals.length === 0 || sendingAlerts}
+                onClick={handleSendAlerts}
+                style={{ backgroundColor: alertableDeals.length > 0 ? '#d13438' : undefined }}
+              >
+                {sendingAlerts ? 'Sending...' : `Send SLA Alerts (${alertableDeals.length})`}
+              </Button>
+            </Tooltip>
+          </div>
+        </div>
         {activeDeals.length === 0 ? (
           <div className={styles.emptyState}>
             No active deals to display.
