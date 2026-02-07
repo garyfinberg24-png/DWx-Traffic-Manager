@@ -33,6 +33,8 @@ import {
   getCategoriesForType,
 } from '../../types/Product';
 import { DW_COLORS } from '../../utils/buttonStyles';
+import { useHeroCollapse } from '../../hooks/useHeroCollapse';
+import { HeroCollapseToggle } from '../Common/HeroCollapseToggle';
 
 // ============================================================
 // Tab Configuration
@@ -179,16 +181,74 @@ const useStyles = makeStyles({
     margin: '0 auto',
     ...shorthands.padding('0', '64px', '24px'),
   },
+  heroWrapper: {
+    position: 'relative',
+    marginBottom: '20px',
+  },
   // V1 Hero with integrated header + tabs
   heroBanner: {
     ...shorthands.borderRadius('0', '0', '16px', '16px'),
     ...shorthands.padding('0'),
-    marginBottom: '20px',
     position: 'relative',
     ...shorthands.overflow('hidden'),
-    transitionProperty: 'background',
+    transitionProperty: 'background, max-height',
     transitionDuration: '0.4s',
     transitionTimingFunction: 'ease',
+  },
+  heroExpanded: {
+    maxHeight: '400px',
+  },
+  heroCollapsed: {
+    maxHeight: '56px',
+  },
+  collapsedStrip: {
+    display: 'flex',
+    alignItems: 'center',
+    ...shorthands.gap('12px'),
+    ...shorthands.padding('0', '32px'),
+    height: '56px',
+    position: 'relative',
+    zIndex: 2,
+  },
+  collapsedTitle: {
+    fontSize: '16px',
+    fontWeight: '700',
+    color: 'white',
+    marginRight: '4px',
+  },
+  collapsedBadge: {
+    fontSize: '11px',
+    fontWeight: '600',
+    color: 'rgba(255,255,255,0.9)',
+    backgroundColor: 'rgba(255,255,255,0.15)',
+    ...shorthands.padding('3px', '10px'),
+    ...shorthands.borderRadius('10px'),
+  },
+  collapsedTabPill: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    ...shorthands.gap('6px'),
+    fontSize: '12px',
+    fontWeight: '600',
+    color: 'white',
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    ...shorthands.padding('4px', '14px'),
+    ...shorthands.borderRadius('14px'),
+    ...shorthands.border('1px', 'solid', 'rgba(255,255,255,0.3)'),
+    cursor: 'pointer',
+  },
+  collapsedTabPillInactive: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    ...shorthands.gap('6px'),
+    fontSize: '12px',
+    fontWeight: '500',
+    color: 'rgba(255,255,255,0.6)',
+    backgroundColor: 'transparent',
+    ...shorthands.padding('4px', '14px'),
+    ...shorthands.borderRadius('14px'),
+    ...shorthands.border('1px', 'solid', 'rgba(255,255,255,0.15)'),
+    cursor: 'pointer',
   },
   heroDecoration: {
     position: 'absolute',
@@ -590,16 +650,18 @@ const useStyles = makeStyles({
     flexShrink: 0,
   },
   modalHeroBadge: {
+    position: 'absolute',
+    top: '14px',
+    right: '48px',
     fontSize: '10px',
     backgroundColor: 'rgba(255,255,255,0.18)',
-    ...shorthands.padding('2px', '10px'),
+    ...shorthands.padding('3px', '10px'),
     ...shorthands.borderRadius('10px'),
     color: 'rgba(255,255,255,0.9)',
     fontWeight: '500',
-    marginBottom: '2px',
-    display: 'inline-block',
     letterSpacing: '0.3px',
     textTransform: 'uppercase' as const,
+    zIndex: 2,
   },
   modalHeroTitle: {
     fontSize: '18px',
@@ -732,6 +794,7 @@ const TAG_LABELS: Record<ProductType, string> = {
 export const ProductCatalog: React.FC = () => {
   const styles = useStyles();
   const navigate = useNavigate();
+  const { isCollapsed, toggle } = useHeroCollapse('products');
   const [activeTab, setActiveTab] = useState<TabValue>('apps');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
@@ -836,68 +899,92 @@ export const ProductCatalog: React.FC = () => {
   return (
     <div className={styles.container}>
       {/* V1 Hero Banner — Header + Tabs + Content all inside the gradient */}
-      <div className={styles.heroBanner} style={{ background: currentConfig.heroGradient }}>
-        <div className={styles.heroDecoration} />
+      <div className={styles.heroWrapper}>
+        <div
+          className={`${styles.heroBanner} ${isCollapsed ? styles.heroCollapsed : styles.heroExpanded}`}
+          style={{ background: currentConfig.heroGradient }}
+        >
+          <div className={styles.heroDecoration} />
 
-        {/* Page header row */}
-        <div className={styles.heroHeaderRow}>
-          <div>
-            <div className={styles.heroHeaderTitle}>Product Catalog</div>
-            <div className={styles.heroHeaderSubtitle}>
-              DWx Apps, HyperParts, HyperCards, and HyperAgents for your digital workplace
+          {isCollapsed ? (
+            <div className={styles.collapsedStrip}>
+              <span className={styles.collapsedTitle}>Products</span>
+              {(Object.entries(TAB_CONFIG) as [TabValue, TabData][]).map(([key, config]) => (
+                <button
+                  key={key}
+                  className={activeTab === key ? styles.collapsedTabPill : styles.collapsedTabPillInactive}
+                  onClick={() => handleTabClick(key)}
+                >
+                  {config.label}
+                </button>
+              ))}
+              <span className={styles.collapsedBadge}>{currentConfig.products.length} items</span>
             </div>
-          </div>
-          <button
-            className={styles.backButtonHero}
-            onClick={() => navigate('/')}
-          >
-            <ArrowLeft24Regular style={{ fontSize: '16px' }} />
-            Back to Home
-          </button>
-        </div>
-
-        {/* Glassmorphic tab pills */}
-        <div className={styles.tabsRow}>
-          {(Object.entries(TAB_CONFIG) as [TabValue, TabData][]).map(([key, config]) => (
-            <button
-              key={key}
-              className={`${styles.tabBtn} ${activeTab === key ? styles.tabBtnActive : ''}`}
-              onClick={() => handleTabClick(key)}
-            >
-              <span style={{ display: 'flex', alignItems: 'center', fontSize: '16px' }}>{config.icon}</span>
-              <span>{config.label}</span>
-              <span className={`${styles.tabCount} ${activeTab === key ? styles.tabCountActive : ''}`}>
-                {config.products.length}
-              </span>
-            </button>
-          ))}
-        </div>
-
-        {/* Tab-specific content row */}
-        <div className={styles.heroContentRow}>
-          <div className={styles.heroLeft}>
-            <div className={styles.heroTop}>
-              <div className={styles.heroIcon}>
-                <span style={{ color: currentConfig.accentColor, fontSize: '18px', display: 'flex' }}>
-                  {currentConfig.icon}
-                </span>
+          ) : (
+            <>
+              {/* Page header row */}
+              <div className={styles.heroHeaderRow}>
+                <div>
+                  <div className={styles.heroHeaderTitle}>Product Catalog</div>
+                  <div className={styles.heroHeaderSubtitle}>
+                    DWx Apps, HyperParts, HyperCards, and HyperAgents for your digital workplace
+                  </div>
+                </div>
+                <button
+                  className={styles.backButtonHero}
+                  onClick={() => navigate('/')}
+                >
+                  <ArrowLeft24Regular style={{ fontSize: '16px' }} />
+                  Back to Home
+                </button>
               </div>
-              <Text className={styles.heroTitle}>
-                {currentConfig.heroTitle}{' '}
-                <span style={{ color: currentConfig.accentColor }}>{currentConfig.heroAccent}</span>
-              </Text>
-            </div>
-            <div className={styles.heroDesc}>{currentConfig.heroDescription}</div>
-          </div>
-          <div className={styles.heroStats}>
-            {currentConfig.stats.map((stat, i) => (
-              <div key={i} className={styles.heroStat}>
-                <Text className={styles.heroStatValue}>{stat.value}</Text>
-                <Text className={styles.heroStatLabel}>{stat.label}</Text>
+
+              {/* Glassmorphic tab pills */}
+              <div className={styles.tabsRow}>
+                {(Object.entries(TAB_CONFIG) as [TabValue, TabData][]).map(([key, config]) => (
+                  <button
+                    key={key}
+                    className={`${styles.tabBtn} ${activeTab === key ? styles.tabBtnActive : ''}`}
+                    onClick={() => handleTabClick(key)}
+                  >
+                    <span style={{ display: 'flex', alignItems: 'center', fontSize: '16px' }}>{config.icon}</span>
+                    <span>{config.label}</span>
+                    <span className={`${styles.tabCount} ${activeTab === key ? styles.tabCountActive : ''}`}>
+                      {config.products.length}
+                    </span>
+                  </button>
+                ))}
               </div>
-            ))}
-          </div>
+
+              {/* Tab-specific content row */}
+              <div className={styles.heroContentRow}>
+                <div className={styles.heroLeft}>
+                  <div className={styles.heroTop}>
+                    <div className={styles.heroIcon}>
+                      <span style={{ color: currentConfig.accentColor, fontSize: '18px', display: 'flex' }}>
+                        {currentConfig.icon}
+                      </span>
+                    </div>
+                    <Text className={styles.heroTitle}>
+                      {currentConfig.heroTitle}{' '}
+                      <span style={{ color: currentConfig.accentColor }}>{currentConfig.heroAccent}</span>
+                    </Text>
+                  </div>
+                  <div className={styles.heroDesc}>{currentConfig.heroDescription}</div>
+                </div>
+                <div className={styles.heroStats}>
+                  {currentConfig.stats.map((stat, i) => (
+                    <div key={i} className={styles.heroStat}>
+                      <Text className={styles.heroStatValue}>{stat.value}</Text>
+                      <Text className={styles.heroStatLabel}>{stat.label}</Text>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </>
+          )}
         </div>
+        <HeroCollapseToggle isCollapsed={isCollapsed} onToggle={toggle} />
       </div>
 
       {/* Filter area — pills for HyperParts, chips for others */}
@@ -1070,12 +1157,12 @@ export const ProductCatalog: React.FC = () => {
                 >
                   <Dismiss24Regular />
                 </button>
+                <div className={styles.modalHeroBadge}>
+                  {TAG_LABELS[selectedProduct.type]} &bull; {selectedProduct.category}
+                </div>
                 <div className={styles.modalHeroContent}>
                   <div className={styles.modalHeroIcon}>{selectedProduct.icon}</div>
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <div className={styles.modalHeroBadge}>
-                      {TAG_LABELS[selectedProduct.type]} &bull; {selectedProduct.category}
-                    </div>
                     <div className={styles.modalHeroTitle}>
                       {selectedProduct.name}
                     </div>
