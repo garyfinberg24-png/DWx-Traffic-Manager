@@ -165,11 +165,12 @@ interface TabData {
   heroTitle: string;
   heroAccent: string;
   heroDescription: string;
-  heroGradient: string;
-  accentColor: string;
-  stats: { value: string; label: string }[];
   features: string[];
 }
+
+// Unified DWx blue/teal hero gradient — same across all tabs
+const HERO_GRADIENT = 'linear-gradient(135deg, #0d3a5c 0%, #1a5a8a 50%, #1e6b7b 100%)';
+const HERO_ACCENT_COLOR = '#7dd3fc';
 
 type TabValue = 'apps' | 'webparts' | 'cards' | 'agents';
 
@@ -183,14 +184,6 @@ const TAB_CONFIG: Record<TabValue, TabData> = {
     heroAccent: 'Suite',
     heroDescription:
       '16 enterprise-grade SPFx applications covering HR, Operations, Document Management, and Employee Engagement — built on Fluent UI v9 and Microsoft Graph.',
-    heroGradient: 'linear-gradient(135deg, #0d3a5c 0%, #1a5a8a 50%, #2a7ab0 100%)',
-    accentColor: '#7dd3fc',
-    stats: [
-      { value: '16', label: 'Apps' },
-      { value: '5', label: 'Categories' },
-      { value: 'SPFx 1.18+', label: 'Framework' },
-      { value: 'Fluent v9', label: 'Design System' },
-    ],
     features: [
       'Built on SharePoint Framework (SPFx) 1.18+',
       'Fluent UI v9 responsive design system',
@@ -211,14 +204,6 @@ const TAB_CONFIG: Record<TabValue, TabData> = {
     heroAccent: 'Suite',
     heroDescription:
       '20 next-gen SPFx web parts engineered for Hyper-Performance, Hyper-Flexibility, and Hyper-Integration — transforming your intranet into an interactive command center.',
-    heroGradient: 'linear-gradient(135deg, #1e1040 0%, #4c1d95 50%, #7c3aed 100%)',
-    accentColor: '#c4b5fd',
-    stats: [
-      { value: '20', label: 'Web Parts' },
-      { value: '15', label: 'Categories' },
-      { value: 'SPFx 1.18+', label: 'Framework' },
-      { value: 'Fluent v9', label: 'Design System' },
-    ],
     features: [
       'SPFx 1.18+ with React 18 support',
       'Fluent UI v9 design system',
@@ -239,14 +224,6 @@ const TAB_CONFIG: Record<TabValue, TabData> = {
     heroAccent: 'Collection',
     heroDescription:
       '6 interactive HyperCards for Microsoft Teams — enabling leave requests, approvals, incident reporting, and task management directly within chat and channels.',
-    heroGradient: 'linear-gradient(135deg, #064e3b 0%, #0d9488 50%, #14b8a6 100%)',
-    accentColor: '#5eead4',
-    stats: [
-      { value: '6', label: 'Cards' },
-      { value: '4', label: 'Categories' },
-      { value: 'Teams SDK', label: 'Platform' },
-      { value: 'v1.5', label: 'Schema' },
-    ],
     features: [
       'HyperCard schema v1.5',
       'Microsoft Teams SDK integration',
@@ -267,14 +244,6 @@ const TAB_CONFIG: Record<TabValue, TabData> = {
     heroAccent: 'Collection',
     heroDescription:
       '10 intelligent Copilot Studio agents powered by GPT-4o — automating IT support, HR inquiries, procurement, and knowledge discovery across your organization.',
-    heroGradient: 'linear-gradient(135deg, #1e1b4b 0%, #4338ca 50%, #6366f1 100%)',
-    accentColor: '#a5b4fc',
-    stats: [
-      { value: '10', label: 'Agents' },
-      { value: '5', label: 'Categories' },
-      { value: 'Copilot Studio', label: 'Platform' },
-      { value: 'GPT-4o', label: 'AI Model' },
-    ],
     features: [
       'Built on Copilot Studio platform',
       'GPT-4o language model integration',
@@ -463,10 +432,6 @@ const useStyles = makeStyles({
     position: 'relative',
     zIndex: 2,
   },
-  heroLeft: {
-    flex: '1',
-    minWidth: '0',
-  },
   heroTop: {
     display: 'flex',
     alignItems: 'center',
@@ -496,33 +461,6 @@ const useStyles = makeStyles({
     color: 'rgba(255,255,255,0.7)',
     maxWidth: '700px',
   },
-  heroStats: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '10px',
-    flexShrink: 0,
-    paddingLeft: '32px',
-    ...shorthands.borderLeft('1px', 'solid', 'rgba(255,255,255,0.12)'),
-  },
-  heroStat: {
-    display: 'flex',
-    alignItems: 'baseline',
-    gap: '8px',
-  },
-  heroStatValue: {
-    fontSize: '18px',
-    fontWeight: '700',
-    color: 'white',
-    whiteSpace: 'nowrap',
-  },
-  heroStatLabel: {
-    fontSize: '10px',
-    color: 'rgba(255,255,255,0.45)',
-    textTransform: 'uppercase',
-    letterSpacing: '0.5px',
-    whiteSpace: 'nowrap',
-  },
-
   // Scrollable pills filter (for HyperParts)
   filterBar: {
     display: 'flex',
@@ -1024,7 +962,7 @@ export const ProductCatalog: React.FC = () => {
       <div className={styles.heroWrapper}>
         <div
           className={`${styles.heroBanner} ${isCollapsed ? styles.heroCollapsed : styles.heroExpanded}`}
-          style={{ background: currentConfig.heroGradient }}
+          style={{ background: HERO_GRADIENT }}
         >
           <div className={styles.heroDecoration} />
 
@@ -1080,30 +1018,20 @@ export const ProductCatalog: React.FC = () => {
 
               {/* Tab-specific content row */}
               <div className={styles.heroContentRow}>
-                <div className={isHyperParts ? styles.heroLeft : undefined} style={!isHyperParts ? { flex: 1 } : undefined}>
+                <div style={{ flex: 1 }}>
                   <div className={styles.heroTop}>
                     <div className={styles.heroIcon}>
-                      <span style={{ color: currentConfig.accentColor, fontSize: '18px', display: 'flex' }}>
+                      <span style={{ color: HERO_ACCENT_COLOR, fontSize: '18px', display: 'flex' }}>
                         {currentConfig.icon}
                       </span>
                     </div>
                     <Text className={styles.heroTitle}>
                       {currentConfig.heroTitle}{' '}
-                      <span style={{ color: currentConfig.accentColor }}>{currentConfig.heroAccent}</span>
+                      <span style={{ color: HERO_ACCENT_COLOR }}>{currentConfig.heroAccent}</span>
                     </Text>
                   </div>
                   <div className={styles.heroDesc}>{currentConfig.heroDescription}</div>
                 </div>
-                {isHyperParts && (
-                  <div className={styles.heroStats}>
-                    {currentConfig.stats.map((stat, i) => (
-                      <div key={i} className={styles.heroStat}>
-                        <Text className={styles.heroStatValue}>{stat.value}</Text>
-                        <Text className={styles.heroStatLabel}>{stat.label}</Text>
-                      </div>
-                    ))}
-                  </div>
-                )}
               </div>
             </>
           )}
@@ -1287,7 +1215,7 @@ export const ProductCatalog: React.FC = () => {
               {/* Modal gradient hero */}
               <div
                 className={styles.modalHero}
-                style={{ background: currentConfig.heroGradient }}
+                style={{ background: HERO_GRADIENT }}
               >
                 <div className={styles.modalHeroDecoration} />
                 <button
