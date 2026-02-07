@@ -14,7 +14,6 @@ import {
   shorthands,
   DialogSurface,
   DialogBody,
-  DialogTitle,
   DialogContent,
   Dialog,
 } from '@fluentui/react-components';
@@ -555,11 +554,13 @@ const useStyles = makeStyles({
     ...shorthands.padding('0'),
     ...shorthands.borderRadius('12px'),
     ...shorthands.overflow('hidden'),
+    ...shorthands.border('none'),
   },
   modalHero: {
     ...shorthands.padding('20px', '24px'),
     position: 'relative',
     ...shorthands.overflow('hidden'),
+    ...shorthands.margin('0'),
   },
   modalHeroDecoration: {
     position: 'absolute',
@@ -1072,13 +1073,13 @@ export const ProductCatalog: React.FC = () => {
                 </button>
                 <div className={styles.modalHeroContent}>
                   <div className={styles.modalHeroIcon}>{selectedProduct.icon}</div>
-                  <div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
                     <div className={styles.modalHeroBadge}>
                       {TAG_LABELS[selectedProduct.type]} &bull; {selectedProduct.category}
                     </div>
-                    <DialogTitle className={styles.modalHeroTitle}>
+                    <div className={styles.modalHeroTitle}>
                       {selectedProduct.name}
-                    </DialogTitle>
+                    </div>
                     <div className={styles.modalHeroSubtitle}>{selectedProduct.subtitle}</div>
                   </div>
                 </div>
