@@ -22,6 +22,61 @@ import {
   CardUi24Regular,
   BotRegular,
   Dismiss24Regular,
+  // Product icon imports
+  ChartMultiple24Regular,
+  DocumentPersonRegular,
+  FolderOpen24Regular,
+  LinkMultiple24Regular,
+  Trophy24Regular,
+  PlugConnected24Regular,
+  Key24Regular,
+  Cart24Regular,
+  QuestionCircle24Regular,
+  DataBarVertical24Regular,
+  ClipboardTask24Regular,
+  PeopleTeam24Regular,
+  HatGraduation24Regular,
+  DocumentEdit24Regular,
+  Shield24Regular,
+  Pulse24Regular,
+  // HyperParts icons
+  Image24Regular,
+  CompassNorthwest24Regular,
+  News24Regular,
+  Search24Regular,
+  Person24Regular,
+  DocumentFolder24Regular,
+  Globe24Regular,
+  Flash24Regular,
+  TabDesktop24Regular,
+  Poll24Regular,
+  Megaphone24Regular,
+  Star24Regular,
+  BookOpen24Regular,
+  CalendarLtr24Regular,
+  Navigation24Regular,
+  ChatBubblesQuestion24Regular,
+  Gift24Regular,
+  WindowShield24Regular,
+  DataTrending24Regular,
+  Timeline24Regular,
+  // HyperCards icons
+  CalendarPerson24Regular,
+  CheckmarkCircle24Regular,
+  Warning24Regular,
+  ChatMultiple24Regular,
+  Notepad24Regular,
+  TaskListSquareLtr24Regular,
+  // HyperAgents icons
+  BotSparkle24Regular,
+  LockClosed24Regular,
+  PeopleSearch24Regular,
+  PersonArrowRight24Regular,
+  BuildingShop24Regular,
+  DocumentSearch24Regular,
+  DesktopPulse24Regular,
+  Airplane24Regular,
+  LibraryRegular,
 } from '@fluentui/react-icons';
 import {
   Product,
@@ -35,6 +90,68 @@ import {
 import { DW_COLORS } from '../../utils/buttonStyles';
 import { useHeroCollapse } from '../../hooks/useHeroCollapse';
 import { HeroCollapseToggle } from '../Common/HeroCollapseToggle';
+
+// ============================================================
+// Product Icon Mapping — Professional SVG line icons per product
+// ============================================================
+const PRODUCT_ICONS: Record<string, React.ReactElement> = {
+  // DWx Apps (16)
+  'asset-dashboard': <ChartMultiple24Regular />,
+  'cv-management': <DocumentPersonRegular />,
+  'document-hub': <FolderOpen24Regular />,
+  'external-sharing-hub': <LinkMultiple24Regular />,
+  'gamification': <Trophy24Regular />,
+  'integration-hub': <PlugConnected24Regular />,
+  'license-management': <Key24Regular />,
+  'procurement-manager': <Cart24Regular />,
+  'quiz-builder': <QuestionCircle24Regular />,
+  'reports-builder': <DataBarVertical24Regular />,
+  'survey-management': <ClipboardTask24Regular />,
+  'recruitment-manager': <PeopleTeam24Regular />,
+  'training-skills': <HatGraduation24Regular />,
+  'contract-manager': <DocumentEdit24Regular />,
+  'policy-manager': <Shield24Regular />,
+  'license-pulse': <Pulse24Regular />,
+  // HyperParts (20)
+  'hyper-hero': <Image24Regular />,
+  'hyper-nav': <CompassNorthwest24Regular />,
+  'hyper-news': <News24Regular />,
+  'hyper-rollup': <Search24Regular />,
+  'hyper-profile': <Person24Regular />,
+  'hyper-explorer': <DocumentFolder24Regular />,
+  'hyper-local': <Globe24Regular />,
+  'hyper-action': <Flash24Regular />,
+  'hyper-tabs': <TabDesktop24Regular />,
+  'hyper-poll': <Poll24Regular />,
+  'hyper-ticker': <Megaphone24Regular />,
+  'hyper-recognition': <Star24Regular />,
+  'hyper-faq': <BookOpen24Regular />,
+  'hyper-events': <CalendarLtr24Regular />,
+  'hyper-breadcrumb': <Navigation24Regular />,
+  'hyper-feedback': <ChatBubblesQuestion24Regular />,
+  'hyper-birthdays': <Gift24Regular />,
+  'hyper-external': <WindowShield24Regular />,
+  'hyper-metrics': <DataTrending24Regular />,
+  'hyper-timeline': <Timeline24Regular />,
+  // HyperCards (6)
+  'leave-request-card': <CalendarPerson24Regular />,
+  'approval-card': <CheckmarkCircle24Regular />,
+  'incident-report': <Warning24Regular />,
+  'feedback-card': <ChatMultiple24Regular />,
+  'meeting-summary': <Notepad24Regular />,
+  'task-assignment': <TaskListSquareLtr24Regular />,
+  // HyperAgents (10)
+  'it-service-desk-assistant': <BotSparkle24Regular />,
+  'access-identity-requests': <LockClosed24Regular />,
+  'hr-policy-leave-advisor': <PeopleSearch24Regular />,
+  'employee-onboarding-concierge': <PersonArrowRight24Regular />,
+  'procurement-helpdesk': <Cart24Regular />,
+  'supplier-query-assistant': <BuildingShop24Regular />,
+  'contract-policy-search': <DocumentSearch24Regular />,
+  'asset-device-lifecycle': <DesktopPulse24Regular />,
+  'travel-expense-policy': <Airplane24Regular />,
+  'internal-knowledge-navigator': <LibraryRegular />,
+};
 
 // ============================================================
 // Tab Configuration
@@ -421,16 +538,16 @@ const useStyles = makeStyles({
     scrollbarWidth: 'none',
   },
   filterPill: {
-    ...shorthands.padding('5px', '14px'),
-    ...shorthands.borderRadius('16px'),
-    fontSize: '12px',
+    ...shorthands.padding('8px', '16px'),
+    ...shorthands.borderRadius('20px'),
+    fontSize: '13px',
     fontWeight: '500',
     cursor: 'pointer',
     transitionProperty: 'all',
-    transitionDuration: '0.15s',
-    ...shorthands.border('1px', 'solid', '#e0e0e0'),
+    transitionDuration: '0.2s',
+    ...shorthands.border('1px', 'solid', '#d0d0d0'),
     backgroundColor: 'white',
-    color: '#555555',
+    color: '#333333',
     whiteSpace: 'nowrap',
     flexShrink: 0,
   },
@@ -459,6 +576,9 @@ const useStyles = makeStyles({
 
   // Category chips filter (for non-HyperParts tabs)
   categorySection: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '12px',
     marginBottom: '24px',
   },
   categoryLabel: {
@@ -534,6 +654,9 @@ const useStyles = makeStyles({
   },
   productSplashIcon: {
     fontSize: '28px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   productVersion: {
     position: 'absolute',
@@ -1084,6 +1207,25 @@ export const ProductCatalog: React.FC = () => {
               </button>
             ))}
           </div>
+          <input
+            type="text"
+            placeholder={`Search ${currentConfig.label}...`}
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            style={{
+              padding: '7px 12px 7px 34px',
+              borderRadius: '8px',
+              border: '1px solid #d0d0d0',
+              fontSize: '13px',
+              color: '#333',
+              width: '240px',
+              flexShrink: 0,
+              outline: 'none',
+              backgroundImage: `url("data:image/svg+xml,%3Csvg width='14' height='14' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='11' cy='11' r='7' stroke='%239ca3af' stroke-width='2'/%3E%3Cline x1='16.5' y1='16.5' x2='21' y2='21' stroke='%239ca3af' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E")`,
+              backgroundRepeat: 'no-repeat',
+              backgroundPosition: '10px center',
+            }}
+          />
         </div>
       )}
 
@@ -1102,7 +1244,7 @@ export const ProductCatalog: React.FC = () => {
                 <div className={styles.productDwx}>
                   DW<span className={styles.productDwxSpan}>x</span>
                 </div>
-                <div className={styles.productSplashIcon}>{product.icon}</div>
+                <div className={styles.productSplashIcon}>{PRODUCT_ICONS[product.id] || product.icon}</div>
               </div>
             </div>
             <div className={styles.productContent}>
@@ -1159,7 +1301,7 @@ export const ProductCatalog: React.FC = () => {
                   {TAG_LABELS[selectedProduct.type]} &bull; {selectedProduct.category}
                 </div>
                 <div className={styles.modalHeroContent}>
-                  <div className={styles.modalHeroIcon}>{selectedProduct.icon}</div>
+                  <div className={styles.modalHeroIcon}>{PRODUCT_ICONS[selectedProduct.id] || selectedProduct.icon}</div>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div className={styles.modalHeroTitle}>
                       {selectedProduct.name}
