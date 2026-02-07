@@ -290,7 +290,7 @@ const useStyles = makeStyles({
     textAlign: 'center',
   },
   cardBody: {
-    padding: '24px',
+    padding: '16px 24px 24px',
     minHeight: '400px',
   },
   cardFooter: {
@@ -320,7 +320,7 @@ const useStyles = makeStyles({
   sectionHint: {
     fontSize: '13px',
     color: '#616161',
-    marginBottom: '16px',
+    marginBottom: '8px',
   },
   servicesGrid: {
     display: 'grid',
@@ -1050,11 +1050,6 @@ export const ServiceRequestForm: React.FC<ServiceRequestFormProps> = ({
 
   const renderServiceStep = () => (
     <div>
-      <Text className={styles.sectionTitle}>Select a Service</Text>
-      <Text className={styles.sectionHint}>
-        Choose the service you'd like to request a pre-sales consultation for.
-      </Text>
-
       {loading ? (
         <div className={styles.loadingContainer}>
           <Spinner size="medium" />
@@ -1903,6 +1898,16 @@ export const ServiceRequestForm: React.FC<ServiceRequestFormProps> = ({
                 </div>
               </MessageBarBody>
             </MessageBar>
+          </div>
+        )}
+
+        {/* Service Step Instruction (shown below stepper, above cards) */}
+        {currentStep === 1 && (
+          <div style={{ padding: '12px 24px 0' }}>
+            <Text className={styles.sectionTitle}>Select a Service</Text>
+            <Text className={styles.sectionHint}>
+              Choose the service you'd like to request a pre-sales consultation for.
+            </Text>
           </div>
         )}
 

@@ -48,7 +48,7 @@ const useStyles = makeStyles({
     flexShrink: 0,
   },
   body: {
-    padding: '22px 24px',
+    padding: '16px 18px',
     flex: 1,
     display: 'flex',
     flexDirection: 'column',
@@ -57,8 +57,8 @@ const useStyles = makeStyles({
   header: {
     display: 'flex',
     alignItems: 'flex-start',
-    gap: '14px',
-    marginBottom: '12px',
+    gap: '12px',
+    marginBottom: '8px',
   },
   iconContainer: {
     width: '44px',
@@ -80,16 +80,18 @@ const useStyles = makeStyles({
     lineHeight: '1.3',
     marginBottom: '2px',
   },
-  categoryLabel: {
-    fontSize: '12px',
-    fontWeight: '500',
-    color: '#9ca3af',
+  tags: {
+    display: 'flex',
+    gap: '6px',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    marginBottom: '12px',
   },
   description: {
     fontSize: '13px',
     color: '#6b7280',
     lineHeight: '1.5',
-    marginBottom: '16px',
+    marginBottom: '10px',
     flex: 1,
     display: '-webkit-box',
     WebkitLineClamp: 2,
@@ -99,15 +101,9 @@ const useStyles = makeStyles({
   footer: {
     display: 'flex',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingTop: '14px',
+    justifyContent: 'flex-end',
+    paddingTop: '10px',
     borderTop: '1px solid #f3f4f6',
-  },
-  metaGroup: {
-    display: 'flex',
-    gap: '6px',
-    alignItems: 'center',
-    flexWrap: 'wrap',
   },
   metaTag: {
     display: 'inline-flex',
@@ -224,26 +220,26 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({ service, onClick }) =>
           </div>
           <div className={styles.headerContent}>
             <Text className={styles.title}>{service.Title}</Text>
-            <Text className={styles.categoryLabel}>{service.Category}</Text>
           </div>
         </div>
 
         <Text className={styles.description}>{service.ShortDescription}</Text>
 
+        <div className={styles.tags}>
+          <span className={`${styles.metaTag} ${getComplexityStyle(service.ComplexityLevel, styles)}`}>
+            {service.ComplexityLevel}
+          </span>
+          <span className={`${styles.metaTag} ${styles.durationTag}`}>
+            <ClockRegular style={{ width: '10px', height: '10px' }} />
+            {service.TypicalDuration}
+          </span>
+          <span className={`${styles.metaTag} ${styles.pricingTag}`}>
+            <MoneyRegular style={{ width: '10px', height: '10px' }} />
+            {service.PricingModel}
+          </span>
+        </div>
+
         <div className={styles.footer}>
-          <div className={styles.metaGroup}>
-            <span className={`${styles.metaTag} ${getComplexityStyle(service.ComplexityLevel, styles)}`}>
-              {service.ComplexityLevel}
-            </span>
-            <span className={`${styles.metaTag} ${styles.durationTag}`}>
-              <ClockRegular style={{ width: '10px', height: '10px' }} />
-              {service.TypicalDuration}
-            </span>
-            <span className={`${styles.metaTag} ${styles.pricingTag}`}>
-              <MoneyRegular style={{ width: '10px', height: '10px' }} />
-              {service.PricingModel}
-            </span>
-          </div>
           <span className={styles.viewLink}>
             View
             <ArrowRightRegular style={{ width: '12px', height: '12px' }} />
