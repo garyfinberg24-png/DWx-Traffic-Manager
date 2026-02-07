@@ -22,6 +22,7 @@ import {
   Textarea,
   Field,
   makeStyles,
+  shorthands,
   Text,
   Spinner,
   ProgressBar,
@@ -72,6 +73,8 @@ import { Client } from '../../types/ReferenceData';
 import { ServiceCard } from '../ServiceCatalog/ServiceCard';
 import { ServiceRequirementsStep } from './ServiceRequirementsStep';
 import { DW_COLORS } from '../../utils/buttonStyles';
+import { useHeroCollapse } from '../../hooks/useHeroCollapse';
+import { HeroCollapseToggle } from '../Common/HeroCollapseToggle';
 import { getServiceRequirements, validateRequirements } from '../../types/ServiceRequirements';
 import { addHours, format, setHours, setMinutes } from 'date-fns';
 
@@ -79,7 +82,129 @@ const useStyles = makeStyles({
   container: {
     maxWidth: '1400px',
     margin: '0 auto',
-    padding: '24px 64px',
+    padding: '0 64px 24px',
+  },
+  heroWrapper: {
+    position: 'relative',
+    marginBottom: '20px',
+  },
+  heroBanner: {
+    ...shorthands.borderRadius('0', '0', '16px', '16px'),
+    ...shorthands.padding('0'),
+    position: 'relative',
+    ...shorthands.overflow('hidden'),
+    background: 'linear-gradient(135deg, #1e6b7b 0%, #2a8d6e 100%)',
+  },
+  heroExpanded: {
+    maxHeight: '200px',
+    transitionProperty: 'max-height',
+    transitionDuration: '350ms',
+    transitionTimingFunction: 'ease',
+  },
+  heroCollapsed: {
+    maxHeight: '56px',
+    transitionProperty: 'max-height',
+    transitionDuration: '350ms',
+    transitionTimingFunction: 'ease',
+  },
+  heroDecoration: {
+    position: 'absolute',
+    top: '-80px',
+    right: '-40px',
+    width: '300px',
+    height: '300px',
+    ...shorthands.borderRadius('50%'),
+    background: 'radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 70%)',
+    pointerEvents: 'none',
+  },
+  heroContentSR: {
+    position: 'relative',
+    zIndex: 1,
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    ...shorthands.gap('32px'),
+    ...shorthands.padding('24px', '32px'),
+  },
+  heroLeftSR: {
+    flex: '1',
+    minWidth: '0',
+  },
+  heroTitleSR: {
+    fontSize: '22px',
+    fontWeight: '700',
+    color: 'white',
+    marginBottom: '4px',
+  },
+  heroTitleAccentSR: {
+    color: '#86efac',
+  },
+  heroSubtitleSR: {
+    fontSize: '13px',
+    color: 'rgba(255,255,255,0.6)',
+  },
+  heroSteps: {
+    display: 'flex',
+    ...shorthands.gap('8px'),
+    alignItems: 'center',
+    flexShrink: 0,
+  },
+  heroStepDot: {
+    width: '32px',
+    height: '32px',
+    ...shorthands.borderRadius('50%'),
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontSize: '12px',
+    fontWeight: '700',
+    transitionProperty: 'all',
+    transitionDuration: '200ms',
+  },
+  heroStepActive: {
+    backgroundColor: 'white',
+    color: '#1e6b7b',
+  },
+  heroStepCompleted: {
+    backgroundColor: 'rgba(255,255,255,0.3)',
+    color: 'white',
+  },
+  heroStepPending: {
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    color: 'rgba(255,255,255,0.4)',
+    ...shorthands.border('1px', 'solid', 'rgba(255,255,255,0.15)'),
+  },
+  heroStepLine: {
+    width: '20px',
+    height: '2px',
+    backgroundColor: 'rgba(255,255,255,0.2)',
+  },
+  heroStepLineCompleted: {
+    width: '20px',
+    height: '2px',
+    backgroundColor: 'rgba(255,255,255,0.5)',
+  },
+  collapsedStrip: {
+    display: 'flex',
+    alignItems: 'center',
+    ...shorthands.gap('16px'),
+    ...shorthands.padding('0', '32px'),
+    height: '56px',
+    position: 'relative',
+    zIndex: 2,
+  },
+  collapsedTitle: {
+    fontSize: '16px',
+    fontWeight: '700',
+    color: 'white',
+  },
+  collapsedBadge: {
+    fontSize: '11px',
+    fontWeight: '600',
+    color: 'rgba(255,255,255,0.9)',
+    backgroundColor: 'rgba(255,255,255,0.15)',
+    ...shorthands.padding('3px', '10px'),
+    ...shorthands.borderRadius('10px'),
   },
   card: {
     backgroundColor: '#ffffff',
@@ -520,6 +645,7 @@ export const ServiceRequestForm: React.FC<ServiceRequestFormProps> = ({
   onCancel,
 }) => {
   const styles = useStyles();
+  const { isCollapsed, toggle } = useHeroCollapse('new-request');
   const location = useLocation();
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -1656,6 +1782,52 @@ export const ServiceRequestForm: React.FC<ServiceRequestFormProps> = ({
 
   return (
     <div className={styles.container}>
+      {/* Hero Banner */}
+      <div className={styles.heroWrapper}>
+        <div className={`${styles.heroBanner} ${isCollapsed ? styles.heroCollapsed : styles.heroExpanded}`}>
+          <div className={styles.heroDecoration} />
+          {isCollapsed ? (
+            <div className={styles.collapsedStrip}>
+              <span className={styles.collapsedTitle}>New Service Request</span>
+              <span className={styles.collapsedBadge}>Step {currentStep} of {STEPS.length}</span>
+            </div>
+          ) : (
+            <div className={styles.heroContentSR}>
+              <div className={styles.heroLeftSR}>
+                <div className={styles.heroTitleSR}>
+                  New Service <span className={styles.heroTitleAccentSR}>Request</span>
+                </div>
+                <div className={styles.heroSubtitleSR}>
+                  Submit a request for DWx pre-sales services
+                </div>
+              </div>
+              <div className={styles.heroSteps}>
+                {STEPS.map((step, index) => (
+                  <React.Fragment key={step.id}>
+                    {index > 0 && (
+                      <div className={step.id <= currentStep ? styles.heroStepLineCompleted : styles.heroStepLine} />
+                    )}
+                    <div
+                      className={`${styles.heroStepDot} ${
+                        step.id === currentStep
+                          ? styles.heroStepActive
+                          : step.id < currentStep
+                          ? styles.heroStepCompleted
+                          : styles.heroStepPending
+                      }`}
+                      title={step.label}
+                    >
+                      {step.id < currentStep ? '\u2713' : step.id}
+                    </div>
+                  </React.Fragment>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+        <HeroCollapseToggle isCollapsed={isCollapsed} onToggle={toggle} />
+      </div>
+
       <div className={styles.card}>
         {/* Header */}
         <div className={styles.cardHeader}>

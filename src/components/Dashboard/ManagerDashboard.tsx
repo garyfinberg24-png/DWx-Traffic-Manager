@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import {
   makeStyles,
@@ -52,6 +52,8 @@ import { WinLossTab } from './WinLossTab';
 import { SLADashboardTab } from './SLADashboardTab';
 import { useToast } from '../../contexts/ToastContext';
 import { DW_COLORS } from '../../utils/buttonStyles';
+import { useHeroCollapse } from '../../hooks/useHeroCollapse';
+import { HeroCollapseToggle } from '../Common/HeroCollapseToggle';
 // DWx Traffic Manager - Pipeline & Service Request Components
 import { SalesFunnelDashboard } from '../SalesFunnel/SalesFunnelDashboard';
 import { RequestsQueue } from '../SalesFunnel/RequestsQueue';
@@ -129,10 +131,122 @@ const useStyles = makeStyles({
   container: {
     display: 'flex',
     flexDirection: 'column',
-    ...shorthands.padding('24px', '64px'),
+    ...shorthands.padding('0', '64px', '24px'),
     maxWidth: '1400px',
     ...shorthands.margin('0', 'auto'),
     width: '100%',
+  },
+  heroWrapper: {
+    position: 'relative',
+    marginBottom: '16px',
+  },
+  heroBanner: {
+    ...shorthands.borderRadius('0', '0', '16px', '16px'),
+    ...shorthands.padding('0'),
+    position: 'relative',
+    ...shorthands.overflow('hidden'),
+    background: 'linear-gradient(135deg, #0d3a5c 0%, #1a5a8a 100%)',
+  },
+  heroExpanded: {
+    maxHeight: '300px',
+    transitionProperty: 'max-height',
+    transitionDuration: '350ms',
+    transitionTimingFunction: 'ease',
+  },
+  heroCollapsed: {
+    maxHeight: '56px',
+    transitionProperty: 'max-height',
+    transitionDuration: '350ms',
+    transitionTimingFunction: 'ease',
+  },
+  heroDecoration: {
+    position: 'absolute',
+    top: '-80px',
+    right: '-40px',
+    width: '300px',
+    height: '300px',
+    ...shorthands.borderRadius('50%'),
+    background: 'radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 70%)',
+    pointerEvents: 'none',
+  },
+  heroContent: {
+    position: 'relative',
+    zIndex: 1,
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    ...shorthands.gap('32px'),
+    ...shorthands.padding('32px', '32px'),
+  },
+  heroLeft: {
+    flex: '1',
+    minWidth: '0',
+  },
+  heroTitle: {
+    fontSize: '24px',
+    fontWeight: '700',
+    color: 'white',
+    marginBottom: '8px',
+  },
+  heroTitleAccent: {
+    color: '#7dd3fc',
+  },
+  heroSubtitle: {
+    fontSize: '14px',
+    color: 'rgba(255,255,255,0.6)',
+  },
+  heroStats: {
+    display: 'flex',
+    ...shorthands.gap('24px'),
+    marginTop: '16px',
+  },
+  heroStat: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    ...shorthands.padding('10px', '16px'),
+    ...shorthands.borderRadius('10px'),
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    minWidth: '80px',
+  },
+  heroStatValue: {
+    fontSize: '20px',
+    fontWeight: '700',
+    color: 'white',
+  },
+  heroStatLabel: {
+    fontSize: '10px',
+    color: 'rgba(255,255,255,0.5)',
+    textTransform: 'uppercase',
+    letterSpacing: '0.5px',
+    marginTop: '2px',
+  },
+  heroRight: {
+    display: 'flex',
+    ...shorthands.gap('8px'),
+    flexShrink: 0,
+  },
+  collapsedStrip: {
+    display: 'flex',
+    alignItems: 'center',
+    ...shorthands.gap('16px'),
+    ...shorthands.padding('0', '32px'),
+    height: '56px',
+    position: 'relative',
+    zIndex: 2,
+  },
+  collapsedTitle: {
+    fontSize: '16px',
+    fontWeight: '700',
+    color: 'white',
+  },
+  collapsedBadge: {
+    fontSize: '11px',
+    fontWeight: '600',
+    color: 'rgba(255,255,255,0.9)',
+    backgroundColor: 'rgba(255,255,255,0.15)',
+    ...shorthands.padding('3px', '10px'),
+    ...shorthands.borderRadius('10px'),
   },
   header: {
     display: 'flex',
@@ -336,6 +450,7 @@ const useStyles = makeStyles({
 
 export const ManagerDashboard: React.FC = () => {
   const styles = useStyles();
+  const { isCollapsed, toggle } = useHeroCollapse('dashboard');
   const { user } = useAuth();
   const { showToast } = useToast();
   const [searchParams] = useSearchParams();
@@ -458,6 +573,13 @@ export const ManagerDashboard: React.FC = () => {
     (r) => r.FunnelStage !== 'Won' && r.FunnelStage !== 'Lost'
   ).length;
 
+  const heroStats = useMemo(() => {
+    return {
+      total: serviceRequests.length,
+      pending: pendingRequestsCount,
+    };
+  }, [serviceRequests.length, pendingRequestsCount]);
+
   const handleBookingClick = (booking: Booking) => {
     setSelectedBooking(booking);
     setDetailsOpen(true);
@@ -497,6 +619,60 @@ export const ManagerDashboard: React.FC = () => {
 
   return (
     <div className={styles.container}>
+      {/* Hero Banner */}
+      <div className={styles.heroWrapper}>
+        <div className={`${styles.heroBanner} ${isCollapsed ? styles.heroCollapsed : styles.heroExpanded}`}>
+          <div className={styles.heroDecoration} />
+          {isCollapsed ? (
+            <div className={styles.collapsedStrip}>
+              <span className={styles.collapsedTitle}>Manager Dashboard</span>
+              <span className={styles.collapsedBadge}>{heroStats.total} Total</span>
+              <span className={styles.collapsedBadge}>{heroStats.pending} Pending</span>
+            </div>
+          ) : (
+            <div className={styles.heroContent}>
+              <div className={styles.heroLeft}>
+                <div className={styles.heroTitle}>
+                  Manager <span className={styles.heroTitleAccent}>Dashboard</span>
+                </div>
+                <div className={styles.heroSubtitle}>
+                  Monitor pipeline performance, approvals, and team activity
+                </div>
+                <div className={styles.heroStats}>
+                  <div className={styles.heroStat}>
+                    <span className={styles.heroStatValue}>{heroStats.total}</span>
+                    <span className={styles.heroStatLabel}>Total Requests</span>
+                  </div>
+                  <div className={styles.heroStat}>
+                    <span className={styles.heroStatValue}>{heroStats.pending}</span>
+                    <span className={styles.heroStatLabel}>Pending</span>
+                  </div>
+                </div>
+              </div>
+              <div className={styles.heroRight}>
+                <Button
+                  appearance="primary"
+                  icon={<ArrowClockwise24Regular />}
+                  onClick={handleRefresh}
+                  style={{ backgroundColor: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.3)', color: 'white' }}
+                >
+                  Refresh
+                </Button>
+                <Button
+                  appearance="primary"
+                  icon={<ArrowDownload24Regular />}
+                  onClick={handleExport}
+                  style={{ backgroundColor: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.3)', color: 'white' }}
+                >
+                  Export
+                </Button>
+              </div>
+            </div>
+          )}
+        </div>
+        <HeroCollapseToggle isCollapsed={isCollapsed} onToggle={toggle} />
+      </div>
+
       {/* Header */}
       <div className={styles.header}>
         <div className={styles.titleSection}>

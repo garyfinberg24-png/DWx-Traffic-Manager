@@ -24,6 +24,8 @@ import { knowledgeBaseService } from '../../services/KnowledgeBaseService';
 import { FAQSection } from './FAQSection';
 import { GlossarySection } from './GlossarySection';
 import { ArticleSection } from './ArticleSection';
+import { useHeroCollapse } from '../../hooks/useHeroCollapse';
+import { HeroCollapseToggle } from '../Common/HeroCollapseToggle';
 
 type KBSection = 'articles' | 'faq' | 'glossary';
 
@@ -45,14 +47,51 @@ const useStyles = makeStyles({
     ...shorthands.padding('0', '64px', '24px'),
   },
 
+  heroWrapper: {
+    position: 'relative',
+    marginBottom: '20px',
+  },
   // Hero banner inside container with rounded bottom corners (Products pattern)
   heroBanner: {
     ...shorthands.borderRadius('0', '0', '16px', '16px'),
     ...shorthands.padding('0'),
-    marginBottom: '20px',
     position: 'relative',
     ...shorthands.overflow('hidden'),
     background: 'linear-gradient(135deg, #0d3a5c 0%, #1a5a8a 100%)',
+  },
+  heroExpanded: {
+    maxHeight: '400px',
+    transitionProperty: 'max-height',
+    transitionDuration: '350ms',
+    transitionTimingFunction: 'ease',
+  },
+  heroCollapsed: {
+    maxHeight: '56px',
+    transitionProperty: 'max-height',
+    transitionDuration: '350ms',
+    transitionTimingFunction: 'ease',
+  },
+  collapsedStrip: {
+    display: 'flex',
+    alignItems: 'center',
+    ...shorthands.gap('16px'),
+    ...shorthands.padding('0', '32px'),
+    height: '56px',
+    position: 'relative',
+    zIndex: 2,
+  },
+  collapsedTitle: {
+    fontSize: '16px',
+    fontWeight: '700',
+    color: 'white',
+  },
+  collapsedBadge: {
+    fontSize: '11px',
+    fontWeight: '600',
+    color: 'rgba(255,255,255,0.9)',
+    backgroundColor: 'rgba(255,255,255,0.15)',
+    ...shorthands.padding('3px', '10px'),
+    ...shorthands.borderRadius('10px'),
   },
   heroDecoration: {
     position: 'absolute',
@@ -221,6 +260,7 @@ const useStyles = makeStyles({
 
 export const KnowledgeBase: React.FC = () => {
   const styles = useStyles();
+  const { isCollapsed, toggle } = useHeroCollapse('knowledge-base');
   const [searchQuery, setSearchQuery] = useState('');
   const [entries, setEntries] = useState<KBEntry[]>([]);
   const [loading, setLoading] = useState(true);
@@ -265,74 +305,87 @@ export const KnowledgeBase: React.FC = () => {
   return (
     <div className={styles.container}>
       {/* Hero Banner — Products page width pattern */}
-      <div className={styles.heroBanner}>
-        <div className={styles.heroDecoration} />
-        <div className={styles.heroContent}>
-          <div className={styles.heroLeft}>
-            <div className={styles.heroBreadcrumb}>
-              <span className={styles.heroBreadcrumbLink}>Home</span> &rsaquo; Knowledge Base
+      <div className={styles.heroWrapper}>
+        <div className={`${styles.heroBanner} ${isCollapsed ? styles.heroCollapsed : styles.heroExpanded}`}>
+          <div className={styles.heroDecoration} />
+
+          {isCollapsed ? (
+            <div className={styles.collapsedStrip}>
+              <span className={styles.collapsedTitle}>DWx Knowledge Centre</span>
+              <span className={styles.collapsedBadge}>{faqEntries.length} FAQs</span>
+              <span className={styles.collapsedBadge}>{glossaryEntries.length} Terms</span>
+              <span className={styles.collapsedBadge}>{articleEntries.length} Articles</span>
             </div>
-            <div className={styles.heroTitle}>
-              DWx Knowledge <span className={styles.heroTitleAccent}>Centre</span>
+          ) : (
+            <div className={styles.heroContent}>
+              <div className={styles.heroLeft}>
+                <div className={styles.heroBreadcrumb}>
+                  <span className={styles.heroBreadcrumbLink}>Home</span> &rsaquo; Knowledge Base
+                </div>
+                <div className={styles.heroTitle}>
+                  DWx Knowledge <span className={styles.heroTitleAccent}>Centre</span>
+                </div>
+                <Text className={styles.heroSubtitle}>
+                  Your one-stop resource for FAQs, terminology, and in-depth guides to master the DWx Traffic Manager platform and sales process.
+                </Text>
+                <div className={styles.heroSearchContainer}>
+                  <Search24Regular
+                    className={styles.heroSearchIcon}
+                    style={{ position: 'absolute', left: 18, top: '50%', transform: 'translateY(-50%)' }}
+                  />
+                  <input
+                    type="text"
+                    placeholder="What are you looking for?"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    style={{
+                      width: '100%',
+                      padding: '16px 20px 16px 48px',
+                      borderRadius: 14,
+                      border: '1px solid rgba(255,255,255,0.15)',
+                      background: 'rgba(255,255,255,0.08)',
+                      backdropFilter: 'blur(12px)',
+                      color: 'white',
+                      fontSize: 15,
+                      outline: 'none',
+                      fontFamily: 'inherit',
+                    }}
+                  />
+                </div>
+              </div>
+              <div className={styles.heroRight}>
+                <div className={styles.quickLink} onClick={() => scrollToSection('faq')}>
+                  <div className={`${styles.quickLinkIcon} ${styles.quickLinkIconFaq}`}>
+                    <QuestionCircle24Regular />
+                  </div>
+                  <div>
+                    <div className={styles.quickLinkText}>Browse FAQs</div>
+                    <div className={styles.quickLinkCount}>{faqEntries.length} questions</div>
+                  </div>
+                </div>
+                <div className={styles.quickLink} onClick={() => scrollToSection('glossary')}>
+                  <div className={`${styles.quickLinkIcon} ${styles.quickLinkIconGlossary}`}>
+                    <BookLetter24Regular />
+                  </div>
+                  <div>
+                    <div className={styles.quickLinkText}>Glossary</div>
+                    <div className={styles.quickLinkCount}>{glossaryEntries.length} terms</div>
+                  </div>
+                </div>
+                <div className={styles.quickLink} onClick={() => scrollToSection('articles')}>
+                  <div className={`${styles.quickLinkIcon} ${styles.quickLinkIconArticles}`}>
+                    <BookOpen24Regular />
+                  </div>
+                  <div>
+                    <div className={styles.quickLinkText}>Read Articles</div>
+                    <div className={styles.quickLinkCount}>{articleEntries.length} guides</div>
+                  </div>
+                </div>
+              </div>
             </div>
-            <Text className={styles.heroSubtitle}>
-              Your one-stop resource for FAQs, terminology, and in-depth guides to master the DWx Traffic Manager platform and sales process.
-            </Text>
-            <div className={styles.heroSearchContainer}>
-              <Search24Regular
-                className={styles.heroSearchIcon}
-                style={{ position: 'absolute', left: 18, top: '50%', transform: 'translateY(-50%)' }}
-              />
-              <input
-                type="text"
-                placeholder="What are you looking for?"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                style={{
-                  width: '100%',
-                  padding: '16px 20px 16px 48px',
-                  borderRadius: 14,
-                  border: '1px solid rgba(255,255,255,0.15)',
-                  background: 'rgba(255,255,255,0.08)',
-                  backdropFilter: 'blur(12px)',
-                  color: 'white',
-                  fontSize: 15,
-                  outline: 'none',
-                  fontFamily: 'inherit',
-                }}
-              />
-            </div>
-          </div>
-          <div className={styles.heroRight}>
-            <div className={styles.quickLink} onClick={() => scrollToSection('faq')}>
-              <div className={`${styles.quickLinkIcon} ${styles.quickLinkIconFaq}`}>
-                <QuestionCircle24Regular />
-              </div>
-              <div>
-                <div className={styles.quickLinkText}>Browse FAQs</div>
-                <div className={styles.quickLinkCount}>{faqEntries.length} questions</div>
-              </div>
-            </div>
-            <div className={styles.quickLink} onClick={() => scrollToSection('glossary')}>
-              <div className={`${styles.quickLinkIcon} ${styles.quickLinkIconGlossary}`}>
-                <BookLetter24Regular />
-              </div>
-              <div>
-                <div className={styles.quickLinkText}>Glossary</div>
-                <div className={styles.quickLinkCount}>{glossaryEntries.length} terms</div>
-              </div>
-            </div>
-            <div className={styles.quickLink} onClick={() => scrollToSection('articles')}>
-              <div className={`${styles.quickLinkIcon} ${styles.quickLinkIconArticles}`}>
-                <BookOpen24Regular />
-              </div>
-              <div>
-                <div className={styles.quickLinkText}>Read Articles</div>
-                <div className={styles.quickLinkCount}>{articleEntries.length} guides</div>
-              </div>
-            </div>
-          </div>
+          )}
         </div>
+        <HeroCollapseToggle isCollapsed={isCollapsed} onToggle={toggle} />
       </div>
 
       {/* Body — Magazine sections */}

@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DWx Hero Banners - All Pages + Collapse Toggle</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', -apple-system, sans-serif; background: #f0f0f0; color: #242424; }
+
+    /* Page nav for switching between pages */
+    .page-nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      padding: 10px 24px; flex-wrap: wrap;
+      background: #1a1a2e; border-bottom: 2px solid #5bb8f5;
+    }
+    .page-nav .nav-label { color: rgba(255,255,255,0.4); font-size: 11px; text-transform: uppercase; letter-spacing: 1px; margin-right: 8px; }
+    .page-nav button {
+      padding: 6px 14px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.2);
+      background: transparent; color: rgba(255,255,255,0.7); cursor: pointer;
+      font-size: 12px; font-weight: 600; transition: all 0.2s;
+    }
+    .page-nav button:hover { background: rgba(255,255,255,0.1); color: white; }
+    .page-nav button.active { background: #5bb8f5; color: #0d3a5c; border-color: #5bb8f5; }
+    .page-nav .divider { width: 1px; height: 20px; background: rgba(255,255,255,0.15); margin: 0 4px; }
+
+    .page-section { display: none; padding-top: 56px; }
+    .page-section.active { display: block; }
+
+    /* Shared header */
+    .dwx-header {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 0 64px; height: 48px;
+      background: linear-gradient(135deg, #0d3a5c 0%, #1a5a8a 100%);
+      color: white; font-size: 13px;
+    }
+    .dwx-header .logo { font-weight: 700; font-size: 15px; }
+    .dwx-header .logo span { color: #5bb8f5; }
+    .dwx-header nav { display: flex; gap: 2px; }
+    .dwx-header nav a {
+      color: rgba(255,255,255,0.7); font-size: 12px; font-weight: 500;
+      padding: 5px 10px; border-radius: 5px; text-decoration: none;
+    }
+    .dwx-header nav a:hover { background: rgba(255,255,255,0.1); color: white; }
+    .dwx-header nav a.active { background: rgba(255,255,255,0.15); color: white; font-weight: 600; }
+
+    /* ======================================================================
+       SHARED HERO PATTERN: 1400px container, rounded bottom corners
+       ====================================================================== */
+
+    .page-container {
+      max-width: 1400px; margin: 0 auto; padding: 0 64px 24px;
+    }
+
+    .hero {
+      border-radius: 0 0 16px 16px;
+      position: relative; overflow: hidden;
+      margin-bottom: 20px;
+      transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1), padding 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .hero::before {
+      content: ''; position: absolute; top: -80px; right: -40px;
+      width: 300px; height: 300px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(91,184,245,0.12) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .hero-content {
+      position: relative; z-index: 1;
+      display: flex; justify-content: space-between; align-items: center; gap: 32px;
+      padding: 40px 48px;
+      transition: padding 0.35s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s;
+    }
+    .hero-left { flex: 1; }
+    .hero-breadcrumb { font-size: 12px; color: rgba(255,255,255,0.4); margin-bottom: 12px; }
+    .hero-title { font-size: 32px; font-weight: 700; color: white; line-height: 1.2; margin-bottom: 8px; }
+    .hero-title em { font-style: normal; color: #5bb8f5; }
+    .hero-subtitle { font-size: 15px; color: rgba(255,255,255,0.55); line-height: 1.5; max-width: 500px; }
+
+    .hero-stats {
+      display: flex; gap: 24px; margin-top: 20px;
+    }
+    .hero-stat { text-align: center; }
+    .hero-stat .value { font-size: 28px; font-weight: 700; color: white; display: block; }
+    .hero-stat .label { font-size: 11px; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 0.5px; }
+
+    .hero-right { display: flex; flex-direction: column; gap: 10px; flex-shrink: 0; }
+
+    /* Quick link cards in hero */
+    .hero-quick-link {
+      display: flex; align-items: center; gap: 12px;
+      padding: 12px 18px; border-radius: 10px;
+      background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+      color: rgba(255,255,255,0.8); font-size: 13px; cursor: pointer;
+      transition: all 0.15s; min-width: 220px;
+    }
+    .hero-quick-link:hover { background: rgba(255,255,255,0.12); color: white; border-color: rgba(255,255,255,0.2); }
+    .hero-quick-link .ql-icon {
+      width: 34px; height: 34px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 15px; flex-shrink: 0;
+    }
+    .hero-quick-link .ql-text { font-weight: 500; }
+    .hero-quick-link .ql-count { font-size: 11px; color: rgba(255,255,255,0.4); }
+
+    /* Stat pills in hero */
+    .hero-stat-pills {
+      display: flex; gap: 8px; flex-wrap: wrap;
+    }
+    .hero-stat-pill {
+      display: flex; align-items: center; gap: 6px;
+      padding: 8px 14px; border-radius: 10px;
+      background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+      color: rgba(255,255,255,0.75); font-size: 12px;
+    }
+    .hero-stat-pill .pill-value { font-weight: 700; color: white; font-size: 16px; }
+
+    /* Search in hero */
+    .hero-search {
+      margin-top: 20px; position: relative; max-width: 480px;
+    }
+    .hero-search input {
+      width: 100%; padding: 14px 18px 14px 44px;
+      border-radius: 12px; border: 1px solid rgba(255,255,255,0.15);
+      background: rgba(255,255,255,0.08); backdrop-filter: blur(12px);
+      color: white; font-size: 14px; outline: none; font-family: inherit;
+    }
+    .hero-search input::placeholder { color: rgba(255,255,255,0.35); }
+    .hero-search .search-icon {
+      position: absolute; left: 16px; top: 50%; transform: translateY(-50%);
+      color: rgba(255,255,255,0.35); font-size: 16px;
+    }
+
+    /* ======================================================================
+       COLLAPSED HERO STATE
+       ====================================================================== */
+
+    .hero.collapsed .hero-content {
+      padding: 14px 48px;
+    }
+    .hero.collapsed .hero-left { display: flex; align-items: center; gap: 24px; }
+    .hero.collapsed .hero-title { font-size: 18px; margin-bottom: 0; }
+    .hero.collapsed .hero-breadcrumb,
+    .hero.collapsed .hero-subtitle,
+    .hero.collapsed .hero-stats,
+    .hero.collapsed .hero-search,
+    .hero.collapsed .hero-right { display: none; }
+    .hero.collapsed .collapsed-stats { display: flex !important; }
+
+    .collapsed-stats {
+      display: none !important;
+      gap: 16px; align-items: center;
+    }
+    .collapsed-stat {
+      display: flex; align-items: center; gap: 6px;
+      padding: 4px 10px; border-radius: 6px;
+      background: rgba(255,255,255,0.08);
+      font-size: 12px; color: rgba(255,255,255,0.6);
+    }
+    .collapsed-stat strong { color: white; font-weight: 600; }
+
+    /* Collapse toggle button */
+    .hero-collapse-toggle {
+      position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
+      z-index: 10; cursor: pointer;
+      width: 48px; height: 20px; border-radius: 10px 10px 0 0;
+      background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15);
+      border-bottom: none;
+      display: flex; align-items: center; justify-content: center;
+      color: rgba(255,255,255,0.5); font-size: 12px;
+      transition: all 0.15s;
+    }
+    .hero-collapse-toggle:hover {
+      background: rgba(255,255,255,0.18); color: white;
+    }
+    .hero.collapsed .hero-collapse-toggle {
+      transform: translateX(-50%) rotate(180deg);
+    }
+
+    /* ======================================================================
+       BODY CONTENT (placeholder)
+       ====================================================================== */
+
+    .body-content {
+      padding: 16px 0;
+    }
+    .placeholder-row {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;
+      margin-bottom: 20px;
+    }
+    .placeholder-card {
+      height: 100px; border-radius: 12px; background: white;
+      border: 1px solid #e8e8e8; padding: 16px;
+      display: flex; flex-direction: column; justify-content: space-between;
+    }
+    .placeholder-card .pc-label { font-size: 12px; color: #999; }
+    .placeholder-card .pc-value { font-size: 24px; font-weight: 700; color: #0d3a5c; }
+    .placeholder-card .pc-trend { font-size: 11px; color: #2a8d6e; }
+
+    .placeholder-table {
+      width: 100%; background: white; border: 1px solid #e8e8e8;
+      border-radius: 12px; overflow: hidden;
+    }
+    .placeholder-table-header {
+      display: grid; grid-template-columns: 2fr 1.5fr 1fr 1fr 1fr;
+      background: #fafbfc; padding: 12px 20px; font-size: 12px;
+      color: #999; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;
+      border-bottom: 1px solid #e8e8e8;
+    }
+    .placeholder-table-row {
+      display: grid; grid-template-columns: 2fr 1.5fr 1fr 1fr 1fr;
+      padding: 14px 20px; font-size: 13px; border-bottom: 1px solid #f0f0f0;
+      align-items: center;
+    }
+    .placeholder-table-row:last-child { border-bottom: none; }
+    .stage-badge {
+      display: inline-block; padding: 3px 10px; border-radius: 10px;
+      font-size: 11px; font-weight: 600;
+    }
+    .stage-lead { background: #e8f4f8; color: #1e6b7b; }
+    .stage-qualified { background: #e8f0fe; color: #1a5a8a; }
+    .stage-discovery { background: #f3e8ff; color: #7c3aed; }
+    .stage-proposal { background: #fef3c7; color: #b45309; }
+    .stage-won { background: #d4edda; color: #107c10; }
+
+    .placeholder-wizard {
+      background: white; border: 1px solid #e8e8e8; border-radius: 12px;
+      padding: 32px; text-align: center; color: #999; font-size: 14px;
+    }
+    .placeholder-wizard .steps {
+      display: flex; align-items: center; justify-content: center;
+      gap: 8px; margin-top: 12px;
+    }
+    .placeholder-wizard .step {
+      width: 32px; height: 32px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; font-weight: 600;
+    }
+    .placeholder-wizard .step.active { background: #1e6b7b; color: white; }
+    .placeholder-wizard .step.done { background: #d4edda; color: #107c10; }
+    .placeholder-wizard .step.pending { background: #f0f0f0; color: #999; }
+    .placeholder-wizard .step-line { width: 24px; height: 2px; background: #e0e0e0; }
+
+    /* Label bar */
+    .page-label {
+      text-align: center; padding: 20px; font-size: 11px; font-weight: 600;
+      color: #999; text-transform: uppercase; letter-spacing: 2px;
+      border-top: 1px solid #e0e0e0; margin-top: 40px;
+    }
+
+    /* Sidebar layout for dashboard/admin */
+    .sidebar-layout {
+      display: flex; gap: 20px;
+    }
+    .sidebar-nav {
+      width: 220px; flex-shrink: 0; background: white;
+      border: 1px solid #e8e8e8; border-radius: 12px;
+      padding: 12px; height: fit-content;
+    }
+    .sidebar-nav .group-label {
+      font-size: 10px; font-weight: 700; color: #999;
+      text-transform: uppercase; letter-spacing: 0.8px;
+      padding: 8px 10px 4px; margin-top: 4px;
+    }
+    .sidebar-nav .nav-item {
+      display: flex; align-items: center; gap: 8px;
+      padding: 8px 10px; border-radius: 6px; cursor: pointer;
+      font-size: 13px; color: #616161; transition: all 0.15s;
+    }
+    .sidebar-nav .nav-item:hover { background: #f5f5f5; }
+    .sidebar-nav .nav-item.active { background: #e8f4f8; color: #1e6b7b; font-weight: 600; }
+    .sidebar-main { flex: 1; min-width: 0; }
+  </style>
+</head>
+<body>
+
+<div class="page-nav">
+  <span class="nav-label">Pages</span>
+  <button class="active" onclick="showPage('my-requests')">My Requests</button>
+  <button onclick="showPage('pipeline')">Pipeline</button>
+  <button onclick="showPage('dashboard')">Dashboard</button>
+  <button onclick="showPage('new-request')">New Request</button>
+  <div class="divider"></div>
+  <span class="nav-label">Interaction</span>
+  <button onclick="showPage('collapse-demo')">Collapse Toggle Demo</button>
+</div>
+
+
+<!-- ======================================================================
+     MY REQUESTS — Personal deal tracker
+     ====================================================================== -->
+<div id="my-requests" class="page-section active">
+  <div class="dwx-header">
+    <div class="logo">&#x2197; DWx Traffic <span>Manager</span></div>
+    <nav>
+      <a href="#">Services</a>
+      <a href="#">Products</a>
+      <a href="#">New Request</a>
+      <a href="#" class="active">My Requests</a>
+      <a href="#">Knowledge Base</a>
+    </nav>
+  </div>
+
+  <div class="page-container">
+    <div class="hero" style="background: linear-gradient(135deg, #0d3a5c 0%, #1a5a8a 60%, #1e6b7b 100%);">
+      <div class="hero-content">
+        <div class="hero-left">
+          <div class="hero-breadcrumb">Home &rsaquo; My Requests</div>
+          <h1 class="hero-title">My <em>Requests</em></h1>
+          <p class="hero-subtitle">Track your service requests, product demos, and saved drafts across the sales pipeline.</p>
+          <div class="hero-stats">
+            <div class="hero-stat">
+              <span class="value">14</span>
+              <span class="label">Active Deals</span>
+            </div>
+            <div class="hero-stat">
+              <span class="value">3</span>
+              <span class="label">Pending</span>
+            </div>
+            <div class="hero-stat">
+              <span class="value">R2.4M</span>
+              <span class="label">Pipeline Value</span>
+            </div>
+            <div class="hero-stat">
+              <span class="value">73%</span>
+              <span class="label">Win Rate</span>
+            </div>
+          </div>
+          <div class="hero-search">
+            <span class="search-icon">&#x1F50D;</span>
+            <input type="text" placeholder="Search by client, service, or stage..." />
+          </div>
+        </div>
+        <div class="hero-right">
+          <div class="hero-quick-link">
+            <div class="ql-icon" style="background: rgba(91,184,245,0.15); color: #5bb8f5;">&#x2795;</div>
+            <div>
+              <div class="ql-text">New Service Request</div>
+              <div class="ql-count">Create a new deal</div>
+            </div>
+          </div>
+          <div class="hero-quick-link">
+            <div class="ql-icon" style="background: rgba(122,204,155,0.15); color: #7acc9b;">&#x1F4E6;</div>
+            <div>
+              <div class="ql-text">Product Request</div>
+              <div class="ql-count">Request a demo or trial</div>
+            </div>
+          </div>
+          <div class="hero-quick-link">
+            <div class="ql-icon" style="background: rgba(247,163,79,0.15); color: #f7a34f;">&#x1F4DD;</div>
+            <div>
+              <div class="ql-text">Saved Drafts</div>
+              <div class="ql-count">2 drafts</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="hero-collapse-toggle" onclick="this.closest('.hero').classList.toggle('collapsed')">&#x25B2;</div>
+    </div>
+
+    <div class="body-content">
+      <div class="placeholder-table">
+        <div class="placeholder-table-header">
+          <span>Deal / Client</span><span>Service</span><span>Stage</span><span>Value</span><span>Updated</span>
+        </div>
+        <div class="placeholder-table-row">
+          <span><strong>Absa Group</strong> &mdash; Power Platform</span>
+          <span>Power Platform Dev</span>
+          <span><span class="stage-badge stage-proposal">Proposal</span></span>
+          <span>R450,000</span><span>2h ago</span>
+        </div>
+        <div class="placeholder-table-row">
+          <span><strong>Discovery Ltd</strong> &mdash; Copilot Agents</span>
+          <span>Enterprise Copilot</span>
+          <span><span class="stage-badge stage-discovery">Discovery</span></span>
+          <span>R1,200,000</span><span>1d ago</span>
+        </div>
+        <div class="placeholder-table-row">
+          <span><strong>Vodacom SA</strong> &mdash; SPFx</span>
+          <span>SPFx Development</span>
+          <span><span class="stage-badge stage-qualified">Qualified</span></span>
+          <span>R320,000</span><span>3d ago</span>
+        </div>
+        <div class="placeholder-table-row">
+          <span><strong>Standard Bank</strong> &mdash; Migration</span>
+          <span>SharePoint Migration</span>
+          <span><span class="stage-badge stage-won">Won</span></span>
+          <span>R780,000</span><span>1w ago</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="page-label">My Requests &mdash; Hero with personal stats (active deals, pipeline value, win rate) + quick-create actions</div>
+</div>
+
+
+<!-- ======================================================================
+     PIPELINE (Sales Funnel Dashboard) — Manager view
+     ====================================================================== -->
+<div id="pipeline" class="page-section">
+  <div class="dwx-header">
+    <div class="logo">&#x2197; DWx Traffic <span>Manager</span></div>
+    <nav>
+      <a href="#">Services</a>
+      <a href="#">Products</a>
+      <a href="#">New Request</a>
+      <a href="#">My Requests</a>
+      <a href="#">Knowledge Base</a>
+      <a href="#" class="active">Pipeline</a>
+      <a href="#">Admin</a>
+    </nav>
+  </div>
+
+  <div class="page-container">
+    <div class="hero" style="background: linear-gradient(135deg, #0d3a5c 0%, #164a70 50%, #1e6b7b 100%);">
+      <div class="hero-content">
+        <div class="hero-left">
+          <div class="hero-breadcrumb">Home &rsaquo; Sales Pipeline</div>
+          <h1 class="hero-title">Sales <em>Pipeline</em></h1>
+          <p class="hero-subtitle">Manage deals, track conversions, and monitor team performance across the sales funnel.</p>
+          <div class="hero-stats">
+            <div class="hero-stat">
+              <span class="value">R8.2M</span>
+              <span class="label">Total Pipeline</span>
+            </div>
+            <div class="hero-stat">
+              <span class="value">R4.7M</span>
+              <span class="label">Weighted</span>
+            </div>
+            <div class="hero-stat">
+              <span class="value">42</span>
+              <span class="label">Active Deals</span>
+            </div>
+            <div class="hero-stat">
+              <span class="value">68%</span>
+              <span class="label">Win Rate</span>
+            </div>
+          </div>
+        </div>
+        <div class="hero-right">
+          <div class="hero-stat-pills">
+            <div class="hero-stat-pill">
+              <span class="pill-value" style="color: #fbbf24;">3</span>
+              <span>At Risk</span>
+            </div>
+            <div class="hero-stat-pill">
+              <span class="pill-value" style="color: #ef4444;">2</span>
+              <span>Overdue</span>
+            </div>
+            <div class="hero-stat-pill">
+              <span class="pill-value" style="color: #22c55e;">5</span>
+              <span>Won This Month</span>
+            </div>
+          </div>
+          <div class="hero-quick-link" style="margin-top: 4px;">
+            <div class="ql-icon" style="background: rgba(91,184,245,0.15); color: #5bb8f5;">&#x26A1;</div>
+            <div>
+              <div class="ql-text">Quick Create Deal</div>
+              <div class="ql-count">Add a new lead</div>
+            </div>
+          </div>
+          <div class="hero-quick-link">
+            <div class="ql-icon" style="background: rgba(247,163,79,0.15); color: #f7a34f;">&#x1F4CA;</div>
+            <div>
+              <div class="ql-text">Export Pipeline</div>
+              <div class="ql-count">Excel / CSV</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="hero-collapse-toggle" onclick="this.closest('.hero').classList.toggle('collapsed')">&#x25B2;</div>
+    </div>
+
+    <div class="body-content">
+      <div class="placeholder-row">
+        <div class="placeholder-card"><span class="pc-label">Active Leads</span><span class="pc-value">12</span><span class="pc-trend">&#x25B2; 3 this week</span></div>
+        <div class="placeholder-card"><span class="pc-label">In Discovery</span><span class="pc-value">8</span><span class="pc-trend">2 meetings today</span></div>
+        <div class="placeholder-card"><span class="pc-label">Proposals Out</span><span class="pc-value">6</span><span class="pc-trend">R3.1M pending</span></div>
+        <div class="placeholder-card"><span class="pc-label">Negotiation</span><span class="pc-value">4</span><span class="pc-trend">R1.8M in play</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="page-label">Pipeline &mdash; Hero with total pipeline, weighted value, deal counts + urgency pills (At Risk, Overdue, Won)</div>
+</div>
+
+
+<!-- ======================================================================
+     DASHBOARD (Manager Dashboard) — Analytics hub
+     ====================================================================== -->
+<div id="dashboard" class="page-section">
+  <div class="dwx-header">
+    <div class="logo">&#x2197; DWx Traffic <span>Manager</span></div>
+    <nav>
+      <a href="#">Services</a>
+      <a href="#">Products</a>
+      <a href="#">New Request</a>
+      <a href="#">My Requests</a>
+      <a href="#">Knowledge Base</a>
+      <a href="#" class="active">Dashboard</a>
+      <a href="#">Admin</a>
+    </nav>
+  </div>
+
+  <div class="page-container">
+    <div class="hero" style="background: linear-gradient(135deg, #0d3a5c 0%, #1a4a70 100%);">
+      <div class="hero-content">
+        <div class="hero-left">
+          <div class="hero-breadcrumb">Home &rsaquo; Manager Dashboard</div>
+          <h1 class="hero-title">Manager <em>Dashboard</em></h1>
+          <p class="hero-subtitle">Analytics, scheduling, and operational insights for Digital Workplace management.</p>
+          <div class="hero-stats">
+            <div class="hero-stat">
+              <span class="value">12</span>
+              <span class="label">Tabs</span>
+            </div>
+            <div class="hero-stat">
+              <span class="value">156</span>
+              <span class="label">Total Bookings</span>
+            </div>
+            <div class="hero-stat">
+              <span class="value">8</span>
+              <span class="label">Pending Approvals</span>
+            </div>
+            <div class="hero-stat">
+              <span class="value">94%</span>
+              <span class="label">SLA Compliance</span>
+            </div>
+          </div>
+        </div>
+        <div class="hero-right">
+          <div class="hero-quick-link">
+            <div class="ql-icon" style="background: rgba(91,184,245,0.15); color: #5bb8f5;">&#x1F504;</div>
+            <div>
+              <div class="ql-text">Refresh Data</div>
+              <div class="ql-count">Last updated 5m ago</div>
+            </div>
+          </div>
+          <div class="hero-quick-link">
+            <div class="ql-icon" style="background: rgba(122,204,155,0.15); color: #7acc9b;">&#x1F4CA;</div>
+            <div>
+              <div class="ql-text">Export Report</div>
+              <div class="ql-count">Excel download</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="hero-collapse-toggle" onclick="this.closest('.hero').classList.toggle('collapsed')">&#x25B2;</div>
+    </div>
+
+    <div class="body-content">
+      <div class="sidebar-layout">
+        <div class="sidebar-nav">
+          <div class="group-label">Pipeline</div>
+          <div class="nav-item active">&#x1F4CA; Overview</div>
+          <div class="nav-item">&#x1F3AF; Sales Pipeline</div>
+          <div class="nav-item">&#x2705; Action Queue <span style="background:#e74c3c;color:white;padding:1px 6px;border-radius:8px;font-size:10px;margin-left:auto;">8</span></div>
+          <div class="group-label">Schedule</div>
+          <div class="nav-item">&#x1F4C5; Calendar</div>
+          <div class="nav-item">&#x23F3; Timeline</div>
+          <div class="group-label">Analytics</div>
+          <div class="nav-item">&#x1F464; AM Performance</div>
+          <div class="nav-item">&#x1F3E2; Client Activity</div>
+          <div class="nav-item">&#x1F4CA; Win/Loss</div>
+          <div class="group-label">Operations</div>
+          <div class="nav-item">&#x1F4B0; Commercial</div>
+          <div class="nav-item">&#x1F3C6; Gamification</div>
+          <div class="nav-item">&#x1F4C1; Resources</div>
+          <div class="nav-item">&#x23F1; SLA Tracking</div>
+        </div>
+        <div class="sidebar-main">
+          <div class="placeholder-row">
+            <div class="placeholder-card"><span class="pc-label">Total Bookings</span><span class="pc-value">156</span><span class="pc-trend">&#x25B2; 12%</span></div>
+            <div class="placeholder-card"><span class="pc-label">Active Deals</span><span class="pc-value">42</span><span class="pc-trend">&#x25B2; 8%</span></div>
+            <div class="placeholder-card"><span class="pc-label">Conversion Rate</span><span class="pc-value">68%</span><span class="pc-trend">&#x25B2; 3%</span></div>
+            <div class="placeholder-card"><span class="pc-label">Avg Deal Size</span><span class="pc-value">R320K</span><span class="pc-trend">&#x25B2; 15%</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="page-label">Dashboard &mdash; Hero with high-level stats + quick actions (Refresh, Export) + sidebar navigation below</div>
+</div>
+
+
+<!-- ======================================================================
+     NEW REQUEST — Service Request Wizard
+     ====================================================================== -->
+<div id="new-request" class="page-section">
+  <div class="dwx-header">
+    <div class="logo">&#x2197; DWx Traffic <span>Manager</span></div>
+    <nav>
+      <a href="#">Services</a>
+      <a href="#">Products</a>
+      <a href="#" class="active">New Request</a>
+      <a href="#">My Requests</a>
+      <a href="#">Knowledge Base</a>
+    </nav>
+  </div>
+
+  <div class="page-container">
+    <div class="hero" style="background: linear-gradient(135deg, #1e6b7b 0%, #1a5a8a 60%, #0d3a5c 100%);">
+      <div class="hero-content" style="padding: 32px 48px;">
+        <div class="hero-left">
+          <div class="hero-breadcrumb">Home &rsaquo; New Service Request</div>
+          <h1 class="hero-title" style="font-size: 28px;">New Service <em>Request</em></h1>
+          <p class="hero-subtitle" style="font-size: 14px;">Complete the wizard to submit a new pre-sales service request. We'll match you with the right specialist.</p>
+        </div>
+        <div class="hero-right" style="flex-direction: row; gap: 16px;">
+          <div class="hero-stat-pill">
+            <span style="font-size: 14px;">&#x2460;</span>
+            <span style="color: white; font-weight: 600;">Service</span>
+          </div>
+          <div class="hero-stat-pill">
+            <span style="font-size: 14px;">&#x2461;</span>
+            <span>Client</span>
+          </div>
+          <div class="hero-stat-pill">
+            <span style="font-size: 14px;">&#x2462;</span>
+            <span>Requirements</span>
+          </div>
+          <div class="hero-stat-pill">
+            <span style="font-size: 14px;">&#x2463;</span>
+            <span>Schedule</span>
+          </div>
+          <div class="hero-stat-pill">
+            <span style="font-size: 14px;">&#x2464;</span>
+            <span>Review</span>
+          </div>
+        </div>
+      </div>
+      <div class="hero-collapse-toggle" onclick="this.closest('.hero').classList.toggle('collapsed')">&#x25B2;</div>
+    </div>
+
+    <div class="body-content">
+      <div class="placeholder-wizard">
+        <div style="font-size: 18px; font-weight: 600; color: #242424; margin-bottom: 8px;">Step 1: Select a Service</div>
+        <p>Choose from 12 service categories to begin your request</p>
+        <div class="steps">
+          <div class="step active">1</div>
+          <div class="step-line"></div>
+          <div class="step pending">2</div>
+          <div class="step-line"></div>
+          <div class="step pending">3</div>
+          <div class="step-line"></div>
+          <div class="step pending">4</div>
+          <div class="step-line"></div>
+          <div class="step pending">5</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="page-label">New Request &mdash; Compact hero with wizard step indicators integrated into the hero itself (saves vertical space)</div>
+</div>
+
+
+<!-- ======================================================================
+     COLLAPSE TOGGLE DEMO — Shows the interaction pattern
+     ====================================================================== -->
+<div id="collapse-demo" class="page-section">
+  <div class="dwx-header">
+    <div class="logo">&#x2197; DWx Traffic <span>Manager</span></div>
+    <nav>
+      <a href="#" class="active">Collapse Demo</a>
+    </nav>
+  </div>
+
+  <div class="page-container">
+    <div style="text-align: center; padding: 16px 0 8px; font-size: 13px; color: #999; font-weight: 600;">
+      &#x25BC; Click the small chevron at the bottom-center of the hero to toggle collapse &#x25BC;
+    </div>
+
+    <!-- EXPANDED STATE -->
+    <div class="hero" id="demo-hero" style="background: linear-gradient(135deg, #0d3a5c 0%, #1a5a8a 60%, #1e6b7b 100%);">
+      <div class="hero-content">
+        <div class="hero-left">
+          <div class="hero-breadcrumb">Home &rsaquo; My Requests</div>
+          <h1 class="hero-title">My <em>Requests</em></h1>
+          <p class="hero-subtitle">Track your service requests, product demos, and saved drafts across the sales pipeline.</p>
+          <div class="hero-stats">
+            <div class="hero-stat">
+              <span class="value">14</span>
+              <span class="label">Active Deals</span>
+            </div>
+            <div class="hero-stat">
+              <span class="value">R2.4M</span>
+              <span class="label">Pipeline Value</span>
+            </div>
+            <div class="hero-stat">
+              <span class="value">73%</span>
+              <span class="label">Win Rate</span>
+            </div>
+          </div>
+          <div class="hero-search">
+            <span class="search-icon">&#x1F50D;</span>
+            <input type="text" placeholder="Search by client, service, or stage..." />
+          </div>
+          <div class="collapsed-stats">
+            <div class="collapsed-stat"><strong>14</strong> Active</div>
+            <div class="collapsed-stat"><strong>R2.4M</strong> Pipeline</div>
+            <div class="collapsed-stat"><strong>73%</strong> Win Rate</div>
+          </div>
+        </div>
+        <div class="hero-right">
+          <div class="hero-quick-link">
+            <div class="ql-icon" style="background: rgba(91,184,245,0.15); color: #5bb8f5;">&#x2795;</div>
+            <div>
+              <div class="ql-text">New Service Request</div>
+              <div class="ql-count">Create a new deal</div>
+            </div>
+          </div>
+          <div class="hero-quick-link">
+            <div class="ql-icon" style="background: rgba(122,204,155,0.15); color: #7acc9b;">&#x1F4E6;</div>
+            <div>
+              <div class="ql-text">Product Request</div>
+              <div class="ql-count">Request a demo or trial</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="hero-collapse-toggle" onclick="this.closest('.hero').classList.toggle('collapsed')">&#x25B2;</div>
+    </div>
+
+    <div style="text-align: center; padding: 12px 0; font-size: 12px; color: #1e6b7b; font-weight: 600; letter-spacing: 1px;">
+      EXPANDED STATE &#x25B2; &mdash; Click chevron to collapse &mdash; &#x25BC; COLLAPSED STATE (showing inline stats)
+    </div>
+
+    <div class="body-content">
+      <div style="background: white; border: 1px solid #e8e8e8; border-radius: 12px; padding: 24px; color: #616161; font-size: 14px; line-height: 1.7;">
+        <h3 style="color: #0d3a5c; margin-bottom: 12px;">Collapse Toggle Behaviour</h3>
+        <ul style="padding-left: 20px; display: flex; flex-direction: column; gap: 8px;">
+          <li><strong>Expanded (default):</strong> Full hero with title, subtitle, stats, search, quick-link cards. ~200px tall.</li>
+          <li><strong>Collapsed:</strong> Thin strip (~56px) with just the title + inline stat badges. Quick links and search hidden.</li>
+          <li><strong>Toggle:</strong> Small chevron button centered at bottom of hero. Rotates 180&deg; when collapsed.</li>
+          <li><strong>Animation:</strong> Smooth 350ms slide transition using CSS max-height + padding.</li>
+          <li><strong>Persistence:</strong> <code>localStorage</code> key per page (e.g. <code>dwx-hero-collapsed-my-requests</code>).</li>
+          <li><strong>Global default:</strong> "Always start minimised" personal setting (stored in <code>localStorage</code>), togglable from user avatar menu.</li>
+          <li><strong>Reset:</strong> Without the global setting, heroes always start expanded on page load (fresh session feel).</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="page-label">Collapse Demo &mdash; Click the chevron at the bottom-center of the hero to toggle between expanded and collapsed states</div>
+</div>
+
+
+<script>
+function showPage(id) {
+  document.querySelectorAll('.page-section').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.page-nav button').forEach(btn => btn.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  event.target.classList.add('active');
+}
+</script>
+
+</body>
+</html>

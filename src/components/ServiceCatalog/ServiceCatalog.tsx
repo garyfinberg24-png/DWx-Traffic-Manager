@@ -28,6 +28,8 @@ import { ServiceCard } from './ServiceCard';
 import { ServiceDetails } from './ServiceDetails';
 import { ServiceDetailModal } from './ServiceDetailModal';
 import { DW_COLORS } from '../../utils/buttonStyles';
+import { useHeroCollapse } from '../../hooks/useHeroCollapse';
+import { HeroCollapseToggle } from '../Common/HeroCollapseToggle';
 
 // ============================================================================
 // Category colors (shared with ServiceCard)
@@ -60,14 +62,52 @@ const useStyles = makeStyles({
     ...shorthands.padding('0', '64px', '24px'),
   },
 
+  // Hero wrapper — relative for toggle positioning
+  heroWrapper: {
+    position: 'relative',
+    marginBottom: '20px',
+  },
   // Hero Banner — contained, rounded bottom corners (matches ProductCatalog.heroBanner)
   heroBanner: {
     ...shorthands.borderRadius('0', '0', '16px', '16px'),
     ...shorthands.padding('0'),
-    marginBottom: '20px',
     position: 'relative',
     ...shorthands.overflow('hidden'),
     background: 'linear-gradient(135deg, #0d3a5c 0%, #1a5a8a 50%, #1e6b7b 100%)',
+  },
+  heroExpanded: {
+    maxHeight: '400px',
+    transitionProperty: 'max-height',
+    transitionDuration: '350ms',
+    transitionTimingFunction: 'ease',
+  },
+  heroCollapsed: {
+    maxHeight: '56px',
+    transitionProperty: 'max-height',
+    transitionDuration: '350ms',
+    transitionTimingFunction: 'ease',
+  },
+  collapsedStrip: {
+    display: 'flex',
+    alignItems: 'center',
+    ...shorthands.gap('16px'),
+    ...shorthands.padding('0', '32px'),
+    height: '56px',
+    position: 'relative',
+    zIndex: 2,
+  },
+  collapsedTitle: {
+    fontSize: '16px',
+    fontWeight: '700',
+    color: 'white',
+  },
+  collapsedBadge: {
+    fontSize: '11px',
+    fontWeight: '600',
+    color: 'rgba(255,255,255,0.9)',
+    backgroundColor: 'rgba(255,255,255,0.15)',
+    ...shorthands.padding('3px', '10px'),
+    ...shorthands.borderRadius('10px'),
   },
   heroDecoration: {
     position: 'absolute',
@@ -392,6 +432,7 @@ interface ServiceCatalogProps {
 export const ServiceCatalog: React.FC<ServiceCatalogProps> = ({ onRequestService }) => {
   const styles = useStyles();
   const navigate = useNavigate();
+  const { isCollapsed, toggle } = useHeroCollapse('services');
 
   const [services, setServices] = useState<DWService[]>([]);
   const [loading, setLoading] = useState(true);
@@ -501,79 +542,92 @@ export const ServiceCatalog: React.FC<ServiceCatalogProps> = ({ onRequestService
   return (
     <div className={styles.container}>
       {/* Hero Banner — contained, rounded bottom corners */}
-      <div className={styles.heroBanner}>
-        <div className={styles.heroDecoration} />
+      <div className={styles.heroWrapper}>
+        <div className={`${styles.heroBanner} ${isCollapsed ? styles.heroCollapsed : styles.heroExpanded}`}>
+          <div className={styles.heroDecoration} />
 
-        {/* Row 1: Page header */}
-        <div className={styles.heroHeaderRow}>
-          <div>
-            <div className={styles.heroHeaderTitle}>Service Catalog</div>
-            <div className={styles.heroHeaderSubtitle}>
-              Explore Digital Workplace's full range of Microsoft 365 services
+          {isCollapsed ? (
+            <div className={styles.collapsedStrip}>
+              <span className={styles.collapsedTitle}>Service Catalog</span>
+              <span className={styles.collapsedBadge}>{services.length} Services</span>
+              <span className={styles.collapsedBadge}>{uniqueCategories} Categories</span>
             </div>
-          </div>
-          <button
-            className={styles.backButtonHero}
-            onClick={() => navigate('/')}
-          >
-            <ArrowLeft24Regular style={{ fontSize: '16px' }} />
-            Back to Home
-          </button>
-        </div>
-
-        {/* Row 2: Glassmorphic search bar */}
-        <div className={styles.heroSearchRow}>
-          <div className={styles.heroSearchBar}>
-            <div className={styles.heroSearchIcon}>
-              <SearchRegular style={{ width: '16px', height: '16px' }} />
-            </div>
-            <input
-              className={styles.heroSearchInput}
-              placeholder="Search services by name, category, or keyword..."
-              value={searchText}
-              onChange={(e) => setSearchText(e.target.value)}
-            />
-          </div>
-          <span className={styles.heroSearchCount}>
-            {services.length} services available
-          </span>
-        </div>
-
-        {/* Row 3: Content — title + description | stats */}
-        <div className={styles.heroContentRow}>
-          <div className={styles.heroLeft}>
-            <div className={styles.heroTop}>
-              <div className={styles.heroIcon}>
-                <GridRegular style={{ color: '#7dd3fc', fontSize: '18px' }} />
+          ) : (
+            <>
+              {/* Row 1: Page header */}
+              <div className={styles.heroHeaderRow}>
+                <div>
+                  <div className={styles.heroHeaderTitle}>Service Catalog</div>
+                  <div className={styles.heroHeaderSubtitle}>
+                    Explore Digital Workplace's full range of Microsoft 365 services
+                  </div>
+                </div>
+                <button
+                  className={styles.backButtonHero}
+                  onClick={() => navigate('/')}
+                >
+                  <ArrowLeft24Regular style={{ fontSize: '16px' }} />
+                  Back to Home
+                </button>
               </div>
-              <Text className={styles.heroTitle}>
-                DWx Service{' '}
-                <span style={{ color: '#7dd3fc' }}>Catalog</span>
-              </Text>
-            </div>
-            <div className={styles.heroDesc}>
-              From Power Platform to Copilot Agents, SharePoint migrations to strategic advisory — find the right Microsoft 365 solution and request a pre-sales consultation.
-            </div>
-          </div>
-          <div className={styles.heroStats}>
-            <div className={styles.heroStat}>
-              <Text className={styles.heroStatValue}>{services.length}</Text>
-              <Text className={styles.heroStatLabel}>Services</Text>
-            </div>
-            <div className={styles.heroStat}>
-              <Text className={styles.heroStatValue}>{uniqueCategories}</Text>
-              <Text className={styles.heroStatLabel}>Categories</Text>
-            </div>
-            <div className={styles.heroStat}>
-              <Text className={styles.heroStatValue}>4</Text>
-              <Text className={styles.heroStatLabel}>Complexity Tiers</Text>
-            </div>
-            <div className={styles.heroStat}>
-              <Text className={styles.heroStatValue}>ZAR</Text>
-              <Text className={styles.heroStatLabel}>Currency</Text>
-            </div>
-          </div>
+
+              {/* Row 2: Glassmorphic search bar */}
+              <div className={styles.heroSearchRow}>
+                <div className={styles.heroSearchBar}>
+                  <div className={styles.heroSearchIcon}>
+                    <SearchRegular style={{ width: '16px', height: '16px' }} />
+                  </div>
+                  <input
+                    className={styles.heroSearchInput}
+                    placeholder="Search services by name, category, or keyword..."
+                    value={searchText}
+                    onChange={(e) => setSearchText(e.target.value)}
+                  />
+                </div>
+                <span className={styles.heroSearchCount}>
+                  {services.length} services available
+                </span>
+              </div>
+
+              {/* Row 3: Content — title + description | stats */}
+              <div className={styles.heroContentRow}>
+                <div className={styles.heroLeft}>
+                  <div className={styles.heroTop}>
+                    <div className={styles.heroIcon}>
+                      <GridRegular style={{ color: '#7dd3fc', fontSize: '18px' }} />
+                    </div>
+                    <Text className={styles.heroTitle}>
+                      DWx Service{' '}
+                      <span style={{ color: '#7dd3fc' }}>Catalog</span>
+                    </Text>
+                  </div>
+                  <div className={styles.heroDesc}>
+                    From Power Platform to Copilot Agents, SharePoint migrations to strategic advisory — find the right Microsoft 365 solution and request a pre-sales consultation.
+                  </div>
+                </div>
+                <div className={styles.heroStats}>
+                  <div className={styles.heroStat}>
+                    <Text className={styles.heroStatValue}>{services.length}</Text>
+                    <Text className={styles.heroStatLabel}>Services</Text>
+                  </div>
+                  <div className={styles.heroStat}>
+                    <Text className={styles.heroStatValue}>{uniqueCategories}</Text>
+                    <Text className={styles.heroStatLabel}>Categories</Text>
+                  </div>
+                  <div className={styles.heroStat}>
+                    <Text className={styles.heroStatValue}>4</Text>
+                    <Text className={styles.heroStatLabel}>Complexity Tiers</Text>
+                  </div>
+                  <div className={styles.heroStat}>
+                    <Text className={styles.heroStatValue}>ZAR</Text>
+                    <Text className={styles.heroStatLabel}>Currency</Text>
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
         </div>
+        <HeroCollapseToggle isCollapsed={isCollapsed} onToggle={toggle} />
       </div>
 
       {/* Error Message */}

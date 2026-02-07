@@ -16,6 +16,7 @@ import {
   MenuList,
   MenuItem,
   makeStyles,
+  shorthands,
   MessageBar,
   MessageBarBody,
   MessageBarTitle,
@@ -60,15 +61,144 @@ import { ProductRequestsQueue } from './ProductRequestsQueue';
 import KanbanBoard from './KanbanBoard';
 import QuickCreateDialog from './QuickCreateDialog';
 import { RequestDetails } from '../MyRequests/RequestDetails';
+import { useHeroCollapse } from '../../hooks/useHeroCollapse';
+import { HeroCollapseToggle } from '../Common/HeroCollapseToggle';
 
 const useStyles = makeStyles({
   container: {
     display: 'flex',
     flexDirection: 'column',
     gap: '24px',
-    padding: '24px 64px',
+    padding: '0 64px 24px',
     maxWidth: '1400px',
     margin: '0 auto',
+  },
+  heroWrapper: {
+    position: 'relative',
+    marginBottom: '20px',
+  },
+  heroBanner: {
+    ...shorthands.borderRadius('0', '0', '16px', '16px'),
+    ...shorthands.padding('0'),
+    position: 'relative',
+    ...shorthands.overflow('hidden'),
+    background: 'linear-gradient(135deg, #0d3a5c 0%, #1e6b7b 100%)',
+  },
+  heroExpanded: {
+    maxHeight: '300px',
+    transitionProperty: 'max-height',
+    transitionDuration: '350ms',
+    transitionTimingFunction: 'ease',
+  },
+  heroCollapsed: {
+    maxHeight: '56px',
+    transitionProperty: 'max-height',
+    transitionDuration: '350ms',
+    transitionTimingFunction: 'ease',
+  },
+  heroDecoration: {
+    position: 'absolute',
+    top: '-80px',
+    right: '-40px',
+    width: '300px',
+    height: '300px',
+    ...shorthands.borderRadius('50%'),
+    background: 'radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 70%)',
+    pointerEvents: 'none',
+  },
+  heroContent: {
+    position: 'relative',
+    zIndex: 1,
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    ...shorthands.gap('32px'),
+    ...shorthands.padding('32px', '32px'),
+  },
+  heroLeft: {
+    flex: '1',
+    minWidth: '0',
+  },
+  heroTitle: {
+    fontSize: '24px',
+    fontWeight: '700',
+    color: 'white',
+    marginBottom: '8px',
+  },
+  heroTitleAccent: {
+    color: '#5eead4',
+  },
+  heroStats: {
+    display: 'flex',
+    ...shorthands.gap('24px'),
+    marginTop: '12px',
+  },
+  heroStat: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    ...shorthands.padding('10px', '16px'),
+    ...shorthands.borderRadius('10px'),
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    minWidth: '90px',
+  },
+  heroStatValue: {
+    fontSize: '20px',
+    fontWeight: '700',
+    color: 'white',
+  },
+  heroStatLabel: {
+    fontSize: '10px',
+    color: 'rgba(255,255,255,0.5)',
+    textTransform: 'uppercase',
+    letterSpacing: '0.5px',
+    marginTop: '2px',
+  },
+  heroRight: {
+    display: 'flex',
+    flexDirection: 'column',
+    ...shorthands.gap('10px'),
+    flexShrink: 0,
+    alignItems: 'flex-end',
+  },
+  heroUrgencyPills: {
+    display: 'flex',
+    ...shorthands.gap('8px'),
+  },
+  urgencyPill: {
+    fontSize: '11px',
+    fontWeight: '600',
+    ...shorthands.padding('4px', '12px'),
+    ...shorthands.borderRadius('12px'),
+    display: 'flex',
+    alignItems: 'center',
+    ...shorthands.gap('4px'),
+  },
+  heroActions: {
+    display: 'flex',
+    ...shorthands.gap('8px'),
+  },
+  collapsedStrip: {
+    display: 'flex',
+    alignItems: 'center',
+    ...shorthands.gap('16px'),
+    ...shorthands.padding('0', '32px'),
+    height: '56px',
+    position: 'relative',
+    zIndex: 2,
+  },
+  collapsedTitle: {
+    fontSize: '16px',
+    fontWeight: '700',
+    color: 'white',
+  },
+  collapsedBadge: {
+    fontSize: '11px',
+    fontWeight: '600',
+    color: 'rgba(255,255,255,0.9)',
+    backgroundColor: 'rgba(255,255,255,0.15)',
+    ...shorthands.padding('3px', '10px'),
+    ...shorthands.borderRadius('10px'),
   },
   header: {
     display: 'flex',
@@ -147,6 +277,7 @@ export const SalesFunnelDashboard: React.FC<SalesFunnelDashboardProps> = ({
   onStageClick,
 }) => {
   const styles = useStyles();
+  const { isCollapsed, toggle } = useHeroCollapse('pipeline');
   const { user, isManager } = useAuth();
 
   const [requests, setRequests] = useState<ServiceRequest[]>([]);
@@ -213,6 +344,14 @@ export const SalesFunnelDashboard: React.FC<SalesFunnelDashboardProps> = ({
     return followUpService.getAttentionSummary(requests);
   }, [requests]);
 
+  const heroStats = useMemo(() => {
+    const activeStages = ['Lead', 'Qualified', 'Discovery', 'Proposal', 'Negotiation'];
+    const activeRequests = requests.filter(r => activeStages.includes(r.FunnelStage));
+    const totalPipeline = activeRequests.reduce((sum, r) => sum + (r.DealValue || 0), 0);
+    const weightedPipeline = activeRequests.reduce((sum, r) => sum + (r.WeightedPipeline || 0), 0);
+    return { activeCount: activeRequests.length, totalPipeline, weightedPipeline };
+  }, [requests]);
+
   const handleRequestUpdated = (updatedRequest: ServiceRequest) => {
     setRequests((prev) =>
       prev.map((r) => (r.Id === updatedRequest.Id ? updatedRequest : r))
@@ -258,6 +397,70 @@ export const SalesFunnelDashboard: React.FC<SalesFunnelDashboardProps> = ({
 
   return (
     <div className={styles.container}>
+      {/* Hero Banner */}
+      <div className={styles.heroWrapper}>
+        <div className={`${styles.heroBanner} ${isCollapsed ? styles.heroCollapsed : styles.heroExpanded}`}>
+          <div className={styles.heroDecoration} />
+          {isCollapsed ? (
+            <div className={styles.collapsedStrip}>
+              <span className={styles.collapsedTitle}>Sales Pipeline</span>
+              <span className={styles.collapsedBadge}>{heroStats.activeCount} Active</span>
+              <span className={styles.collapsedBadge}>R{heroStats.totalPipeline.toLocaleString()}</span>
+            </div>
+          ) : (
+            <div className={styles.heroContent}>
+              <div className={styles.heroLeft}>
+                <div className={styles.heroTitle}>
+                  Sales <span className={styles.heroTitleAccent}>Pipeline</span>
+                </div>
+                <div className={styles.heroStats}>
+                  <div className={styles.heroStat}>
+                    <span className={styles.heroStatValue}>R{heroStats.totalPipeline.toLocaleString()}</span>
+                    <span className={styles.heroStatLabel}>Total Pipeline</span>
+                  </div>
+                  <div className={styles.heroStat}>
+                    <span className={styles.heroStatValue}>R{heroStats.weightedPipeline.toLocaleString()}</span>
+                    <span className={styles.heroStatLabel}>Weighted</span>
+                  </div>
+                  <div className={styles.heroStat}>
+                    <span className={styles.heroStatValue}>{heroStats.activeCount}</span>
+                    <span className={styles.heroStatLabel}>Active Deals</span>
+                  </div>
+                </div>
+              </div>
+              <div className={styles.heroRight}>
+                {attentionSummary && (attentionSummary.overdueCount > 0 || attentionSummary.criticalCount > 0) && (
+                  <div className={styles.heroUrgencyPills}>
+                    {attentionSummary.overdueCount > 0 && (
+                      <span className={styles.urgencyPill} style={{ backgroundColor: 'rgba(209,52,56,0.2)', color: '#ff8a8a' }}>
+                        <Warning24Regular style={{ fontSize: '14px' }} />
+                        {attentionSummary.overdueCount} Overdue
+                      </span>
+                    )}
+                    {attentionSummary.criticalCount > 0 && (
+                      <span className={styles.urgencyPill} style={{ backgroundColor: 'rgba(255,170,0,0.2)', color: '#ffcc4d' }}>
+                        {attentionSummary.criticalCount} At Risk
+                      </span>
+                    )}
+                  </div>
+                )}
+                <div className={styles.heroActions}>
+                  <Button
+                    appearance="primary"
+                    icon={<AddRegular />}
+                    onClick={() => setShowQuickCreate(true)}
+                    style={{ backgroundColor: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.3)', color: 'white' }}
+                  >
+                    Quick Create
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+        <HeroCollapseToggle isCollapsed={isCollapsed} onToggle={toggle} />
+      </div>
+
       {/* Header */}
       <div className={styles.header}>
         <div className={styles.headerLeft}>

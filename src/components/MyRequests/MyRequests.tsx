@@ -4,6 +4,7 @@
  */
 
 import React, { useState, useEffect, useMemo, useDeferredValue } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Text,
   Spinner,
@@ -54,15 +55,130 @@ import { RequestCardSkeleton } from '../Common/CardSkeleton';
 import { Pagination, usePagination } from '../Common/Pagination';
 import { AdvancedFilterPanel, useAdvancedFilters, FilterConfig } from '../Common/AdvancedFilterPanel';
 import { DraftsTabContent } from './DraftsTabContent';
+import { useHeroCollapse } from '../../hooks/useHeroCollapse';
+import { HeroCollapseToggle } from '../Common/HeroCollapseToggle';
 
 const useStyles = makeStyles({
   container: {
     display: 'flex',
     flexDirection: 'column',
     gap: '24px',
-    padding: '24px 64px',
+    ...shorthands.padding('0', '64px', '24px'),
     maxWidth: '1400px',
     margin: '0 auto',
+  },
+  heroWrapper: {
+    position: 'relative',
+    marginBottom: '20px',
+  },
+  heroBanner: {
+    ...shorthands.borderRadius('0', '0', '16px', '16px'),
+    ...shorthands.padding('0'),
+    position: 'relative',
+    ...shorthands.overflow('hidden'),
+    background: 'linear-gradient(135deg, #0d3a5c 0%, #1a5a8a 100%)',
+  },
+  heroExpanded: {
+    maxHeight: '300px',
+    transitionProperty: 'max-height',
+    transitionDuration: '350ms',
+    transitionTimingFunction: 'ease',
+  },
+  heroCollapsed: {
+    maxHeight: '56px',
+    transitionProperty: 'max-height',
+    transitionDuration: '350ms',
+    transitionTimingFunction: 'ease',
+  },
+  heroDecoration: {
+    position: 'absolute',
+    top: '-80px',
+    right: '-40px',
+    width: '300px',
+    height: '300px',
+    ...shorthands.borderRadius('50%'),
+    background: 'radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 70%)',
+    pointerEvents: 'none',
+  },
+  heroContent: {
+    position: 'relative',
+    zIndex: 1,
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    ...shorthands.gap('32px'),
+    ...shorthands.padding('32px', '32px'),
+  },
+  heroLeft: {
+    flex: '1',
+    minWidth: '0',
+  },
+  heroTitle: {
+    fontSize: '24px',
+    fontWeight: '700',
+    color: 'white',
+    marginBottom: '8px',
+  },
+  heroTitleAccent: {
+    color: '#7dd3fc',
+  },
+  heroSubtitle: {
+    fontSize: '14px',
+    color: 'rgba(255,255,255,0.6)',
+    marginBottom: '16px',
+  },
+  heroStats: {
+    display: 'flex',
+    ...shorthands.gap('24px'),
+  },
+  heroStat: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    ...shorthands.padding('10px', '16px'),
+    ...shorthands.borderRadius('10px'),
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    minWidth: '80px',
+  },
+  heroStatValue: {
+    fontSize: '20px',
+    fontWeight: '700',
+    color: 'white',
+  },
+  heroStatLabel: {
+    fontSize: '10px',
+    color: 'rgba(255,255,255,0.5)',
+    textTransform: 'uppercase',
+    letterSpacing: '0.5px',
+    marginTop: '2px',
+  },
+  heroRight: {
+    display: 'flex',
+    flexDirection: 'column',
+    ...shorthands.gap('10px'),
+    flexShrink: 0,
+  },
+  collapsedStrip: {
+    display: 'flex',
+    alignItems: 'center',
+    ...shorthands.gap('16px'),
+    ...shorthands.padding('0', '32px'),
+    height: '56px',
+    position: 'relative',
+    zIndex: 2,
+  },
+  collapsedTitle: {
+    fontSize: '16px',
+    fontWeight: '700',
+    color: 'white',
+  },
+  collapsedBadge: {
+    fontSize: '11px',
+    fontWeight: '600',
+    color: 'rgba(255,255,255,0.9)',
+    backgroundColor: 'rgba(255,255,255,0.15)',
+    ...shorthands.padding('3px', '10px'),
+    ...shorthands.borderRadius('10px'),
   },
   header: {
     display: 'flex',
@@ -391,6 +507,8 @@ interface MyRequestsProps {
 
 export const MyRequests: React.FC<MyRequestsProps> = ({ onNewRequest }) => {
   const styles = useStyles();
+  const { isCollapsed, toggle } = useHeroCollapse('my-requests');
+  const navigate = useNavigate();
   const { user, isManager } = useAuth();
   const { showToast } = useToast();
 
@@ -500,6 +618,16 @@ export const MyRequests: React.FC<MyRequestsProps> = ({ onNewRequest }) => {
       weightedValue,
       hotLeads,
     };
+  }, [requests]);
+
+  const heroStats = useMemo(() => {
+    const activeStages = ['Lead', 'Qualified', 'Discovery', 'Proposal', 'Negotiation'];
+    const activeRequests = requests.filter(r => activeStages.includes(r.FunnelStage));
+    const pipelineValue = activeRequests.reduce((sum, r) => sum + (r.DealValue || 0), 0);
+    const wonCount = requests.filter(r => r.FunnelStage === 'Won').length;
+    const lostCount = requests.filter(r => r.FunnelStage === 'Lost').length;
+    const winRate = wonCount + lostCount > 0 ? Math.round((wonCount / (wonCount + lostCount)) * 100) : 0;
+    return { activeCount: activeRequests.length, pipelineValue, winRate };
   }, [requests]);
 
   // Filter and sort requests
@@ -702,6 +830,57 @@ export const MyRequests: React.FC<MyRequestsProps> = ({ onNewRequest }) => {
 
   return (
     <div className={styles.container}>
+      {/* Hero Banner */}
+      <div className={styles.heroWrapper}>
+        <div className={`${styles.heroBanner} ${isCollapsed ? styles.heroCollapsed : styles.heroExpanded}`}>
+          <div className={styles.heroDecoration} />
+          {isCollapsed ? (
+            <div className={styles.collapsedStrip}>
+              <span className={styles.collapsedTitle}>My Requests</span>
+              <span className={styles.collapsedBadge}>{heroStats.activeCount} Active</span>
+              <span className={styles.collapsedBadge}>R{heroStats.pipelineValue.toLocaleString()}</span>
+              <span className={styles.collapsedBadge}>{heroStats.winRate}% Win Rate</span>
+            </div>
+          ) : (
+            <div className={styles.heroContent}>
+              <div className={styles.heroLeft}>
+                <div className={styles.heroTitle}>
+                  My <span className={styles.heroTitleAccent}>Requests</span>
+                </div>
+                <div className={styles.heroSubtitle}>
+                  Track your service and product requests through the sales pipeline
+                </div>
+                <div className={styles.heroStats}>
+                  <div className={styles.heroStat}>
+                    <span className={styles.heroStatValue}>{heroStats.activeCount}</span>
+                    <span className={styles.heroStatLabel}>Active Deals</span>
+                  </div>
+                  <div className={styles.heroStat}>
+                    <span className={styles.heroStatValue}>R{heroStats.pipelineValue.toLocaleString()}</span>
+                    <span className={styles.heroStatLabel}>Pipeline</span>
+                  </div>
+                  <div className={styles.heroStat}>
+                    <span className={styles.heroStatValue}>{heroStats.winRate}%</span>
+                    <span className={styles.heroStatLabel}>Win Rate</span>
+                  </div>
+                </div>
+              </div>
+              <div className={styles.heroRight}>
+                <Button
+                  appearance="primary"
+                  icon={<AddRegular />}
+                  onClick={() => navigate('/request')}
+                  style={{ backgroundColor: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.3)' }}
+                >
+                  New Request
+                </Button>
+              </div>
+            </div>
+          )}
+        </div>
+        <HeroCollapseToggle isCollapsed={isCollapsed} onToggle={toggle} />
+      </div>
+
       {/* Header */}
       <div className={styles.header}>
         <div className={styles.headerLeft}>
