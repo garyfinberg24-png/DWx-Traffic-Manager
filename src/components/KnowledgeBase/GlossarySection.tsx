@@ -1,13 +1,14 @@
 /**
- * DWx Traffic Manager - Glossary Section
- * Displays glossary terms with an A-Z letter navigation bar.
+ * DWx Traffic Manager - Glossary Section (V3 Magazine)
+ * Displays glossary terms as a 3-column card grid with letter indicators
+ * and a refined A-Z alphabet bar.
+ * Shows 6 terms by default, expandable to show all.
  * Read-only browsing view for Account Managers.
  */
 
 import React, { useState, useMemo } from 'react';
 import {
   Text,
-  Badge,
   makeStyles,
   tokens,
   shorthands,
@@ -18,6 +19,7 @@ import { KBEntry } from '../../types/KnowledgeBase';
 interface GlossarySectionProps {
   entries: KBEntry[];
   searchQuery: string;
+  expanded?: boolean;
 }
 
 const ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
@@ -28,120 +30,133 @@ const useStyles = makeStyles({
     flexDirection: 'column',
     ...shorthands.gap('20px'),
   },
-  letterBar: {
+
+  // Alphabet bar
+  alphaBar: {
     display: 'flex',
-    flexWrap: 'wrap',
     ...shorthands.gap('4px'),
+    flexWrap: 'wrap',
     ...shorthands.padding('12px', '16px'),
-    backgroundColor: tokens.colorNeutralBackground3,
-    ...shorthands.borderRadius('8px'),
-    justifyContent: 'center',
+    backgroundColor: '#fafbfc',
+    ...shorthands.borderRadius('12px'),
   },
-  letterButton: {
-    width: '36px',
-    height: '36px',
+  alphaButton: {
+    width: '34px',
+    height: '34px',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    ...shorthands.borderRadius('6px'),
-    ...shorthands.border('1px', 'solid', tokens.colorNeutralStroke1),
-    backgroundColor: tokens.colorNeutralBackground1,
-    cursor: 'pointer',
+    ...shorthands.borderRadius('8px'),
+    ...shorthands.border('0', 'none', 'transparent'),
+    backgroundColor: 'transparent',
     fontSize: '14px',
     fontWeight: '600',
-    color: tokens.colorNeutralForeground1,
-    transitionProperty: 'background-color, color, border-color',
+    color: '#999',
+    cursor: 'pointer',
+    transitionProperty: 'background-color, color',
     transitionDuration: '150ms',
     ':hover': {
-      backgroundColor: tokens.colorBrandBackground,
-      color: tokens.colorNeutralForegroundOnBrand,
-      ...shorthands.border('1px', 'solid', tokens.colorBrandBackground),
+      backgroundColor: '#e8f4f8',
+      color: '#1e6b7b',
     },
   },
-  letterButtonActive: {
-    width: '36px',
-    height: '36px',
+  alphaButtonActive: {
+    width: '34px',
+    height: '34px',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    ...shorthands.borderRadius('6px'),
-    ...shorthands.border('1px', 'solid', tokens.colorBrandBackground),
-    backgroundColor: tokens.colorBrandBackground,
+    ...shorthands.borderRadius('8px'),
+    ...shorthands.border('0', 'none', 'transparent'),
+    backgroundColor: '#1e6b7b',
+    fontSize: '14px',
+    fontWeight: '600',
+    color: 'white',
     cursor: 'pointer',
-    fontSize: '14px',
-    fontWeight: '600',
-    color: tokens.colorNeutralForegroundOnBrand,
   },
-  letterButtonDimmed: {
-    width: '36px',
-    height: '36px',
+  alphaButtonDisabled: {
+    width: '34px',
+    height: '34px',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    ...shorthands.borderRadius('6px'),
-    ...shorthands.border('1px', 'solid', tokens.colorNeutralStroke2),
-    backgroundColor: tokens.colorNeutralBackground2,
-    cursor: 'default',
+    ...shorthands.borderRadius('8px'),
+    ...shorthands.border('0', 'none', 'transparent'),
+    backgroundColor: 'transparent',
     fontSize: '14px',
     fontWeight: '600',
-    color: tokens.colorNeutralForegroundDisabled,
+    color: '#ddd',
+    cursor: 'default',
   },
   clearButton: {
-    height: '36px',
+    height: '34px',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    ...shorthands.borderRadius('6px'),
-    ...shorthands.border('1px', 'solid', tokens.colorNeutralStroke1),
-    backgroundColor: tokens.colorNeutralBackground1,
+    ...shorthands.borderRadius('8px'),
+    ...shorthands.border('1px', 'solid', '#e0e0e0'),
+    backgroundColor: 'white',
     cursor: 'pointer',
     fontSize: '12px',
     fontWeight: '500',
-    color: tokens.colorNeutralForeground2,
+    color: '#616161',
     ...shorthands.padding('0', '12px'),
+    marginLeft: '8px',
     ':hover': {
-      backgroundColor: tokens.colorNeutralBackground3,
+      backgroundColor: '#f5f5f5',
     },
   },
-  termsList: {
-    display: 'flex',
-    flexDirection: 'column',
-    ...shorthands.gap('2px'),
-  },
-  termCard: {
-    display: 'flex',
-    flexDirection: 'column',
-    ...shorthands.gap('6px'),
-    ...shorthands.padding('16px', '20px'),
-    ...shorthands.borderRadius('8px'),
-    ...shorthands.border('1px', 'solid', tokens.colorNeutralStroke1),
-    backgroundColor: tokens.colorNeutralBackground1,
-    ':hover': {
-      backgroundColor: tokens.colorNeutralBackground1Hover,
-    },
-  },
-  termHeader: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+
+  // Card grid
+  glossaryGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(3, 1fr)',
     ...shorthands.gap('12px'),
   },
+  glossaryCard: {
+    ...shorthands.padding('18px'),
+    ...shorthands.borderRadius('10px'),
+    backgroundColor: 'white',
+    ...shorthands.border('1px', 'solid', '#e8e8e8'),
+    transitionProperty: 'border-color, background-color',
+    transitionDuration: '150ms',
+    ':hover': {
+      ...shorthands.border('1px', 'solid', '#1e6b7b'),
+      backgroundColor: '#fafbfc',
+    },
+  },
+  termLetter: {
+    fontSize: '11px',
+    fontWeight: '700',
+    color: '#1e6b7b',
+    textTransform: 'uppercase',
+    letterSpacing: '1px',
+    marginBottom: '6px',
+  },
   termTitle: {
-    fontSize: '15px',
+    fontSize: '14px',
     fontWeight: '600',
-    color: tokens.colorNeutralForeground1,
+    color: '#242424',
+    marginBottom: '6px',
   },
   termContent: {
-    fontSize: '14px',
-    lineHeight: '1.6',
-    color: tokens.colorNeutralForeground2,
-    whiteSpace: 'pre-wrap' as const,
+    fontSize: '12px',
+    color: '#999',
+    lineHeight: '1.5',
+    display: '-webkit-box',
+    WebkitLineClamp: 2,
+    WebkitBoxOrient: 'vertical',
+    ...shorthands.overflow('hidden'),
   },
+
+  // Filter info
   filterInfo: {
     fontSize: '13px',
     color: tokens.colorNeutralForeground3,
     ...shorthands.padding('0', '4px'),
   },
+
+  // Empty state
   emptyState: {
     display: 'flex',
     flexDirection: 'column',
@@ -158,7 +173,11 @@ const useStyles = makeStyles({
   },
 });
 
-export const GlossarySection: React.FC<GlossarySectionProps> = ({ entries, searchQuery }) => {
+export const GlossarySection: React.FC<GlossarySectionProps> = ({
+  entries,
+  searchQuery,
+  expanded = false,
+}) => {
   const styles = useStyles();
   const [activeLetter, setActiveLetter] = useState<string | null>(null);
 
@@ -186,16 +205,21 @@ export const GlossarySection: React.FC<GlossarySectionProps> = ({ entries, searc
   }, [searchFiltered]);
 
   // Filter by active letter
-  const displayedEntries = useMemo(() => {
+  const letterFiltered = useMemo(() => {
     let result = searchFiltered;
     if (activeLetter) {
       result = result.filter(
         (entry) => entry.Title.charAt(0).toUpperCase() === activeLetter
       );
     }
-    // Sort alphabetically by title
     return result.sort((a, b) => a.Title.localeCompare(b.Title));
   }, [searchFiltered, activeLetter]);
+
+  // Show 6 by default, all when expanded/searching/letter-filtered
+  const displayedEntries = useMemo(() => {
+    if (expanded || searchQuery.trim() || activeLetter) return letterFiltered;
+    return letterFiltered.slice(0, 6);
+  }, [letterFiltered, expanded, searchQuery, activeLetter]);
 
   const handleLetterClick = (letter: string) => {
     if (!lettersWithEntries.has(letter)) return;
@@ -220,17 +244,17 @@ export const GlossarySection: React.FC<GlossarySectionProps> = ({ entries, searc
 
   return (
     <div className={styles.container}>
-      {/* A-Z Letter Bar */}
-      <div className={styles.letterBar}>
+      {/* A-Z Alphabet Bar */}
+      <div className={styles.alphaBar}>
         {ALPHABET.map((letter) => {
           const hasEntries = lettersWithEntries.has(letter);
           const isActive = activeLetter === letter;
 
-          let className = styles.letterButtonDimmed;
+          let className = styles.alphaButtonDisabled;
           if (isActive) {
-            className = styles.letterButtonActive;
+            className = styles.alphaButtonActive;
           } else if (hasEntries) {
-            className = styles.letterButton;
+            className = styles.alphaButton;
           }
 
           return (
@@ -260,31 +284,25 @@ export const GlossarySection: React.FC<GlossarySectionProps> = ({ entries, searc
       {/* Filter info */}
       {activeLetter && (
         <Text className={styles.filterInfo}>
-          Showing {displayedEntries.length} term{displayedEntries.length !== 1 ? 's' : ''} starting with "{activeLetter}"
+          Showing {displayedEntries.length} term{displayedEntries.length !== 1 ? 's' : ''} starting with &ldquo;{activeLetter}&rdquo;
         </Text>
       )}
 
-      {/* Terms List */}
+      {/* Glossary Card Grid */}
       {displayedEntries.length === 0 && activeLetter ? (
         <div className={styles.emptyState}>
           <Text size={300}>
-            No terms starting with "{activeLetter}" found.
+            No terms starting with &ldquo;{activeLetter}&rdquo; found.
           </Text>
         </div>
       ) : (
-        <div className={styles.termsList}>
+        <div className={styles.glossaryGrid}>
           {displayedEntries.map((entry) => (
-            <div key={entry.Id} className={styles.termCard}>
-              <div className={styles.termHeader}>
-                <Text className={styles.termTitle}>{entry.Title}</Text>
-                <Badge
-                  appearance="tint"
-                  color="informative"
-                  size="small"
-                >
-                  {entry.Category}
-                </Badge>
+            <div key={entry.Id} className={styles.glossaryCard}>
+              <div className={styles.termLetter}>
+                {entry.Title.charAt(0).toUpperCase()}
               </div>
+              <Text className={styles.termTitle}>{entry.Title}</Text>
               <Text className={styles.termContent}>{entry.Content}</Text>
             </div>
           ))}

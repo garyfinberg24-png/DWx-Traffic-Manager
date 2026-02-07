@@ -6,7 +6,8 @@
 import { Client } from '@microsoft/microsoft-graph-client';
 import { getAuthService, getGraphService } from './serviceFactory';
 import { config } from '../config/environmentConfig';
-import { DW_SERVICES_SEED_DATA, DEFAULT_SERVICES } from '../types/ServiceRequest';
+import { DW_SERVICES_SEED_DATA, DEFAULT_SERVICES, DEFAULT_SLA_TARGETS } from '../types/ServiceRequest';
+import type { ServiceComplexity } from '../types/ServiceRequest';
 
 // Get the appropriate auth service based on test mode
 const authService = getAuthService();
@@ -1168,6 +1169,8 @@ class DWxSharePointProvisioningService {
             KeyBenefits_JSON: richContent?.KeyBenefits ? JSON.stringify(richContent.KeyBenefits) : null,
             IdealFor_JSON: richContent?.IdealFor ? JSON.stringify(richContent.IdealFor) : null,
             RelatedCategories_JSON: richContent?.RelatedCategories ? JSON.stringify(richContent.RelatedCategories) : null,
+            // SLA targets based on complexity level
+            SLATargets_JSON: JSON.stringify(DEFAULT_SLA_TARGETS[service.ComplexityLevel as ServiceComplexity] || DEFAULT_SLA_TARGETS.Medium),
           });
 
           results.push({ service: service.Title, success: true, message: 'Created successfully' });
@@ -1369,6 +1372,7 @@ class DWxSharePointProvisioningService {
         Budget: 'R150K - R200K', Timeline: 'Q3 2026',
         Requirements: 'Full security and compliance audit of their M365 environment. Capitec is expanding their digital banking platform and needs to ensure their M365 tenant meets financial services compliance requirements including POPIA and the South African Reserve Bank regulations.',
         Comments: 'New prospect - Sipho attended our webinar on M365 security best practices for financial services.',
+        StageTimestamps_JSON: JSON.stringify({ Lead: '2026-02-01T08:30:00Z' }),
       },
       {
         Title: 'Anglo American SA - SharePoint Migration',
@@ -1381,6 +1385,7 @@ class DWxSharePointProvisioningService {
         Budget: 'R500K - R800K', Timeline: 'H2 2026',
         Requirements: 'Migration of on-premises SharePoint 2016 farm to SharePoint Online. Approximately 2TB of content across 150 site collections used by mining operations, engineering, and corporate teams across South Africa.',
         Comments: 'Initial inquiry via website contact form. Large-scale migration with complex permissions and custom workflows.',
+        StageTimestamps_JSON: JSON.stringify({ Lead: '2026-01-28T10:15:00Z' }),
       },
       // Qualified Stage (2) - Interest validated, specialist being assigned
       {
@@ -1395,6 +1400,7 @@ class DWxSharePointProvisioningService {
         AssignedSpecialistName: 'Gary Finberg', AssignedSpecialistEmail: 'gary@firsttech.digital', AssignedSpecialistRole: 'Solution Architect',
         Requirements: 'Design and implement Copilot agents for their customer service and internal IT help desk. MTN wants to reduce call centre load by 30% through AI-powered self-service for both customers and employees.',
         Comments: 'Premium client with strong executive sponsorship. CTO is driving the AI transformation agenda.',
+        StageTimestamps_JSON: JSON.stringify({ Lead: '2026-01-10T09:00:00Z', Qualified: '2026-01-15T14:30:00Z' }),
       },
       {
         Title: 'Shoprite Holdings - Power Platform Development',
@@ -1408,6 +1414,7 @@ class DWxSharePointProvisioningService {
         AssignedSpecialistName: 'Wimpie Baard', AssignedSpecialistEmail: 'wimpie.baard@firsttech.digital', AssignedSpecialistRole: 'Technical Specialist',
         Requirements: 'Power Apps for store inventory auditing across 3,000+ Shoprite, Checkers, and Usave stores. Need offline capability for rural locations and integration with their existing SAP inventory system.',
         Comments: 'Follow-up from a successful initial engagement. They need offline-first Power Apps for store managers.',
+        StageTimestamps_JSON: JSON.stringify({ Lead: '2026-01-18T11:00:00Z', Qualified: '2026-01-24T09:45:00Z' }),
       },
       // Discovery Stage (2) - Meeting scheduled, specialist assigned
       {
@@ -1423,6 +1430,7 @@ class DWxSharePointProvisioningService {
         AssignedSpecialistName: 'Gary Finberg', AssignedSpecialistEmail: 'gary@firsttech.digital', AssignedSpecialistRole: 'Solution Architect',
         Requirements: 'Custom Power Apps for branch operations digitisation. Currently 200+ branches use paper-based processes for customer onboarding, account opening, and compliance checks. Need integration with Nedbank core banking APIs and Azure AD for branch staff authentication.',
         Comments: 'Premium client - priority engagement. Discovery session confirmed for March 15. Previous M365 Assessment was a success.',
+        StageTimestamps_JSON: JSON.stringify({ Lead: '2026-01-05T08:00:00Z', Qualified: '2026-01-08T15:00:00Z', Discovery: '2026-01-12T10:00:00Z' }),
       },
       {
         Title: 'Discovery Health - SPFx Development',
@@ -1437,6 +1445,7 @@ class DWxSharePointProvisioningService {
         AssignedSpecialistName: 'Wimpie Baard', AssignedSpecialistEmail: 'wimpie.baard@firsttech.digital', AssignedSpecialistRole: 'Technical Specialist',
         Requirements: 'Custom SPFx web parts for their Vitality wellness programme intranet. Need interactive health dashboard web parts that integrate with Discovery Vitality APIs to show employee wellness metrics, gym booking, and rewards tracking within SharePoint.',
         Comments: 'Complex SPFx project with external API integration. Discovery session scheduled for March 18.',
+        StageTimestamps_JSON: JSON.stringify({ Lead: '2026-01-08T09:30:00Z', Qualified: '2026-01-14T11:00:00Z', Discovery: '2026-01-20T14:00:00Z' }),
       },
       // Proposal Stage (2) - Discovery complete, proposal being prepared
       {
@@ -1453,6 +1462,7 @@ class DWxSharePointProvisioningService {
         Requirements: 'Migration of engineering document management system from SharePoint 2019 on-prem to SharePoint Online. 5TB of technical drawings, safety documents, and project files. Must preserve metadata, version history, and complex permission structures. Compliance with mining safety regulations (MHSA) required.',
         Comments: 'Discovery completed Feb 10. Preparing phased migration proposal. Key concern is maintaining uptime during migration for Secunda and Sasolburg plants.',
         NextSteps: 'Finalise migration roadmap and present proposal by March 1',
+        StageTimestamps_JSON: JSON.stringify({ Lead: '2025-12-02T08:00:00Z', Qualified: '2025-12-10T14:00:00Z', Discovery: '2025-12-20T09:00:00Z', Proposal: '2026-02-10T09:00:00Z' }),
       },
       {
         Title: 'Sanlam Life - Microsoft Viva Suite',
@@ -1468,6 +1478,7 @@ class DWxSharePointProvisioningService {
         Requirements: 'Full Microsoft Viva implementation across Sanlam Life division: Viva Connections for their intranet, Viva Learning for FAIS compliance training, Viva Insights for hybrid work analytics, and Viva Engage for cross-departmental collaboration. 4,500 employees in scope.',
         Comments: 'Discovery session completed. Sanlam is particularly interested in Viva Learning for regulatory compliance training tracking.',
         NextSteps: 'Draft proposal with phased rollout starting with Viva Connections and Learning',
+        StageTimestamps_JSON: JSON.stringify({ Lead: '2025-11-15T10:00:00Z', Qualified: '2025-11-22T09:00:00Z', Discovery: '2025-12-05T11:00:00Z', Proposal: '2026-02-05T11:00:00Z' }),
       },
       // Negotiation Stage (2) - Proposal sent, terms being finalised
       {
@@ -1484,6 +1495,7 @@ class DWxSharePointProvisioningService {
         Requirements: 'Enterprise Copilot agents for wealth management advisors and policy servicing. Agents will surface client portfolio information, product recommendations, and compliance checklists. Integration with Old Mutual\'s existing Salesforce CRM and policy administration systems.',
         Comments: 'Proposal approved by technical team. Negotiating final pricing and SLA terms. Legal review of data processing agreement in progress.',
         NextSteps: 'Finalise contract terms and sign by end of March',
+        StageTimestamps_JSON: JSON.stringify({ Lead: '2025-10-01T08:00:00Z', Qualified: '2025-10-08T10:00:00Z', Discovery: '2025-10-20T10:00:00Z', Proposal: '2025-11-15T09:00:00Z', Negotiation: '2026-01-20T10:00:00Z' }),
       },
       {
         Title: 'Standard Bank - M365 Tenant Assessment',
@@ -1499,6 +1511,7 @@ class DWxSharePointProvisioningService {
         Requirements: 'Comprehensive M365 security and governance assessment ahead of their planned migration of retail banking teams to Teams. Focus on DLP policies, sensitivity labels, conditional access, and SARB (South African Reserve Bank) regulatory compliance.',
         Comments: 'Assessment scope agreed. Negotiating timeline - Standard Bank wants completion before Q2 board meeting.',
         NextSteps: 'Confirm start date and provision access to tenant analytics',
+        StageTimestamps_JSON: JSON.stringify({ Lead: '2025-10-15T09:00:00Z', Qualified: '2025-10-22T14:00:00Z', Discovery: '2025-11-05T09:00:00Z', Proposal: '2025-12-01T10:00:00Z', Negotiation: '2026-01-15T09:00:00Z' }),
       },
       // Won Stage (2) - Contract signed, deal closed
       {
@@ -1516,6 +1529,7 @@ class DWxSharePointProvisioningService {
         WinLossReason: 'Strong demo of retail-specific Power Platform solutions. Competitive pricing and proven experience with SA retail sector.',
         Comments: 'Contract signed January 31. Project kickoff scheduled for February 15.',
         NextSteps: 'Project initiation and environment setup',
+        StageTimestamps_JSON: JSON.stringify({ Lead: '2025-09-01T08:00:00Z', Qualified: '2025-09-05T10:00:00Z', Discovery: '2025-09-15T10:00:00Z', Proposal: '2025-10-10T09:00:00Z', Negotiation: '2025-11-15T14:00:00Z', Won: '2026-01-31T11:00:00Z' }),
       },
       {
         Title: 'Nedbank Group - M365 Tenant Assessment',
@@ -1532,6 +1546,7 @@ class DWxSharePointProvisioningService {
         WinLossReason: 'Existing relationship and deep understanding of banking compliance requirements. Fast turnaround commitment.',
         Comments: 'Assessment completed successfully. Led to the current Power Platform Development opportunity.',
         NextSteps: 'Remediation tracking in progress. Follow-up assessment in 6 months.',
+        StageTimestamps_JSON: JSON.stringify({ Lead: '2025-08-15T08:00:00Z', Qualified: '2025-08-18T11:00:00Z', Discovery: '2025-08-25T09:00:00Z', Proposal: '2025-09-15T10:00:00Z', Negotiation: '2025-10-10T14:00:00Z', Won: '2025-12-15T09:00:00Z' }),
       },
       // Lost Stage (2) - Opportunities that didn't convert
       {
@@ -1547,6 +1562,7 @@ class DWxSharePointProvisioningService {
         WinLossReason: 'Client chose competitor with lower pricing. Also concerns about disruption during peak trading season (November-December).',
         Comments: 'Lost to a Johannesburg-based consultancy. Client indicated they may revisit in Q3 2026 after settling into the new platform.',
         NextSteps: 'Schedule follow-up call in July 2026 to discuss potential remediation or Phase 2 work.',
+        StageTimestamps_JSON: JSON.stringify({ Lead: '2025-05-10T08:00:00Z', Qualified: '2025-05-20T10:00:00Z', Discovery: '2025-06-05T14:00:00Z', Proposal: '2025-07-01T09:00:00Z', Negotiation: '2025-08-15T10:00:00Z', Lost: '2025-09-30T16:00:00Z' }),
       },
       {
         Title: 'MTN South Africa - Microsoft Viva Suite',
@@ -1561,6 +1577,7 @@ class DWxSharePointProvisioningService {
         WinLossReason: 'Budget constraints - MTN reallocated digital workplace budget to 5G network rollout. Interest remains for 2026.',
         Comments: 'MTN still interested in Copilot Agents (separate active deal). Viva may be revisited once 5G investment phase completes.',
         NextSteps: 'Maintain relationship through Copilot Agents engagement. Revisit Viva conversation in Q3 2026.',
+        StageTimestamps_JSON: JSON.stringify({ Lead: '2025-07-01T09:00:00Z', Qualified: '2025-07-15T11:00:00Z', Discovery: '2025-08-10T10:00:00Z', Proposal: '2025-09-20T09:00:00Z', Lost: '2025-12-31T17:00:00Z' }),
       },
     ];
 

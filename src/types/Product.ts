@@ -1,6 +1,6 @@
 /**
  * DWx Traffic Manager - Product Types
- * Types for DWx Apps, HyperParts, Adaptive Cards, and Agents
+ * Types for DWx Apps, HyperParts, HyperCards, and HyperAgents
  */
 
 export type ProductType = 'app' | 'webpart' | 'adaptive-card' | 'agent';
@@ -268,8 +268,8 @@ export const HYPERPARTS: Product[] = [
 /** @deprecated Use HYPERPARTS instead */
 export const WEBPARTS = HYPERPARTS;
 
-// Adaptive Cards for Teams (6 cards)
-export const ADAPTIVE_CARDS: Product[] = [
+// HyperCards - Adaptive Cards for Teams (6 cards)
+export const HYPERCARDS: Product[] = [
   {
     id: 'leave-request-card',
     name: 'Leave Request Card',
@@ -280,7 +280,7 @@ export const ADAPTIVE_CARDS: Product[] = [
     version: 'v1.2.0',
     icon: '🏖️',
     gradient: 'forest-teal',
-    brand: 'TEAMS',
+    brand: 'HYPERCARDS',
   },
   {
     id: 'approval-card',
@@ -292,7 +292,7 @@ export const ADAPTIVE_CARDS: Product[] = [
     version: 'v1.5.0',
     icon: '✅',
     gradient: 'teal',
-    brand: 'TEAMS',
+    brand: 'HYPERCARDS',
   },
   {
     id: 'incident-report',
@@ -304,7 +304,7 @@ export const ADAPTIVE_CARDS: Product[] = [
     version: 'v1.1.0',
     icon: '⚠️',
     gradient: 'blue-gray',
-    brand: 'TEAMS',
+    brand: 'HYPERCARDS',
   },
   {
     id: 'feedback-card',
@@ -316,7 +316,7 @@ export const ADAPTIVE_CARDS: Product[] = [
     version: 'v1.3.0',
     icon: '💬',
     gradient: 'lime',
-    brand: 'TEAMS',
+    brand: 'HYPERCARDS',
   },
   {
     id: 'meeting-summary',
@@ -328,7 +328,7 @@ export const ADAPTIVE_CARDS: Product[] = [
     version: 'v1.0.0',
     icon: '📝',
     gradient: 'cyan',
-    brand: 'TEAMS',
+    brand: 'HYPERCARDS',
   },
   {
     id: 'task-assignment',
@@ -340,12 +340,12 @@ export const ADAPTIVE_CARDS: Product[] = [
     version: 'v1.4.0',
     icon: '📋',
     gradient: 'coral',
-    brand: 'TEAMS',
+    brand: 'HYPERCARDS',
   },
 ];
 
-// DWx Agents (Copilot Studio Agents - 10 agents)
-export const DWX_AGENTS: Product[] = [
+// HyperAgents - Copilot Studio Agents (10 agents)
+export const HYPERAGENTS: Product[] = [
   {
     id: 'it-service-desk-assistant',
     name: 'IT Service Desk Assistant',
@@ -356,7 +356,7 @@ export const DWX_AGENTS: Product[] = [
     version: 'v1.0.0',
     icon: '🤖',
     gradient: 'corporate-blue',
-    brand: 'COPILOT STUDIO',
+    brand: 'HYPERAGENTS',
   },
   {
     id: 'access-identity-requests',
@@ -368,7 +368,7 @@ export const DWX_AGENTS: Product[] = [
     version: 'v1.0.0',
     icon: '🔐',
     gradient: 'indigo',
-    brand: 'COPILOT STUDIO',
+    brand: 'HYPERAGENTS',
   },
   {
     id: 'hr-policy-leave-advisor',
@@ -380,7 +380,7 @@ export const DWX_AGENTS: Product[] = [
     version: 'v1.0.0',
     icon: '👥',
     gradient: 'pink',
-    brand: 'COPILOT STUDIO',
+    brand: 'HYPERAGENTS',
   },
   {
     id: 'employee-onboarding-concierge',
@@ -392,7 +392,7 @@ export const DWX_AGENTS: Product[] = [
     version: 'v1.0.0',
     icon: '🎯',
     gradient: 'emerald',
-    brand: 'COPILOT STUDIO',
+    brand: 'HYPERAGENTS',
   },
   {
     id: 'procurement-helpdesk',
@@ -404,7 +404,7 @@ export const DWX_AGENTS: Product[] = [
     version: 'v1.0.0',
     icon: '🛒',
     gradient: 'amber',
-    brand: 'COPILOT STUDIO',
+    brand: 'HYPERAGENTS',
   },
   {
     id: 'supplier-query-assistant',
@@ -416,7 +416,7 @@ export const DWX_AGENTS: Product[] = [
     version: 'v1.0.0',
     icon: '🏭',
     gradient: 'forest-teal',
-    brand: 'COPILOT STUDIO',
+    brand: 'HYPERAGENTS',
   },
   {
     id: 'contract-policy-search',
@@ -428,7 +428,7 @@ export const DWX_AGENTS: Product[] = [
     version: 'v1.0.0',
     icon: '📑',
     gradient: 'royal-purple',
-    brand: 'COPILOT STUDIO',
+    brand: 'HYPERAGENTS',
   },
   {
     id: 'asset-device-lifecycle',
@@ -440,7 +440,7 @@ export const DWX_AGENTS: Product[] = [
     version: 'v1.0.0',
     icon: '💻',
     gradient: 'slate',
-    brand: 'COPILOT STUDIO',
+    brand: 'HYPERAGENTS',
   },
   {
     id: 'travel-expense-policy',
@@ -452,7 +452,7 @@ export const DWX_AGENTS: Product[] = [
     version: 'v1.0.0',
     icon: '✈️',
     gradient: 'sky',
-    brand: 'COPILOT STUDIO',
+    brand: 'HYPERAGENTS',
   },
   {
     id: 'internal-knowledge-navigator',
@@ -464,13 +464,19 @@ export const DWX_AGENTS: Product[] = [
     version: 'v1.0.0',
     icon: '🧭',
     gradient: 'teal',
-    brand: 'COPILOT STUDIO',
+    brand: 'HYPERAGENTS',
   },
 ];
 
+/** @deprecated Use HYPERCARDS instead */
+export const ADAPTIVE_CARDS = HYPERCARDS;
+
+/** @deprecated Use HYPERAGENTS instead */
+export const DWX_AGENTS = HYPERAGENTS;
+
 // Get all products
 export const getAllProducts = (): Product[] => {
-  return [...DWX_APPS, ...HYPERPARTS, ...ADAPTIVE_CARDS, ...DWX_AGENTS];
+  return [...DWX_APPS, ...HYPERPARTS, ...HYPERCARDS, ...HYPERAGENTS];
 };
 
 // Get products by type

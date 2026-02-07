@@ -1,7 +1,7 @@
 /**
  * DWx Traffic Manager - Service Catalog Component
- * V1 Hero Banner + Pill Filters design
- * Gradient hero with embedded search, colorful category pills, accent-bordered cards
+ * Contained hero matching Products page layout — rounded bottom corners,
+ * glassmorphic search, content row with stats, filter pills below hero
  */
 
 import React, { useState, useEffect, useMemo, useDeferredValue } from 'react';
@@ -11,6 +11,7 @@ import {
   Spinner,
   Button,
   makeStyles,
+  shorthands,
   MessageBar,
   MessageBarBody,
   MessageBarTitle,
@@ -48,159 +49,246 @@ const categoryColors: Record<string, string> = {
 };
 
 // ============================================================================
-// Styles
+// Styles — matching ProductCatalog layout exactly
 // ============================================================================
 
 const useStyles = makeStyles({
-  // Full-width page container (no max-width — hero spans full width)
-  page: {
-    display: 'flex',
-    flexDirection: 'column',
-    minHeight: '100%',
-  },
-
-  // Hero Banner
-  hero: {
-    background: 'linear-gradient(135deg, #0d3a5c 0%, #1a5a8a 50%, #1e6b7b 100%)',
-    padding: '56px 64px 44px',
-    position: 'relative',
-    overflow: 'hidden',
-  },
-  heroContent: {
-    position: 'relative',
-    zIndex: 1,
+  // Contained page (matches ProductCatalog.container)
+  container: {
     maxWidth: '1400px',
     margin: '0 auto',
+    ...shorthands.padding('0', '64px', '24px'),
   },
-  heroBackButton: {
-    color: 'rgba(255,255,255,0.7)',
-    border: '1px solid rgba(255,255,255,0.2)',
-    backgroundColor: 'rgba(255,255,255,0.08)',
+
+  // Hero Banner — contained, rounded bottom corners (matches ProductCatalog.heroBanner)
+  heroBanner: {
+    ...shorthands.borderRadius('0', '0', '16px', '16px'),
+    ...shorthands.padding('0'),
     marginBottom: '20px',
-    ':hover': {
-      color: '#fff',
-      backgroundColor: 'rgba(255,255,255,0.15)',
-    },
+    position: 'relative',
+    ...shorthands.overflow('hidden'),
+    background: 'linear-gradient(135deg, #0d3a5c 0%, #1a5a8a 50%, #1e6b7b 100%)',
   },
-  heroTitle: {
-    fontSize: '36px',
-    fontWeight: '800',
-    color: '#ffffff',
-    marginBottom: '10px',
-    letterSpacing: '-0.5px',
+  heroDecoration: {
+    position: 'absolute',
+    top: '-80px',
+    right: '-40px',
+    width: '300px',
+    height: '300px',
+    ...shorthands.borderRadius('50%'),
+    background: 'radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 70%)',
+    pointerEvents: 'none',
   },
-  heroSubtitle: {
-    fontSize: '16px',
-    color: 'rgba(255,255,255,0.7)',
-    marginBottom: '28px',
-    maxWidth: '600px',
-    lineHeight: '1.6',
+
+  // Row 1: Page header (matches ProductCatalog.heroHeaderRow)
+  heroHeaderRow: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    ...shorthands.padding('20px', '32px', '0'),
+    position: 'relative',
+    zIndex: 2,
+  },
+  heroHeaderTitle: {
+    fontSize: '22px',
+    fontWeight: '700',
+    color: 'white',
+    letterSpacing: '-0.3px',
+  },
+  heroHeaderSubtitle: {
+    fontSize: '13px',
+    color: 'rgba(255,255,255,0.6)',
+    marginTop: '2px',
+  },
+  backButtonHero: {
+    ...shorthands.padding('6px', '14px'),
+    ...shorthands.borderRadius('8px'),
+    ...shorthands.border('1px', 'solid', 'rgba(255,255,255,0.25)'),
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    color: 'rgba(255,255,255,0.85)',
+    fontSize: '13px',
+    fontWeight: '500',
+    cursor: 'pointer',
+    transitionProperty: 'all',
+    transitionDuration: '0.2s',
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '6px',
+    flexShrink: 0,
+  },
+
+  // Row 2: Glassmorphic search bar (in position of Products' tab pills)
+  heroSearchRow: {
+    ...shorthands.padding('14px', '32px', '0'),
+    position: 'relative',
+    zIndex: 2,
+    display: 'flex',
+    alignItems: 'center',
+    gap: '16px',
   },
   heroSearchBar: {
     display: 'flex',
+    alignItems: 'center',
+    flex: '1',
     maxWidth: '560px',
-    backgroundColor: 'rgba(255,255,255,0.12)',
-    border: '1px solid rgba(255,255,255,0.2)',
-    borderRadius: '12px',
-    overflow: 'hidden',
-    transition: 'all 0.3s',
-  },
-  heroSearchInput: {
-    flex: 1,
-    backgroundColor: 'transparent',
-    border: 'none',
-    padding: '14px 20px',
-    fontSize: '15px',
-    color: '#ffffff',
-    outline: 'none',
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    ...shorthands.border('1px', 'solid', 'rgba(255,255,255,0.25)'),
+    ...shorthands.borderRadius('20px'),
+    backdropFilter: 'blur(8px)',
+    ...shorthands.overflow('hidden'),
   },
   heroSearchIcon: {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    padding: '0 20px',
+    paddingLeft: '16px',
     color: 'rgba(255,255,255,0.5)',
+  },
+  heroSearchInput: {
+    flex: 1,
+    backgroundColor: 'transparent',
+    ...shorthands.border('none'),
+    ...shorthands.padding('10px', '16px'),
+    fontSize: '13px',
+    color: '#ffffff',
+    ...shorthands.outline('none'),
+  },
+  heroSearchCount: {
+    fontSize: '12px',
+    color: 'rgba(255,255,255,0.5)',
+    whiteSpace: 'nowrap',
+  },
+
+  // Row 3: Hero content (icon + title + desc | stats) — matches ProductCatalog.heroContentRow
+  heroContentRow: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '32px',
+    ...shorthands.padding('18px', '32px', '22px'),
+    position: 'relative',
+    zIndex: 2,
+  },
+  heroLeft: {
+    flex: '1',
+    minWidth: '0',
+  },
+  heroTop: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '12px',
+    marginBottom: '8px',
+  },
+  heroIcon: {
+    width: '36px',
+    height: '36px',
+    ...shorthands.borderRadius('10px'),
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    ...shorthands.border('1px', 'solid', 'rgba(255,255,255,0.15)'),
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
+  },
+  heroTitle: {
+    fontSize: '20px',
+    fontWeight: '700',
+    color: 'white',
+    letterSpacing: '-0.3px',
+  },
+  heroDesc: {
+    fontSize: '13px',
+    lineHeight: '1.6',
+    color: 'rgba(255,255,255,0.7)',
+    maxWidth: '700px',
   },
   heroStats: {
     display: 'flex',
-    gap: '32px',
-    marginTop: '24px',
+    flexDirection: 'column',
+    gap: '10px',
+    flexShrink: 0,
+    paddingLeft: '32px',
+    ...shorthands.borderLeft('1px', 'solid', 'rgba(255,255,255,0.12)'),
   },
   heroStat: {
     display: 'flex',
-    flexDirection: 'column',
-    gap: '2px',
+    alignItems: 'baseline',
+    gap: '8px',
   },
   heroStatValue: {
-    fontSize: '22px',
+    fontSize: '18px',
     fontWeight: '700',
-    color: '#ffffff',
+    color: 'white',
+    whiteSpace: 'nowrap',
   },
   heroStatLabel: {
-    fontSize: '12px',
-    color: 'rgba(255,255,255,0.5)',
+    fontSize: '10px',
+    color: 'rgba(255,255,255,0.45)',
     textTransform: 'uppercase',
     letterSpacing: '0.5px',
+    whiteSpace: 'nowrap',
   },
 
-  // Pill Filters
-  pillBar: {
-    padding: '20px 64px',
-    backgroundColor: '#ffffff',
-    borderBottom: '1px solid #e5e7eb',
+  // Filter bar — below hero, inside container (matches ProductCatalog.filterBar)
+  filterBar: {
     display: 'flex',
-    gap: '10px',
+    alignItems: 'center',
+    gap: '12px',
+    marginBottom: '20px',
+  },
+  filterPillsScroll: {
+    display: 'flex',
+    gap: '6px',
     overflowX: 'auto',
-    maxWidth: '100%',
+    flex: '1',
+    scrollbarWidth: 'none',
   },
-  pill: {
+  filterPill: {
+    ...shorthands.padding('5px', '14px'),
+    ...shorthands.borderRadius('16px'),
+    fontSize: '12px',
+    fontWeight: '500',
+    cursor: 'pointer',
+    transitionProperty: 'all',
+    transitionDuration: '0.15s',
+    ...shorthands.border('1px', 'solid', '#e0e0e0'),
+    backgroundColor: 'white',
+    color: '#555555',
+    whiteSpace: 'nowrap',
+    flexShrink: 0,
     display: 'inline-flex',
     alignItems: 'center',
     gap: '6px',
-    padding: '8px 18px',
-    borderRadius: '24px',
-    fontSize: '13px',
-    fontWeight: '600',
-    border: '2px solid transparent',
-    cursor: 'pointer',
-    whiteSpace: 'nowrap',
-    transition: 'all 0.2s',
-    backgroundColor: '#f3f4f6',
-    color: '#4b5563',
-    ':hover': {
-      transform: 'translateY(-1px)',
-      boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-    },
   },
-  pillActive: {
-    display: 'inline-flex',
-    alignItems: 'center',
-    gap: '6px',
-    padding: '8px 18px',
-    borderRadius: '24px',
-    fontSize: '13px',
-    fontWeight: '600',
-    border: '2px solid transparent',
-    cursor: 'pointer',
-    whiteSpace: 'nowrap',
-    transition: 'all 0.2s',
-    color: '#ffffff',
-    boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+  filterPillActive: {
+    color: 'white',
   },
   pillDot: {
     width: '8px',
     height: '8px',
-    borderRadius: '50%',
+    ...shorthands.borderRadius('50%'),
     display: 'inline-block',
+  },
+  pillCount: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    minWidth: '16px',
+    height: '16px',
+    ...shorthands.borderRadius('8px'),
+    fontSize: '10px',
+    marginLeft: '4px',
+    ...shorthands.padding('0', '4px'),
+  },
+  pillCountActive: {
+    backgroundColor: 'rgba(255,255,255,0.25)',
+    color: 'white',
+  },
+  pillCountInactive: {
+    backgroundColor: '#f0f0f0',
+    color: '#888888',
   },
 
   // Content area
-  content: {
-    padding: '32px 64px 48px',
-    maxWidth: '1400px',
-    margin: '0 auto',
-    width: '100%',
-  },
   toolbar: {
     display: 'flex',
     justifyContent: 'space-between',
@@ -227,7 +315,7 @@ const useStyles = makeStyles({
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
-    padding: '80px',
+    ...shorthands.padding('80px'),
     flexDirection: 'column',
     gap: '12px',
   },
@@ -236,11 +324,11 @@ const useStyles = makeStyles({
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
-    padding: '80px 20px',
+    ...shorthands.padding('80px', '20px'),
     textAlign: 'center',
     backgroundColor: '#fafbfc',
-    borderRadius: '16px',
-    border: '2px dashed #e5e7eb',
+    ...shorthands.borderRadius('16px'),
+    ...shorthands.border('2px', 'dashed', '#e5e7eb'),
   },
   emptyIcon: {
     width: '56px',
@@ -353,7 +441,6 @@ export const ServiceCatalog: React.FC<ServiceCatalogProps> = ({ onRequestService
     });
   }, [services, selectedTab, debouncedSearch]);
 
-  // Count services per category for hero stats
   const categoryCounts = useMemo(() => {
     const counts = new Map<string, number>();
     services.forEach(s => {
@@ -394,9 +481,15 @@ export const ServiceCatalog: React.FC<ServiceCatalogProps> = ({ onRequestService
     setFullDetailsService(null);
   };
 
+  const getTabCount = (tab: CatalogTab): number => {
+    if (tab === 'Popular') return services.filter(s => s.IsPopular || POPULAR_TITLES.has(s.Title)).length;
+    if (tab === 'All') return services.length;
+    return categoryCounts.get(tab) || 0;
+  };
+
   if (loading) {
     return (
-      <div className={styles.page}>
+      <div className={styles.container}>
         <div className={styles.loadingContainer}>
           <Spinner size="large" />
           <Text>Loading service catalog...</Text>
@@ -406,56 +499,33 @@ export const ServiceCatalog: React.FC<ServiceCatalogProps> = ({ onRequestService
   }
 
   return (
-    <div className={styles.page}>
-      {/* Hero Banner */}
-      <div className={styles.hero}>
-        {/* Decorative circles (CSS pseudo-elements handled via inline) */}
-        <div
-          style={{
-            position: 'absolute',
-            top: '-50%',
-            right: '-10%',
-            width: '600px',
-            height: '600px',
-            borderRadius: '50%',
-            background: 'radial-gradient(circle, rgba(30,107,123,0.3) 0%, transparent 70%)',
-            pointerEvents: 'none',
-          }}
-        />
-        <div
-          style={{
-            position: 'absolute',
-            bottom: '-30%',
-            left: '10%',
-            width: '400px',
-            height: '400px',
-            borderRadius: '50%',
-            background: 'radial-gradient(circle, rgba(26,90,138,0.2) 0%, transparent 70%)',
-            pointerEvents: 'none',
-          }}
-        />
+    <div className={styles.container}>
+      {/* Hero Banner — contained, rounded bottom corners */}
+      <div className={styles.heroBanner}>
+        <div className={styles.heroDecoration} />
 
-        <div className={styles.heroContent}>
-          <Button
-            className={styles.heroBackButton}
-            appearance="subtle"
-            icon={<ArrowLeft24Regular />}
+        {/* Row 1: Page header */}
+        <div className={styles.heroHeaderRow}>
+          <div>
+            <div className={styles.heroHeaderTitle}>Service Catalog</div>
+            <div className={styles.heroHeaderSubtitle}>
+              Explore Digital Workplace's full range of Microsoft 365 services
+            </div>
+          </div>
+          <button
+            className={styles.backButtonHero}
             onClick={() => navigate('/')}
-            size="small"
           >
+            <ArrowLeft24Regular style={{ fontSize: '16px' }} />
             Back to Home
-          </Button>
+          </button>
+        </div>
 
-          <Text className={styles.heroTitle} block>Service Catalog</Text>
-          <Text className={styles.heroSubtitle} block>
-            Explore Digital Workplace's full range of Microsoft 365 services.
-            From Power Platform to Copilot Agents — find the right solution and request a pre-sales consultation.
-          </Text>
-
-          {/* Search Bar */}
+        {/* Row 2: Glassmorphic search bar */}
+        <div className={styles.heroSearchRow}>
           <div className={styles.heroSearchBar}>
             <div className={styles.heroSearchIcon}>
-              <SearchRegular style={{ width: '20px', height: '20px' }} />
+              <SearchRegular style={{ width: '16px', height: '16px' }} />
             </div>
             <input
               className={styles.heroSearchInput}
@@ -464,8 +534,27 @@ export const ServiceCatalog: React.FC<ServiceCatalogProps> = ({ onRequestService
               onChange={(e) => setSearchText(e.target.value)}
             />
           </div>
+          <span className={styles.heroSearchCount}>
+            {services.length} services available
+          </span>
+        </div>
 
-          {/* Stats */}
+        {/* Row 3: Content — title + description | stats */}
+        <div className={styles.heroContentRow}>
+          <div className={styles.heroLeft}>
+            <div className={styles.heroTop}>
+              <div className={styles.heroIcon}>
+                <GridRegular style={{ color: '#7dd3fc', fontSize: '18px' }} />
+              </div>
+              <Text className={styles.heroTitle}>
+                DWx Service{' '}
+                <span style={{ color: '#7dd3fc' }}>Catalog</span>
+              </Text>
+            </div>
+            <div className={styles.heroDesc}>
+              From Power Platform to Copilot Agents, SharePoint migrations to strategic advisory — find the right Microsoft 365 solution and request a pre-sales consultation.
+            </div>
+          </div>
           <div className={styles.heroStats}>
             <div className={styles.heroStat}>
               <Text className={styles.heroStatValue}>{services.length}</Text>
@@ -476,8 +565,12 @@ export const ServiceCatalog: React.FC<ServiceCatalogProps> = ({ onRequestService
               <Text className={styles.heroStatLabel}>Categories</Text>
             </div>
             <div className={styles.heroStat}>
-              <Text className={styles.heroStatValue}>{filteredServices.length}</Text>
-              <Text className={styles.heroStatLabel}>Showing</Text>
+              <Text className={styles.heroStatValue}>4</Text>
+              <Text className={styles.heroStatLabel}>Complexity Tiers</Text>
+            </div>
+            <div className={styles.heroStat}>
+              <Text className={styles.heroStatValue}>ZAR</Text>
+              <Text className={styles.heroStatLabel}>Currency</Text>
             </div>
           </div>
         </div>
@@ -485,7 +578,7 @@ export const ServiceCatalog: React.FC<ServiceCatalogProps> = ({ onRequestService
 
       {/* Error Message */}
       {error && (
-        <div style={{ padding: '16px 64px' }}>
+        <div style={{ marginBottom: '16px' }}>
           <MessageBar intent="error">
             <MessageBarBody>
               <MessageBarTitle>Error</MessageBarTitle>
@@ -495,83 +588,86 @@ export const ServiceCatalog: React.FC<ServiceCatalogProps> = ({ onRequestService
         </div>
       )}
 
-      {/* Pill Filters */}
-      <div className={styles.pillBar}>
-        {CATALOG_TABS.map((tab) => {
-          const isActive = selectedTab === tab.id;
-          const count = tab.id === 'Popular'
-            ? services.filter(s => s.IsPopular || POPULAR_TITLES.has(s.Title)).length
-            : tab.id === 'All'
-            ? services.length
-            : categoryCounts.get(tab.id) || 0;
+      {/* Filter pills — below hero, inside container */}
+      <div className={styles.filterBar}>
+        <div
+          className={styles.filterPillsScroll}
+          style={{
+            maskImage: 'linear-gradient(to right, black 92%, transparent 100%)',
+            WebkitMaskImage: 'linear-gradient(to right, black 92%, transparent 100%)',
+          }}
+        >
+          {CATALOG_TABS.map((tab) => {
+            const isActive = selectedTab === tab.id;
+            const count = getTabCount(tab.id);
 
-          return (
-            <span
-              key={tab.id}
-              className={isActive ? styles.pillActive : styles.pill}
-              style={isActive ? { backgroundColor: tab.color } : undefined}
-              onClick={() => setSelectedTab(tab.id)}
-            >
-              {tab.id !== 'Popular' && tab.id !== 'All' && (
+            return (
+              <button
+                key={tab.id}
+                className={`${styles.filterPill} ${isActive ? styles.filterPillActive : ''}`}
+                style={
+                  isActive
+                    ? { backgroundColor: tab.color, borderColor: tab.color }
+                    : undefined
+                }
+                onClick={() => setSelectedTab(tab.id)}
+              >
+                {tab.id === 'Popular' && (
+                  <StarRegular style={{ width: '12px', height: '12px' }} />
+                )}
+                {tab.id !== 'Popular' && tab.id !== 'All' && (
+                  <span
+                    className={styles.pillDot}
+                    style={{ backgroundColor: isActive ? 'rgba(255,255,255,0.5)' : tab.color }}
+                  />
+                )}
+                {tab.label}
                 <span
-                  className={styles.pillDot}
-                  style={{ backgroundColor: isActive ? 'rgba(255,255,255,0.5)' : tab.color }}
-                />
-              )}
-              {tab.id === 'Popular' && <StarRegular style={{ width: '14px', height: '14px' }} />}
-              {tab.label}
-              {count > 0 && (
-                <span style={{
-                  fontSize: '11px',
-                  fontWeight: '700',
-                  opacity: isActive ? 0.8 : 0.6,
-                  marginLeft: '2px',
-                }}>
-                  ({count})
+                  className={`${styles.pillCount} ${isActive ? styles.pillCountActive : styles.pillCountInactive}`}
+                >
+                  {count}
                 </span>
-              )}
-            </span>
-          );
-        })}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {/* Content */}
-      <div className={styles.content}>
-        <div className={styles.toolbar}>
-          <span className={styles.resultsInfo}>
-            <GridRegular style={{ width: '16px', height: '16px' }} />
-            {filteredServices.length} {filteredServices.length === 1 ? 'service' : 'services'}
-            {searchText && ` matching "${searchText}"`}
-          </span>
-        </div>
-
-        {filteredServices.length > 0 ? (
-          <div className={styles.grid}>
-            {filteredServices.map((service) => (
-              <ServiceCard key={service.Id} service={service} onClick={handleServiceClick} />
-            ))}
-          </div>
-        ) : (
-          <div className={styles.emptyState}>
-            <SearchRegular className={styles.emptyIcon} />
-            <Text className={styles.emptyTitle}>No services found</Text>
-            <Text className={styles.emptyText}>
-              {searchText || selectedTab !== 'All'
-                ? 'Try adjusting your search or filter criteria'
-                : 'No services are currently available'}
-            </Text>
-            {(searchText || selectedTab !== 'All') && (
-              <Button
-                appearance="primary"
-                style={{ marginTop: '16px', backgroundColor: DW_COLORS.teal }}
-                onClick={() => { setSearchText(''); setSelectedTab('All'); }}
-              >
-                Show All Services
-              </Button>
-            )}
-          </div>
-        )}
+      <div className={styles.toolbar}>
+        <span className={styles.resultsInfo}>
+          <GridRegular style={{ width: '16px', height: '16px' }} />
+          {filteredServices.length} {filteredServices.length === 1 ? 'service' : 'services'}
+          {searchText && ` matching "${searchText}"`}
+        </span>
       </div>
+
+      {filteredServices.length > 0 ? (
+        <div className={styles.grid}>
+          {filteredServices.map((service) => (
+            <ServiceCard key={service.Id} service={service} onClick={handleServiceClick} />
+          ))}
+        </div>
+      ) : (
+        <div className={styles.emptyState}>
+          <SearchRegular className={styles.emptyIcon} />
+          <Text className={styles.emptyTitle}>No services found</Text>
+          <Text className={styles.emptyText}>
+            {searchText || selectedTab !== 'All'
+              ? 'Try adjusting your search or filter criteria'
+              : 'No services are currently available'}
+          </Text>
+          {(searchText || selectedTab !== 'All') && (
+            <Button
+              appearance="primary"
+              style={{ marginTop: '16px', backgroundColor: DW_COLORS.teal }}
+              onClick={() => { setSearchText(''); setSelectedTab('All'); }}
+            >
+              Show All Services
+            </Button>
+          )}
+        </div>
+      )}
 
       {/* Quick View Modal */}
       {selectedService && (

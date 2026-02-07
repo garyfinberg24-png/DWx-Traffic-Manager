@@ -1,0 +1,1010 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DWx Knowledge Base - Design Variations</title>
+  <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif; background: #f0f0f0; color: #242424; }
+
+    /* Page nav for switching between variations */
+    .variation-nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: center; gap: 12px;
+      padding: 12px 24px;
+      background: #1a1a2e; border-bottom: 2px solid #5bb8f5;
+    }
+    .variation-nav button {
+      padding: 8px 20px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.2);
+      background: transparent; color: rgba(255,255,255,0.7); cursor: pointer;
+      font-size: 13px; font-weight: 600; transition: all 0.2s;
+    }
+    .variation-nav button:hover { background: rgba(255,255,255,0.1); color: white; }
+    .variation-nav button.active { background: #5bb8f5; color: #0d3a5c; border-color: #5bb8f5; }
+    .variation-nav .nav-label { color: rgba(255,255,255,0.4); font-size: 11px; text-transform: uppercase; letter-spacing: 1px; margin-right: 8px; }
+
+    .variation { display: none; padding-top: 56px; }
+    .variation.active { display: block; }
+
+    /* DWx Header bar (shared) */
+    .dwx-header {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 0 64px; height: 56px;
+      background: linear-gradient(135deg, #0d3a5c 0%, #1a5a8a 100%);
+      color: white; border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    .dwx-header .logo { display: flex; align-items: center; gap: 8px; font-size: 17px; font-weight: 700; }
+    .dwx-header .logo span { color: #5bb8f5; }
+    .dwx-header nav { display: flex; gap: 2px; }
+    .dwx-header nav a {
+      color: rgba(255,255,255,0.75); font-size: 13px; font-weight: 500;
+      padding: 6px 14px; border-radius: 6px; text-decoration: none; transition: all 0.15s;
+    }
+    .dwx-header nav a:hover { background: rgba(255,255,255,0.1); color: white; }
+    .dwx-header nav a.active { background: rgba(255,255,255,0.15); color: white; font-weight: 600; }
+    .dwx-header .user-section { display: flex; align-items: center; gap: 10px; color: rgba(255,255,255,0.8); font-size: 13px; }
+    .dwx-header .avatar { width: 32px; height: 32px; border-radius: 50%; background: #1e6b7b; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; }
+
+
+    /* ========================================================================
+       V1: HERO BANNER + CATEGORY CARDS (like Services page)
+       ======================================================================== */
+
+    .v1-hero {
+      background: linear-gradient(135deg, #0d3a5c 0%, #1a5a8a 50%, #1e6b7b 100%);
+      padding: 48px 64px 56px;
+      position: relative; overflow: hidden;
+    }
+    .v1-hero::before {
+      content: ''; position: absolute; top: -50%; right: -10%; width: 500px; height: 500px;
+      background: radial-gradient(circle, rgba(91,184,245,0.15) 0%, transparent 70%);
+      border-radius: 50%;
+    }
+    .v1-hero::after {
+      content: ''; position: absolute; bottom: -30%; left: 20%; width: 400px; height: 400px;
+      background: radial-gradient(circle, rgba(30,107,123,0.2) 0%, transparent 70%);
+      border-radius: 50%;
+    }
+    .v1-hero-content { position: relative; z-index: 1; max-width: 1200px; margin: 0 auto; }
+    .v1-hero-row { display: flex; justify-content: space-between; align-items: flex-end; gap: 40px; }
+    .v1-hero-left { flex: 1; }
+    .v1-hero-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 4px 12px; border-radius: 20px;
+      background: rgba(91,184,245,0.15); color: #5bb8f5;
+      font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;
+      margin-bottom: 16px; border: 1px solid rgba(91,184,245,0.2);
+    }
+    .v1-hero h1 { font-size: 32px; font-weight: 700; color: white; margin-bottom: 10px; line-height: 1.2; }
+    .v1-hero p { font-size: 15px; color: rgba(255,255,255,0.7); line-height: 1.6; max-width: 500px; }
+
+    .v1-hero-search {
+      display: flex; align-items: center; gap: 0;
+      background: rgba(255,255,255,0.12); backdrop-filter: blur(12px);
+      border: 1px solid rgba(255,255,255,0.15); border-radius: 12px;
+      padding: 4px; margin-top: 24px; max-width: 480px;
+    }
+    .v1-hero-search input {
+      flex: 1; padding: 12px 16px; border: none; background: transparent;
+      color: white; font-size: 14px; outline: none;
+    }
+    .v1-hero-search input::placeholder { color: rgba(255,255,255,0.5); }
+    .v1-hero-search button {
+      padding: 10px 20px; border-radius: 8px; border: none;
+      background: #5bb8f5; color: #0d3a5c; font-weight: 600; font-size: 13px; cursor: pointer;
+    }
+
+    .v1-hero-stats { display: flex; gap: 32px; }
+    .v1-hero-stat { text-align: center; }
+    .v1-hero-stat .number { font-size: 28px; font-weight: 700; color: #5bb8f5; display: block; }
+    .v1-hero-stat .label { font-size: 12px; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 0.5px; }
+
+    .v1-body { max-width: 1200px; margin: 0 auto; padding: 32px 64px; }
+
+    /* Category nav pills */
+    .v1-categories {
+      display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 28px;
+    }
+    .v1-cat-pill {
+      display: flex; align-items: center; gap: 6px;
+      padding: 8px 16px; border-radius: 20px;
+      border: 1px solid #e0e0e0; background: white;
+      font-size: 13px; font-weight: 500; color: #616161;
+      cursor: pointer; transition: all 0.15s;
+    }
+    .v1-cat-pill:hover { border-color: #1e6b7b; color: #1e6b7b; }
+    .v1-cat-pill.active { background: #1e6b7b; color: white; border-color: #1e6b7b; }
+    .v1-cat-pill .dot { width: 8px; height: 8px; border-radius: 50%; }
+    .v1-cat-pill .count {
+      background: rgba(0,0,0,0.08); padding: 1px 7px; border-radius: 10px; font-size: 11px;
+    }
+    .v1-cat-pill.active .count { background: rgba(255,255,255,0.25); }
+
+    /* Tab bar */
+    .v1-tabs { display: flex; gap: 0; border-bottom: 2px solid #e8e8e8; margin-bottom: 24px; }
+    .v1-tab {
+      padding: 12px 20px; font-size: 14px; font-weight: 500; color: #616161;
+      cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px;
+      transition: all 0.15s; display: flex; align-items: center; gap: 8px;
+    }
+    .v1-tab:hover { color: #1e6b7b; }
+    .v1-tab.active { color: #1e6b7b; border-bottom-color: #1e6b7b; font-weight: 600; }
+    .v1-tab .badge {
+      background: #e8f4f8; color: #1e6b7b; padding: 2px 8px;
+      border-radius: 10px; font-size: 11px; font-weight: 600;
+    }
+    .v1-tab.active .badge { background: #1e6b7b; color: white; }
+
+    /* FAQ Accordion */
+    .v1-faq-group { margin-bottom: 24px; }
+    .v1-faq-group-header {
+      font-size: 13px; font-weight: 600; color: #1e6b7b; text-transform: uppercase;
+      letter-spacing: 0.5px; margin-bottom: 10px; padding-left: 2px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .v1-faq-group-header::after {
+      content: ''; flex: 1; height: 1px; background: linear-gradient(90deg, rgba(30,107,123,0.2), transparent);
+    }
+    .v1-faq-item {
+      background: white; border: 1px solid #e8e8e8; border-radius: 10px;
+      margin-bottom: 6px; overflow: hidden; transition: all 0.15s;
+    }
+    .v1-faq-item:hover { border-color: #cde5ec; box-shadow: 0 2px 8px rgba(30,107,123,0.06); }
+    .v1-faq-question {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 20px; cursor: pointer; font-size: 14px; font-weight: 500;
+    }
+    .v1-faq-question .icon { color: #1e6b7b; font-size: 18px; transition: transform 0.2s; }
+    .v1-faq-answer {
+      padding: 0 20px 16px; font-size: 14px; line-height: 1.7; color: #616161;
+      border-top: 1px solid #f0f0f0; padding-top: 12px; display: none;
+    }
+    .v1-faq-item.open .v1-faq-answer { display: block; }
+    .v1-faq-item.open .icon { transform: rotate(180deg); }
+
+
+    /* ========================================================================
+       V2: MODERN DASHBOARD (sidebar categories + main content)
+       ======================================================================== */
+
+    .v2-container { max-width: 1400px; margin: 0 auto; display: flex; min-height: calc(100vh - 56px); }
+
+    .v2-sidebar {
+      width: 280px; flex-shrink: 0; background: #fafbfc;
+      border-right: 1px solid #e8e8e8; padding: 28px 0;
+    }
+    .v2-sidebar-header {
+      padding: 0 24px 20px; border-bottom: 1px solid #e8e8e8; margin-bottom: 16px;
+    }
+    .v2-sidebar-header h2 { font-size: 18px; font-weight: 700; color: #0d3a5c; margin-bottom: 4px; }
+    .v2-sidebar-header p { font-size: 12px; color: #999; }
+
+    .v2-sidebar-search { padding: 0 16px; margin-bottom: 20px; }
+    .v2-sidebar-search input {
+      width: 100%; padding: 10px 14px; border-radius: 8px;
+      border: 1px solid #e0e0e0; font-size: 13px; outline: none;
+      background: white;
+    }
+    .v2-sidebar-search input:focus { border-color: #1e6b7b; box-shadow: 0 0 0 2px rgba(30,107,123,0.12); }
+
+    .v2-nav-group { margin-bottom: 20px; }
+    .v2-nav-group-label {
+      font-size: 10px; font-weight: 700; color: #999; text-transform: uppercase;
+      letter-spacing: 1px; padding: 0 24px; margin-bottom: 6px;
+    }
+    .v2-nav-item {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 24px; font-size: 13px; color: #616161; cursor: pointer;
+      transition: all 0.1s; border-left: 3px solid transparent;
+    }
+    .v2-nav-item:hover { background: #f0f4f8; color: #1e6b7b; }
+    .v2-nav-item.active {
+      background: rgba(30,107,123,0.06); color: #1e6b7b;
+      font-weight: 600; border-left-color: #1e6b7b;
+    }
+    .v2-nav-item .nav-icon { width: 20px; margin-right: 10px; opacity: 0.6; }
+    .v2-nav-item .count-badge {
+      background: #e8f4f8; color: #1e6b7b; padding: 2px 8px;
+      border-radius: 10px; font-size: 11px; font-weight: 600;
+    }
+    .v2-nav-item.active .count-badge { background: #1e6b7b; color: white; }
+
+    .v2-main { flex: 1; padding: 32px 40px; background: white; }
+
+    .v2-main-header { margin-bottom: 28px; }
+    .v2-main-header h1 { font-size: 24px; font-weight: 700; color: #0d3a5c; margin-bottom: 4px; }
+    .v2-main-header p { font-size: 14px; color: #999; }
+
+    /* Stat cards row */
+    .v2-stats { display: flex; gap: 16px; margin-bottom: 28px; }
+    .v2-stat-card {
+      flex: 1; padding: 20px; border-radius: 12px; background: linear-gradient(135deg, #f8fbfd, #edf5fa);
+      border: 1px solid #dce9f0;
+    }
+    .v2-stat-card .stat-number { font-size: 28px; font-weight: 700; color: #0d3a5c; }
+    .v2-stat-card .stat-label { font-size: 12px; color: #999; text-transform: uppercase; letter-spacing: 0.3px; margin-top: 2px; }
+
+    /* Article cards for V2 */
+    .v2-article-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+    .v2-article-card {
+      border: 1px solid #e8e8e8; border-radius: 12px; padding: 24px;
+      cursor: pointer; transition: all 0.15s; position: relative; overflow: hidden;
+    }
+    .v2-article-card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+      background: linear-gradient(90deg, #1e6b7b, #5bb8f5);
+    }
+    .v2-article-card:hover { border-color: #cde5ec; box-shadow: 0 4px 16px rgba(30,107,123,0.08); transform: translateY(-1px); }
+    .v2-article-card h3 { font-size: 15px; font-weight: 600; margin-bottom: 8px; color: #242424; }
+    .v2-article-card p {
+      font-size: 13px; color: #616161; line-height: 1.6;
+      display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+    }
+    .v2-article-card .card-meta {
+      display: flex; align-items: center; gap: 8px; margin-top: 14px;
+    }
+    .v2-article-card .tag {
+      background: #f0f4f8; color: #1e6b7b; padding: 3px 10px;
+      border-radius: 12px; font-size: 11px; font-weight: 500;
+    }
+    .v2-article-card .read-more {
+      font-size: 12px; font-weight: 600; color: #1e6b7b; margin-left: auto;
+    }
+
+    /* FAQ items for V2 */
+    .v2-faq-item {
+      border: 1px solid #e8e8e8; border-radius: 10px; margin-bottom: 8px;
+      overflow: hidden;
+    }
+    .v2-faq-item:hover { border-color: #cde5ec; }
+    .v2-faq-q {
+      display: flex; align-items: center; gap: 12px;
+      padding: 16px 20px; cursor: pointer; font-size: 14px; font-weight: 500;
+    }
+    .v2-faq-q .q-icon {
+      width: 28px; height: 28px; border-radius: 8px;
+      background: #e8f4f8; color: #1e6b7b; display: flex; align-items: center;
+      justify-content: center; font-weight: 700; font-size: 13px; flex-shrink: 0;
+    }
+    .v2-faq-a {
+      padding: 0 20px 16px 60px; font-size: 14px; line-height: 1.7; color: #616161;
+      display: none;
+    }
+    .v2-faq-item.open .v2-faq-a { display: block; }
+
+    /* Glossary for V2 */
+    .v2-glossary-letter {
+      font-size: 20px; font-weight: 700; color: #1e6b7b; margin-bottom: 12px;
+      padding-bottom: 4px; border-bottom: 2px solid rgba(30,107,123,0.15);
+      display: inline-block;
+    }
+    .v2-glossary-term {
+      padding: 12px 16px; border-left: 3px solid #dce9f0; margin-bottom: 8px;
+      margin-left: 4px; transition: all 0.15s;
+    }
+    .v2-glossary-term:hover { border-left-color: #1e6b7b; background: #fafbfc; }
+    .v2-glossary-term h4 { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+    .v2-glossary-term p { font-size: 13px; color: #616161; line-height: 1.5; }
+
+
+    /* ========================================================================
+       V3: MAGAZINE / EDITORIAL (full-width sections, visual hierarchy)
+       ======================================================================== */
+
+    .v3-hero {
+      background: linear-gradient(135deg, #0d3a5c 0%, #1a5a8a 100%);
+      padding: 56px 64px; position: relative; overflow: hidden;
+    }
+    .v3-hero::before {
+      content: ''; position: absolute; inset: 0;
+      background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    }
+    .v3-hero-content {
+      position: relative; z-index: 1; max-width: 1200px; margin: 0 auto;
+      display: flex; justify-content: space-between; align-items: center; gap: 40px;
+    }
+    .v3-hero-left { flex: 1; }
+    .v3-hero .breadcrumb { font-size: 12px; color: rgba(255,255,255,0.4); margin-bottom: 16px; }
+    .v3-hero .breadcrumb a { color: rgba(255,255,255,0.5); text-decoration: none; }
+    .v3-hero .breadcrumb a:hover { color: #5bb8f5; }
+    .v3-hero h1 { font-size: 36px; font-weight: 700; color: white; margin-bottom: 12px; line-height: 1.2; }
+    .v3-hero h1 em { font-style: normal; color: #5bb8f5; }
+    .v3-hero p { font-size: 16px; color: rgba(255,255,255,0.6); line-height: 1.6; max-width: 520px; }
+
+    .v3-hero-search {
+      margin-top: 28px; position: relative; max-width: 520px;
+    }
+    .v3-hero-search input {
+      width: 100%; padding: 16px 20px 16px 48px;
+      border-radius: 14px; border: 1px solid rgba(255,255,255,0.15);
+      background: rgba(255,255,255,0.08); backdrop-filter: blur(12px);
+      color: white; font-size: 15px; outline: none;
+    }
+    .v3-hero-search input::placeholder { color: rgba(255,255,255,0.4); }
+    .v3-hero-search .search-icon {
+      position: absolute; left: 18px; top: 50%; transform: translateY(-50%);
+      color: rgba(255,255,255,0.4); font-size: 18px;
+    }
+
+    .v3-hero-right { display: flex; flex-direction: column; gap: 12px; }
+    .v3-quick-link {
+      display: flex; align-items: center; gap: 12px;
+      padding: 14px 20px; border-radius: 12px;
+      background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+      color: rgba(255,255,255,0.8); font-size: 14px; cursor: pointer;
+      transition: all 0.15s; min-width: 240px;
+    }
+    .v3-quick-link:hover { background: rgba(255,255,255,0.12); color: white; border-color: rgba(255,255,255,0.2); }
+    .v3-quick-link .ql-icon {
+      width: 36px; height: 36px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px; flex-shrink: 0;
+    }
+    .v3-quick-link:nth-child(1) .ql-icon { background: rgba(91,184,245,0.15); color: #5bb8f5; }
+    .v3-quick-link:nth-child(2) .ql-icon { background: rgba(122,204,155,0.15); color: #7acc9b; }
+    .v3-quick-link:nth-child(3) .ql-icon { background: rgba(247,163,79,0.15); color: #f7a34f; }
+    .v3-quick-link .ql-text { font-weight: 500; }
+    .v3-quick-link .ql-count { font-size: 11px; color: rgba(255,255,255,0.4); }
+
+    .v3-body { max-width: 1200px; margin: 0 auto; padding: 0 64px; }
+
+    /* Featured articles row */
+    .v3-featured { padding: 36px 0; }
+    .v3-section-header {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 20px;
+    }
+    .v3-section-header h2 { font-size: 20px; font-weight: 700; color: #0d3a5c; }
+    .v3-section-header .view-all { font-size: 13px; color: #1e6b7b; font-weight: 600; cursor: pointer; }
+
+    .v3-featured-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; }
+    .v3-featured-card {
+      border-radius: 16px; overflow: hidden; cursor: pointer;
+      transition: all 0.2s; border: 1px solid #e8e8e8;
+    }
+    .v3-featured-card:hover { box-shadow: 0 8px 24px rgba(0,0,0,0.08); transform: translateY(-2px); }
+    .v3-featured-card .card-banner {
+      height: 120px; position: relative; display: flex; align-items: flex-end; padding: 16px;
+    }
+    .v3-featured-card:nth-child(1) .card-banner { background: linear-gradient(135deg, #0d3a5c, #1e6b7b); }
+    .v3-featured-card:nth-child(2) .card-banner { background: linear-gradient(135deg, #1e6b7b, #2a8d6e); }
+    .v3-featured-card:nth-child(3) .card-banner { background: linear-gradient(135deg, #1a5a8a, #3a7bd5); }
+    .v3-featured-card .card-banner .cat-badge {
+      position: absolute; top: 12px; right: 12px;
+      background: rgba(255,255,255,0.2); backdrop-filter: blur(8px);
+      color: white; padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: 600;
+    }
+    .v3-featured-card .card-banner h3 { color: white; font-size: 16px; font-weight: 600; line-height: 1.3; }
+    .v3-featured-card .card-body { padding: 16px; background: white; }
+    .v3-featured-card .card-body p {
+      font-size: 13px; color: #616161; line-height: 1.6;
+      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+    }
+    .v3-featured-card .card-body .tags { display: flex; gap: 6px; margin-top: 12px; flex-wrap: wrap; }
+    .v3-featured-card .card-body .tags span {
+      background: #f0f4f8; color: #1e6b7b; padding: 3px 10px;
+      border-radius: 10px; font-size: 11px; font-weight: 500;
+    }
+
+    /* FAQ section for V3 */
+    .v3-faq-section { padding: 36px 0; border-top: 1px solid #e8e8e8; }
+    .v3-faq-columns { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .v3-faq-card {
+      display: flex; align-items: flex-start; gap: 14px;
+      padding: 20px; border-radius: 12px; background: white;
+      border: 1px solid #e8e8e8; cursor: pointer; transition: all 0.15s;
+    }
+    .v3-faq-card:hover { border-color: #cde5ec; box-shadow: 0 2px 12px rgba(30,107,123,0.06); }
+    .v3-faq-card .faq-number {
+      width: 32px; height: 32px; border-radius: 10px;
+      background: linear-gradient(135deg, #1e6b7b, #2a8faa);
+      color: white; display: flex; align-items: center; justify-content: center;
+      font-size: 13px; font-weight: 700; flex-shrink: 0;
+    }
+    .v3-faq-card h4 { font-size: 14px; font-weight: 600; color: #242424; margin-bottom: 6px; }
+    .v3-faq-card p {
+      font-size: 13px; color: #616161; line-height: 1.5;
+      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+    }
+
+    /* Glossary section for V3 */
+    .v3-glossary-section { padding: 36px 0; border-top: 1px solid #e8e8e8; }
+    .v3-alpha-bar {
+      display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 24px;
+      padding: 12px 16px; background: #fafbfc; border-radius: 12px;
+    }
+    .v3-alpha-btn {
+      width: 34px; height: 34px; display: flex; align-items: center; justify-content: center;
+      border-radius: 8px; border: none; background: transparent;
+      font-size: 14px; font-weight: 600; color: #999; cursor: pointer; transition: all 0.15s;
+    }
+    .v3-alpha-btn:hover { background: #e8f4f8; color: #1e6b7b; }
+    .v3-alpha-btn.active { background: #1e6b7b; color: white; }
+    .v3-alpha-btn.disabled { color: #ddd; cursor: default; }
+
+    .v3-glossary-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+    .v3-glossary-card {
+      padding: 18px; border-radius: 10px; background: white;
+      border: 1px solid #e8e8e8; transition: all 0.15s;
+    }
+    .v3-glossary-card:hover { border-color: #1e6b7b; background: #fafbfc; }
+    .v3-glossary-card .term-letter {
+      font-size: 11px; font-weight: 700; color: #1e6b7b; text-transform: uppercase;
+      letter-spacing: 1px; margin-bottom: 6px;
+    }
+    .v3-glossary-card h4 { font-size: 14px; font-weight: 600; color: #242424; margin-bottom: 6px; }
+    .v3-glossary-card p {
+      font-size: 12px; color: #999; line-height: 1.5;
+      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+    }
+
+    /* Variation labels */
+    .variation-label {
+      text-align: center; padding: 20px; font-size: 11px; font-weight: 600;
+      color: #999; text-transform: uppercase; letter-spacing: 2px;
+      border-top: 1px solid #e0e0e0; margin-top: 40px;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Variation Switcher -->
+<div class="variation-nav">
+  <span class="nav-label">Design</span>
+  <button class="active" onclick="showVariation('v1')">V1: Hero Banner</button>
+  <button onclick="showVariation('v2')">V2: Sidebar Nav</button>
+  <button onclick="showVariation('v3')">V3: Magazine</button>
+</div>
+
+
+<!-- ============================================================================
+     V1: HERO BANNER + CATEGORY PILLS
+     Similar to the approved Services page V1 Hero Banner pattern.
+     Big gradient hero with embedded glassmorphic search, stat counters,
+     category pill filters, and tabbed content below.
+     ============================================================================ -->
+<div id="v1" class="variation active">
+  <div class="dwx-header">
+    <div class="logo">&#x2197; DWx Traffic <span>Manager</span></div>
+    <nav>
+      <a href="#">Services</a>
+      <a href="#">Products</a>
+      <a href="#">New Request</a>
+      <a href="#">My Requests</a>
+      <a href="#" class="active">Knowledge Base</a>
+      <a href="#">Dashboard</a>
+      <a href="#">Admin</a>
+    </nav>
+    <div class="user-section">
+      Gary Finberg
+      <div class="avatar">GF</div>
+    </div>
+  </div>
+
+  <div class="v1-hero">
+    <div class="v1-hero-content">
+      <div class="v1-hero-row">
+        <div class="v1-hero-left">
+          <div class="v1-hero-badge">&#x1F4DA; Knowledge Centre</div>
+          <h1>Everything you need to know about DWx</h1>
+          <p>Browse FAQs, explore our glossary, and read in-depth articles to master the DWx Traffic Manager and sales process.</p>
+          <div class="v1-hero-search">
+            <input type="text" placeholder="Search FAQs, glossary terms, and articles..." />
+            <button>Search</button>
+          </div>
+        </div>
+        <div class="v1-hero-stats">
+          <div class="v1-hero-stat">
+            <span class="number">24</span>
+            <span class="label">FAQs</span>
+          </div>
+          <div class="v1-hero-stat">
+            <span class="number">18</span>
+            <span class="label">Terms</span>
+          </div>
+          <div class="v1-hero-stat">
+            <span class="number">8</span>
+            <span class="label">Articles</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="v1-body">
+    <!-- Category pills -->
+    <div class="v1-categories">
+      <div class="v1-cat-pill active"><span class="dot" style="background:#1e6b7b"></span> All <span class="count">50</span></div>
+      <div class="v1-cat-pill"><span class="dot" style="background:#5bb8f5"></span> General <span class="count">8</span></div>
+      <div class="v1-cat-pill"><span class="dot" style="background:#2a8d6e"></span> Services <span class="count">12</span></div>
+      <div class="v1-cat-pill"><span class="dot" style="background:#7b61ff"></span> Products <span class="count">6</span></div>
+      <div class="v1-cat-pill"><span class="dot" style="background:#f7a34f"></span> Process <span class="count">10</span></div>
+      <div class="v1-cat-pill"><span class="dot" style="background:#e74c3c"></span> Technical <span class="count">9</span></div>
+      <div class="v1-cat-pill"><span class="dot" style="background:#3498db"></span> Commercial <span class="count">5</span></div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="v1-tabs">
+      <div class="v1-tab active">&#x2753; FAQ <span class="badge">24</span></div>
+      <div class="v1-tab">&#x1F4D6; Glossary <span class="badge">18</span></div>
+      <div class="v1-tab">&#x1F4DD; Articles <span class="badge">8</span></div>
+    </div>
+
+    <!-- FAQ Content (sample) -->
+    <div class="v1-faq-group">
+      <div class="v1-faq-group-header">General</div>
+      <div class="v1-faq-item open" onclick="this.classList.toggle('open')">
+        <div class="v1-faq-question">
+          What is DWx Traffic Manager?
+          <span class="icon">&#9660;</span>
+        </div>
+        <div class="v1-faq-answer">
+          DWx Traffic Manager is a Microsoft Teams application designed for Digital Workplace's pre-sales coordination. It helps Account Managers create service requests, track deals through a sales funnel (Lead to Won/Lost), and coordinate with technical specialists for client engagements. The app integrates with SharePoint, Microsoft Graph, and Azure OpenAI for intelligent content generation.
+        </div>
+      </div>
+      <div class="v1-faq-item" onclick="this.classList.toggle('open')">
+        <div class="v1-faq-question">
+          Who can use the application?
+          <span class="icon">&#9660;</span>
+        </div>
+        <div class="v1-faq-answer">
+          Account Managers, Business Development Managers, and the Sales Team can create and manage service requests. Managers have additional access to the sales pipeline dashboard, approval queue, and admin panel for system configuration.
+        </div>
+      </div>
+      <div class="v1-faq-item" onclick="this.classList.toggle('open')">
+        <div class="v1-faq-question">
+          How do I get started with DWx Traffic Manager?
+          <span class="icon">&#9660;</span>
+        </div>
+        <div class="v1-faq-answer">
+          Simply log in with your Microsoft 365 account. From the landing page, browse available services in the Service Catalog, then click "New Request" to submit a service request. You can track all your requests under "My Requests" in the navigation bar.
+        </div>
+      </div>
+    </div>
+
+    <div class="v1-faq-group">
+      <div class="v1-faq-group-header">Process</div>
+      <div class="v1-faq-item" onclick="this.classList.toggle('open')">
+        <div class="v1-faq-question">
+          What are the stages in the sales funnel?
+          <span class="icon">&#9660;</span>
+        </div>
+        <div class="v1-faq-answer">
+          The sales funnel has 7 stages: Lead, Qualified, Discovery, Proposal, Negotiation, Won, and Lost. Each stage has specific entry triggers and exit criteria. Deals progress from Lead through each stage as they mature, with the possibility of moving to Lost at any point.
+        </div>
+      </div>
+      <div class="v1-faq-item" onclick="this.classList.toggle('open')">
+        <div class="v1-faq-question">
+          How do I qualify a lead?
+          <span class="icon">&#9660;</span>
+        </div>
+        <div class="v1-faq-answer">
+          To qualify a lead, validate the client's genuine interest and budget. Ensure you have the decision-maker's contact details, understand the project timeline, and confirm the scope aligns with DWx service offerings. Once validated, a manager can advance the deal from Lead to Qualified status.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="variation-label">V1: Hero Banner &mdash; Matches approved Services page pattern with gradient hero, glassmorphic search, category pills, and tabbed content</div>
+</div>
+
+
+<!-- ============================================================================
+     V2: SIDEBAR NAVIGATION
+     Persistent left sidebar with category tree navigation,
+     search at top, stat cards, and main content area.
+     Great for frequent reference use — feels like a docs site.
+     ============================================================================ -->
+<div id="v2" class="variation">
+  <div class="dwx-header">
+    <div class="logo">&#x2197; DWx Traffic <span>Manager</span></div>
+    <nav>
+      <a href="#">Services</a>
+      <a href="#">Products</a>
+      <a href="#">New Request</a>
+      <a href="#">My Requests</a>
+      <a href="#" class="active">Knowledge Base</a>
+      <a href="#">Dashboard</a>
+      <a href="#">Admin</a>
+    </nav>
+    <div class="user-section">
+      Gary Finberg
+      <div class="avatar">GF</div>
+    </div>
+  </div>
+
+  <div class="v2-container">
+    <div class="v2-sidebar">
+      <div class="v2-sidebar-header">
+        <h2>&#x1F4DA; Knowledge Base</h2>
+        <p>50 entries across 6 categories</p>
+      </div>
+
+      <div class="v2-sidebar-search">
+        <input type="text" placeholder="Search everything..." />
+      </div>
+
+      <div class="v2-nav-group">
+        <div class="v2-nav-group-label">Content Type</div>
+        <div class="v2-nav-item active">
+          &#x2753; FAQ
+          <span class="count-badge">24</span>
+        </div>
+        <div class="v2-nav-item">
+          &#x1F4D6; Glossary
+          <span class="count-badge">18</span>
+        </div>
+        <div class="v2-nav-item">
+          &#x1F4DD; Articles
+          <span class="count-badge">8</span>
+        </div>
+      </div>
+
+      <div class="v2-nav-group">
+        <div class="v2-nav-group-label">Categories</div>
+        <div class="v2-nav-item">
+          <span>&#x1F30D; General</span>
+          <span class="count-badge">8</span>
+        </div>
+        <div class="v2-nav-item">
+          <span>&#x2699; Services</span>
+          <span class="count-badge">12</span>
+        </div>
+        <div class="v2-nav-item">
+          <span>&#x1F4E6; Products</span>
+          <span class="count-badge">6</span>
+        </div>
+        <div class="v2-nav-item">
+          <span>&#x1F504; Process</span>
+          <span class="count-badge">10</span>
+        </div>
+        <div class="v2-nav-item">
+          <span>&#x1F527; Technical</span>
+          <span class="count-badge">9</span>
+        </div>
+        <div class="v2-nav-item">
+          <span>&#x1F4B0; Commercial</span>
+          <span class="count-badge">5</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="v2-main">
+      <div class="v2-main-header">
+        <h1>Frequently Asked Questions</h1>
+        <p>24 questions across all categories</p>
+      </div>
+
+      <div class="v2-stats">
+        <div class="v2-stat-card">
+          <div class="stat-number">24</div>
+          <div class="stat-label">FAQs</div>
+        </div>
+        <div class="v2-stat-card">
+          <div class="stat-number">18</div>
+          <div class="stat-label">Glossary Terms</div>
+        </div>
+        <div class="v2-stat-card">
+          <div class="stat-number">8</div>
+          <div class="stat-label">Articles</div>
+        </div>
+        <div class="v2-stat-card">
+          <div class="stat-number">6</div>
+          <div class="stat-label">Categories</div>
+        </div>
+      </div>
+
+      <!-- FAQ items -->
+      <div class="v2-faq-item open" onclick="this.classList.toggle('open')">
+        <div class="v2-faq-q">
+          <span class="q-icon">Q</span>
+          What is DWx Traffic Manager?
+        </div>
+        <div class="v2-faq-a">
+          DWx Traffic Manager is a Microsoft Teams application designed for Digital Workplace's pre-sales coordination. It helps Account Managers create service requests, track deals through a sales funnel, and coordinate with technical specialists for client engagements.
+        </div>
+      </div>
+      <div class="v2-faq-item" onclick="this.classList.toggle('open')">
+        <div class="v2-faq-q">
+          <span class="q-icon">Q</span>
+          Who can use the application?
+        </div>
+        <div class="v2-faq-a">
+          Account Managers, Business Development Managers, and the Sales Team can create and manage service requests. Managers have additional access to the pipeline dashboard and admin panel.
+        </div>
+      </div>
+      <div class="v2-faq-item" onclick="this.classList.toggle('open')">
+        <div class="v2-faq-q">
+          <span class="q-icon">Q</span>
+          What are the stages in the sales funnel?
+        </div>
+        <div class="v2-faq-a">
+          The sales funnel has 7 stages: Lead, Qualified, Discovery, Proposal, Negotiation, Won, and Lost.
+        </div>
+      </div>
+      <div class="v2-faq-item" onclick="this.classList.toggle('open')">
+        <div class="v2-faq-q">
+          <span class="q-icon">Q</span>
+          How do I create a new service request?
+        </div>
+        <div class="v2-faq-a">
+          Click "New Request" in the navigation bar, then follow the 5-step wizard: select a service, enter client details, specify requirements, propose meeting times, and review your request before submitting.
+        </div>
+      </div>
+      <div class="v2-faq-item" onclick="this.classList.toggle('open')">
+        <div class="v2-faq-q">
+          <span class="q-icon">Q</span>
+          How do I prepare for a discovery meeting?
+        </div>
+        <div class="v2-faq-a">
+          Use the Session Preparation feature available on confirmed Discovery-stage requests. It provides AI-generated client profiles, talking points, suggested resources, and a preparation checklist to ensure you're fully ready.
+        </div>
+      </div>
+      <div class="v2-faq-item" onclick="this.classList.toggle('open')">
+        <div class="v2-faq-q">
+          <span class="q-icon">Q</span>
+          What currencies are supported?
+        </div>
+        <div class="v2-faq-a">
+          All deal values are denominated in South African Rand (ZAR). This applies to deal values, proposals, pricing breakdowns, and all commercial metrics.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="variation-label">V2: Sidebar Navigation &mdash; Persistent left sidebar with type/category tree, stat cards, and doc-site feel for frequent reference</div>
+</div>
+
+
+<!-- ============================================================================
+     V3: MAGAZINE / EDITORIAL
+     Full-width editorial layout with featured articles hero,
+     FAQ cards in 2-column grid, glossary with letter nav,
+     and visual hierarchy between content types.
+     ============================================================================ -->
+<div id="v3" class="variation">
+  <div class="dwx-header">
+    <div class="logo">&#x2197; DWx Traffic <span>Manager</span></div>
+    <nav>
+      <a href="#">Services</a>
+      <a href="#">Products</a>
+      <a href="#">New Request</a>
+      <a href="#">My Requests</a>
+      <a href="#" class="active">Knowledge Base</a>
+      <a href="#">Dashboard</a>
+      <a href="#">Admin</a>
+    </nav>
+    <div class="user-section">
+      Gary Finberg
+      <div class="avatar">GF</div>
+    </div>
+  </div>
+
+  <div class="v3-hero">
+    <div class="v3-hero-content">
+      <div class="v3-hero-left">
+        <div class="breadcrumb"><a href="#">Home</a> &rsaquo; Knowledge Base</div>
+        <h1>DWx Knowledge <em>Centre</em></h1>
+        <p>Your one-stop resource for FAQs, terminology, and in-depth guides to master the DWx Traffic Manager platform and sales process.</p>
+        <div class="v3-hero-search">
+          <span class="search-icon">&#x1F50D;</span>
+          <input type="text" placeholder="What are you looking for?" />
+        </div>
+      </div>
+      <div class="v3-hero-right">
+        <div class="v3-quick-link">
+          <div class="ql-icon">&#x2753;</div>
+          <div>
+            <div class="ql-text">Browse FAQs</div>
+            <div class="ql-count">24 questions</div>
+          </div>
+        </div>
+        <div class="v3-quick-link">
+          <div class="ql-icon">&#x1F4D6;</div>
+          <div>
+            <div class="ql-text">Glossary</div>
+            <div class="ql-count">18 terms</div>
+          </div>
+        </div>
+        <div class="v3-quick-link">
+          <div class="ql-icon">&#x1F4DD;</div>
+          <div>
+            <div class="ql-text">Read Articles</div>
+            <div class="ql-count">8 guides</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="v3-body">
+    <!-- Featured Articles -->
+    <div class="v3-featured">
+      <div class="v3-section-header">
+        <h2>Featured Articles</h2>
+        <span class="view-all">View all 8 articles &rarr;</span>
+      </div>
+      <div class="v3-featured-grid">
+        <div class="v3-featured-card">
+          <div class="card-banner">
+            <span class="cat-badge">Process</span>
+            <h3>Understanding the Sales Funnel Stages</h3>
+          </div>
+          <div class="card-body">
+            <p>A comprehensive guide to the 7-stage sales funnel from Lead to Won/Lost, including entry triggers, required actions, and best practices for advancing deals.</p>
+            <div class="tags">
+              <span>Sales Process</span>
+              <span>Pipeline</span>
+            </div>
+          </div>
+        </div>
+        <div class="v3-featured-card">
+          <div class="card-banner">
+            <span class="cat-badge">Services</span>
+            <h3>DWx Service Categories Explained</h3>
+          </div>
+          <div class="card-body">
+            <p>Deep dive into all 12 DWx service categories including Power Platform, SPFx Development, Copilot Agents, and Strategic Advisory.</p>
+            <div class="tags">
+              <span>Service Catalog</span>
+              <span>Overview</span>
+            </div>
+          </div>
+        </div>
+        <div class="v3-featured-card">
+          <div class="card-banner">
+            <span class="cat-badge">Technical</span>
+            <h3>Preparing for Discovery Meetings</h3>
+          </div>
+          <div class="card-body">
+            <p>How to leverage AI-powered session preparation to create client profiles, talking points, and meeting agendas for successful discovery calls.</p>
+            <div class="tags">
+              <span>AI Features</span>
+              <span>Session Prep</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Popular FAQs -->
+    <div class="v3-faq-section">
+      <div class="v3-section-header">
+        <h2>Popular Questions</h2>
+        <span class="view-all">View all 24 FAQs &rarr;</span>
+      </div>
+      <div class="v3-faq-columns">
+        <div class="v3-faq-card">
+          <div class="faq-number">1</div>
+          <div>
+            <h4>What is DWx Traffic Manager?</h4>
+            <p>A Microsoft Teams app for Digital Workplace's pre-sales coordination, service request management, and sales funnel tracking.</p>
+          </div>
+        </div>
+        <div class="v3-faq-card">
+          <div class="faq-number">2</div>
+          <div>
+            <h4>How do I create a new service request?</h4>
+            <p>Click "New Request" in the navigation and follow the 5-step wizard to select a service, enter client details, and submit.</p>
+          </div>
+        </div>
+        <div class="v3-faq-card">
+          <div class="faq-number">3</div>
+          <div>
+            <h4>What are the sales funnel stages?</h4>
+            <p>Lead, Qualified, Discovery, Proposal, Negotiation, Won, and Lost. Each stage has specific entry triggers and exit criteria.</p>
+          </div>
+        </div>
+        <div class="v3-faq-card">
+          <div class="faq-number">4</div>
+          <div>
+            <h4>How does specialist assignment work?</h4>
+            <p>Managers assign specialists to deals once they reach the Qualified stage. Specialists cannot self-assign to maintain oversight.</p>
+          </div>
+        </div>
+        <div class="v3-faq-card">
+          <div class="faq-number">5</div>
+          <div>
+            <h4>What currencies does the app support?</h4>
+            <p>All financial values use South African Rand (ZAR) for deal values, proposals, and commercial metrics.</p>
+          </div>
+        </div>
+        <div class="v3-faq-card">
+          <div class="faq-number">6</div>
+          <div>
+            <h4>How do I prepare for a discovery meeting?</h4>
+            <p>Use the Session Preparation feature with AI-generated client profiles, talking points, and preparation checklists.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Glossary -->
+    <div class="v3-glossary-section">
+      <div class="v3-section-header">
+        <h2>Glossary</h2>
+        <span class="view-all">View all 18 terms &rarr;</span>
+      </div>
+
+      <div class="v3-alpha-bar">
+        <button class="v3-alpha-btn active">A</button>
+        <button class="v3-alpha-btn">B</button>
+        <button class="v3-alpha-btn">C</button>
+        <button class="v3-alpha-btn">D</button>
+        <button class="v3-alpha-btn disabled">E</button>
+        <button class="v3-alpha-btn">F</button>
+        <button class="v3-alpha-btn disabled">G</button>
+        <button class="v3-alpha-btn disabled">H</button>
+        <button class="v3-alpha-btn disabled">I</button>
+        <button class="v3-alpha-btn disabled">J</button>
+        <button class="v3-alpha-btn">K</button>
+        <button class="v3-alpha-btn">L</button>
+        <button class="v3-alpha-btn">M</button>
+        <button class="v3-alpha-btn disabled">N</button>
+        <button class="v3-alpha-btn disabled">O</button>
+        <button class="v3-alpha-btn">P</button>
+        <button class="v3-alpha-btn disabled">Q</button>
+        <button class="v3-alpha-btn disabled">R</button>
+        <button class="v3-alpha-btn">S</button>
+        <button class="v3-alpha-btn disabled">T</button>
+        <button class="v3-alpha-btn disabled">U</button>
+        <button class="v3-alpha-btn disabled">V</button>
+        <button class="v3-alpha-btn">W</button>
+        <button class="v3-alpha-btn disabled">X</button>
+        <button class="v3-alpha-btn disabled">Y</button>
+        <button class="v3-alpha-btn disabled">Z</button>
+      </div>
+
+      <div class="v3-glossary-grid">
+        <div class="v3-glossary-card">
+          <div class="term-letter">A</div>
+          <h4>Account Manager</h4>
+          <p>A sales team member responsible for managing client relationships and creating service requests in DWx.</p>
+        </div>
+        <div class="v3-glossary-card">
+          <div class="term-letter">A</div>
+          <h4>Azure OpenAI</h4>
+          <p>Microsoft's enterprise AI service used by DWx for generating session preparation content and proposal sections.</p>
+        </div>
+        <div class="v3-glossary-card">
+          <div class="term-letter">C</div>
+          <h4>Copilot Agent</h4>
+          <p>An AI-powered assistant built on Microsoft 365 Copilot that automates tasks and surfaces relevant information.</p>
+        </div>
+        <div class="v3-glossary-card">
+          <div class="term-letter">D</div>
+          <h4>Deal Value</h4>
+          <p>The estimated revenue in ZAR for a service engagement, used to calculate weighted pipeline metrics.</p>
+        </div>
+        <div class="v3-glossary-card">
+          <div class="term-letter">D</div>
+          <h4>Discovery Meeting</h4>
+          <p>A scheduled session with the client to understand requirements, assess scope, and demonstrate DWx capabilities.</p>
+        </div>
+        <div class="v3-glossary-card">
+          <div class="term-letter">F</div>
+          <h4>Funnel Stage</h4>
+          <p>One of 7 stages a deal passes through from initial Lead to final Won or Lost status.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="variation-label">V3: Magazine / Editorial &mdash; Full-width sections with featured articles, FAQ cards, and glossary grid. Most visual variety and editorial feel.</div>
+</div>
+
+
+<script>
+  function showVariation(id) {
+    document.querySelectorAll('.variation').forEach(v => v.classList.remove('active'));
+    document.querySelectorAll('.variation-nav button').forEach(b => b.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    event.target.classList.add('active');
+    window.scrollTo(0, 0);
+  }
+</script>
+
+</body>
+</html>

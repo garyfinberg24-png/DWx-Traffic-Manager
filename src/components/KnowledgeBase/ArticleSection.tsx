@@ -1,6 +1,7 @@
 /**
- * DWx Traffic Manager - Article Section
- * Displays knowledge base articles as a card grid with search and read-more dialog.
+ * DWx Traffic Manager - Article Section (V3 Magazine)
+ * Featured article cards with gradient banners, category badges, and tag pills.
+ * Shows 3 featured by default, expandable to show all.
  * Read-only browsing view for Account Managers.
  */
 
@@ -8,9 +9,9 @@ import React, { useState, useMemo } from 'react';
 import {
   Text,
   Badge,
-  Card,
   makeStyles,
   tokens,
+  shorthands,
   Dialog,
   DialogSurface,
   DialogBody,
@@ -25,56 +26,91 @@ import { KBEntry } from '../../types/KnowledgeBase';
 interface ArticleSectionProps {
   entries: KBEntry[];
   searchQuery: string;
+  expanded?: boolean;
+  categoryGradients?: Record<string, string>;
 }
 
+const DEFAULT_GRADIENTS: Record<string, string> = {
+  Process: 'linear-gradient(135deg, #0d3a5c, #1e6b7b)',
+  Services: 'linear-gradient(135deg, #1e6b7b, #2a8d6e)',
+  Technical: 'linear-gradient(135deg, #1a5a8a, #3a7bd5)',
+  Products: 'linear-gradient(135deg, #4c1d95, #7c3aed)',
+  General: 'linear-gradient(135deg, #0d3a5c, #1a5a8a)',
+  Commercial: 'linear-gradient(135deg, #1e6b7b, #1a5a8a)',
+};
+
 const useStyles = makeStyles({
-  container: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '20px',
-  },
   grid: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
-    gap: '16px',
+    gridTemplateColumns: 'repeat(3, 1fr)',
+    ...shorthands.gap('20px'),
   },
   card: {
-    padding: '20px',
+    ...shorthands.borderRadius('16px'),
+    ...shorthands.overflow('hidden'),
     cursor: 'pointer',
     transitionProperty: 'box-shadow, transform',
-    transitionDuration: '150ms',
+    transitionDuration: '200ms',
+    ...shorthands.border('1px', 'solid', '#e8e8e8'),
     ':hover': {
-      boxShadow: tokens.shadow8,
+      boxShadow: '0 8px 24px rgba(0,0,0,0.08)',
+      transform: 'translateY(-2px)',
     },
   },
-  cardHeader: {
+  cardBanner: {
+    height: '120px',
+    position: 'relative',
     display: 'flex',
-    alignItems: 'flex-start',
-    justifyContent: 'space-between',
-    gap: '8px',
-    marginBottom: '8px',
+    alignItems: 'flex-end',
+    ...shorthands.padding('16px'),
   },
-  cardTitle: {
-    fontSize: '15px',
+  cardBannerTitle: {
+    color: 'white',
+    fontSize: '16px',
     fontWeight: '600',
-    color: tokens.colorNeutralForeground1,
+    lineHeight: '1.3',
+  },
+  categoryBadge: {
+    position: 'absolute',
+    top: '12px',
+    right: '12px',
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    backdropFilter: 'blur(8px)',
+    color: 'white',
+    ...shorthands.padding('4px', '10px'),
+    ...shorthands.borderRadius('12px'),
+    fontSize: '11px',
+    fontWeight: '600',
+  },
+  cardBody: {
+    ...shorthands.padding('16px'),
+    backgroundColor: 'white',
   },
   cardExcerpt: {
     fontSize: '13px',
+    color: '#616161',
     lineHeight: '1.6',
-    color: tokens.colorNeutralForeground2,
     display: '-webkit-box',
-    WebkitLineClamp: 3,
+    WebkitLineClamp: 2,
     WebkitBoxOrient: 'vertical',
-    overflow: 'hidden',
+    ...shorthands.overflow('hidden'),
   },
-  cardFooter: {
+  cardTags: {
     display: 'flex',
-    alignItems: 'center',
-    gap: '8px',
+    ...shorthands.gap('6px'),
     marginTop: '12px',
     flexWrap: 'wrap',
   },
+  tag: {
+    backgroundColor: '#f0f4f8',
+    color: '#1e6b7b',
+    ...shorthands.padding('3px', '10px'),
+    ...shorthands.borderRadius('10px'),
+    fontSize: '11px',
+    fontWeight: '500',
+  },
+
+  // Dialog
   dialogSurface: {
     maxWidth: '700px',
     width: '100%',
@@ -88,17 +124,19 @@ const useStyles = makeStyles({
   dialogMeta: {
     display: 'flex',
     alignItems: 'center',
-    gap: '8px',
+    ...shorthands.gap('8px'),
     marginBottom: '16px',
     flexWrap: 'wrap',
   },
+
+  // Empty state
   emptyState: {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
-    padding: '48px',
-    gap: '12px',
+    ...shorthands.padding('48px'),
+    ...shorthands.gap('12px'),
     textAlign: 'center',
     color: tokens.colorNeutralForeground3,
   },
@@ -108,19 +146,34 @@ const useStyles = makeStyles({
   },
 });
 
-export const ArticleSection: React.FC<ArticleSectionProps> = ({ entries, searchQuery }) => {
+export const ArticleSection: React.FC<ArticleSectionProps> = ({
+  entries,
+  searchQuery,
+  expanded = false,
+  categoryGradients,
+}) => {
   const styles = useStyles();
   const [selectedArticle, setSelectedArticle] = useState<KBEntry | null>(null);
+  const gradients = categoryGradients || DEFAULT_GRADIENTS;
 
   const filteredEntries = useMemo(() => {
-    if (!searchQuery.trim()) return entries;
-    const query = searchQuery.toLowerCase();
-    return entries.filter(
-      (entry) =>
-        entry.Title.toLowerCase().includes(query) ||
-        entry.Content.toLowerCase().includes(query)
-    );
+    let result = entries;
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      result = result.filter(
+        (entry) =>
+          entry.Title.toLowerCase().includes(query) ||
+          entry.Content.toLowerCase().includes(query)
+      );
+    }
+    return result;
   }, [entries, searchQuery]);
+
+  // Show 3 featured by default, all when expanded or searching
+  const displayedEntries = useMemo(() => {
+    if (expanded || searchQuery.trim()) return filteredEntries;
+    return filteredEntries.slice(0, 3);
+  }, [filteredEntries, expanded, searchQuery]);
 
   if (filteredEntries.length === 0) {
     return (
@@ -139,31 +192,36 @@ export const ArticleSection: React.FC<ArticleSectionProps> = ({ entries, searchQ
   }
 
   return (
-    <div className={styles.container}>
+    <>
       <div className={styles.grid}>
-        {filteredEntries.map((entry) => (
-          <Card
-            key={entry.Id}
-            className={styles.card}
-            onClick={() => setSelectedArticle(entry)}
-          >
-            <div className={styles.cardHeader}>
-              <Text className={styles.cardTitle}>{entry.Title}</Text>
-              <Badge appearance="tint" color="informative" size="small">
-                {entry.Category}
-              </Badge>
+        {displayedEntries.map((entry) => {
+          const gradient = gradients[entry.Category] || gradients.General;
+          return (
+            <div
+              key={entry.Id}
+              className={styles.card}
+              onClick={() => setSelectedArticle(entry)}
+            >
+              <div
+                className={styles.cardBanner}
+                style={{ background: gradient }}
+              >
+                <span className={styles.categoryBadge}>{entry.Category}</span>
+                <Text className={styles.cardBannerTitle}>{entry.Title}</Text>
+              </div>
+              <div className={styles.cardBody}>
+                <Text className={styles.cardExcerpt}>{entry.Content}</Text>
+                {entry.Tags && entry.Tags.length > 0 && (
+                  <div className={styles.cardTags}>
+                    {entry.Tags.map((tag) => (
+                      <span key={tag} className={styles.tag}>{tag}</span>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
-            <Text className={styles.cardExcerpt}>{entry.Content}</Text>
-            <div className={styles.cardFooter}>
-              {entry.Tags &&
-                entry.Tags.map((tag) => (
-                  <Badge key={tag} appearance="outline" size="small">
-                    {tag}
-                  </Badge>
-                ))}
-            </div>
-          </Card>
-        ))}
+          );
+        })}
       </div>
 
       {/* Article detail dialog */}
@@ -217,6 +275,6 @@ export const ArticleSection: React.FC<ArticleSectionProps> = ({ entries, searchQ
           </DialogBody>
         </DialogSurface>
       </Dialog>
-    </div>
+    </>
   );
 };

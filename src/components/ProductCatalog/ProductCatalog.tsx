@@ -1,6 +1,7 @@
 /**
  * DWx Traffic Manager - Product Catalog
- * Displays DWx Apps, HyperParts, Adaptive Cards, and Agents with tabs
+ * V1 Hero with integrated header + glassmorphic tab pills
+ * All 4 tabs share a unified hero that transitions gradient per tab
  */
 
 import React, { useState, useMemo, useRef } from 'react';
@@ -9,13 +10,13 @@ import {
   Text,
   Card,
   Button,
-  Badge,
   makeStyles,
   shorthands,
-  Tab,
-  TabList,
-  SelectTabData,
-  SelectTabEvent,
+  DialogSurface,
+  DialogBody,
+  DialogTitle,
+  DialogContent,
+  Dialog,
 } from '@fluentui/react-components';
 import {
   ArrowLeft24Regular,
@@ -23,87 +24,271 @@ import {
   PuzzlePiece24Regular,
   CardUi24Regular,
   BotRegular,
+  Dismiss24Regular,
 } from '@fluentui/react-icons';
 import {
   Product,
   ProductType,
   DWX_APPS,
   HYPERPARTS,
-  ADAPTIVE_CARDS,
-  DWX_AGENTS,
+  HYPERCARDS,
+  HYPERAGENTS,
   getCategoriesForType,
 } from '../../types/Product';
 import { DW_COLORS } from '../../utils/buttonStyles';
+
+// ============================================================
+// Tab Configuration
+// ============================================================
+
+interface TabData {
+  label: string;
+  icon: React.ReactNode;
+  products: Product[];
+  color: string;
+  heroTitle: string;
+  heroAccent: string;
+  heroDescription: string;
+  heroGradient: string;
+  accentColor: string;
+  stats: { value: string; label: string }[];
+  features: string[];
+}
+
+type TabValue = 'apps' | 'webparts' | 'cards' | 'agents';
+
+const TAB_CONFIG: Record<TabValue, TabData> = {
+  apps: {
+    label: 'DWx Apps',
+    icon: <Apps24Regular />,
+    products: DWX_APPS,
+    color: DW_COLORS.primary,
+    heroTitle: 'DWx Application',
+    heroAccent: 'Suite',
+    heroDescription:
+      '16 enterprise-grade SPFx applications covering HR, Operations, Document Management, and Employee Engagement — built on Fluent UI v9 and Microsoft Graph.',
+    heroGradient: 'linear-gradient(135deg, #0d3a5c 0%, #1a5a8a 50%, #2a7ab0 100%)',
+    accentColor: '#7dd3fc',
+    stats: [
+      { value: '16', label: 'Apps' },
+      { value: '5', label: 'Categories' },
+      { value: 'SPFx 1.18+', label: 'Framework' },
+      { value: 'Fluent v9', label: 'Design System' },
+    ],
+    features: [
+      'Built on SharePoint Framework (SPFx) 1.18+',
+      'Fluent UI v9 responsive design system',
+      'Role-based access control (RBAC)',
+      'Microsoft Graph API integration',
+      'Power Automate workflow connectors',
+      'Export to Excel / PDF reporting',
+      'Multi-language support (i18n)',
+      'Teams personal app integration',
+    ],
+  },
+  webparts: {
+    label: 'HyperParts',
+    icon: <PuzzlePiece24Regular />,
+    products: HYPERPARTS,
+    color: '#7c3aed',
+    heroTitle: 'The HyperParts',
+    heroAccent: 'Suite',
+    heroDescription:
+      '20 next-gen SPFx web parts engineered for Hyper-Performance, Hyper-Flexibility, and Hyper-Integration — transforming your intranet into an interactive command center.',
+    heroGradient: 'linear-gradient(135deg, #1e1040 0%, #4c1d95 50%, #7c3aed 100%)',
+    accentColor: '#c4b5fd',
+    stats: [
+      { value: '20', label: 'Web Parts' },
+      { value: '15', label: 'Categories' },
+      { value: 'SPFx 1.18+', label: 'Framework' },
+      { value: 'Fluent v9', label: 'Design System' },
+    ],
+    features: [
+      'SPFx 1.18+ with React 18 support',
+      'Fluent UI v9 design system',
+      'Property pane configuration UI',
+      'Adaptive responsive layouts',
+      'Web part connections support',
+      'Theme-aware styling',
+      'Section backgrounds support',
+      'Performance optimized with lazy loading',
+    ],
+  },
+  cards: {
+    label: 'HyperCards',
+    icon: <CardUi24Regular />,
+    products: HYPERCARDS,
+    color: '#0d9488',
+    heroTitle: 'The HyperCards',
+    heroAccent: 'Collection',
+    heroDescription:
+      '6 interactive HyperCards for Microsoft Teams — enabling leave requests, approvals, incident reporting, and task management directly within chat and channels.',
+    heroGradient: 'linear-gradient(135deg, #064e3b 0%, #0d9488 50%, #14b8a6 100%)',
+    accentColor: '#5eead4',
+    stats: [
+      { value: '6', label: 'Cards' },
+      { value: '4', label: 'Categories' },
+      { value: 'Teams SDK', label: 'Platform' },
+      { value: 'v1.5', label: 'Schema' },
+    ],
+    features: [
+      'HyperCard schema v1.5',
+      'Microsoft Teams SDK integration',
+      'Bot Framework messaging support',
+      'Universal Actions for multi-platform',
+      'Data binding with templating',
+      'Refresh and auto-update support',
+      'Accessibility compliant (WCAG 2.1)',
+      'Power Automate trigger integration',
+    ],
+  },
+  agents: {
+    label: 'HyperAgents',
+    icon: <BotRegular />,
+    products: HYPERAGENTS,
+    color: '#6366f1',
+    heroTitle: 'The HyperAgents',
+    heroAccent: 'Collection',
+    heroDescription:
+      '10 intelligent Copilot Studio agents powered by GPT-4o — automating IT support, HR inquiries, procurement, and knowledge discovery across your organization.',
+    heroGradient: 'linear-gradient(135deg, #1e1b4b 0%, #4338ca 50%, #6366f1 100%)',
+    accentColor: '#a5b4fc',
+    stats: [
+      { value: '10', label: 'Agents' },
+      { value: '5', label: 'Categories' },
+      { value: 'Copilot Studio', label: 'Platform' },
+      { value: 'GPT-4o', label: 'AI Model' },
+    ],
+    features: [
+      'Built on Copilot Studio platform',
+      'GPT-4o language model integration',
+      'Microsoft Graph knowledge grounding',
+      'HyperCard response rendering',
+      'Multi-turn conversation support',
+      'Power Automate plugin actions',
+      'SharePoint knowledge base indexing',
+      'Teams channel and chat deployment',
+    ],
+  },
+};
+
+// ============================================================
+// Styles
+// ============================================================
 
 const useStyles = makeStyles({
   container: {
     maxWidth: '1400px',
     margin: '0 auto',
-    ...shorthands.padding('24px', '64px'),
+    ...shorthands.padding('0', '64px', '24px'),
   },
-  header: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: '24px',
-  },
-  titleSection: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '8px',
-  },
-  title: {
-    fontSize: '28px',
-    fontWeight: '700',
-    color: '#333333',
-  },
-  subtitle: {
-    fontSize: '14px',
-    color: '#6c757d',
-  },
-  backButton: {
-    minWidth: 'auto',
-  },
-  tabsContainer: {
-    marginBottom: '0',
-    ...shorthands.borderBottom('2px', 'solid', '#e0e0e0'),
-    paddingBottom: '0',
-  },
-  tab: {
-    ...shorthands.padding('12px', '20px'),
-    ...shorthands.borderRadius('8px', '8px', '0', '0'),
-    marginBottom: '-2px',
-    position: 'relative',
-  },
-  tabContent: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '8px',
-  },
-  tabIcon: {
-    fontSize: '20px',
-  },
-  tabCount: {
-    fontSize: '12px',
-    ...shorthands.padding('2px', '8px'),
-    ...shorthands.borderRadius('10px'),
-    fontWeight: '500',
-  },
-  // Hero banner (V1 Side-by-Side)
+  // V1 Hero with integrated header + tabs
   heroBanner: {
-    background: 'linear-gradient(135deg, #1e1040 0%, #2d1b69 30%, #4c1d95 60%, #7c3aed 100%)',
     ...shorthands.borderRadius('0', '0', '16px', '16px'),
-    ...shorthands.padding('24px', '32px'),
+    ...shorthands.padding('0'),
     marginBottom: '20px',
     position: 'relative',
     ...shorthands.overflow('hidden'),
+    transitionProperty: 'background',
+    transitionDuration: '0.4s',
+    transitionTimingFunction: 'ease',
   },
-  heroInner: {
+  heroDecoration: {
+    position: 'absolute',
+    top: '-80px',
+    right: '-40px',
+    width: '300px',
+    height: '300px',
+    ...shorthands.borderRadius('50%'),
+    background: 'radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 70%)',
+    pointerEvents: 'none',
+  },
+  // Page header row inside the hero
+  heroHeaderRow: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    ...shorthands.padding('20px', '32px', '0'),
     position: 'relative',
-    zIndex: 1,
+    zIndex: 2,
+  },
+  heroHeaderTitle: {
+    fontSize: '22px',
+    fontWeight: '700',
+    color: 'white',
+    letterSpacing: '-0.3px',
+  },
+  heroHeaderSubtitle: {
+    fontSize: '13px',
+    color: 'rgba(255,255,255,0.6)',
+    marginTop: '2px',
+  },
+  backButtonHero: {
+    ...shorthands.padding('6px', '14px'),
+    ...shorthands.borderRadius('8px'),
+    ...shorthands.border('1px', 'solid', 'rgba(255,255,255,0.25)'),
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    color: 'rgba(255,255,255,0.85)',
+    fontSize: '13px',
+    fontWeight: '500',
+    cursor: 'pointer',
+    transitionProperty: 'all',
+    transitionDuration: '0.2s',
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '6px',
+    flexShrink: 0,
+  },
+  // Glassmorphic tab row
+  tabsRow: {
+    display: 'flex',
+    gap: '6px',
+    ...shorthands.padding('14px', '32px', '0'),
+    position: 'relative',
+    zIndex: 2,
+  },
+  tabBtn: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '8px',
+    ...shorthands.padding('8px', '20px'),
+    ...shorthands.borderRadius('20px'),
+    ...shorthands.border('1px', 'solid', 'rgba(255,255,255,0.25)'),
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    color: 'rgba(255,255,255,0.7)',
+    fontSize: '13px',
+    fontWeight: '600',
+    cursor: 'pointer',
+    transitionProperty: 'all',
+    transitionDuration: '0.2s',
+    backdropFilter: 'blur(8px)',
+  },
+  tabBtnActive: {
+    backgroundColor: 'rgba(255,255,255,0.22)',
+    color: 'white',
+    ...shorthands.borderColor('rgba(255,255,255,0.45)'),
+    boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+  },
+  tabCount: {
+    fontSize: '11px',
+    fontWeight: '700',
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    ...shorthands.padding('1px', '8px'),
+    ...shorthands.borderRadius('10px'),
+    minWidth: '22px',
+    textAlign: 'center',
+  },
+  tabCountActive: {
+    backgroundColor: 'rgba(255,255,255,0.3)',
+  },
+  // Hero content row (icon + title + description | stats)
+  heroContentRow: {
     display: 'flex',
     alignItems: 'center',
     gap: '32px',
+    ...shorthands.padding('18px', '32px', '22px'),
+    position: 'relative',
+    zIndex: 2,
   },
   heroLeft: {
     flex: '1',
@@ -113,11 +298,11 @@ const useStyles = makeStyles({
     display: 'flex',
     alignItems: 'center',
     gap: '12px',
-    marginBottom: '10px',
+    marginBottom: '8px',
   },
   heroIcon: {
-    width: '40px',
-    height: '40px',
+    width: '36px',
+    height: '36px',
     ...shorthands.borderRadius('10px'),
     backgroundColor: 'rgba(255,255,255,0.1)',
     ...shorthands.border('1px', 'solid', 'rgba(255,255,255,0.15)'),
@@ -125,7 +310,6 @@ const useStyles = makeStyles({
     alignItems: 'center',
     justifyContent: 'center',
     flexShrink: 0,
-    fontSize: '20px',
   },
   heroTitle: {
     fontSize: '20px',
@@ -133,23 +317,16 @@ const useStyles = makeStyles({
     color: 'white',
     letterSpacing: '-0.3px',
   },
-  heroTitleAccent: {
-    color: '#a78bfa',
-  },
-  heroText: {
+  heroDesc: {
     fontSize: '13px',
-    lineHeight: '1.7',
-    color: 'rgba(255,255,255,0.75)',
-    maxWidth: '720px',
-  },
-  heroTextStrong: {
-    color: '#c4b5fd',
-    fontWeight: '600',
+    lineHeight: '1.6',
+    color: 'rgba(255,255,255,0.7)',
+    maxWidth: '700px',
   },
   heroStats: {
     display: 'flex',
     flexDirection: 'column',
-    gap: '12px',
+    gap: '10px',
     flexShrink: 0,
     paddingLeft: '32px',
     ...shorthands.borderLeft('1px', 'solid', 'rgba(255,255,255,0.12)'),
@@ -160,7 +337,7 @@ const useStyles = makeStyles({
     gap: '8px',
   },
   heroStatValue: {
-    fontSize: '20px',
+    fontSize: '18px',
     fontWeight: '700',
     color: 'white',
     whiteSpace: 'nowrap',
@@ -172,7 +349,8 @@ const useStyles = makeStyles({
     letterSpacing: '0.5px',
     whiteSpace: 'nowrap',
   },
-  // Scrollable pills filter (V2)
+
+  // Scrollable pills filter (for HyperParts)
   filterBar: {
     display: 'flex',
     alignItems: 'center',
@@ -185,7 +363,6 @@ const useStyles = makeStyles({
     overflowX: 'auto',
     flex: '1',
     scrollbarWidth: 'none',
-    // Fade mask applied via inline style
   },
   filterPill: {
     ...shorthands.padding('5px', '14px'),
@@ -202,9 +379,7 @@ const useStyles = makeStyles({
     flexShrink: 0,
   },
   filterPillActive: {
-    backgroundColor: '#7c3aed',
     color: 'white',
-    ...shorthands.borderColor('#7c3aed'),
   },
   pillCount: {
     display: 'inline-flex',
@@ -225,7 +400,8 @@ const useStyles = makeStyles({
     backgroundColor: '#f0f0f0',
     color: '#888888',
   },
-  // Category filter (for non-HyperParts tabs)
+
+  // Category chips filter (for non-HyperParts tabs)
   categorySection: {
     marginBottom: '24px',
   },
@@ -252,16 +428,15 @@ const useStyles = makeStyles({
     backgroundColor: 'white',
     color: '#333333',
   },
-  categoryChipActive: {
-    backgroundColor: DW_COLORS.primary,
-    color: 'white',
-    ...shorthands.borderColor('#1a5a8a'),
-  },
+
+  // Products grid
   productsGrid: {
     display: 'grid',
     gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))',
     gap: '16px',
   },
+
+  // Product card — fixed height with pinned button
   productCard: {
     ...shorthands.borderRadius('12px'),
     ...shorthands.overflow('hidden'),
@@ -269,6 +444,9 @@ const useStyles = makeStyles({
     transitionProperty: 'all',
     transitionDuration: '0.2s',
     ...shorthands.border('1px', 'solid', '#e0e0e0'),
+    display: 'flex',
+    flexDirection: 'column',
+    height: '260px',
   },
   productImage: {
     height: '100px',
@@ -277,6 +455,7 @@ const useStyles = makeStyles({
     justifyContent: 'center',
     position: 'relative',
     ...shorthands.overflow('hidden'),
+    flexShrink: 0,
   },
   productSplash: {
     textAlign: 'center',
@@ -313,6 +492,10 @@ const useStyles = makeStyles({
   },
   productContent: {
     ...shorthands.padding('12px'),
+    display: 'flex',
+    flexDirection: 'column',
+    flex: '1',
+    minHeight: '0',
   },
   productTypeTag: {
     display: 'inline-block',
@@ -321,6 +504,7 @@ const useStyles = makeStyles({
     ...shorthands.borderRadius('8px'),
     marginBottom: '6px',
     fontWeight: '500',
+    alignSelf: 'flex-start',
   },
   appTag: {
     backgroundColor: '#e8f4fc',
@@ -348,7 +532,7 @@ const useStyles = makeStyles({
   productSubtitle: {
     fontSize: '11px',
     color: '#6c757d',
-    marginBottom: '8px',
+    lineHeight: '1.3',
   },
   productFooter: {
     display: 'flex',
@@ -356,11 +540,154 @@ const useStyles = makeStyles({
     alignItems: 'center',
     paddingTop: '8px',
     ...shorthands.borderTop('1px', 'solid', '#f0f0f0'),
+    marginTop: 'auto',
   },
   requestBtn: {
     ...shorthands.padding('6px', '12px'),
     fontSize: '11px',
   },
+
+  // Product Detail Modal
+  modalSurface: {
+    maxWidth: '920px',
+    width: '100%',
+    maxHeight: '90vh',
+    ...shorthands.padding('0'),
+    ...shorthands.borderRadius('16px'),
+    ...shorthands.overflow('hidden'),
+  },
+  modalHero: {
+    ...shorthands.padding('28px', '32px'),
+    position: 'relative',
+    ...shorthands.overflow('hidden'),
+  },
+  modalHeroDecoration: {
+    position: 'absolute',
+    top: '-60px',
+    right: '-30px',
+    width: '200px',
+    height: '200px',
+    ...shorthands.borderRadius('50%'),
+    background: 'radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%)',
+    pointerEvents: 'none',
+  },
+  modalHeroContent: {
+    position: 'relative',
+    zIndex: 1,
+    display: 'flex',
+    alignItems: 'center',
+    gap: '20px',
+  },
+  modalHeroIcon: {
+    width: '64px',
+    height: '64px',
+    ...shorthands.borderRadius('16px'),
+    backgroundColor: 'rgba(255,255,255,0.12)',
+    ...shorthands.border('1px', 'solid', 'rgba(255,255,255,0.2)'),
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontSize: '32px',
+    flexShrink: 0,
+  },
+  modalHeroBadge: {
+    fontSize: '11px',
+    backgroundColor: 'rgba(255,255,255,0.18)',
+    ...shorthands.padding('3px', '12px'),
+    ...shorthands.borderRadius('12px'),
+    color: 'rgba(255,255,255,0.9)',
+    fontWeight: '500',
+    marginBottom: '4px',
+    display: 'inline-block',
+  },
+  modalHeroTitle: {
+    fontSize: '24px',
+    fontWeight: '700',
+    color: 'white',
+    lineHeight: '1.2',
+  },
+  modalHeroSubtitle: {
+    fontSize: '14px',
+    color: 'rgba(255,255,255,0.7)',
+    marginTop: '2px',
+  },
+  modalCloseBtn: {
+    position: 'absolute',
+    top: '16px',
+    right: '16px',
+    zIndex: 2,
+    ...shorthands.border('none'),
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    color: 'white',
+    ...shorthands.borderRadius('8px'),
+    width: '32px',
+    height: '32px',
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    transitionProperty: 'background',
+    transitionDuration: '0.15s',
+  },
+  modalBody: {
+    ...shorthands.padding('24px', '32px', '28px'),
+  },
+  modalMeta: {
+    display: 'flex',
+    gap: '16px',
+    flexWrap: 'wrap',
+    marginBottom: '20px',
+  },
+  modalMetaItem: {
+    fontSize: '13px',
+    color: '#555',
+    backgroundColor: '#f5f5f5',
+    ...shorthands.padding('4px', '12px'),
+    ...shorthands.borderRadius('6px'),
+  },
+  modalDescription: {
+    fontSize: '14px',
+    lineHeight: '1.7',
+    color: '#444',
+    marginBottom: '24px',
+  },
+  modalFeaturesTitle: {
+    fontSize: '14px',
+    fontWeight: '700',
+    color: '#333',
+    marginBottom: '12px',
+  },
+  modalFeaturesList: {
+    display: 'grid',
+    gridTemplateColumns: '1fr 1fr',
+    gap: '8px',
+    marginBottom: '24px',
+    listStyleType: 'none',
+    ...shorthands.padding('0'),
+  },
+  modalFeatureItem: {
+    display: 'flex',
+    alignItems: 'flex-start',
+    gap: '8px',
+    fontSize: '13px',
+    color: '#555',
+    lineHeight: '1.5',
+  },
+  modalFeatureDot: {
+    width: '6px',
+    height: '6px',
+    ...shorthands.borderRadius('50%'),
+    flexShrink: 0,
+    marginTop: '7px',
+  },
+  modalFooter: {
+    display: 'flex',
+    justifyContent: 'flex-end',
+    gap: '12px',
+    paddingTop: '16px',
+    ...shorthands.borderTop('1px', 'solid', '#eee'),
+  },
+
   // Gradient classes
   'gradient-slate': { background: 'linear-gradient(135deg, #4a5568 0%, #2d3748 100%)' },
   'gradient-corporate-blue': { background: 'linear-gradient(135deg, #1a5a8a 0%, #0d3a5c 100%)' },
@@ -382,34 +709,20 @@ const useStyles = makeStyles({
   'gradient-lime': { background: 'linear-gradient(135deg, #84cc16 0%, #65a30d 100%)' },
 });
 
-type TabValue = 'apps' | 'webparts' | 'cards' | 'agents';
+// ============================================================
+// Tag label mapping
+// ============================================================
 
-const TAB_CONFIG: Record<TabValue, { label: string; icon: React.ReactNode; products: Product[]; color: string }> = {
-  apps: {
-    label: 'DWx Apps',
-    icon: <Apps24Regular />,
-    products: DWX_APPS,
-    color: DW_COLORS.primary,
-  },
-  webparts: {
-    label: 'HyperParts',
-    icon: <PuzzlePiece24Regular />,
-    products: HYPERPARTS,
-    color: '#7c3aed',
-  },
-  cards: {
-    label: 'Adaptive Cards',
-    icon: <CardUi24Regular />,
-    products: ADAPTIVE_CARDS,
-    color: '#0d9488',
-  },
-  agents: {
-    label: 'DWx Agents',
-    icon: <BotRegular />,
-    products: DWX_AGENTS,
-    color: '#6366f1',
-  },
+const TAG_LABELS: Record<ProductType, string> = {
+  app: 'DWx App',
+  webpart: 'HyperPart',
+  'adaptive-card': 'HyperCard',
+  agent: 'HyperAgent',
 };
+
+// ============================================================
+// Component
+// ============================================================
 
 export const ProductCatalog: React.FC = () => {
   const styles = useStyles();
@@ -417,6 +730,7 @@ export const ProductCatalog: React.FC = () => {
   const [activeTab, setActiveTab] = useState<TabValue>('apps');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const pillsRef = useRef<HTMLDivElement>(null);
 
   const currentConfig = TAB_CONFIG[activeTab];
@@ -440,13 +754,15 @@ export const ProductCatalog: React.FC = () => {
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase().trim();
       products = products.filter(
-        (p) => p.name.toLowerCase().includes(q) || p.subtitle.toLowerCase().includes(q) || p.category.toLowerCase().includes(q)
+        (p) =>
+          p.name.toLowerCase().includes(q) ||
+          p.subtitle.toLowerCase().includes(q) ||
+          p.category.toLowerCase().includes(q)
       );
     }
     return products;
   }, [currentConfig.products, selectedCategory, searchQuery]);
 
-  // Count products per category
   const categoryCounts = useMemo(() => {
     const counts: Record<string, number> = {};
     currentConfig.products.forEach((p) => {
@@ -455,8 +771,8 @@ export const ProductCatalog: React.FC = () => {
     return counts;
   }, [currentConfig.products]);
 
-  const handleTabChange = (_event: SelectTabEvent, data: SelectTabData) => {
-    setActiveTab(data.value as TabValue);
+  const handleTabClick = (tab: TabValue) => {
+    setActiveTab(tab);
     setSelectedCategory('all');
     setSearchQuery('');
   };
@@ -467,6 +783,10 @@ export const ProductCatalog: React.FC = () => {
 
   const handleRequestDemo = (product: Product) => {
     navigate('/product-request', { state: { productRequest: product } });
+  };
+
+  const handleCardClick = (product: Product) => {
+    setSelectedProduct(product);
   };
 
   const getGradientClass = (gradient: string): string => {
@@ -510,94 +830,72 @@ export const ProductCatalog: React.FC = () => {
 
   return (
     <div className={styles.container}>
-      <div className={styles.header}>
-        <div className={styles.titleSection}>
-          <Text className={styles.title}>Product Catalog</Text>
-          <Text className={styles.subtitle}>
-            DWx applications, HyperParts web parts, adaptive cards, and agents for your digital workplace
-          </Text>
-        </div>
-        <Button
-          appearance="secondary"
-          icon={<ArrowLeft24Regular />}
-          onClick={() => navigate('/')}
-          className={styles.backButton}
-        >
-          Back to Home
-        </Button>
-      </div>
+      {/* V1 Hero Banner — Header + Tabs + Content all inside the gradient */}
+      <div className={styles.heroBanner} style={{ background: currentConfig.heroGradient }}>
+        <div className={styles.heroDecoration} />
 
-      {/* Tabs */}
-      <div className={styles.tabsContainer}>
-        <TabList
-          selectedValue={activeTab}
-          onTabSelect={handleTabChange}
-        >
-          {(Object.entries(TAB_CONFIG) as [TabValue, typeof TAB_CONFIG[TabValue]][]).map(([key, config]) => (
-            <Tab key={key} value={key} className={styles.tab}>
-              <div className={styles.tabContent}>
-                <span className={styles.tabIcon}>{config.icon}</span>
-                <span>{config.label}</span>
-                <Badge
-                  appearance={activeTab === key ? 'filled' : 'outline'}
-                  color={activeTab === key ? 'brand' : 'informative'}
-                  size="small"
-                  style={activeTab === key ? { backgroundColor: config.color } : undefined}
-                >
-                  {config.products.length}
-                </Badge>
-              </div>
-            </Tab>
-          ))}
-        </TabList>
-      </div>
-
-      {/* HyperParts Hero Banner (only on webparts tab) */}
-      {isHyperParts && (
-        <div className={styles.heroBanner}>
-          <div className={styles.heroInner}>
-            <div className={styles.heroLeft}>
-              <div className={styles.heroTop}>
-                <div className={styles.heroIcon}>
-                  <PuzzlePiece24Regular style={{ color: '#a78bfa' }} />
-                </div>
-                <Text className={styles.heroTitle}>
-                  The <span className={styles.heroTitleAccent}>HyperParts</span> Suite
-                </Text>
-              </div>
-              <div className={styles.heroText}>
-                Step into the future of the digital workplace with the HyperParts Suite — a revolutionary
-                ecosystem of SPFx components engineered to shatter the limitations of standard SharePoint.
-                These components provide{' '}
-                <strong className={styles.heroTextStrong}>Hyper-Performance</strong>,{' '}
-                <strong className={styles.heroTextStrong}>Hyper-Flexibility</strong>, and{' '}
-                <strong className={styles.heroTextStrong}>Hyper-Integration</strong>, transforming your
-                intranet from a static document repository into a high-velocity, interactive command center.
-              </div>
-            </div>
-            <div className={styles.heroStats}>
-              <div className={styles.heroStat}>
-                <Text className={styles.heroStatValue}>20</Text>
-                <Text className={styles.heroStatLabel}>Web Parts</Text>
-              </div>
-              <div className={styles.heroStat}>
-                <Text className={styles.heroStatValue}>15</Text>
-                <Text className={styles.heroStatLabel}>Categories</Text>
-              </div>
-              <div className={styles.heroStat}>
-                <Text className={styles.heroStatValue}>SPFx 1.18+</Text>
-                <Text className={styles.heroStatLabel}>Framework</Text>
-              </div>
-              <div className={styles.heroStat}>
-                <Text className={styles.heroStatValue}>Fluent v9</Text>
-                <Text className={styles.heroStatLabel}>Design System</Text>
-              </div>
+        {/* Page header row */}
+        <div className={styles.heroHeaderRow}>
+          <div>
+            <div className={styles.heroHeaderTitle}>Product Catalog</div>
+            <div className={styles.heroHeaderSubtitle}>
+              DWx Apps, HyperParts, HyperCards, and HyperAgents for your digital workplace
             </div>
           </div>
+          <button
+            className={styles.backButtonHero}
+            onClick={() => navigate('/')}
+          >
+            <ArrowLeft24Regular style={{ fontSize: '16px' }} />
+            Back to Home
+          </button>
         </div>
-      )}
 
-      {/* HyperParts: Scrollable Pills + Search (V2 Filter) */}
+        {/* Glassmorphic tab pills */}
+        <div className={styles.tabsRow}>
+          {(Object.entries(TAB_CONFIG) as [TabValue, TabData][]).map(([key, config]) => (
+            <button
+              key={key}
+              className={`${styles.tabBtn} ${activeTab === key ? styles.tabBtnActive : ''}`}
+              onClick={() => handleTabClick(key)}
+            >
+              <span style={{ display: 'flex', alignItems: 'center', fontSize: '16px' }}>{config.icon}</span>
+              <span>{config.label}</span>
+              <span className={`${styles.tabCount} ${activeTab === key ? styles.tabCountActive : ''}`}>
+                {config.products.length}
+              </span>
+            </button>
+          ))}
+        </div>
+
+        {/* Tab-specific content row */}
+        <div className={styles.heroContentRow}>
+          <div className={styles.heroLeft}>
+            <div className={styles.heroTop}>
+              <div className={styles.heroIcon}>
+                <span style={{ color: currentConfig.accentColor, fontSize: '18px', display: 'flex' }}>
+                  {currentConfig.icon}
+                </span>
+              </div>
+              <Text className={styles.heroTitle}>
+                {currentConfig.heroTitle}{' '}
+                <span style={{ color: currentConfig.accentColor }}>{currentConfig.heroAccent}</span>
+              </Text>
+            </div>
+            <div className={styles.heroDesc}>{currentConfig.heroDescription}</div>
+          </div>
+          <div className={styles.heroStats}>
+            {currentConfig.stats.map((stat, i) => (
+              <div key={i} className={styles.heroStat}>
+                <Text className={styles.heroStatValue}>{stat.value}</Text>
+                <Text className={styles.heroStatLabel}>{stat.label}</Text>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Filter area — pills for HyperParts, chips for others */}
       {isHyperParts ? (
         <div className={styles.filterBar}>
           <div
@@ -618,7 +916,9 @@ export const ProductCatalog: React.FC = () => {
               }
             >
               All
-              <span className={`${styles.pillCount} ${selectedCategory === 'all' ? styles.pillCountActive : styles.pillCountInactive}`}>
+              <span
+                className={`${styles.pillCount} ${selectedCategory === 'all' ? styles.pillCountActive : styles.pillCountInactive}`}
+              >
                 {currentConfig.products.length}
               </span>
             </button>
@@ -634,7 +934,9 @@ export const ProductCatalog: React.FC = () => {
                 }
               >
                 {category}
-                <span className={`${styles.pillCount} ${selectedCategory === category ? styles.pillCountActive : styles.pillCountInactive}`}>
+                <span
+                  className={`${styles.pillCount} ${selectedCategory === category ? styles.pillCountActive : styles.pillCountInactive}`}
+                >
                   {categoryCounts[category] || 0}
                 </span>
               </button>
@@ -661,14 +963,13 @@ export const ProductCatalog: React.FC = () => {
           />
         </div>
       ) : (
-        /* Standard category chips for other tabs */
         <div className={styles.categorySection}>
           <Text className={styles.categoryLabel} block>
             Filter by category
           </Text>
           <div className={styles.categoryChips}>
             <button
-              className={`${styles.categoryChip} ${selectedCategory === 'all' ? styles.categoryChipActive : ''}`}
+              className={styles.categoryChip}
               onClick={() => handleCategoryClick('all')}
               style={
                 selectedCategory === 'all'
@@ -681,7 +982,7 @@ export const ProductCatalog: React.FC = () => {
             {categories.map((category) => (
               <button
                 key={category}
-                className={`${styles.categoryChip} ${selectedCategory === category ? styles.categoryChipActive : ''}`}
+                className={styles.categoryChip}
                 onClick={() => handleCategoryClick(category)}
                 style={
                   selectedCategory === category
@@ -699,7 +1000,11 @@ export const ProductCatalog: React.FC = () => {
       {/* Products Grid */}
       <div className={styles.productsGrid}>
         {filteredProducts.map((product) => (
-          <Card key={product.id} className={styles.productCard}>
+          <Card
+            key={product.id}
+            className={styles.productCard}
+            onClick={() => handleCardClick(product)}
+          >
             <div className={`${styles.productImage} ${getGradientClass(product.gradient)}`}>
               <span className={styles.productVersion}>{product.version}</span>
               <div className={styles.productSplash}>
@@ -736,6 +1041,99 @@ export const ProductCatalog: React.FC = () => {
           </Card>
         ))}
       </div>
+
+      {/* Product Detail Modal */}
+      <Dialog
+        open={!!selectedProduct}
+        onOpenChange={(_, data) => {
+          if (!data.open) setSelectedProduct(null);
+        }}
+      >
+        <DialogSurface className={styles.modalSurface}>
+          {selectedProduct && (
+            <DialogBody style={{ padding: 0 }}>
+              {/* Modal gradient hero */}
+              <div
+                className={styles.modalHero}
+                style={{ background: currentConfig.heroGradient }}
+              >
+                <div className={styles.modalHeroDecoration} />
+                <button
+                  className={styles.modalCloseBtn}
+                  onClick={() => setSelectedProduct(null)}
+                >
+                  <Dismiss24Regular />
+                </button>
+                <div className={styles.modalHeroContent}>
+                  <div className={styles.modalHeroIcon}>{selectedProduct.icon}</div>
+                  <div>
+                    <div className={styles.modalHeroBadge}>
+                      {TAG_LABELS[selectedProduct.type]} &bull; {selectedProduct.category}
+                    </div>
+                    <DialogTitle className={styles.modalHeroTitle}>
+                      {selectedProduct.name}
+                    </DialogTitle>
+                    <div className={styles.modalHeroSubtitle}>{selectedProduct.subtitle}</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Modal body */}
+              <DialogContent className={styles.modalBody}>
+                {/* Metadata chips */}
+                <div className={styles.modalMeta}>
+                  <span className={styles.modalMetaItem}>
+                    <strong>Version:</strong> {selectedProduct.version}
+                  </span>
+                  <span className={styles.modalMetaItem}>
+                    <strong>Brand:</strong> {selectedProduct.brand}
+                  </span>
+                  <span className={styles.modalMetaItem}>
+                    <strong>Category:</strong> {selectedProduct.category}
+                  </span>
+                  <span className={styles.modalMetaItem}>
+                    <strong>Type:</strong> {TAG_LABELS[selectedProduct.type]}
+                  </span>
+                </div>
+
+                {/* Description */}
+                <div className={styles.modalDescription}>{selectedProduct.description}</div>
+
+                {/* Key Features */}
+                <div className={styles.modalFeaturesTitle}>Key Features</div>
+                <div className={styles.modalFeaturesList}>
+                  {currentConfig.features.map((feature, i) => (
+                    <div key={i} className={styles.modalFeatureItem}>
+                      <div
+                        className={styles.modalFeatureDot}
+                        style={{ backgroundColor: currentConfig.color }}
+                      />
+                      <span>{feature}</span>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Footer actions */}
+                <div className={styles.modalFooter}>
+                  <Button appearance="secondary" onClick={() => setSelectedProduct(null)}>
+                    Close
+                  </Button>
+                  <Button
+                    appearance="primary"
+                    onClick={() => {
+                      handleRequestDemo(selectedProduct);
+                      setSelectedProduct(null);
+                    }}
+                    style={{ backgroundColor: currentConfig.color }}
+                  >
+                    Request Demo
+                  </Button>
+                </div>
+              </DialogContent>
+            </DialogBody>
+          )}
+        </DialogSurface>
+      </Dialog>
     </div>
   );
 };

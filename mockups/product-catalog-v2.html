@@ -1,0 +1,1807 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DWx Traffic Manager - Product Catalog V2 Variations</title>
+<style>
+  /* ============================================================
+     CSS Custom Properties
+     ============================================================ */
+  :root {
+    /* Tab Brand Colors */
+    --apps-blue: #1a5a8a;
+    --apps-blue-dark: #0d3a5c;
+    --apps-blue-light: #2a7ab0;
+    --hyperparts-purple: #7c3aed;
+    --hyperparts-purple-dark: #1e1040;
+    --hyperparts-purple-mid: #4c1d95;
+    --cards-teal: #0d9488;
+    --cards-teal-dark: #064e3b;
+    --cards-teal-light: #14b8a6;
+    --agents-indigo: #6366f1;
+    --agents-indigo-dark: #1e1b4b;
+    --agents-indigo-light: #818cf8;
+
+    /* Neutrals */
+    --gray-50: #fafbfc;
+    --gray-100: #f3f4f6;
+    --gray-200: #e5e7eb;
+    --gray-300: #d1d5db;
+    --gray-400: #9ca3af;
+    --gray-500: #6b7280;
+    --gray-600: #4b5563;
+    --gray-700: #374151;
+    --gray-800: #1f2937;
+    --gray-900: #111827;
+
+    /* Layout */
+    --section-gap: 80px;
+    --card-radius: 12px;
+    --card-shadow: 0 1px 3px rgba(0,0,0,0.08), 0 4px 12px rgba(0,0,0,0.04);
+    --card-shadow-hover: 0 4px 12px rgba(0,0,0,0.12), 0 12px 28px rgba(0,0,0,0.08);
+  }
+
+  /* ============================================================
+     Reset & Base
+     ============================================================ */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+    color: var(--gray-800);
+    background: var(--gray-50);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ============================================================
+     Top Navigation (Jump Links)
+     ============================================================ */
+  .top-nav {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    background: #0d3a5c;
+    border-bottom: 2px solid #1e6b7b;
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    height: 52px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.25);
+  }
+
+  .top-nav .nav-brand {
+    font-weight: 700;
+    font-size: 14px;
+    color: rgba(255,255,255,0.6);
+    margin-right: 16px;
+    white-space: nowrap;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+
+  .top-nav a {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 16px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.85);
+    text-decoration: none;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+
+  .top-nav a:hover {
+    background: rgba(255,255,255,0.12);
+    color: #fff;
+  }
+
+  .top-nav a .badge {
+    background: #1e6b7b;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 1px 7px;
+    border-radius: 10px;
+  }
+
+  /* ============================================================
+     Variation Section Wrapper
+     ============================================================ */
+  .variation-section {
+    margin-bottom: var(--section-gap);
+  }
+
+  .variation-label {
+    background: #0d3a5c;
+    color: #fff;
+    padding: 24px 40px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .variation-label .v-number {
+    background: #7c3aed;
+    color: #fff;
+    font-size: 10px;
+    font-weight: 800;
+    padding: 4px 14px;
+    border-radius: 6px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+  }
+
+  .variation-label .v-title {
+    font-size: 22px;
+    font-weight: 700;
+  }
+
+  .variation-label .v-desc {
+    font-size: 14px;
+    color: rgba(255,255,255,0.6);
+    margin-left: auto;
+  }
+
+  /* ============================================================
+     Variation Content Container
+     ============================================================ */
+  .variation-content {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 32px 64px 64px;
+  }
+
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 24px;
+  }
+
+  .page-header h1 {
+    font-size: 28px;
+    font-weight: 700;
+    color: #333;
+  }
+
+  .page-header .subtitle {
+    font-size: 14px;
+    color: #6c757d;
+    margin-top: 4px;
+  }
+
+  .back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: 6px;
+    border: 1px solid #d0d0d0;
+    background: white;
+    font-size: 13px;
+    color: #555;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.15s;
+  }
+
+  .back-btn:hover { border-color: #999; }
+
+  /* ============================================================
+     VARIATION 1: Tabs Inside Hero (Gradient Bar)
+     ============================================================ */
+  .v1-hero {
+    border-radius: 0 0 16px 16px;
+    padding: 0;
+    margin-bottom: 20px;
+    position: relative;
+    overflow: hidden;
+    transition: background 0.4s ease;
+  }
+
+  .v1-hero[data-tab="apps"] {
+    background: linear-gradient(135deg, #0d3a5c 0%, #1a5a8a 50%, #2a7ab0 100%);
+  }
+  .v1-hero[data-tab="webparts"] {
+    background: linear-gradient(135deg, #1e1040 0%, #4c1d95 50%, #7c3aed 100%);
+  }
+  .v1-hero[data-tab="cards"] {
+    background: linear-gradient(135deg, #064e3b 0%, #0d9488 50%, #14b8a6 100%);
+  }
+  .v1-hero[data-tab="agents"] {
+    background: linear-gradient(135deg, #1e1b4b 0%, #4338ca 50%, #6366f1 100%);
+  }
+
+  /* Decorative circle */
+  .v1-hero::before {
+    content: '';
+    position: absolute;
+    top: -80px;
+    right: -40px;
+    width: 300px;
+    height: 300px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .v1-tabs-row {
+    display: flex;
+    gap: 6px;
+    padding: 14px 32px 0;
+    position: relative;
+    z-index: 2;
+  }
+
+  .v1-tab-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 20px;
+    border-radius: 20px;
+    border: 1px solid rgba(255,255,255,0.25);
+    background: rgba(255,255,255,0.08);
+    color: rgba(255,255,255,0.7);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: inherit;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+
+  .v1-tab-btn:hover {
+    background: rgba(255,255,255,0.15);
+    color: white;
+  }
+
+  .v1-tab-btn.active {
+    background: rgba(255,255,255,0.22);
+    color: white;
+    border-color: rgba(255,255,255,0.45);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  }
+
+  .v1-tab-count {
+    font-size: 11px;
+    font-weight: 700;
+    background: rgba(255,255,255,0.2);
+    padding: 1px 8px;
+    border-radius: 10px;
+    min-width: 22px;
+    text-align: center;
+  }
+
+  .v1-tab-btn.active .v1-tab-count {
+    background: rgba(255,255,255,0.3);
+  }
+
+  .v1-hero-content {
+    display: flex;
+    align-items: center;
+    gap: 32px;
+    padding: 18px 32px 22px;
+    position: relative;
+    z-index: 2;
+  }
+
+  .v1-hero-left {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .v1-hero-top {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+  }
+
+  .v1-hero-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+
+  .v1-hero-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: white;
+    letter-spacing: -0.3px;
+  }
+
+  .v1-hero-title .accent {
+    opacity: 0.7;
+  }
+
+  .v1-hero-desc {
+    font-size: 13px;
+    line-height: 1.6;
+    color: rgba(255,255,255,0.7);
+    max-width: 700px;
+  }
+
+  .v1-hero-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    flex-shrink: 0;
+    padding-left: 32px;
+    border-left: 1px solid rgba(255,255,255,0.12);
+  }
+
+  .v1-hero-stat {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+  }
+
+  .v1-hero-stat-value {
+    font-size: 18px;
+    font-weight: 700;
+    color: white;
+    white-space: nowrap;
+  }
+
+  .v1-hero-stat-label {
+    font-size: 10px;
+    color: rgba(255,255,255,0.45);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+  }
+
+  /* ============================================================
+     VARIATION 2: Tabs as Floating Bar Above Compact Hero
+     ============================================================ */
+  .v2-tabs-bar {
+    display: flex;
+    gap: 4px;
+    padding: 8px 12px;
+    background: white;
+    border-radius: 12px;
+    margin-bottom: 8px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06), 0 2px 12px rgba(0,0,0,0.04);
+    border: 1px solid #e8e8e8;
+  }
+
+  .v2-tab-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: none;
+    background: transparent;
+    color: #555;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: inherit;
+    position: relative;
+  }
+
+  .v2-tab-btn:hover {
+    background: #f3f4f6;
+    color: #333;
+  }
+
+  .v2-tab-btn.active {
+    color: #333;
+    background: #f3f4f6;
+  }
+
+  .v2-tab-btn::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 16px;
+    right: 16px;
+    height: 2.5px;
+    border-radius: 2px;
+    background: transparent;
+    transition: background 0.2s;
+  }
+
+  .v2-tab-btn.active::after {
+    background: var(--tab-color, #1a5a8a);
+  }
+
+  .v2-tab-icon {
+    font-size: 18px;
+    line-height: 1;
+  }
+
+  .v2-tab-count {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 1px 8px;
+    border-radius: 10px;
+    min-width: 22px;
+    text-align: center;
+  }
+
+  .v2-tab-btn.active .v2-tab-count {
+    color: white;
+  }
+
+  .v2-compact-hero {
+    height: 80px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 32px;
+    margin-bottom: 20px;
+    position: relative;
+    overflow: hidden;
+    transition: background 0.4s ease;
+  }
+
+  .v2-compact-hero[data-tab="apps"] {
+    background: linear-gradient(135deg, #0d3a5c 0%, #1a5a8a 100%);
+  }
+  .v2-compact-hero[data-tab="webparts"] {
+    background: linear-gradient(135deg, #1e1040 0%, #7c3aed 100%);
+  }
+  .v2-compact-hero[data-tab="cards"] {
+    background: linear-gradient(135deg, #064e3b 0%, #0d9488 100%);
+  }
+  .v2-compact-hero[data-tab="agents"] {
+    background: linear-gradient(135deg, #1e1b4b 0%, #6366f1 100%);
+  }
+
+  .v2-compact-hero::before {
+    content: '';
+    position: absolute;
+    top: -60px;
+    right: -20px;
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,255,255,0.06) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .v2-hero-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .v2-hero-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    flex-shrink: 0;
+  }
+
+  .v2-hero-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: white;
+    letter-spacing: -0.3px;
+  }
+
+  .v2-hero-tagline {
+    font-size: 12px;
+    color: rgba(255,255,255,0.6);
+    margin-top: 2px;
+  }
+
+  .v2-hero-stats {
+    display: flex;
+    gap: 24px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .v2-hero-stat {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+  }
+
+  .v2-hero-stat-value {
+    font-size: 16px;
+    font-weight: 700;
+    color: white;
+    white-space: nowrap;
+  }
+
+  .v2-hero-stat-label {
+    font-size: 10px;
+    color: rgba(255,255,255,0.45);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+  }
+
+  /* ============================================================
+     VARIATION 3: Split Hero (Icon Column + Content)
+     ============================================================ */
+  .v3-tabs-bar {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 0;
+  }
+
+  .v3-tab-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    border-radius: 8px 8px 0 0;
+    border: 1px solid #e0e0e0;
+    border-bottom: none;
+    background: white;
+    color: #777;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: inherit;
+    position: relative;
+    bottom: -1px;
+  }
+
+  .v3-tab-btn:hover {
+    background: #f9f9f9;
+    color: #333;
+  }
+
+  .v3-tab-btn.active {
+    background: #1f2937;
+    color: white;
+    border-color: #1f2937;
+  }
+
+  .v3-tab-count {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 1px 7px;
+    border-radius: 10px;
+    min-width: 20px;
+    text-align: center;
+    background: #f0f0f0;
+    color: #888;
+  }
+
+  .v3-tab-btn.active .v3-tab-count {
+    background: rgba(255,255,255,0.2);
+    color: white;
+  }
+
+  .v3-split-hero {
+    height: 100px;
+    border-radius: 0 12px 12px 12px;
+    display: flex;
+    overflow: hidden;
+    margin-bottom: 20px;
+    border: 1px solid #e0e0e0;
+    border-top: none;
+  }
+
+  .v3-icon-col {
+    width: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: background 0.4s ease;
+  }
+
+  .v3-icon-col[data-tab="apps"] { background: linear-gradient(135deg, #1a5a8a, #2a7ab0); }
+  .v3-icon-col[data-tab="webparts"] { background: linear-gradient(135deg, #5b21b6, #7c3aed); }
+  .v3-icon-col[data-tab="cards"] { background: linear-gradient(135deg, #0d9488, #14b8a6); }
+  .v3-icon-col[data-tab="agents"] { background: linear-gradient(135deg, #4f46e5, #6366f1); }
+
+  .v3-icon-col .icon {
+    font-size: 36px;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+  }
+
+  .v3-content-col {
+    flex: 1;
+    background: #1f2937;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 16px 28px;
+    position: relative;
+  }
+
+  .v3-content-col::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 200px;
+    background: radial-gradient(ellipse at right center, rgba(255,255,255,0.03) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .v3-hero-title {
+    font-size: 17px;
+    font-weight: 700;
+    color: white;
+    letter-spacing: -0.2px;
+    margin-bottom: 4px;
+  }
+
+  .v3-hero-desc {
+    font-size: 12px;
+    color: rgba(255,255,255,0.6);
+    margin-bottom: 10px;
+    max-width: 600px;
+  }
+
+  .v3-stat-chips {
+    display: flex;
+    gap: 8px;
+  }
+
+  .v3-stat-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 10px;
+    border-radius: 12px;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.1);
+    font-size: 11px;
+    color: rgba(255,255,255,0.7);
+    white-space: nowrap;
+  }
+
+  .v3-stat-chip strong {
+    color: white;
+    font-weight: 700;
+  }
+
+  /* ============================================================
+     Filter Bar (shared)
+     ============================================================ */
+  .filter-bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .filter-pills-scroll {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    flex: 1;
+    scrollbar-width: none;
+    mask-image: linear-gradient(to right, black 90%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to right, black 90%, transparent 100%);
+  }
+
+  .filter-pills-scroll::-webkit-scrollbar { display: none; }
+
+  .filter-pill {
+    padding: 5px 14px;
+    border-radius: 16px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+    border: 1px solid #e0e0e0;
+    background: white;
+    color: #555;
+    white-space: nowrap;
+    flex-shrink: 0;
+    font-family: inherit;
+  }
+
+  .filter-pill:hover { border-color: #999; }
+  .filter-pill.active { color: white; }
+
+  .pill-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 16px;
+    height: 16px;
+    border-radius: 8px;
+    font-size: 10px;
+    margin-left: 4px;
+    padding: 0 4px;
+  }
+
+  .pill-count.inactive { background: #f0f0f0; color: #888; }
+  .pill-count.active { background: rgba(255,255,255,0.25); color: white; }
+
+  .filter-search {
+    padding: 7px 12px 7px 34px;
+    border-radius: 8px;
+    border: 1px solid #d0d0d0;
+    font-size: 13px;
+    color: #333;
+    width: 220px;
+    flex-shrink: 0;
+    outline: none;
+    font-family: inherit;
+    background-image: url("data:image/svg+xml,%3Csvg width='14' height='14' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='11' cy='11' r='7' stroke='%239ca3af' stroke-width='2'/%3E%3Cline x1='16.5' y1='16.5' x2='21' y2='21' stroke='%239ca3af' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: 10px center;
+  }
+
+  .filter-search:focus { border-color: #999; }
+
+  /* Category Chips (non-HyperParts) */
+  .category-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 24px;
+  }
+
+  .category-chip {
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 1px solid #d0d0d0;
+    background: white;
+    color: #333;
+    font-family: inherit;
+  }
+
+  .category-chip:hover { border-color: #999; }
+  .category-chip.active { color: white; border-color: transparent; }
+
+  .category-label {
+    font-size: 13px;
+    font-weight: 500;
+    color: #6c757d;
+    margin-bottom: 12px;
+  }
+
+  /* ============================================================
+     Product Card Grid
+     ============================================================ */
+  .products-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 16px;
+  }
+
+  .product-card {
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid #e0e0e0;
+    background: white;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    flex-direction: column;
+    height: 260px;
+  }
+
+  .product-card:hover {
+    box-shadow: var(--card-shadow-hover);
+    transform: translateY(-2px);
+    border-color: #ccc;
+  }
+
+  .product-card-image {
+    height: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+
+  .product-card-splash {
+    text-align: center;
+    color: white;
+    padding: 12px;
+  }
+
+  .product-card-brand {
+    font-size: 8px;
+    letter-spacing: 1.5px;
+    opacity: 0.8;
+    margin-bottom: 2px;
+    text-transform: uppercase;
+  }
+
+  .product-card-dwx {
+    font-size: 16px;
+    font-weight: 800;
+    margin-bottom: 4px;
+  }
+
+  .product-card-dwx span { color: rgba(255,255,255,0.7); }
+
+  .product-card-icon { font-size: 28px; }
+
+  .product-card-version {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: rgba(255,255,255,0.2);
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 10px;
+    color: white;
+    font-weight: 500;
+  }
+
+  .product-card-content {
+    padding: 12px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .product-card-top {
+    flex: 1;
+  }
+
+  .product-type-tag {
+    display: inline-block;
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 8px;
+    margin-bottom: 6px;
+    font-weight: 500;
+  }
+
+  .tag-app { background: #e8f4fc; color: #1a5a8a; }
+  .tag-webpart { background: #f3e8ff; color: #7c3aed; }
+  .tag-card { background: #e6fffa; color: #0d9488; }
+  .tag-agent { background: #eef2ff; color: #6366f1; }
+
+  .product-card-name {
+    font-size: 14px;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 2px;
+    line-height: 1.2;
+  }
+
+  .product-card-subtitle {
+    font-size: 11px;
+    color: #6c757d;
+  }
+
+  .product-card-footer {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    padding-top: 8px;
+    border-top: 1px solid #f0f0f0;
+    margin-top: auto;
+  }
+
+  .request-demo-btn {
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.15s;
+  }
+
+  .request-demo-btn:hover { opacity: 0.9; filter: brightness(1.1); }
+
+  /* Gradient presets */
+  .grad-corporate-blue { background: linear-gradient(135deg, #1a5a8a 0%, #0d3a5c 100%); }
+  .grad-royal-purple { background: linear-gradient(135deg, #7c3aed 0%, #5b21b6 100%); }
+  .grad-forest-teal { background: linear-gradient(135deg, #0d9488 0%, #0f766e 100%); }
+  .grad-indigo { background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); }
+  .grad-coral { background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); }
+  .grad-rose { background: linear-gradient(135deg, #e11d48 0%, #be123c 100%); }
+  .grad-emerald { background: linear-gradient(135deg, #10b981 0%, #059669 100%); }
+  .grad-amber { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); }
+  .grad-sky { background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%); }
+  .grad-slate { background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%); }
+  .grad-charcoal { background: linear-gradient(135deg, #374151 0%, #1f2937 100%); }
+  .grad-ocean-depth { background: linear-gradient(135deg, #0369a1 0%, #075985 100%); }
+  .grad-violet { background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); }
+  .grad-pink { background: linear-gradient(135deg, #ec4899 0%, #db2777 100%); }
+  .grad-cyan { background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%); }
+  .grad-teal { background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%); }
+
+  /* ============================================================
+     Product Detail Modal
+     ============================================================ */
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s;
+  }
+
+  .modal-backdrop.open {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  .modal-dialog {
+    width: 920px;
+    max-height: 85vh;
+    background: white;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    display: flex;
+    flex-direction: column;
+    transform: translateY(20px);
+    transition: transform 0.25s;
+  }
+
+  .modal-backdrop.open .modal-dialog {
+    transform: translateY(0);
+  }
+
+  .modal-hero {
+    height: 140px;
+    display: flex;
+    align-items: center;
+    padding: 0 36px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .modal-hero::before {
+    content: '';
+    position: absolute;
+    top: -50px;
+    right: -30px;
+    width: 250px;
+    height: 250px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .modal-hero-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 14px;
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    flex-shrink: 0;
+    margin-right: 20px;
+  }
+
+  .modal-hero-info {
+    flex: 1;
+    position: relative;
+    z-index: 1;
+  }
+
+  .modal-hero-badge {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 10px;
+    border-radius: 10px;
+    background: rgba(255,255,255,0.15);
+    color: rgba(255,255,255,0.9);
+    margin-bottom: 6px;
+    letter-spacing: 0.5px;
+  }
+
+  .modal-hero-title {
+    font-size: 24px;
+    font-weight: 700;
+    color: white;
+    margin-bottom: 2px;
+  }
+
+  .modal-hero-subtitle {
+    font-size: 14px;
+    color: rgba(255,255,255,0.7);
+  }
+
+  .modal-close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: white;
+    font-size: 18px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+    z-index: 2;
+  }
+
+  .modal-close:hover {
+    background: rgba(255,255,255,0.25);
+  }
+
+  .modal-body {
+    padding: 32px 36px;
+    overflow-y: auto;
+    flex: 1;
+  }
+
+  .modal-section-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 12px;
+  }
+
+  .modal-description {
+    font-size: 14px;
+    color: #555;
+    line-height: 1.7;
+    margin-bottom: 28px;
+  }
+
+  .modal-features-list {
+    list-style: none;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px 24px;
+    margin-bottom: 32px;
+  }
+
+  .modal-features-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    font-size: 13px;
+    color: #555;
+    line-height: 1.5;
+  }
+
+  .modal-features-list li::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    margin-top: 6px;
+  }
+
+  .modal-meta {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+  }
+
+  .modal-meta-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: #6c757d;
+    padding: 6px 12px;
+    background: #f8f9fa;
+    border-radius: 8px;
+  }
+
+  .modal-meta-item strong {
+    color: #333;
+    font-weight: 600;
+  }
+
+  .modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    padding: 20px 36px;
+    border-top: 1px solid #e8e8e8;
+    background: #fafbfc;
+  }
+
+  .modal-btn {
+    padding: 10px 24px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.15s;
+    border: none;
+  }
+
+  .modal-btn-secondary {
+    background: white;
+    border: 1px solid #d0d0d0;
+    color: #555;
+  }
+
+  .modal-btn-secondary:hover { border-color: #999; }
+
+  .modal-btn-primary {
+    color: white;
+  }
+
+  .modal-btn-primary:hover { opacity: 0.9; filter: brightness(1.1); }
+
+  /* ============================================================
+     Spacer
+     ============================================================ */
+  .spacer {
+    height: 40px;
+  }
+
+  /* Hidden utility */
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<!-- ============================================================
+     Top Navigation
+     ============================================================ -->
+<nav class="top-nav">
+  <span class="nav-brand">Product Catalog V2</span>
+  <a href="#v1">V1 <span class="badge">Tabs Inside Hero</span></a>
+  <a href="#v2">V2 <span class="badge">Floating Bar</span></a>
+  <a href="#v3">V3 <span class="badge">Split Hero</span></a>
+</nav>
+
+<!-- ============================================================
+     PRODUCT DETAIL MODAL (static example)
+     ============================================================ -->
+<div class="modal-backdrop open" id="productModal" style="display: none;">
+  <div class="modal-dialog">
+    <div class="modal-hero grad-royal-purple" id="modalHero">
+      <div class="modal-hero-icon" id="modalIcon"></div>
+      <div class="modal-hero-info">
+        <div class="modal-hero-badge" id="modalBadge"></div>
+        <div class="modal-hero-title" id="modalTitle"></div>
+        <div class="modal-hero-subtitle" id="modalSubtitle"></div>
+      </div>
+      <button class="modal-close" onclick="closeModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-meta" id="modalMeta"></div>
+      <h3 class="modal-section-title">About this Product</h3>
+      <p class="modal-description" id="modalDesc"></p>
+      <h3 class="modal-section-title">Key Features</h3>
+      <ul class="modal-features-list" id="modalFeatures"></ul>
+    </div>
+    <div class="modal-footer">
+      <button class="modal-btn modal-btn-secondary" onclick="closeModal()">Close</button>
+      <button class="modal-btn modal-btn-primary" id="modalCta" style="background: #7c3aed;">Request Demo</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     VARIATION 1: Tabs Inside Hero (Gradient Bar)
+     ============================================================ -->
+<section class="variation-section" id="v1">
+  <div class="variation-label">
+    <span class="v-number">V1</span>
+    <span class="v-title">Tabs Inside Hero (Gradient Bar)</span>
+    <span class="v-desc">Full-width gradient hero that changes color based on active tab. Glassmorphic pill tabs sit inside the hero.</span>
+  </div>
+
+  <div class="variation-content">
+    <div class="page-header">
+      <div>
+        <h1>Product Catalog</h1>
+        <div class="subtitle">DWx applications, HyperParts web parts, adaptive cards, and agents for your digital workplace</div>
+      </div>
+      <button class="back-btn">&#8592; Back to Home</button>
+    </div>
+
+    <!-- V1 Hero with tabs inside -->
+    <div class="v1-hero" id="v1-hero" data-tab="apps">
+      <div class="v1-tabs-row" id="v1-tabs">
+        <button class="v1-tab-btn active" data-tab="apps" onclick="switchV1Tab('apps')">
+          <span>&#128187;</span> DWx Apps <span class="v1-tab-count">16</span>
+        </button>
+        <button class="v1-tab-btn" data-tab="webparts" onclick="switchV1Tab('webparts')">
+          <span>&#129513;</span> HyperParts <span class="v1-tab-count">20</span>
+        </button>
+        <button class="v1-tab-btn" data-tab="cards" onclick="switchV1Tab('cards')">
+          <span>&#127183;</span> Adaptive Cards <span class="v1-tab-count">6</span>
+        </button>
+        <button class="v1-tab-btn" data-tab="agents" onclick="switchV1Tab('agents')">
+          <span>&#129302;</span> DWx Agents <span class="v1-tab-count">10</span>
+        </button>
+      </div>
+      <div class="v1-hero-content" id="v1-hero-content">
+        <!-- Content injected via JS -->
+      </div>
+    </div>
+
+    <!-- Filter area -->
+    <div id="v1-filter"></div>
+
+    <!-- Products Grid -->
+    <div class="products-grid" id="v1-grid"></div>
+  </div>
+</section>
+
+
+<!-- ============================================================
+     VARIATION 2: Tabs as Floating Bar Above Compact Hero
+     ============================================================ -->
+<section class="variation-section" id="v2">
+  <div class="variation-label">
+    <span class="v-number">V2</span>
+    <span class="v-title">Tabs as Floating Bar Above Compact Hero</span>
+    <span class="v-desc">Clean white tab bar with colored underline, slim gradient hero below with icon + title + inline stats.</span>
+  </div>
+
+  <div class="variation-content">
+    <div class="page-header">
+      <div>
+        <h1>Product Catalog</h1>
+        <div class="subtitle">DWx applications, HyperParts web parts, adaptive cards, and agents for your digital workplace</div>
+      </div>
+      <button class="back-btn">&#8592; Back to Home</button>
+    </div>
+
+    <!-- V2 Floating Tabs Bar -->
+    <div class="v2-tabs-bar" id="v2-tabs">
+      <button class="v2-tab-btn active" data-tab="apps" style="--tab-color: #1a5a8a;" onclick="switchV2Tab('apps')">
+        <span class="v2-tab-icon">&#128187;</span> DWx Apps <span class="v2-tab-count" style="background: #e8f4fc; color: #1a5a8a;">16</span>
+      </button>
+      <button class="v2-tab-btn" data-tab="webparts" style="--tab-color: #7c3aed;" onclick="switchV2Tab('webparts')">
+        <span class="v2-tab-icon">&#129513;</span> HyperParts <span class="v2-tab-count" style="background: #f3e8ff; color: #7c3aed;">20</span>
+      </button>
+      <button class="v2-tab-btn" data-tab="cards" style="--tab-color: #0d9488;" onclick="switchV2Tab('cards')">
+        <span class="v2-tab-icon">&#127183;</span> Adaptive Cards <span class="v2-tab-count" style="background: #e6fffa; color: #0d9488;">6</span>
+      </button>
+      <button class="v2-tab-btn" data-tab="agents" style="--tab-color: #6366f1;" onclick="switchV2Tab('agents')">
+        <span class="v2-tab-icon">&#129302;</span> DWx Agents <span class="v2-tab-count" style="background: #eef2ff; color: #6366f1;">10</span>
+      </button>
+    </div>
+
+    <!-- V2 Compact Hero -->
+    <div class="v2-compact-hero" id="v2-hero" data-tab="apps">
+      <div class="v2-hero-left" id="v2-hero-left">
+        <!-- Injected via JS -->
+      </div>
+      <div class="v2-hero-stats" id="v2-hero-stats">
+        <!-- Injected via JS -->
+      </div>
+    </div>
+
+    <!-- Filter area -->
+    <div id="v2-filter"></div>
+
+    <!-- Products Grid -->
+    <div class="products-grid" id="v2-grid"></div>
+  </div>
+</section>
+
+
+<!-- ============================================================
+     VARIATION 3: Split Hero (Icon Column + Content)
+     ============================================================ -->
+<section class="variation-section" id="v3">
+  <div class="variation-label">
+    <span class="v-number">V3</span>
+    <span class="v-title">Split Hero (Icon Column + Content)</span>
+    <span class="v-desc">Standard tab bar with left icon column on brand color, right column with title + description on dark bg. Stats as inline chips.</span>
+  </div>
+
+  <div class="variation-content">
+    <div class="page-header">
+      <div>
+        <h1>Product Catalog</h1>
+        <div class="subtitle">DWx applications, HyperParts web parts, adaptive cards, and agents for your digital workplace</div>
+      </div>
+      <button class="back-btn">&#8592; Back to Home</button>
+    </div>
+
+    <!-- V3 Tab Bar -->
+    <div class="v3-tabs-bar" id="v3-tabs">
+      <button class="v3-tab-btn active" data-tab="apps" onclick="switchV3Tab('apps')">
+        <span>&#128187;</span> DWx Apps <span class="v3-tab-count">16</span>
+      </button>
+      <button class="v3-tab-btn" data-tab="webparts" onclick="switchV3Tab('webparts')">
+        <span>&#129513;</span> HyperParts <span class="v3-tab-count">20</span>
+      </button>
+      <button class="v3-tab-btn" data-tab="cards" onclick="switchV3Tab('cards')">
+        <span>&#127183;</span> Adaptive Cards <span class="v3-tab-count">6</span>
+      </button>
+      <button class="v3-tab-btn" data-tab="agents" onclick="switchV3Tab('agents')">
+        <span>&#129302;</span> DWx Agents <span class="v3-tab-count">10</span>
+      </button>
+    </div>
+
+    <!-- V3 Split Hero -->
+    <div class="v3-split-hero" id="v3-hero">
+      <div class="v3-icon-col" id="v3-icon-col" data-tab="apps">
+        <span class="icon" id="v3-icon"></span>
+      </div>
+      <div class="v3-content-col">
+        <div class="v3-hero-title" id="v3-hero-title"></div>
+        <div class="v3-hero-desc" id="v3-hero-desc"></div>
+        <div class="v3-stat-chips" id="v3-hero-stats"></div>
+      </div>
+    </div>
+
+    <!-- Filter area -->
+    <div id="v3-filter"></div>
+
+    <!-- Products Grid -->
+    <div class="products-grid" id="v3-grid"></div>
+  </div>
+</section>
+
+
+<!-- ============================================================
+     JAVASCRIPT
+     ============================================================ -->
+<script>
+// Tab data
+const TAB_DATA = {
+  apps: {
+    icon: '&#128187;',
+    iconEmoji: '\u{1F4BB}',
+    title: 'DWx Application Suite',
+    accent: 'Application',
+    tagline: '16 enterprise-grade SharePoint applications for every business function',
+    description: '16 enterprise-grade SharePoint applications built with SPFx and Fluent UI, covering HR, Operations, Document Management, and Learning.',
+    color: '#1a5a8a',
+    colorLight: '#e8f4fc',
+    stats: [
+      { value: '16', label: 'Apps' },
+      { value: '5', label: 'Categories' },
+      { value: 'SPFx 1.18+', label: 'Framework' },
+      { value: 'Fluent v9', label: 'Design System' },
+    ],
+    categories: ['All DWx Apps', 'Document & Content', 'HR & People', 'Operations & IT', 'Learning & Engagement'],
+    products: [
+      { name: 'Asset Dashboard', subtitle: 'IT Asset Tracking & Management', category: 'Operations & IT', icon: '\u{1F4CA}', gradient: 'grad-corporate-blue', version: 'v2.1.0', brand: 'FIRST DIGITAL', type: 'app', description: 'Comprehensive IT asset tracking with lifecycle management, depreciation tracking, and detailed reporting dashboards.' },
+      { name: 'CV Management', subtitle: 'Candidate Resume Repository', category: 'HR & People', icon: '\u{1F4C4}', gradient: 'grad-coral', version: 'v1.8.0', brand: 'FIRST DIGITAL', type: 'app', description: 'Centralized resume management system with search, tagging, and candidate tracking capabilities.' },
+      { name: 'Document Hub', subtitle: 'Enterprise Document Management', category: 'Document & Content', icon: '\u{1F4C1}', gradient: 'grad-rose', version: 'v3.0.0', brand: 'FIRST DIGITAL', type: 'app', description: 'Centralized document management with versioning, approval workflows, and secure sharing.' },
+      { name: 'Integration Hub', subtitle: 'Connect Enterprise Systems', category: 'Operations & IT', icon: '\u{1F50C}', gradient: 'grad-indigo', version: 'v2.5.0', brand: 'FIRST DIGITAL', type: 'app', description: 'Centralized integration platform connecting your business applications seamlessly.' },
+      { name: 'License Pulse', subtitle: 'M365 License Analytics', category: 'Operations & IT', icon: '\u{1F4CA}', gradient: 'grad-teal', version: 'v1.0.0', brand: 'FIRST DIGITAL', type: 'app', description: 'Comprehensive M365 license analytics with Power BI dashboards, usage insights, and cost optimization.' },
+      { name: 'Training & Skills', subtitle: 'Learning Management System', category: 'Learning & Engagement', icon: '\u{1F393}', gradient: 'grad-cyan', version: 'v1.4.0', brand: 'FIRST DIGITAL', type: 'app', description: 'Comprehensive LMS with courses, certifications, skills tracking, and learning paths.' },
+    ],
+  },
+  webparts: {
+    icon: '&#129513;',
+    iconEmoji: '\u{1F9E9}',
+    title: 'The HyperParts Suite',
+    accent: 'HyperParts',
+    tagline: '20 revolutionary SPFx web parts engineered to shatter the limitations of standard SharePoint',
+    description: 'Step into the future of the digital workplace with the HyperParts Suite \u2014 a revolutionary ecosystem of SPFx components with Hyper-Performance, Hyper-Flexibility, and Hyper-Integration.',
+    color: '#7c3aed',
+    colorLight: '#f3e8ff',
+    stats: [
+      { value: '20', label: 'Web Parts' },
+      { value: '15', label: 'Categories' },
+      { value: 'SPFx 1.18+', label: 'Framework' },
+      { value: 'Fluent v9', label: 'Design System' },
+    ],
+    categories: ['All HyperParts', 'Visuals & Branding', 'Navigation', 'Communication', 'Content Discovery', 'People & Culture', 'Media & Files'],
+    products: [
+      { name: 'HyperHero', subtitle: 'Dynamic Hero Layouts & Animations', category: 'Visuals & Branding', icon: '\u{1F5BC}\uFE0F', gradient: 'grad-royal-purple', version: 'v1.0.0', brand: 'HYPERPARTS', type: 'webpart', description: 'Replaces static layouts with a CSS Grid engine. Supports video backgrounds, Lottie animations, and 10+ grid configurations.' },
+      { name: 'HyperNav', subtitle: 'Multi-level Personalized Navigation', category: 'Navigation', icon: '\u{1F9ED}', gradient: 'grad-indigo', version: 'v1.0.0', brand: 'HYPERPARTS', type: 'webpart', description: 'Multi-level nesting with personalized "My Links" based on AD attributes, SVG icon support, and audience visibility.' },
+      { name: 'HyperNews Feed', subtitle: 'Interactive Media Hub', category: 'Communication', icon: '\u{1F4F0}', gradient: 'grad-sky', version: 'v1.0.0', brand: 'HYPERPARTS', type: 'webpart', description: 'Infinite scroll, in-line modal Quick Read, estimated read time, and social engagement metrics.' },
+      { name: 'HyperRollup', subtitle: 'Visual Query Builder & Content', category: 'Content Discovery', icon: '\u{1F50D}', gradient: 'grad-emerald', version: 'v1.0.0', brand: 'HYPERPARTS', type: 'webpart', description: 'Visual Query Builder for non-devs, custom result templates, and Export to CSV/Excel functionality.' },
+      { name: 'HyperProfile', subtitle: 'Live Directory Cards', category: 'People & Culture', icon: '\u{1F464}', gradient: 'grad-pink', version: 'v1.0.0', brand: 'HYPERPARTS', type: 'webpart', description: 'Live interactive directory cards with real-time Teams status, Schedule Meeting button, and skill-tag searching.' },
+      { name: 'HyperExplorer', subtitle: 'Advanced File Previewer', category: 'Media & Files', icon: '\u{1F4C1}', gradient: 'grad-coral', version: 'v1.0.0', brand: 'HYPERPARTS', type: 'webpart', description: 'Multi-file previewer, folder breadcrumbs, Download as ZIP capability, and integrated PDF annotation.' },
+    ],
+  },
+  cards: {
+    icon: '&#127183;',
+    iconEmoji: '\u{1F0CF}',
+    title: 'Adaptive Cards for Teams',
+    accent: 'Adaptive Cards',
+    tagline: '6 interactive cards for Microsoft Teams chat and channels',
+    description: '6 interactive cards designed for Microsoft Teams, enabling in-chat workflows for leave requests, approvals, incident reporting, and more.',
+    color: '#0d9488',
+    colorLight: '#e6fffa',
+    stats: [
+      { value: '6', label: 'Cards' },
+      { value: '4', label: 'Categories' },
+      { value: 'Teams SDK', label: 'Platform' },
+      { value: 'Adaptive v1.5', label: 'Schema' },
+    ],
+    categories: ['All Cards', 'HR & People', 'Workflows', 'Operations & IT', 'Productivity', 'Learning & Engagement'],
+    products: [
+      { name: 'Leave Request Card', subtitle: 'Submit & Approve Leave', category: 'HR & People', icon: '\u{1F3D6}\uFE0F', gradient: 'grad-forest-teal', version: 'v1.2.0', brand: 'TEAMS', type: 'card', description: 'Interactive leave request card with manager approval workflow integration.' },
+      { name: 'Approval Card', subtitle: 'Multi-stage Approvals', category: 'Workflows', icon: '\u2705', gradient: 'grad-teal', version: 'v1.5.0', brand: 'TEAMS', type: 'card', description: 'Generic approval card supporting multi-stage workflows with comments.' },
+      { name: 'Incident Report', subtitle: 'Report & Track Issues', category: 'Operations & IT', icon: '\u26A0\uFE0F', gradient: 'grad-slate', version: 'v1.1.0', brand: 'TEAMS', type: 'card', description: 'Incident reporting card with severity levels, assignments, and status tracking.' },
+      { name: 'Feedback Card', subtitle: 'Quick Pulse Surveys', category: 'Learning & Engagement', icon: '\u{1F4AC}', gradient: 'grad-emerald', version: 'v1.3.0', brand: 'TEAMS', type: 'card', description: 'Quick feedback collection with emoji ratings and optional comments.' },
+      { name: 'Meeting Summary', subtitle: 'Auto-generated Notes', category: 'Productivity', icon: '\u{1F4DD}', gradient: 'grad-cyan', version: 'v1.0.0', brand: 'TEAMS', type: 'card', description: 'Post-meeting summary card with action items, decisions, and follow-ups.' },
+      { name: 'Task Assignment', subtitle: 'Assign & Track Tasks', category: 'Productivity', icon: '\u{1F4CB}', gradient: 'grad-coral', version: 'v1.4.0', brand: 'TEAMS', type: 'card', description: 'Task assignment card with due dates, priority, and completion tracking.' },
+    ],
+  },
+  agents: {
+    icon: '&#129302;',
+    iconEmoji: '\u{1F916}',
+    title: 'DWx AI Agent Collection',
+    accent: 'AI Agent',
+    tagline: '10 intelligent agents powered by Copilot Studio and GPT-4o',
+    description: '10 intelligent Copilot Studio agents that automate IT support, HR inquiries, procurement, and knowledge discovery across your organization.',
+    color: '#6366f1',
+    colorLight: '#eef2ff',
+    stats: [
+      { value: '10', label: 'Agents' },
+      { value: '5', label: 'Categories' },
+      { value: 'Copilot Studio', label: 'Platform' },
+      { value: 'GPT-4o', label: 'AI Model' },
+    ],
+    categories: ['All Agents', 'Operations & IT', 'HR & People', 'Document & Content', 'AI & Automation'],
+    products: [
+      { name: 'IT Service Desk Assistant', subtitle: 'AI-Powered IT Support', category: 'Operations & IT', icon: '\u{1F916}', gradient: 'grad-corporate-blue', version: 'v1.0.0', brand: 'COPILOT STUDIO', type: 'agent', description: 'Intelligent IT helpdesk agent that handles common queries, troubleshooting, and ticket creation.' },
+      { name: 'Access & Identity Requests', subtitle: 'Automated Access Management', category: 'Operations & IT', icon: '\u{1F510}', gradient: 'grad-indigo', version: 'v1.0.0', brand: 'COPILOT STUDIO', type: 'agent', description: 'Self-service agent for requesting system access, role changes, and identity verification.' },
+      { name: 'HR Policy & Leave Advisor', subtitle: 'HR Self-Service Assistant', category: 'HR & People', icon: '\u{1F465}', gradient: 'grad-pink', version: 'v1.0.0', brand: 'COPILOT STUDIO', type: 'agent', description: 'Answer HR policy questions, guide leave applications, and provide benefits information.' },
+      { name: 'Onboarding Concierge', subtitle: 'New Hire Welcome Assistant', category: 'HR & People', icon: '\u{1F3AF}', gradient: 'grad-emerald', version: 'v1.0.0', brand: 'COPILOT STUDIO', type: 'agent', description: 'Guide new employees through onboarding tasks, document completion, and orientation.' },
+      { name: 'Contract & Policy Search', subtitle: 'Document Intelligence Agent', category: 'Document & Content', icon: '\u{1F4D1}', gradient: 'grad-royal-purple', version: 'v1.0.0', brand: 'COPILOT STUDIO', type: 'agent', description: 'Search and retrieve information from contracts, policies, and legal documents using natural language.' },
+      { name: 'Knowledge Navigator', subtitle: 'Enterprise Search Copilot', category: 'AI & Automation', icon: '\u{1F9ED}', gradient: 'grad-teal', version: 'v1.0.0', brand: 'COPILOT STUDIO', type: 'agent', description: 'Navigate internal knowledge bases, wikis, and documentation to find answers.' },
+    ],
+  },
+};
+
+// Feature lists for modal (generic per type)
+const FEATURES_BY_TYPE = {
+  app: [
+    'Built on SharePoint Framework (SPFx) 1.18+',
+    'Fluent UI v9 responsive design system',
+    'Role-based access control (RBAC)',
+    'Microsoft Graph API integration',
+    'Power Automate workflow connectors',
+    'Export to Excel / PDF reporting',
+    'Multi-language support (i18n)',
+    'Teams personal app integration',
+  ],
+  webpart: [
+    'SPFx 1.18+ with React 18 support',
+    'Fluent UI v9 design system',
+    'Property pane configuration UI',
+    'Adaptive responsive layouts',
+    'Web part connections support',
+    'Theme-aware styling',
+    'Section backgrounds support',
+    'Performance optimized with lazy loading',
+  ],
+  card: [
+    'Adaptive Card schema v1.5',
+    'Microsoft Teams SDK integration',
+    'Bot Framework messaging support',
+    'Universal Actions for multi-platform',
+    'Data binding with templating',
+    'Refresh and auto-update support',
+    'Accessibility compliant (WCAG 2.1)',
+    'Power Automate trigger integration',
+  ],
+  agent: [
+    'Built on Copilot Studio platform',
+    'GPT-4o language model integration',
+    'Microsoft Graph knowledge grounding',
+    'Adaptive Card response rendering',
+    'Multi-turn conversation support',
+    'Power Automate plugin actions',
+    'SharePoint knowledge base indexing',
+    'Teams channel and chat deployment',
+  ],
+};
+
+const TAG_CLASS_MAP = { app: 'tag-app', webpart: 'tag-webpart', card: 'tag-card', agent: 'tag-agent' };
+const TAG_LABEL_MAP = { app: 'DWx App', webpart: 'HyperPart', card: 'Adaptive Card', agent: 'DWx Agent' };
+
+// ============================================================
+// Render helpers
+// ============================================================
+
+function renderProductCard(product, tabColor) {
+  return `
+    <div class="product-card" onclick="openModal('${product.name.replace(/'/g, "\\'")}', '${product.subtitle.replace(/'/g, "\\'")}', '${product.category}', '${product.icon}', '${product.gradient}', '${product.version}', '${product.brand}', '${product.type}', '${product.description.replace(/'/g, "\\'")}', '${tabColor}')">
+      <div class="product-card-image ${product.gradient}">
+        <span class="product-card-version">${product.version}</span>
+        <div class="product-card-splash">
+          <div class="product-card-brand">${product.brand}</div>
+          <div class="product-card-dwx">DW<span>x</span></div>
+          <div class="product-card-icon">${product.icon}</div>
+        </div>
+      </div>
+      <div class="product-card-content">
+        <div class="product-card-top">
+          <span class="product-type-tag ${TAG_CLASS_MAP[product.type]}">${product.category}</span>
+          <div class="product-card-name">${product.name}</div>
+          <div class="product-card-subtitle">${product.subtitle}</div>
+        </div>
+        <div class="product-card-footer">
+          <button class="request-demo-btn" style="background: ${tabColor};" onclick="event.stopPropagation();">Request Demo</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderFilterPills(categories, tabColor, idPrefix) {
+  return `
+    <div class="filter-bar">
+      <div class="filter-pills-scroll">
+        ${categories.map((cat, i) => `
+          <button class="filter-pill ${i === 0 ? 'active' : ''}" style="${i === 0 ? `background: ${tabColor}; border-color: ${tabColor};` : ''}">
+            ${cat}${i === 0 ? `<span class="pill-count active">All</span>` : ''}
+          </button>
+        `).join('')}
+      </div>
+      <input class="filter-search" type="text" placeholder="Search products...">
+    </div>
+  `;
+}
+
+function renderCategoryChips(categories, tabColor) {
+  return `
+    <div style="margin-bottom: 24px;">
+      <div class="category-label">Filter by category</div>
+      <div class="category-chips">
+        ${categories.map((cat, i) => `
+          <button class="category-chip ${i === 0 ? 'active' : ''}" style="${i === 0 ? `background: ${tabColor}; border-color: ${tabColor}; color: white;` : ''}">${cat}</button>
+        `).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function renderGrid(products, tabColor) {
+  return products.map(p => renderProductCard(p, tabColor)).join('');
+}
+
+// ============================================================
+// V1: Tabs Inside Hero
+// ============================================================
+
+let v1ActiveTab = 'apps';
+
+function switchV1Tab(tab) {
+  v1ActiveTab = tab;
+  const data = TAB_DATA[tab];
+
+  // Update hero gradient
+  document.getElementById('v1-hero').setAttribute('data-tab', tab);
+
+  // Update tab active states
+  document.querySelectorAll('#v1-tabs .v1-tab-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.getAttribute('data-tab') === tab);
+  });
+
+  // Update hero content
+  document.getElementById('v1-hero-content').innerHTML = `
+    <div class="v1-hero-left">
+      <div class="v1-hero-top">
+        <div class="v1-hero-icon">${data.iconEmoji}</div>
+        <div class="v1-hero-title">${data.title.replace(data.accent, `<span class="accent">${data.accent}</span>`)}</div>
+      </div>
+      <div class="v1-hero-desc">${data.description}</div>
+    </div>
+    <div class="v1-hero-stats">
+      ${data.stats.map(s => `
+        <div class="v1-hero-stat">
+          <span class="v1-hero-stat-value">${s.value}</span>
+          <span class="v1-hero-stat-label">${s.label}</span>
+        </div>
+      `).join('')}
+    </div>
+  `;
+
+  // Update filter
+  const isHyperParts = tab === 'webparts';
+  document.getElementById('v1-filter').innerHTML = isHyperParts
+    ? renderFilterPills(data.categories, data.color, 'v1')
+    : renderCategoryChips(data.categories, data.color);
+
+  // Update grid
+  document.getElementById('v1-grid').innerHTML = renderGrid(data.products, data.color);
+}
+
+// ============================================================
+// V2: Floating Bar Above Compact Hero
+// ============================================================
+
+let v2ActiveTab = 'apps';
+
+function switchV2Tab(tab) {
+  v2ActiveTab = tab;
+  const data = TAB_DATA[tab];
+
+  // Update hero gradient
+  document.getElementById('v2-hero').setAttribute('data-tab', tab);
+
+  // Update tab active states
+  document.querySelectorAll('#v2-tabs .v2-tab-btn').forEach(btn => {
+    const isActive = btn.getAttribute('data-tab') === tab;
+    btn.classList.toggle('active', isActive);
+    const countEl = btn.querySelector('.v2-tab-count');
+    if (isActive) {
+      countEl.style.background = data.color;
+      countEl.style.color = 'white';
+    } else {
+      // Reset to default color
+      const btnTab = btn.getAttribute('data-tab');
+      const btnData = TAB_DATA[btnTab];
+      countEl.style.background = btnData.colorLight;
+      countEl.style.color = btnData.color;
+    }
+  });
+
+  // Update hero left
+  document.getElementById('v2-hero-left').innerHTML = `
+    <div class="v2-hero-icon">${data.iconEmoji}</div>
+    <div>
+      <div class="v2-hero-title">${data.title}</div>
+      <div class="v2-hero-tagline">${data.tagline}</div>
+    </div>
+  `;
+
+  // Update hero stats
+  document.getElementById('v2-hero-stats').innerHTML = data.stats.map(s => `
+    <div class="v2-hero-stat">
+      <span class="v2-hero-stat-value">${s.value}</span>
+      <span class="v2-hero-stat-label">${s.label}</span>
+    </div>
+  `).join('');
+
+  // Update filter
+  const isHyperParts = tab === 'webparts';
+  document.getElementById('v2-filter').innerHTML = isHyperParts
+    ? renderFilterPills(data.categories, data.color, 'v2')
+    : renderCategoryChips(data.categories, data.color);
+
+  // Update grid
+  document.getElementById('v2-grid').innerHTML = renderGrid(data.products, data.color);
+}
+
+// ============================================================
+// V3: Split Hero (Icon Column + Content)
+// ============================================================
+
+let v3ActiveTab = 'apps';
+
+function switchV3Tab(tab) {
+  v3ActiveTab = tab;
+  const data = TAB_DATA[tab];
+
+  // Update icon column color
+  document.getElementById('v3-icon-col').setAttribute('data-tab', tab);
+
+  // Update tab active states
+  document.querySelectorAll('#v3-tabs .v3-tab-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.getAttribute('data-tab') === tab);
+  });
+
+  // Update icon
+  document.getElementById('v3-icon').textContent = data.iconEmoji;
+
+  // Update content
+  document.getElementById('v3-hero-title').textContent = data.title;
+  document.getElementById('v3-hero-desc').textContent = data.tagline;
+
+  // Update stats as chips
+  document.getElementById('v3-hero-stats').innerHTML = data.stats.map(s => `
+    <span class="v3-stat-chip"><strong>${s.value}</strong> ${s.label}</span>
+  `).join('');
+
+  // Update filter
+  const isHyperParts = tab === 'webparts';
+  document.getElementById('v3-filter').innerHTML = isHyperParts
+    ? renderFilterPills(data.categories, data.color, 'v3')
+    : renderCategoryChips(data.categories, data.color);
+
+  // Update grid
+  document.getElementById('v3-grid').innerHTML = renderGrid(data.products, data.color);
+}
+
+// ============================================================
+// Modal
+// ============================================================
+
+function openModal(name, subtitle, category, icon, gradient, version, brand, type, description, tabColor) {
+  const modal = document.getElementById('productModal');
+  const hero = document.getElementById('modalHero');
+  const features = FEATURES_BY_TYPE[type] || FEATURES_BY_TYPE.app;
+
+  // Set gradient on hero
+  hero.className = 'modal-hero ' + gradient;
+
+  document.getElementById('modalIcon').textContent = icon;
+  document.getElementById('modalBadge').textContent = TAG_LABEL_MAP[type] + ' \u2022 ' + category;
+  document.getElementById('modalTitle').textContent = name;
+  document.getElementById('modalSubtitle').textContent = subtitle;
+  document.getElementById('modalDesc').textContent = description;
+
+  document.getElementById('modalMeta').innerHTML = `
+    <div class="modal-meta-item"><strong>Version:</strong> ${version}</div>
+    <div class="modal-meta-item"><strong>Brand:</strong> ${brand}</div>
+    <div class="modal-meta-item"><strong>Category:</strong> ${category}</div>
+    <div class="modal-meta-item"><strong>Type:</strong> ${TAG_LABEL_MAP[type]}</div>
+  `;
+
+  document.getElementById('modalFeatures').innerHTML = features.map(f => `
+    <li style="--dot-color: ${tabColor};"><span style="display:inline-block; width:6px; height:6px; border-radius:50%; background:${tabColor}; flex-shrink:0; margin-top:6px;"></span>${f}</li>
+  `).join('');
+
+  // Remove the CSS ::before dot since we are inlining it
+  const featureItems = document.querySelectorAll('#modalFeatures li');
+  featureItems.forEach(li => li.style.setProperty('--dot-color', tabColor));
+
+  document.getElementById('modalCta').style.background = tabColor;
+
+  modal.style.display = 'flex';
+  requestAnimationFrame(() => modal.classList.add('open'));
+}
+
+function closeModal() {
+  const modal = document.getElementById('productModal');
+  modal.classList.remove('open');
+  setTimeout(() => { modal.style.display = 'none'; }, 250);
+}
+
+// Close modal on backdrop click
+document.getElementById('productModal').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+
+// Close modal on Escape
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeModal();
+});
+
+// ============================================================
+// Initialize all variations
+// ============================================================
+window.addEventListener('DOMContentLoaded', function() {
+  switchV1Tab('apps');
+  switchV2Tab('apps');
+  switchV3Tab('apps');
+});
+</script>
+
+</body>
+</html>
