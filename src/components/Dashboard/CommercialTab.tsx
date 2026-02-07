@@ -20,6 +20,7 @@ import {
   Cell,
 } from 'recharts';
 import { Booking } from '../../types/Booking';
+import { DW_COLORS } from '../../utils/buttonStyles';
 import { commercialService } from '../../services/CommercialService';
 import { DEPLOYMENT_FEE, DEAL_RATE_PER_LICENSE, RevenueStage } from '../../types/Commercial';
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -45,11 +46,11 @@ const useStyles = makeStyles({
     boxShadow: '0 1.6px 3.6px 0 rgba(0,0,0,.13), 0 0.3px 0.9px 0 rgba(0,0,0,.11)',
   },
   heroDeployment: {
-    backgroundColor: '#1e6b7b',
+    backgroundColor: DW_COLORS.teal,
     color: 'white',
   },
   heroConversion: {
-    backgroundColor: '#107c10',
+    backgroundColor: DW_COLORS.success,
     color: 'white',
   },
   heroIcon: {
@@ -240,7 +241,7 @@ const useStyles = makeStyles({
     width: '24px',
     height: '24px',
     borderRadius: '50%',
-    backgroundColor: '#1e6b7b',
+    backgroundColor: DW_COLORS.teal,
     color: 'white',
     fontSize: '12px',
     fontWeight: '600',
@@ -523,7 +524,7 @@ export const CommercialTab: React.FC<CommercialTabProps> = ({ bookings }) => {
                           className={styles.progressBar}
                           style={{
                             width: `${(am.totalRevenue / maxAMRevenue) * 100}%`,
-                            backgroundColor: index === 0 ? '#1e6b7b' : index === 1 ? '#0078d4' : '#8764b8',
+                            backgroundColor: index === 0 ? DW_COLORS.teal : index === 1 ? '#0078d4' : '#8764b8',
                           }}
                         />
                       </div>

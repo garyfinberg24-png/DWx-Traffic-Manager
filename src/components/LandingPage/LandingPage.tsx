@@ -19,6 +19,7 @@ import {
 } from '@fluentui/react-icons';
 import { DEFAULT_LANDING_PAGE_CONTENT, LandingPageContent, LandingPageTeamMember } from '../../types/LandingPageContent';
 import { landingPageContentService } from '../../services/LandingPageContentService';
+import { DW_COLORS } from '../../utils/buttonStyles';
 
 // ─── Data ──────────────────────────────────────────────────────────────────────
 
@@ -681,7 +682,7 @@ const useStyles = makeStyles({
     width: '4px',
     height: '4px',
     ...shorthands.borderRadius('50%'),
-    backgroundColor: '#1a5a8a',
+    backgroundColor: DW_COLORS.primary,
     flexShrink: 0,
   },
 });

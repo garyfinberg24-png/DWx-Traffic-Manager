@@ -45,6 +45,7 @@ import { ClientIndustry, CompanySize } from '../../types/ServiceRequest';
 import { productRequestService } from '../../services/ProductRequestService';
 import { ProductRequestType } from '../../types/ProductRequest';
 import { addHours, format, setHours, setMinutes } from 'date-fns';
+import { DW_COLORS } from '../../utils/buttonStyles';
 
 const useStyles = makeStyles({
   container: {
@@ -119,11 +120,11 @@ const useStyles = makeStyles({
     transition: 'all 0.2s ease',
   },
   progressStepActive: {
-    backgroundColor: '#1a5a8a',
+    backgroundColor: DW_COLORS.primary,
     color: 'white',
   },
   progressStepCompleted: {
-    backgroundColor: '#107c10',
+    backgroundColor: DW_COLORS.success,
     color: 'white',
   },
   progressStepPending: {
@@ -1274,7 +1275,7 @@ export const ProductRequestForm: React.FC = () => {
                 iconPosition="after"
                 onClick={handleNext}
                 disabled={!canProceed()}
-                style={{ backgroundColor: '#1a5a8a' }}
+                style={{ backgroundColor: DW_COLORS.primary }}
               >
                 Next
               </Button>
@@ -1285,7 +1286,7 @@ export const ProductRequestForm: React.FC = () => {
                 iconPosition="after"
                 onClick={handleSubmit(onSubmit)}
                 disabled={submitting || !canProceed()}
-                style={{ backgroundColor: '#1a5a8a' }}
+                style={{ backgroundColor: DW_COLORS.primary }}
               >
                 {submitting ? 'Submitting...' : 'Submit Request'}
               </Button>

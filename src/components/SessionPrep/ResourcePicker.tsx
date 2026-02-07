@@ -19,6 +19,7 @@ import {
 } from '@fluentui/react-icons';
 import { SuggestedResource, ResourceType, RESOURCE_TYPE_LABELS } from '../../types/SessionPreparation';
 import { DetailSection } from '../MyRequests/DetailModalShell';
+import { DW_COLORS } from '../../utils/buttonStyles';
 
 const useStyles = makeStyles({
   emptyState: {
@@ -71,8 +72,8 @@ const useStyles = makeStyles({
     width: '18px',
     height: '18px',
     borderRadius: '4px',
-    border: '2px solid #1a5a8a',
-    backgroundColor: '#1a5a8a',
+    border: `2px solid ${DW_COLORS.primary}`,
+    backgroundColor: DW_COLORS.primary,
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',

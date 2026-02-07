@@ -9,19 +9,23 @@ import { CalendarEvent } from '../types/ApiResponses';
 import { EntraUser } from '../types/ReferenceData';
 import {
   isTestMode,
-  getTestBookings,
   getTestClients,
   getTestTeamMembers,
   getTestAccountManagers,
-  createTestBooking,
-  updateTestBooking,
-  deleteTestBooking,
+  getTestServiceRequests,
+  getTestProposals,
+  createTestServiceRequest,
+  updateTestServiceRequest,
+  deleteTestServiceRequest,
   createTestClient,
+  createTestProposal,
+  updateTestProposal,
   getMockUser,
   mockAccountManagers,
 } from '../config/testModeConfig';
-import type { Booking } from '../types/Booking';
+import type { ServiceRequest } from '../types/ServiceRequest';
 import type { Client, TeamMember, AccountManager } from '../types/ReferenceData';
+import type { Proposal } from '../types/Proposal';
 
 // Mock calendar events storage
 let mockCalendarEvents: CalendarEvent[] = [];
@@ -410,9 +414,9 @@ class MockGraphService {
     // Return appropriate mock data based on list name (case-insensitive)
     const normalizedListName = listName.toLowerCase();
 
-    // DWx Traffic Manager lists
+    // DWx Traffic Manager lists — return proper ServiceRequest mock data
     if (normalizedListName.includes('servicerequests')) {
-      return this.transformBookingsToListItems(getTestBookings());
+      return this.transformServiceRequestsToListItems(getTestServiceRequests());
     }
 
     if (normalizedListName.includes('clients')) {
@@ -437,6 +441,30 @@ class MockGraphService {
 
     if (normalizedListName.includes('specialists')) {
       return []; // Return empty specialists for tests
+    }
+
+    if (normalizedListName.includes('proposals')) {
+      const allProposals = this.transformProposalsToListItems(getTestProposals());
+      // Apply basic ServiceRequestId filter if present
+      if (options?.filter) {
+        const serviceRequestIdMatch = options.filter.match(/ServiceRequestId\s+eq\s+(\d+)/);
+        if (serviceRequestIdMatch) {
+          const targetId = parseInt(serviceRequestIdMatch[1], 10);
+          return allProposals.filter((item: unknown) => {
+            const fields = (item as { fields: Record<string, unknown> }).fields;
+            return fields.ServiceRequestId === targetId;
+          });
+        }
+        const idMatch = options.filter.match(/fields\/id\s+eq\s+(\d+)/);
+        if (idMatch) {
+          const targetId = parseInt(idMatch[1], 10);
+          return allProposals.filter((item: unknown) => {
+            const fields = (item as { fields: Record<string, unknown> }).fields;
+            return fields.id === targetId;
+          });
+        }
+      }
+      return allProposals;
     }
 
     if (normalizedListName.includes('productrequests')) {
@@ -475,32 +503,37 @@ class MockGraphService {
 
     // Handle service request creation (DWxServiceRequests list)
     if (listName.toLowerCase().includes('servicerequests')) {
-      const booking = createTestBooking({
+      const request = createTestServiceRequest({
         Title: fields.Title as string || '',
+        ServiceId: fields.ServiceId as number,
+        ServiceName: fields.ServiceName as string || '',
         AccountManagerName: fields.AccountManagerName as string || '',
         AccountManagerEmail: fields.AccountManagerEmail as string || '',
+        AccountManagerTenant: (fields.AccountManagerTenant as 'Internal' | 'External') || 'Internal',
         ClientName: fields.ClientName as string || '',
-        BookingType: (fields.BookingType as 'Demo' | 'Deployment') || 'Demo',
-        LicenseCount: fields.LicenseCount as number || 0,
+        ClientId: fields.ClientId as number,
+        ContactName: fields.ContactName as string || '',
+        ContactEmail: fields.ContactEmail as string || '',
+        ContactPhone: fields.ContactPhone as string,
+        Industry: fields.Industry as ServiceRequest['Industry'],
+        CompanySize: fields.CompanySize as ServiceRequest['CompanySize'],
+        FunnelStage: (fields.FunnelStage as ServiceRequest['FunnelStage']) || 'Lead',
+        InterestLevel: (fields.InterestLevel as ServiceRequest['InterestLevel']) || 'Warm',
+        DealValue: fields.DealValue as number,
+        DealProbability: fields.DealProbability as number,
+        WeightedPipeline: fields.WeightedPipeline as number,
+        ExpectedCloseDate: fields.ExpectedCloseDate as string,
         ProposedSlot1: fields.ProposedSlot1 as string || '',
         ProposedSlot2: fields.ProposedSlot2 as string || '',
         ProposedSlot3: fields.ProposedSlot3 as string || '',
-        IsPremiumClient: fields.IsPremiumClient as boolean || false,
-        Status: (fields.Status as Booking['Status']) || 'Pending Review',
         Comments: fields.Comments as string,
-        Priority: fields.Priority as Booking['Priority'],
-        DealSize: fields.DealSize as number,
-        DealValue: fields.DealValue as string,
+        Requirements: fields.Requirements as string,
         Created: new Date().toISOString(),
-        CreatedBy: {
-          Title: getMockUser().displayName,
-          Email: getMockUser().email,
-        },
       });
 
       return {
-        id: String(booking.Id),
-        fields: { ...fields, id: booking.Id },
+        id: String(request.Id),
+        fields: { ...fields, id: request.Id },
       };
     }
 
@@ -524,6 +557,49 @@ class MockGraphService {
       };
     }
 
+    // Handle proposal creation (DWxProposals list)
+    if (listName.toLowerCase().includes('proposals')) {
+      const now = new Date().toISOString();
+      const proposal = createTestProposal({
+        Title: (fields.Title as string) || '',
+        ServiceRequestId: (fields.ServiceRequestId as number) || 0,
+        Status: (fields.Status as Proposal['Status']) || 'Draft',
+        Version: (fields.Version as number) || 1,
+        ProposalType: (fields.ProposalType as Proposal['ProposalType']) || 'Standard',
+        TemplateName: (fields.TemplateName as string) || '',
+        ExecutiveSummary: null,
+        SolutionOverview: null,
+        TechnologyStack: null,
+        ScopeOfWork: null,
+        PricingBreakdown: null,
+        Timeline: null,
+        TeamComposition: null,
+        Terms: fields.TermsAndConditions_JSON ? JSON.parse(fields.TermsAndConditions_JSON as string) : null,
+        ChangeControl: fields.ChangeControl_JSON ? JSON.parse(fields.ChangeControl_JSON as string) : null,
+        Assumptions: [],
+        Risks: [],
+        SigningPage: null,
+        ValidUntil: (fields.ValidUntil as string) || null,
+        SentDate: null,
+        ClientResponseDate: null,
+        ClientFeedback: '',
+        InternalNotes: '',
+        DocumentUrl: '',
+        CreatedByEmail: (fields.CreatedByEmail as string) || '',
+        CreatedByName: (fields.CreatedByName as string) || '',
+        ApprovedByEmail: '',
+        ApprovedByName: '',
+        ApprovedDate: null,
+        Created: now,
+        Modified: now,
+      });
+
+      return {
+        id: String(proposal.Id),
+        fields: { ...fields, id: proposal.Id },
+      };
+    }
+
     // Generic mock response for other lists
     const mockId = Math.floor(Math.random() * 10000);
     return {
@@ -541,11 +617,20 @@ class MockGraphService {
 
     // Handle service request update (DWxServiceRequests list)
     if (listName.toLowerCase().includes('servicerequests')) {
-      const updated = updateTestBooking(Number(itemId), fields as Partial<Booking>);
+      const updated = updateTestServiceRequest(Number(itemId), fields as Partial<ServiceRequest>);
       if (!updated) {
-        throw new Error(`Booking ${itemId} not found`);
+        throw new Error(`Service request ${itemId} not found`);
       }
 
+      return {
+        id: String(itemId),
+        fields: { ...fields, id: Number(itemId) },
+      };
+    }
+
+    // Handle proposal update (DWxProposals list)
+    if (listName.toLowerCase().includes('proposals')) {
+      updateTestProposal(Number(itemId), fields as Partial<Proposal>);
       return {
         id: String(itemId),
         fields: { ...fields, id: Number(itemId) },
@@ -564,44 +649,58 @@ class MockGraphService {
 
     // Handle service request deletion (DWxServiceRequests list)
     if (listName.toLowerCase().includes('servicerequests')) {
-      const deleted = deleteTestBooking(Number(itemId));
+      const deleted = deleteTestServiceRequest(Number(itemId));
       if (!deleted) {
-        throw new Error(`Booking ${itemId} not found`);
+        throw new Error(`Service request ${itemId} not found`);
       }
     }
   }
 
   // ==================== TRANSFORM HELPERS ====================
 
-  private transformBookingsToListItems(bookings: Booking[]): unknown[] {
-    return bookings.map((booking) => ({
-      id: String(booking.Id),
+  private transformServiceRequestsToListItems(requests: ServiceRequest[]): unknown[] {
+    return requests.map((req) => ({
+      id: String(req.Id),
       fields: {
-        id: booking.Id,
-        Title: booking.Title,
-        AccountManagerName: booking.AccountManagerName,
-        AccountManagerEmail: booking.AccountManagerEmail,
-        ClientName: booking.ClientName,
-        BookingType: booking.BookingType,
-        LicenseCount: booking.LicenseCount,
-        ProposedSlot1: booking.ProposedSlot1,
-        ProposedSlot2: booking.ProposedSlot2,
-        ProposedSlot3: booking.ProposedSlot3,
-        ConfirmedDateTime: booking.ConfirmedDateTime,
-        Comments: booking.Comments,
-        IsPremiumClient: booking.IsPremiumClient,
-        Status: booking.Status,
-        Outcome: booking.Outcome,
-        NextSteps: booking.NextSteps,
-        CalendarEventId: booking.CalendarEventId,
-        AssignedSpecialistName: booking.AssignedSpecialistName,
-        AssignedSpecialistEmail: booking.AssignedSpecialistEmail,
-        AssignedSpecialistRole: booking.AssignedSpecialistRole,
-        DealSize: booking.DealSize,
-        DealValue: booking.DealValue,
-        Priority: booking.Priority,
-        Created: booking.Created,
-        Author: booking.CreatedBy,
+        id: req.Id,
+        Title: req.Title,
+        ServiceId: req.ServiceId,
+        ServiceName: req.ServiceName,
+        AccountManagerName: req.AccountManagerName,
+        AccountManagerEmail: req.AccountManagerEmail,
+        AccountManagerTenant: req.AccountManagerTenant,
+        ClientName: req.ClientName,
+        ClientId: req.ClientId,
+        ContactName: req.ContactName,
+        ContactEmail: req.ContactEmail,
+        ContactPhone: req.ContactPhone,
+        Industry: req.Industry || req.ClientIndustry,
+        CompanySize: req.CompanySize || req.ClientCompanySize,
+        IsPremiumClient: req.IsPremiumClient,
+        FunnelStage: req.FunnelStage,
+        InterestLevel: req.InterestLevel,
+        DealValue: req.DealValue,
+        DealProbability: req.DealProbability,
+        WeightedPipeline: req.WeightedPipeline,
+        ExpectedCloseDate: req.ExpectedCloseDate,
+        Budget: req.Budget,
+        Timeline: req.Timeline,
+        ProposedSlot1: req.ProposedSlot1,
+        ProposedSlot2: req.ProposedSlot2,
+        ProposedSlot3: req.ProposedSlot3,
+        ConfirmedDateTime: req.ConfirmedDateTime,
+        CalendarEventId: req.CalendarEventId,
+        AssignedSpecialistName: req.AssignedSpecialistName,
+        AssignedSpecialistEmail: req.AssignedSpecialistEmail,
+        AssignedSpecialistRole: req.AssignedSpecialistRole,
+        ServiceCategory: req.ServiceCategory,
+        Requirements: req.Requirements,
+        ServiceHistory: req.ServiceHistory,
+        WinLossReason: req.WinLossReason,
+        NextSteps: req.NextSteps,
+        Comments: req.Comments,
+        Created: req.Created,
+        Modified: req.Modified,
       },
     }));
   }
@@ -663,6 +762,47 @@ class MockGraphService {
         HireDate: manager.HireDate,
         Notes: manager.Notes,
         Created: manager.Created,
+      },
+    }));
+  }
+
+  private transformProposalsToListItems(proposals: Proposal[]): unknown[] {
+    return proposals.map((p) => ({
+      id: String(p.Id),
+      fields: {
+        id: p.Id,
+        Title: p.Title,
+        ServiceRequestId: p.ServiceRequestId,
+        Status: p.Status,
+        Version: p.Version,
+        ProposalType: p.ProposalType,
+        TemplateName: p.TemplateName,
+        ValidUntil: p.ValidUntil,
+        SentDate: p.SentDate,
+        ClientResponseDate: p.ClientResponseDate,
+        ClientFeedback: p.ClientFeedback,
+        InternalNotes: p.InternalNotes,
+        DocumentUrl: p.DocumentUrl,
+        CreatedByEmail: p.CreatedByEmail,
+        CreatedByName: p.CreatedByName,
+        ApprovedByEmail: p.ApprovedByEmail,
+        ApprovedByName: p.ApprovedByName,
+        ApprovedDate: p.ApprovedDate,
+        // JSON section columns — serialize to strings as SharePoint would store them
+        ExecutiveSummary_JSON: p.ExecutiveSummary ? JSON.stringify(p.ExecutiveSummary) : null,
+        SolutionOverview_JSON: p.SolutionOverview ? JSON.stringify(p.SolutionOverview) : null,
+        TechnologyStack_JSON: p.TechnologyStack ? JSON.stringify(p.TechnologyStack) : null,
+        ScopeOfWork_JSON: p.ScopeOfWork ? JSON.stringify(p.ScopeOfWork) : null,
+        PricingBreakdown_JSON: p.PricingBreakdown ? JSON.stringify(p.PricingBreakdown) : null,
+        Timeline_JSON: p.Timeline ? JSON.stringify(p.Timeline) : null,
+        TeamComposition_JSON: p.TeamComposition ? JSON.stringify(p.TeamComposition) : null,
+        TermsAndConditions_JSON: p.Terms ? JSON.stringify(p.Terms) : null,
+        ChangeControl_JSON: p.ChangeControl ? JSON.stringify(p.ChangeControl) : null,
+        Assumptions_JSON: p.Assumptions.length > 0 ? JSON.stringify(p.Assumptions) : null,
+        RisksAndMitigations_JSON: p.Risks.length > 0 ? JSON.stringify(p.Risks) : null,
+        SigningPage_JSON: p.SigningPage ? JSON.stringify(p.SigningPage) : null,
+        Created: p.Created,
+        Modified: p.Modified,
       },
     }));
   }

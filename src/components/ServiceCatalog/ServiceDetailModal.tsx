@@ -37,6 +37,7 @@ import {
   LightbulbRegular,
 } from '@fluentui/react-icons';
 import { DWService, ServiceComplexity } from '../../types/ServiceRequest';
+import { DW_COLORS } from '../../utils/buttonStyles';
 
 const useStyles = makeStyles({
   dialogSurface: {
@@ -387,7 +388,7 @@ const useStyles = makeStyles({
     flexShrink: 0,
   },
   requestButton: {
-    backgroundColor: '#1a5a8a',
+    backgroundColor: DW_COLORS.primary,
     color: 'white',
     fontWeight: '600',
     ':hover': {
@@ -471,7 +472,7 @@ export const ServiceDetailModal: React.FC<ServiceDetailModalProps> = ({
 }) => {
   const styles = useStyles();
 
-  const heroColor = categoryColors[service.Category] || '#1a5a8a';
+  const heroColor = categoryColors[service.Category] || DW_COLORS.primary;
   const IconComponent = iconMap[service.IconName || ''] || FlashRegular;
 
   const relatedServices = useMemo(() => {

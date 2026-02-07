@@ -2,6 +2,7 @@ import React from 'react';
 import { makeStyles, Button, Text, Spinner } from '@fluentui/react-components';
 import { ShieldCheckmark24Regular, Checkmark24Regular } from '@fluentui/react-icons';
 import { useAuth } from '../../contexts/AuthContext';
+import { DW_COLORS } from '../../utils/buttonStyles';
 
 const useStyles = makeStyles({
   // Root container - full viewport split screen
@@ -295,7 +296,7 @@ const useStyles = makeStyles({
     padding: '13px 24px',
     fontSize: '14px',
     fontWeight: '600',
-    backgroundColor: '#1a5a8a',
+    backgroundColor: DW_COLORS.primary,
     borderRadius: '8px',
     ':hover': {
       backgroundColor: '#0f3d5c',
@@ -464,7 +465,7 @@ const IconPreview: React.FC = () => (
     position: 'fixed',
     bottom: '20px',
     left: '20px',
-    backgroundColor: '#1a5a8a',
+    backgroundColor: DW_COLORS.primary,
     padding: '20px',
     borderRadius: '12px',
     zIndex: 9999,

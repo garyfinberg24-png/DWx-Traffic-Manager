@@ -26,6 +26,7 @@ import {
   InfoRegular,
 } from '@fluentui/react-icons';
 import { DWService, ServiceComplexity } from '../../types/ServiceRequest';
+import { DW_COLORS } from '../../utils/buttonStyles';
 
 const useStyles = makeStyles({
   dialogSurface: {
@@ -41,7 +42,7 @@ const useStyles = makeStyles({
     display: 'flex',
     alignItems: 'center',
     gap: '16px',
-    backgroundColor: '#1a5a8a',
+    backgroundColor: DW_COLORS.primary,
     color: 'white',
     borderRadius: '8px 8px 0 0',
     marginTop: '-1px',
@@ -198,7 +199,7 @@ const useStyles = makeStyles({
     minWidth: '80px',
   },
   submitButton: {
-    backgroundColor: '#1a5a8a',
+    backgroundColor: DW_COLORS.primary,
     color: 'white',
     fontWeight: '600',
     minWidth: '140px',

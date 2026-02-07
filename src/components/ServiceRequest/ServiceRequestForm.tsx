@@ -71,6 +71,7 @@ import { referenceDataService } from '../../services/ReferenceDataService';
 import { Client } from '../../types/ReferenceData';
 import { ServiceCard } from '../ServiceCatalog/ServiceCard';
 import { ServiceRequirementsStep } from './ServiceRequirementsStep';
+import { DW_COLORS } from '../../utils/buttonStyles';
 import { getServiceRequirements, validateRequirements } from '../../types/ServiceRequirements';
 import { addHours, format, setHours, setMinutes } from 'date-fns';
 
@@ -147,11 +148,11 @@ const useStyles = makeStyles({
     transition: 'all 0.2s ease',
   },
   progressStepActive: {
-    backgroundColor: '#1e6b7b',
+    backgroundColor: DW_COLORS.teal,
     color: 'white',
   },
   progressStepCompleted: {
-    backgroundColor: '#107c10',
+    backgroundColor: DW_COLORS.success,
     color: 'white',
   },
   progressStepPending: {
@@ -256,7 +257,7 @@ const useStyles = makeStyles({
     gap: '12px',
   },
   primaryButton: {
-    backgroundColor: '#1e6b7b',
+    backgroundColor: DW_COLORS.teal,
     ':hover': {
       backgroundColor: '#165a68',
     },

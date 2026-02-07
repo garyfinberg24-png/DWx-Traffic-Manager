@@ -54,6 +54,7 @@ import {
   ArrowSync24Regular,
   PeopleTeam24Regular,
 } from '@fluentui/react-icons';
+import { DW_COLORS } from '../../utils/buttonStyles';
 import { accountManagerService } from '../../services/AccountManagerService';
 import {
   AccountManager,
@@ -1006,7 +1007,7 @@ export const AccountManagerManagement: React.FC<AccountManagerManagementProps> =
               </Button>
               <Button
                 appearance="primary"
-                style={{ backgroundColor: '#d13438' }}
+                style={{ backgroundColor: DW_COLORS.danger }}
                 icon={isSubmitting ? <Spinner size="tiny" /> : <Delete24Regular />}
                 onClick={handleDelete}
                 disabled={isSubmitting}

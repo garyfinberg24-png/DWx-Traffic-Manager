@@ -23,6 +23,7 @@ import {
   ArrowForwardRegular,
   DismissCircleRegular,
 } from '@fluentui/react-icons';
+import { DW_COLORS } from '../../utils/buttonStyles';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
 import {
@@ -57,7 +58,7 @@ const useStyles = makeStyles({
     color: '#242424',
   },
   badge: {
-    backgroundColor: '#d13438',
+    backgroundColor: DW_COLORS.danger,
     color: 'white',
     fontSize: '11px',
     fontWeight: '600',
@@ -137,13 +138,13 @@ const useStyles = makeStyles({
     minWidth: '180px',
   },
   advanceButton: {
-    backgroundColor: '#1e6b7b',
+    backgroundColor: DW_COLORS.teal,
     ':hover': {
       backgroundColor: '#165a68',
     },
   },
   confirmButton: {
-    backgroundColor: '#107c10',
+    backgroundColor: DW_COLORS.success,
     ':hover': {
       backgroundColor: '#0b5a0b',
     },
@@ -616,7 +617,7 @@ export const RequestsQueue: React.FC<RequestsQueueProps> = ({
                     icon={<ArrowForwardRegular />}
                     onClick={() => handleBulkAdvanceStage(bulkNextStage)}
                     size="small"
-                    style={{ backgroundColor: '#1e6b7b' }}
+                    style={{ backgroundColor: DW_COLORS.teal }}
                   >
                     → {bulkNextStage}
                   </Button>

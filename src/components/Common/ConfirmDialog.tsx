@@ -12,6 +12,7 @@ import {
   tokens,
 } from '@fluentui/react-components';
 import { Warning24Regular } from '@fluentui/react-icons';
+import { DW_COLORS } from '../../utils/buttonStyles';
 
 const useStyles = makeStyles({
   surface: {
@@ -61,7 +62,7 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   const styles = useStyles();
 
   const dangerStyle = intent === 'danger' ? {
-    backgroundColor: '#d13438',
+    backgroundColor: DW_COLORS.danger,
     color: 'white',
   } : undefined;
 

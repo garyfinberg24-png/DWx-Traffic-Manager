@@ -26,6 +26,7 @@ import { serviceCatalogService } from '../../services/ServiceCatalogService';
 import { ServiceCard } from './ServiceCard';
 import { ServiceDetails } from './ServiceDetails';
 import { ServiceDetailModal } from './ServiceDetailModal';
+import { DW_COLORS } from '../../utils/buttonStyles';
 
 // ============================================================================
 // Category colors (shared with ServiceCard)
@@ -276,7 +277,7 @@ const POPULAR_TITLES = new Set([
 type CatalogTab = 'Popular' | 'All' | ServiceCategory;
 
 const CATALOG_TABS: { id: CatalogTab; label: string; color: string }[] = [
-  { id: 'Popular', label: 'Popular', color: '#1e6b7b' },
+  { id: 'Popular', label: 'Popular', color: DW_COLORS.teal },
   { id: 'All', label: 'All Services', color: '#374151' },
   { id: 'Power Platform', label: 'Power Platform', color: categoryColors['Power Platform'] },
   { id: 'SPFx Development', label: 'SPFx', color: categoryColors['SPFx Development'] },
@@ -562,7 +563,7 @@ export const ServiceCatalog: React.FC<ServiceCatalogProps> = ({ onRequestService
             {(searchText || selectedTab !== 'All') && (
               <Button
                 appearance="primary"
-                style={{ marginTop: '16px', backgroundColor: '#1e6b7b' }}
+                style={{ marginTop: '16px', backgroundColor: DW_COLORS.teal }}
                 onClick={() => { setSearchText(''); setSelectedTab('All'); }}
               >
                 Show All Services

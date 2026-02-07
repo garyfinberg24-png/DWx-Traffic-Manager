@@ -33,6 +33,7 @@ import {
   DWX_AGENTS,
   getCategoriesForType,
 } from '../../types/Product';
+import { DW_COLORS } from '../../utils/buttonStyles';
 
 const useStyles = makeStyles({
   container: {
@@ -115,7 +116,7 @@ const useStyles = makeStyles({
     color: '#333333',
   },
   categoryChipActive: {
-    backgroundColor: '#1a5a8a',
+    backgroundColor: DW_COLORS.primary,
     color: 'white',
     ...shorthands.borderColor('#1a5a8a'),
   },
@@ -251,7 +252,7 @@ const TAB_CONFIG: Record<TabValue, { label: string; icon: React.ReactNode; produ
     label: 'DWx Apps',
     icon: <Apps24Regular />,
     products: DWX_APPS,
-    color: '#1a5a8a',
+    color: DW_COLORS.primary,
   },
   webparts: {
     label: 'Web Parts',

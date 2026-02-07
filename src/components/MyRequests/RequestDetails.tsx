@@ -35,6 +35,7 @@ import { serviceRequestService } from '../../services/ServiceRequestService';
 import { followUpService } from '../../services/FollowUpService';
 import { SessionPrepDialog } from '../SessionPrep';
 import { ProposalBuilder, ProposalTracker } from '../Proposal';
+import { DW_COLORS } from '../../utils/buttonStyles';
 import { format } from 'date-fns';
 import { DealActivityTimeline } from './DealActivityTimeline';
 import { EmailTimeline } from './EmailTimeline';
@@ -78,7 +79,7 @@ const useStyles = makeStyles({
     width: '40px',
     height: '40px',
     borderRadius: '50%',
-    backgroundColor: '#1a5a8a',
+    backgroundColor: DW_COLORS.primary,
     color: 'white',
     display: 'flex',
     alignItems: 'center',
@@ -131,25 +132,25 @@ const useStyles = makeStyles({
     gap: '8px',
   },
   advanceButton: {
-    backgroundColor: '#1a5a8a',
+    backgroundColor: DW_COLORS.primary,
     ':hover': {
       backgroundColor: '#145a7a',
     },
   },
   regressButton: {
-    backgroundColor: '#616161',
+    backgroundColor: DW_COLORS.neutral,
     ':hover': {
       backgroundColor: '#4d4d4d',
     },
   },
   lostButton: {
-    backgroundColor: '#d13438',
+    backgroundColor: DW_COLORS.danger,
     ':hover': {
       backgroundColor: '#a52a2d',
     },
   },
   wonButton: {
-    backgroundColor: '#107c10',
+    backgroundColor: DW_COLORS.success,
     ':hover': {
       backgroundColor: '#0b5a0b',
     },
@@ -667,7 +668,7 @@ export const RequestDetails: React.FC<RequestDetailsProps> = ({
               appearance="primary"
               icon={<Sparkle24Regular />}
               onClick={() => setShowSessionPrep(true)}
-              style={{ backgroundColor: '#1e6b7b' }}
+              style={{ backgroundColor: DW_COLORS.teal }}
             >
               Open Session Prep
             </Button>
@@ -683,6 +684,7 @@ export const RequestDetails: React.FC<RequestDetailsProps> = ({
           <ProposalTracker
             serviceRequestId={request.Id}
             onOpenProposal={() => setShowProposal(true)}
+            onCreateProposal={() => setShowProposal(true)}
           />
         </DetailSection>
       )}
@@ -1012,7 +1014,7 @@ export const RequestDetails: React.FC<RequestDetailsProps> = ({
           <Button
             appearance="primary"
             onClick={onClose}
-            style={{ backgroundColor: '#1a5a8a' }}
+            style={{ backgroundColor: DW_COLORS.primary }}
           >
             Done
           </Button>

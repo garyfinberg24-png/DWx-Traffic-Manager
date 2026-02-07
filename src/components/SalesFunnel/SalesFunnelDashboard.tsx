@@ -36,6 +36,7 @@ import {
   downloadProductRequestsExcel,
   downloadProductRequestsCSV,
 } from '../../utils/excelExport';
+import { DW_COLORS } from '../../utils/buttonStyles';
 import { KPICardSkeleton } from '../Common/CardSkeleton';
 import { useAuth } from '../../contexts/AuthContext';
 import {
@@ -271,7 +272,7 @@ export const SalesFunnelDashboard: React.FC<SalesFunnelDashboardProps> = ({
             appearance="primary"
             icon={<AddRegular />}
             size="small"
-            style={{ backgroundColor: '#1a5a8a' }}
+            style={{ backgroundColor: DW_COLORS.primary }}
             onClick={() => setShowQuickCreate(true)}
           >
             Quick Create

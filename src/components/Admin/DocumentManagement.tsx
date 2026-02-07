@@ -30,6 +30,7 @@ import {
   Save24Regular,
   FolderOpen24Regular,
 } from '@fluentui/react-icons';
+import { DW_COLORS } from '../../utils/buttonStyles';
 import { getAuthService } from '../../services/serviceFactory';
 import { config } from '../../config/environmentConfig';
 import { BOOKING_DOCUMENTS } from '../../services/DocumentService';
@@ -92,7 +93,7 @@ const useStyles = makeStyles({
     left: '0',
     right: '0',
     height: '2px',
-    backgroundColor: '#1e6b7b',
+    backgroundColor: DW_COLORS.teal,
   },
   tabBadge: {
     backgroundColor: tokens.colorNeutralBackground3,
@@ -352,7 +353,7 @@ const useStyles = makeStyles({
     flexShrink: 0,
   },
   primaryBtn: {
-    backgroundColor: '#1e6b7b',
+    backgroundColor: DW_COLORS.teal,
   },
   selectedFile: {
     display: 'flex',

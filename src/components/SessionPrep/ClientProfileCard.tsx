@@ -22,6 +22,7 @@ import {
 import { ClientProfile, EngagementSummary } from '../../types/SessionPreparation';
 import { DetailSection, DetailGrid, DetailField } from '../MyRequests/DetailModalShell';
 import { format } from 'date-fns';
+import { DW_COLORS } from '../../utils/buttonStyles';
 
 const useStyles = makeStyles({
   emptyState: {
@@ -88,7 +89,7 @@ const useStyles = makeStyles({
     width: '6px',
     height: '6px',
     borderRadius: '50%',
-    backgroundColor: '#1a5a8a',
+    backgroundColor: DW_COLORS.primary,
     flexShrink: 0,
     marginTop: '6px',
   },

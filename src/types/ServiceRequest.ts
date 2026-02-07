@@ -54,6 +54,7 @@ export interface DWService {
   KeyBenefits?: string[];
   IdealFor?: string[];
   IsPopular?: boolean;
+  SLATargets?: SLATargets;
   Created?: string;
   Modified?: string;
 }
@@ -82,6 +83,7 @@ export interface DWServiceInput {
   KeyBenefits?: string[];
   IdealFor?: string[];
   IsPopular?: boolean;
+  SLATargets?: SLATargets;
 }
 
 // ============================================================================
@@ -226,6 +228,9 @@ export interface ServiceRequest {
 
   // Document References
   DocumentIds?: string; // JSON array of document IDs
+
+  // SLA Tracking
+  StageTimestamps?: StageTimestamps;
 
   // Audit
   Created: string;
@@ -453,6 +458,88 @@ export interface ForecastData {
   weighted: number;
   actual?: number;
   deals: { id: number; client: string; value: number; probability: number }[];
+}
+
+// ============================================================================
+// SLA Tracking Types
+// ============================================================================
+
+/**
+ * SLA status for a deal in its current stage
+ */
+export type SLAStatus = 'on-track' | 'at-risk' | 'breached';
+
+/**
+ * Timestamps recording when each stage was entered
+ */
+export type StageTimestamps = Partial<Record<FunnelStage, string>>;
+
+/**
+ * SLA targets per stage transition (in business days)
+ */
+export interface SLATargets {
+  LeadToQualified?: number;
+  QualifiedToDiscovery?: number;
+  DiscoveryToProposal?: number;
+  ProposalToNegotiation?: number;
+  NegotiationToWon?: number;
+}
+
+/**
+ * Default SLA targets by service complexity level (business days)
+ */
+export const DEFAULT_SLA_TARGETS: Record<ServiceComplexity, SLATargets> = {
+  Low: {
+    LeadToQualified: 2,
+    QualifiedToDiscovery: 3,
+    DiscoveryToProposal: 5,
+    ProposalToNegotiation: 3,
+    NegotiationToWon: 3,
+  },
+  Medium: {
+    LeadToQualified: 3,
+    QualifiedToDiscovery: 5,
+    DiscoveryToProposal: 7,
+    ProposalToNegotiation: 5,
+    NegotiationToWon: 5,
+  },
+  High: {
+    LeadToQualified: 5,
+    QualifiedToDiscovery: 7,
+    DiscoveryToProposal: 10,
+    ProposalToNegotiation: 7,
+    NegotiationToWon: 7,
+  },
+  Enterprise: {
+    LeadToQualified: 7,
+    QualifiedToDiscovery: 10,
+    DiscoveryToProposal: 14,
+    ProposalToNegotiation: 10,
+    NegotiationToWon: 10,
+  },
+};
+
+/**
+ * Maps a funnel stage to the SLA target key for the transition INTO that stage
+ */
+export const STAGE_TO_SLA_KEY: Partial<Record<FunnelStage, keyof SLATargets>> = {
+  Qualified: 'LeadToQualified',
+  Discovery: 'QualifiedToDiscovery',
+  Proposal: 'DiscoveryToProposal',
+  Negotiation: 'ProposalToNegotiation',
+  Won: 'NegotiationToWon',
+};
+
+/**
+ * SLA stage breakdown for a completed stage
+ */
+export interface SLAStageBreakdown {
+  stage: FunnelStage;
+  enteredAt: string;
+  exitedAt?: string;
+  daysInStage: number;
+  targetDays?: number;
+  status: SLAStatus;
 }
 
 // ============================================================================

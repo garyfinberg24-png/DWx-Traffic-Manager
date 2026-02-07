@@ -51,6 +51,7 @@ import { sharePointService } from '../../services/SharePointService';
 import { notificationService } from '../../services/NotificationService';
 import { useAuth } from '../../contexts/AuthContext';
 import { ApprovalResult } from '../../types/Booking';
+import { DW_COLORS } from '../../utils/buttonStyles';
 
 const useStyles = makeStyles({
   container: {
@@ -321,7 +322,7 @@ const useStyles = makeStyles({
     minWidth: '100px',
   },
   approveBtn: {
-    backgroundColor: '#107c10',
+    backgroundColor: DW_COLORS.success,
     minWidth: '150px',
     whiteSpace: 'nowrap',
     ':hover': {
@@ -548,7 +549,7 @@ const useStyles = makeStyles({
     color: '#242424',
   },
   successCloseBtn: {
-    backgroundColor: '#107c10',
+    backgroundColor: DW_COLORS.success,
     minWidth: '120px',
     ':hover': {
       backgroundColor: '#0b5c0b',

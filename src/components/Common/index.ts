@@ -2,6 +2,7 @@ export { LoadingSpinner } from './LoadingSpinner';
 export { ErrorBoundary } from './ErrorBoundary';
 export { Header } from './Header';
 export { NotificationCenter } from './NotificationCenter';
+export { RecentActivity } from './RecentActivity';
 export { UserGuide, showUserGuide } from './UserGuide';
 export { ConfirmDialog } from './ConfirmDialog';
 export { RequestCardSkeleton, KPICardSkeleton, TableRowSkeleton } from './CardSkeleton';

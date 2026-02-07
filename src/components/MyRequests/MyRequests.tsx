@@ -27,10 +27,13 @@ import {
   AddRegular,
   FilterRegular,
   GridRegular,
+  TextBulletListLtr24Regular,
   Apps24Regular,
   ArrowDownloadRegular,
   SaveRegular,
 } from '@fluentui/react-icons';
+import { DW_COLORS } from '../../utils/buttonStyles';
+import { slaService } from '../../services/SLAService';
 import { downloadServiceRequestsExcel, downloadProductRequestsExcel } from '../../utils/excelExport';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
@@ -83,7 +86,7 @@ const useStyles = makeStyles({
     color: '#616161',
   },
   newRequestBtn: {
-    backgroundColor: '#1e6b7b',
+    backgroundColor: DW_COLORS.teal,
   },
   filterSection: {
     display: 'flex',
@@ -109,7 +112,7 @@ const useStyles = makeStyles({
     gap: '6px',
   },
   stageChipActive: {
-    backgroundColor: '#1e6b7b',
+    backgroundColor: DW_COLORS.teal,
     color: 'white',
     ...shorthands.borderColor('#1e6b7b'),
   },
@@ -255,6 +258,76 @@ const useStyles = makeStyles({
     fontSize: '13px',
     color: '#616161',
   },
+  viewToggleGroup: {
+    display: 'flex',
+    gap: '2px',
+    backgroundColor: '#f0f0f0',
+    borderRadius: '6px',
+    padding: '2px',
+  },
+  viewToggleBtn: {
+    border: 'none',
+    backgroundColor: 'transparent',
+    padding: '4px 8px',
+    borderRadius: '4px',
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    color: '#616161',
+    transition: 'all 0.15s ease',
+  },
+  viewToggleBtnActive: {
+    backgroundColor: 'white',
+    color: DW_COLORS.teal,
+    boxShadow: '0 1px 2px rgba(0,0,0,0.1)',
+  },
+  listTable: {
+    width: '100%',
+    borderCollapse: 'collapse',
+    backgroundColor: '#ffffff',
+    borderRadius: '8px',
+    overflow: 'hidden',
+    boxShadow: '0 1px 2px rgba(0,0,0,0.08)',
+    border: '1px solid #e1e1e1',
+  },
+  listTh: {
+    padding: '10px 14px',
+    textAlign: 'left',
+    fontSize: '12px',
+    fontWeight: '600',
+    color: '#616161',
+    backgroundColor: '#fafafa',
+    borderBottom: '1px solid #e1e1e1',
+    whiteSpace: 'nowrap',
+  },
+  listTd: {
+    padding: '10px 14px',
+    fontSize: '13px',
+    color: '#242424',
+    borderBottom: '1px solid #f0f0f0',
+  },
+  listRow: {
+    cursor: 'pointer',
+    transition: 'background-color 0.15s ease',
+    ':hover': {
+      backgroundColor: '#f5f5f5',
+    },
+  },
+  stageBadge: {
+    display: 'inline-block',
+    padding: '2px 8px',
+    borderRadius: '12px',
+    fontSize: '11px',
+    fontWeight: '600',
+    color: 'white',
+  },
+  interestBadge: {
+    display: 'inline-block',
+    padding: '2px 8px',
+    borderRadius: '12px',
+    fontSize: '11px',
+    fontWeight: '500',
+  },
 });
 
 const STAGE_OPTIONS: (FunnelStage | 'All')[] = [
@@ -322,6 +395,7 @@ export const MyRequests: React.FC<MyRequestsProps> = ({ onNewRequest }) => {
   const { showToast } = useToast();
 
   const [activeTab, setActiveTab] = useState<'service' | 'product' | 'drafts'>('service');
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [draftCount, setDraftCount] = useState(0);
   const [requests, setRequests] = useState<ServiceRequest[]>([]);
   const [productRequests, setProductRequests] = useState<ProductRequest[]>([]);
@@ -880,7 +954,26 @@ export const MyRequests: React.FC<MyRequestsProps> = ({ onNewRequest }) => {
         </Dropdown>
 
         <span className={styles.resultsInfo}>
-          <GridRegular style={{ width: '16px', height: '16px' }} />
+          <div className={styles.viewToggleGroup}>
+            <button
+              className={`${styles.viewToggleBtn} ${viewMode === 'grid' ? styles.viewToggleBtnActive : ''}`}
+              onClick={() => setViewMode('grid')}
+              title="Grid view"
+              aria-label="Grid view"
+              aria-pressed={viewMode === 'grid'}
+            >
+              <GridRegular style={{ width: '16px', height: '16px' }} />
+            </button>
+            <button
+              className={`${styles.viewToggleBtn} ${viewMode === 'list' ? styles.viewToggleBtnActive : ''}`}
+              onClick={() => setViewMode('list')}
+              title="List view"
+              aria-label="List view"
+              aria-pressed={viewMode === 'list'}
+            >
+              <TextBulletListLtr24Regular style={{ width: '16px', height: '16px' }} />
+            </button>
+          </div>
           {filteredRequests.length} {filteredRequests.length === 1 ? 'request' : 'requests'}
         </span>
       </div>
@@ -893,14 +986,92 @@ export const MyRequests: React.FC<MyRequestsProps> = ({ onNewRequest }) => {
         onClear={clearAdvancedFilters}
       />
 
-      {/* Request Grid */}
+      {/* Request Grid / List */}
       {filteredRequests.length > 0 ? (
         <>
-          <div className={styles.grid}>
-            {paginatedServiceRequests.map((request) => (
-              <RequestCard key={request.Id} request={request} onClick={handleRequestClick} onQuickAction={handleQuickAction} />
-            ))}
-          </div>
+          {viewMode === 'grid' ? (
+            <div className={styles.grid}>
+              {paginatedServiceRequests.map((request) => (
+                <RequestCard key={request.Id} request={request} onClick={handleRequestClick} onQuickAction={handleQuickAction} />
+              ))}
+            </div>
+          ) : (
+            <table className={styles.listTable}>
+              <thead>
+                <tr>
+                  <th className={styles.listTh}>Client</th>
+                  <th className={styles.listTh}>Service</th>
+                  <th className={styles.listTh}>Stage</th>
+                  <th className={styles.listTh}>Interest</th>
+                  <th className={styles.listTh}>Specialist</th>
+                  <th className={styles.listTh} style={{ textAlign: 'right' }}>Deal Value</th>
+                  <th className={styles.listTh} style={{ textAlign: 'right' }}>Probability</th>
+                  <th className={styles.listTh}>Expected Close</th>
+                  <th className={styles.listTh}>Created</th>
+                </tr>
+              </thead>
+              <tbody>
+                {paginatedServiceRequests.map((request) => (
+                  <tr
+                    key={request.Id}
+                    className={styles.listRow}
+                    onClick={() => handleRequestClick(request)}
+                  >
+                    <td className={styles.listTd} style={{ fontWeight: '600' }}>{request.ClientName}</td>
+                    <td className={styles.listTd}>{request.ServiceName}</td>
+                    <td className={styles.listTd}>
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                        <span
+                          className={styles.stageBadge}
+                          style={{ backgroundColor: STAGE_METADATA[request.FunnelStage]?.color || '#616161' }}
+                        >
+                          {request.FunnelStage}
+                        </span>
+                        {request.FunnelStage !== 'Won' && request.FunnelStage !== 'Lost' && (() => {
+                          const slaStatus = slaService.getSLAStatus(request);
+                          const slaColor = slaStatus === 'breached' ? '#EF4444' : slaStatus === 'at-risk' ? '#F59E0B' : '#10B981';
+                          return (
+                            <span
+                              style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: slaColor, display: 'inline-block' }}
+                              title={`SLA: ${slaStatus === 'on-track' ? 'On Track' : slaStatus === 'at-risk' ? 'At Risk' : 'Breached'} (${slaService.getTimeInCurrentStage(request)}d)`}
+                            />
+                          );
+                        })()}
+                      </span>
+                    </td>
+                    <td className={styles.listTd}>
+                      <span
+                        className={styles.interestBadge}
+                        style={{
+                          backgroundColor: request.InterestLevel === 'Hot' ? '#fde7e9' : request.InterestLevel === 'Warm' ? '#fff4ce' : '#e8f5e9',
+                          color: request.InterestLevel === 'Hot' ? '#d13438' : request.InterestLevel === 'Warm' ? '#8a6914' : '#107c10',
+                        }}
+                      >
+                        {request.InterestLevel}
+                      </span>
+                    </td>
+                    <td className={styles.listTd} style={{ color: request.AssignedSpecialistName ? '#242424' : '#a0a0a0' }}>
+                      {request.AssignedSpecialistName || 'Unassigned'}
+                    </td>
+                    <td className={styles.listTd} style={{ textAlign: 'right', fontWeight: '500' }}>
+                      {request.DealValue ? formatCurrency(request.DealValue) : '—'}
+                    </td>
+                    <td className={styles.listTd} style={{ textAlign: 'right' }}>
+                      {request.DealProbability != null ? `${request.DealProbability}%` : '—'}
+                    </td>
+                    <td className={styles.listTd}>
+                      {request.ExpectedCloseDate
+                        ? new Date(request.ExpectedCloseDate).toLocaleDateString('en-ZA', { year: 'numeric', month: 'short', day: 'numeric' })
+                        : 'Not set'}
+                    </td>
+                    <td className={styles.listTd} style={{ color: '#616161', fontSize: '12px' }}>
+                      {new Date(request.Created).toLocaleDateString('en-ZA', { year: 'numeric', month: 'short', day: 'numeric' })}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
           <Pagination
             currentPage={serviceCurrentPage}
             totalItems={serviceTotalItems}

@@ -19,6 +19,7 @@ import {
   STAGE_TRANSITIONS,
   ServiceRequestFilterCriteria,
   Specialist,
+  StageTimestamps,
 } from '../types/ServiceRequest';
 
 class ServiceRequestService {
@@ -83,6 +84,8 @@ class ServiceRequestService {
         Requirements: data.Requirements,
         ServiceHistory: data.ServiceHistory,
         Comments: data.Comments,
+        // SLA: Record initial stage timestamp
+        StageTimestamps_JSON: JSON.stringify({ Lead: new Date().toISOString() }),
         // Tender-specific fields (only included when provided)
         ...(data.TenderReferenceNumber && { TenderReferenceNumber: data.TenderReferenceNumber }),
         ...(data.BriefingSessionDate && { BriefingSessionDate: data.BriefingSessionDate }),
@@ -316,6 +319,14 @@ class ServiceRequestService {
       const updateData: Record<string, unknown> = {
         FunnelStage: newStage,
       };
+
+      // SLA: Record stage entry timestamp
+      const existingTimestamps: StageTimestamps = currentRequest.StageTimestamps || {};
+      const updatedTimestamps: StageTimestamps = {
+        ...existingTimestamps,
+        [newStage]: new Date().toISOString(),
+      };
+      updateData.StageTimestamps_JSON = JSON.stringify(updatedTimestamps);
 
       // Handle Won/Lost specific fields
       if (newStage === 'Won' || newStage === 'Lost') {
@@ -916,9 +927,19 @@ class ServiceRequestService {
       WinLossReason: fields.WinLossReason as string,
       NextSteps: fields.NextSteps as string,
       Comments: fields.Comments as string,
+      StageTimestamps: this.parseStageTimestamps(fields.StageTimestamps_JSON as string),
       Created: fields.Created as string || '',
       Modified: fields.Modified as string,
     };
+  }
+
+  private parseStageTimestamps(json: string | undefined | null): StageTimestamps | undefined {
+    if (!json) return undefined;
+    try {
+      return JSON.parse(json) as StageTimestamps;
+    } catch {
+      return undefined;
+    }
   }
 }
 

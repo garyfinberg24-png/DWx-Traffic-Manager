@@ -47,6 +47,7 @@ import { MeetingAgendaView } from './MeetingAgendaView';
 import { PrepChecklist } from './PrepChecklist';
 import { MeetingNotesEditor } from './MeetingNotesEditor';
 import { format } from 'date-fns';
+import { DW_COLORS } from '../../utils/buttonStyles';
 
 // ============================================================================
 // Local styles (only things NOT in DetailModalShell)
@@ -398,7 +399,7 @@ export const SessionPrepDialog: React.FC<SessionPrepDialogProps> = ({
           icon={<CheckmarkCircleRegular />}
           onClick={handleMarkAsReady}
           disabled={generating || saving || completionPercent < 50}
-          style={{ backgroundColor: '#107c10' }}
+          style={{ backgroundColor: DW_COLORS.success }}
           size="small"
         >
           Mark as Ready
@@ -406,7 +407,7 @@ export const SessionPrepDialog: React.FC<SessionPrepDialogProps> = ({
       )}
     </div>
   ) : (
-    <Button appearance="primary" onClick={onClose} style={{ backgroundColor: '#1a5a8a' }}>
+    <Button appearance="primary" onClick={onClose} style={{ backgroundColor: DW_COLORS.primary }}>
       Done
     </Button>
   );

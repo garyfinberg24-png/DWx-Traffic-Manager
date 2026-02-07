@@ -38,6 +38,7 @@ import {
 } from '@fluentui/react-icons';
 import { DWService, ServiceComplexity } from '../../types/ServiceRequest';
 import { serviceCatalogService } from '../../services/ServiceCatalogService';
+import { DW_COLORS } from '../../utils/buttonStyles';
 
 const useStyles = makeStyles({
   container: {
@@ -53,7 +54,7 @@ const useStyles = makeStyles({
     ...shorthands.borderRadius('12px'),
     ...shorthands.overflow('hidden'),
     marginBottom: '32px',
-    backgroundColor: '#1a5a8a',
+    backgroundColor: DW_COLORS.primary,
     color: 'white',
   },
   heroContent: {
@@ -354,7 +355,7 @@ const useStyles = makeStyles({
     marginTop: '16px',
   },
   ctaButton: {
-    backgroundColor: '#1a5a8a',
+    backgroundColor: DW_COLORS.primary,
     color: 'white',
     fontWeight: '600',
     fontSize: '15px',
@@ -476,7 +477,7 @@ export const ServiceDetailPage: React.FC = () => {
     );
   }, [service, services]);
 
-  const heroColor = service ? (categoryColors[service.Category] || '#1a5a8a') : '#1a5a8a';
+  const heroColor = service ? (categoryColors[service.Category] || DW_COLORS.primary) : DW_COLORS.primary;
   const IconComponent = service ? (iconMap[service.IconName || ''] || FlashRegular) : FlashRegular;
 
   const handleRequestService = () => {

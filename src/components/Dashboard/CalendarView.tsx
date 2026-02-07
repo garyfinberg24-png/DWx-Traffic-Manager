@@ -4,6 +4,7 @@ import { format, parse, startOfWeek, getDay } from 'date-fns';
 import { enUS } from 'date-fns/locale';
 import { makeStyles } from '@fluentui/react-components';
 import { Booking, BookingStatus } from '../../types/Booking';
+import { DW_COLORS } from '../../utils/buttonStyles';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 
 const locales = {
@@ -199,7 +200,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ bookings, onBookingC
       <style>{calendarStyles}</style>
       <div className={styles.legend}>
         <div className={styles.legendItem}>
-          <div className={styles.legendDot} style={{ backgroundColor: '#107c10' }} />
+          <div className={styles.legendDot} style={{ backgroundColor: DW_COLORS.success }} />
           Confirmed
         </div>
         <div className={styles.legendItem}>
@@ -215,7 +216,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ bookings, onBookingC
           Rescheduling Required
         </div>
         <div className={styles.legendItem}>
-          <div className={styles.legendDot} style={{ backgroundColor: '#d13438', opacity: 0.6 }} />
+          <div className={styles.legendDot} style={{ backgroundColor: DW_COLORS.danger, opacity: 0.6 }} />
           Cancelled
         </div>
         <div className={styles.legendItem}>

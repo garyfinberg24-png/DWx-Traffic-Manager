@@ -32,6 +32,7 @@ import { Booking } from '../../types/Booking';
 import { deserializeChecklistItems } from '../../types/Checklist';
 import { format } from 'date-fns';
 import { useAuth } from '../../contexts/AuthContext';
+import { DW_COLORS } from '../../utils/buttonStyles';
 // Temporarily disabled - Generate Quote feature
 // import { notificationService } from '../../services/NotificationService';
 // import { referenceDataService } from '../../services/ReferenceDataService';
@@ -159,11 +160,11 @@ const useStyles = makeStyles({
     flexShrink: 0,
     color: 'white',
   },
-  statusIconConfirmed: { backgroundColor: '#107c10' },
+  statusIconConfirmed: { backgroundColor: DW_COLORS.success },
   statusIconPending: { backgroundColor: '#f7630c' },
   statusIconAwaiting: { backgroundColor: '#0078d4' },
   statusIconRescheduling: { backgroundColor: '#6264a7' },
-  statusIconCancelled: { backgroundColor: '#d13438' },
+  statusIconCancelled: { backgroundColor: DW_COLORS.danger },
   statusContent: {
     display: 'flex',
     flexDirection: 'column',
@@ -265,7 +266,7 @@ const useStyles = makeStyles({
     flexShrink: 0,
   },
   slotNumberSelected: {
-    backgroundColor: '#107c10',
+    backgroundColor: DW_COLORS.success,
     color: 'white',
   },
   slotDate: {
@@ -330,7 +331,7 @@ const useStyles = makeStyles({
   },
   manageChecklistBtn: {
     marginTop: '12px',
-    backgroundColor: '#1e6b7b',
+    backgroundColor: DW_COLORS.teal,
     ':hover': {
       backgroundColor: '#154f5c',
     },
@@ -352,7 +353,7 @@ const useStyles = makeStyles({
     },
   },
   cancelBtn: {
-    backgroundColor: '#d13438',
+    backgroundColor: DW_COLORS.danger,
     color: 'white',
     ':hover': {
       backgroundColor: '#a52a2d',
@@ -372,7 +373,7 @@ const useStyles = makeStyles({
     width: '48px',
     height: '48px',
     borderRadius: '50%',
-    backgroundColor: '#107c10',
+    backgroundColor: DW_COLORS.success,
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
@@ -415,7 +416,7 @@ const useStyles = makeStyles({
     },
   },
   feedbackBtn: {
-    backgroundColor: '#107c10',
+    backgroundColor: DW_COLORS.success,
     color: 'white',
     ':hover': {
       backgroundColor: '#0b5c0b',

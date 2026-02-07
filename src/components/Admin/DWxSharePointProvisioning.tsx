@@ -43,6 +43,7 @@ import {
   Checkmark20Regular,
   Dismiss20Regular,
 } from '@fluentui/react-icons';
+import { DW_COLORS } from '../../utils/buttonStyles';
 import { dwxSharePointProvisioningService } from '../../services/DWxSharePointProvisioningService';
 
 // ============================================================================
@@ -667,7 +668,7 @@ export const DWxSharePointProvisioning: React.FC = () => {
               icon={<Database24Regular />}
               onClick={provisionAllLists}
               disabled={isProvisioning}
-              style={{ backgroundColor: '#1e6b7b' }}
+              style={{ backgroundColor: DW_COLORS.teal }}
             >
               {isProvisioning ? <><Spinner size="tiny" /> Provisioning...</> : `Create Missing (${missingLists.length})`}
             </Button>
@@ -769,7 +770,7 @@ export const DWxSharePointProvisioning: React.FC = () => {
             icon={<Database24Regular />}
             onClick={provisionAllLists}
             disabled={isProvisioning}
-            style={{ backgroundColor: '#1e6b7b' }}
+            style={{ backgroundColor: DW_COLORS.teal }}
           >
             {isProvisioning ? 'Provisioning...' : `Create Missing (${missingLists.length})`}
           </Button>
@@ -853,7 +854,7 @@ export const DWxSharePointProvisioning: React.FC = () => {
             icon={<Rocket24Regular />}
             onClick={seedAllData}
             disabled={anySeeding || !allListsExist}
-            style={{ backgroundColor: '#1e6b7b' }}
+            style={{ backgroundColor: DW_COLORS.teal }}
           >
             {isSeedingAll ? (
               <><Spinner size="tiny" style={{ marginRight: '6px' }} />{seedAllProgress || 'Seeding...'}</>

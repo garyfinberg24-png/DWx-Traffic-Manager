@@ -17,6 +17,7 @@ import {
   ChevronDoubleLeftRegular,
   ChevronDoubleRightRegular,
 } from '@fluentui/react-icons';
+import { DW_COLORS } from '../../utils/buttonStyles';
 
 const useStyles = makeStyles({
   container: {
@@ -56,7 +57,7 @@ const useStyles = makeStyles({
   activePageButton: {
     minWidth: '32px',
     height: '32px',
-    backgroundColor: '#1e6b7b',
+    backgroundColor: DW_COLORS.teal,
     color: 'white',
     ':hover': {
       backgroundColor: '#165a68',

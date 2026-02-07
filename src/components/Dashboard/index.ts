@@ -13,3 +13,4 @@ export { TimelineView } from './TimelineView';
 export { CommercialTab } from './CommercialTab';
 export { ResourcesTab } from './ResourcesTab';
 export { WinLossTab } from './WinLossTab';
+export { SLADashboardTab } from './SLADashboardTab';

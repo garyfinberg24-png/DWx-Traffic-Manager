@@ -19,6 +19,7 @@ import {
 import { PrepChecklistItem, PrepChecklistCategory } from '../../types/SessionPreparation';
 import { DetailSection } from '../MyRequests/DetailModalShell';
 import { format } from 'date-fns';
+import { DW_COLORS } from '../../utils/buttonStyles';
 
 const useStyles = makeStyles({
   emptyState: {
@@ -121,8 +122,8 @@ const useStyles = makeStyles({
     width: '20px',
     height: '20px',
     borderRadius: '4px',
-    border: '2px solid #107c10',
-    backgroundColor: '#107c10',
+    border: `2px solid ${DW_COLORS.success}`,
+    backgroundColor: DW_COLORS.success,
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
@@ -239,7 +240,7 @@ export const PrepChecklist: React.FC<PrepChecklistProps> = ({
             className={styles.progressFill}
             style={{
               width: `${overallProgress}%`,
-              backgroundColor: overallProgress >= 100 ? '#107c10' : '#1a5a8a',
+              backgroundColor: overallProgress >= 100 ? DW_COLORS.success : DW_COLORS.primary,
             }}
           />
         </div>

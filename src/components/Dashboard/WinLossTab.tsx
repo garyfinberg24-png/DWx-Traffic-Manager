@@ -18,6 +18,7 @@ import {
   Cell,
 } from 'recharts';
 import { ServiceRequest } from '../../types/ServiceRequest';
+import { DW_COLORS } from '../../utils/buttonStyles';
 import { winLossAnalysisService } from '../../services/WinLossAnalysisService';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -43,11 +44,11 @@ const useStyles = makeStyles({
     boxShadow: '0 1.6px 3.6px 0 rgba(0,0,0,.13), 0 0.3px 0.9px 0 rgba(0,0,0,.11)',
   },
   heroWinRate: {
-    backgroundColor: '#107c10',
+    backgroundColor: DW_COLORS.success,
     color: 'white',
   },
   heroRevenue: {
-    backgroundColor: '#1e6b7b',
+    backgroundColor: DW_COLORS.teal,
     color: 'white',
   },
   heroIcon: {
@@ -401,7 +402,7 @@ export const WinLossTab: React.FC<WinLossTabProps> = ({ requests }) => {
                           className={styles.reasonBarFill}
                           style={{
                             width: `${Math.max(entry.percentage, 8)}%`,
-                            backgroundColor: '#107c10',
+                            backgroundColor: DW_COLORS.success,
                           }}
                         >
                           {entry.percentage.toFixed(0)}%
@@ -423,7 +424,7 @@ export const WinLossTab: React.FC<WinLossTabProps> = ({ requests }) => {
                           className={styles.reasonBarFill}
                           style={{
                             width: `${Math.max(entry.percentage, 8)}%`,
-                            backgroundColor: '#d13438',
+                            backgroundColor: DW_COLORS.danger,
                           }}
                         >
                           {entry.percentage.toFixed(0)}%
@@ -552,7 +553,7 @@ export const WinLossTab: React.FC<WinLossTabProps> = ({ requests }) => {
                   width: '28px',
                   height: '28px',
                   borderRadius: '50%',
-                  backgroundColor: '#1e6b7b',
+                  backgroundColor: DW_COLORS.teal,
                   color: 'white',
                   display: 'flex',
                   alignItems: 'center',

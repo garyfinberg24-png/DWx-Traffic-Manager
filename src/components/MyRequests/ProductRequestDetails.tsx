@@ -35,6 +35,7 @@ import { ProductRequest, ProductRequestStatus } from '../../types/ProductRequest
 import { Specialist } from '../../types/ServiceRequest';
 import { productRequestService } from '../../services/ProductRequestService';
 import { specialistService } from '../../services/SpecialistService';
+import { DW_COLORS } from '../../utils/buttonStyles';
 import { format } from 'date-fns';
 import { DealActivityTimeline } from './DealActivityTimeline';
 import {
@@ -113,7 +114,7 @@ const useStyles = makeStyles({
     width: '40px',
     height: '40px',
     borderRadius: '50%',
-    backgroundColor: '#1a5a8a',
+    backgroundColor: DW_COLORS.primary,
     color: 'white',
     display: 'flex',
     alignItems: 'center',
@@ -189,25 +190,25 @@ const useStyles = makeStyles({
     alignItems: 'center',
   },
   advanceButton: {
-    backgroundColor: '#1a5a8a',
+    backgroundColor: DW_COLORS.primary,
     ':hover': {
       backgroundColor: '#145a7a',
     },
   },
   confirmButton: {
-    backgroundColor: '#107c10',
+    backgroundColor: DW_COLORS.success,
     ':hover': {
       backgroundColor: '#0b5a0b',
     },
   },
   cancelStatusButton: {
-    backgroundColor: '#d13438',
+    backgroundColor: DW_COLORS.danger,
     ':hover': {
       backgroundColor: '#a52a2d',
     },
   },
   completeButton: {
-    backgroundColor: '#107c10',
+    backgroundColor: DW_COLORS.success,
     ':hover': {
       backgroundColor: '#0b5a0b',
     },
@@ -529,7 +530,7 @@ export const ProductRequestDetails: React.FC<ProductRequestDetailsProps> = ({
     <Button
       appearance="primary"
       onClick={onClose}
-      style={{ backgroundColor: '#1a5a8a' }}
+      style={{ backgroundColor: DW_COLORS.primary }}
     >
       Done
     </Button>

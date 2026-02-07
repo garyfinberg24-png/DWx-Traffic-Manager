@@ -20,6 +20,7 @@ import {
   CheckmarkStarburst24Regular,
   Delete24Regular,
 } from '@fluentui/react-icons';
+import { DW_COLORS } from '../../utils/buttonStyles';
 import { useNotifications } from '../../contexts/NotificationContext';
 import { AppNotification, NotificationType } from '../../types/Notification';
 import { formatDistanceToNow } from 'date-fns';
@@ -139,7 +140,7 @@ const useStyles = makeStyles({
     width: '6px',
     height: '6px',
     borderRadius: '50%',
-    backgroundColor: '#1e6b7b',
+    backgroundColor: DW_COLORS.teal,
     flexShrink: 0,
   },
   notificationMessage: {

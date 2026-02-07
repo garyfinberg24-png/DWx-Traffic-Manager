@@ -7,6 +7,7 @@ import {
 } from '@fluentui/react-icons';
 import { format, isToday, isTomorrow, isYesterday, startOfDay, compareAsc } from 'date-fns';
 import { Booking, BookingStatus } from '../../types/Booking';
+import { DW_COLORS } from '../../utils/buttonStyles';
 
 const useStyles = makeStyles({
   container: {
@@ -38,17 +39,17 @@ const useStyles = makeStyles({
     display: 'inline-flex',
     alignItems: 'center',
     padding: '6px 14px',
-    backgroundColor: '#1e6b7b',
+    backgroundColor: DW_COLORS.teal,
     color: 'white',
     borderRadius: '20px',
     fontSize: '13px',
     fontWeight: '600',
   },
   dateBadgeToday: {
-    backgroundColor: '#107c10',
+    backgroundColor: DW_COLORS.success,
   },
   dateBadgePast: {
-    backgroundColor: '#616161',
+    backgroundColor: DW_COLORS.neutral,
   },
   dateCount: {
     fontSize: '12px',

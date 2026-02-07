@@ -16,6 +16,7 @@ import {
   DeleteRegular,
   ArrowRightRegular,
 } from '@fluentui/react-icons';
+import { DW_COLORS } from '../../utils/buttonStyles';
 
 const useStyles = makeStyles({
   card: {
@@ -113,7 +114,7 @@ const useStyles = makeStyles({
     gap: '8px',
   },
   continueBtn: {
-    backgroundColor: '#1a5a8a',
+    backgroundColor: DW_COLORS.primary,
     ':hover': {
       backgroundColor: '#145a7a',
     },

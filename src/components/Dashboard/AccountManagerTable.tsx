@@ -6,6 +6,7 @@ import {
 } from '@fluentui/react-components';
 import { Search24Regular, ArrowSort24Regular } from '@fluentui/react-icons';
 import { AccountManagerMetrics } from '../../types/Dashboard';
+import { DW_COLORS } from '../../utils/buttonStyles';
 
 const useStyles = makeStyles({
   card: {
@@ -113,7 +114,7 @@ const useStyles = makeStyles({
   progressFill: {
     height: '100%',
     borderRadius: '3px',
-    backgroundColor: '#1e6b7b',
+    backgroundColor: DW_COLORS.teal,
   },
   sortIcon: {
     marginLeft: '4px',

@@ -309,6 +309,8 @@ class DWxSharePointProvisioningService {
         { internalName: 'KeyBenefits_JSON', displayName: 'Key Benefits (JSON)', type: 'Note' },
         { internalName: 'IdealFor_JSON', displayName: 'Ideal For (JSON)', type: 'Note' },
         { internalName: 'RelatedCategories_JSON', displayName: 'Related Categories (JSON)', type: 'Note' },
+        // SLA Targets (v2.12.0)
+        { internalName: 'SLATargets_JSON', displayName: 'SLA Targets JSON', type: 'Note' },
       ],
     };
   }
@@ -401,6 +403,8 @@ class DWxSharePointProvisioningService {
         { internalName: 'CVRequired', displayName: 'CV Required', type: 'Boolean' },
         // Email Thread Tracking (v2.11.0)
         { internalName: 'EmailThread_JSON', displayName: 'Email Thread JSON', type: 'Note' },
+        // SLA Tracking (v2.12.0)
+        { internalName: 'StageTimestamps_JSON', displayName: 'Stage Timestamps JSON', type: 'Note' },
       ],
     };
   }

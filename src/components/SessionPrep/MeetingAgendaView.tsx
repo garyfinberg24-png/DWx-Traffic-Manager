@@ -18,6 +18,7 @@ import {
 } from '@fluentui/react-icons';
 import { MeetingAgenda } from '../../types/SessionPreparation';
 import { DetailSection } from '../MyRequests/DetailModalShell';
+import { DW_COLORS } from '../../utils/buttonStyles';
 
 const useStyles = makeStyles({
   emptyState: {
@@ -81,7 +82,7 @@ const useStyles = makeStyles({
     width: '28px',
     height: '28px',
     borderRadius: '50%',
-    backgroundColor: '#1a5a8a',
+    backgroundColor: DW_COLORS.primary,
     color: 'white',
     display: 'flex',
     alignItems: 'center',

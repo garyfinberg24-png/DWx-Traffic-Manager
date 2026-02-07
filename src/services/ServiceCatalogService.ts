@@ -11,6 +11,7 @@ import {
   ServiceCategory,
   DEFAULT_SERVICES,
   SpecialistRole,
+  SLATargets,
 } from '../types/ServiceRequest';
 
 class ServiceCatalogService {
@@ -105,6 +106,7 @@ class ServiceCatalogService {
         KeyBenefits_JSON: data.KeyBenefits ? JSON.stringify(data.KeyBenefits) : null,
         IdealFor_JSON: data.IdealFor ? JSON.stringify(data.IdealFor) : null,
         RelatedCategories_JSON: data.RelatedCategories ? JSON.stringify(data.RelatedCategories) : null,
+        SLATargets_JSON: data.SLATargets ? JSON.stringify(data.SLATargets) : null,
       };
 
       const result = await graphService.createListItem(this.listName, itemData);
@@ -144,6 +146,7 @@ class ServiceCatalogService {
       if (data.KeyBenefits !== undefined) itemData.KeyBenefits_JSON = JSON.stringify(data.KeyBenefits);
       if (data.IdealFor !== undefined) itemData.IdealFor_JSON = JSON.stringify(data.IdealFor);
       if (data.RelatedCategories !== undefined) itemData.RelatedCategories_JSON = JSON.stringify(data.RelatedCategories);
+      if (data.SLATargets !== undefined) itemData.SLATargets_JSON = JSON.stringify(data.SLATargets);
 
       const result = await graphService.updateListItem(this.listName, id, itemData);
 
@@ -257,6 +260,7 @@ class ServiceCatalogService {
     const keyBenefits = parseJson<string[]>('KeyBenefits_JSON');
     const idealFor = parseJson<string[]>('IdealFor_JSON');
     const relatedCategories = parseJson<ServiceCategory[]>('RelatedCategories_JSON');
+    const slaTargets = parseJson<SLATargets>('SLATargets_JSON');
 
     // Fall back to DEFAULT_SERVICES if SharePoint doesn't have rich content
     const defaultMatch = DEFAULT_SERVICES.find(s => s.Title === title);
@@ -281,6 +285,7 @@ class ServiceCatalogService {
       RelatedCategories: relatedCategories || defaultMatch?.RelatedCategories,
       KeyBenefits: keyBenefits || defaultMatch?.KeyBenefits,
       IdealFor: idealFor || defaultMatch?.IdealFor,
+      SLATargets: slaTargets,
       Created: this.getFieldValue(item, 'Created', ''),
       Modified: this.getFieldValue(item, 'Modified', ''),
     };

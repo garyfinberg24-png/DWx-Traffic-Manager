@@ -7,6 +7,7 @@ import React from 'react';
 import { makeStyles, Text, Tooltip } from '@fluentui/react-components';
 import { CheckmarkRegular, DismissRegular } from '@fluentui/react-icons';
 import { FunnelStage, STAGE_METADATA } from '../../types/ServiceRequest';
+import { DW_COLORS } from '../../utils/buttonStyles';
 
 const useStyles = makeStyles({
   container: {
@@ -39,11 +40,11 @@ const useStyles = makeStyles({
     zIndex: 1,
   },
   stageCompleted: {
-    backgroundColor: '#107c10',
+    backgroundColor: DW_COLORS.success,
     color: 'white',
   },
   stageCurrent: {
-    backgroundColor: '#1e6b7b',
+    backgroundColor: DW_COLORS.teal,
     color: 'white',
     boxShadow: '0 0 0 3px rgba(30, 107, 123, 0.2)',
   },
@@ -52,11 +53,11 @@ const useStyles = makeStyles({
     color: '#616161',
   },
   stageWon: {
-    backgroundColor: '#107c10',
+    backgroundColor: DW_COLORS.success,
     color: 'white',
   },
   stageLost: {
-    backgroundColor: '#d13438',
+    backgroundColor: DW_COLORS.danger,
     color: 'white',
   },
   connector: {
@@ -66,7 +67,7 @@ const useStyles = makeStyles({
     transition: 'background-color 0.2s ease',
   },
   connectorCompleted: {
-    backgroundColor: '#107c10',
+    backgroundColor: DW_COLORS.success,
   },
   stageLabel: {
     fontSize: '10px',
@@ -178,7 +179,7 @@ export const StageProgressBar: React.FC<StageProgressBarProps> = ({
                 <div
                   className={styles.compactConnector}
                   style={{
-                    backgroundColor: index < currentIndex ? '#107c10' : '#e1e1e1',
+                    backgroundColor: index < currentIndex ? DW_COLORS.success : '#e1e1e1',
                   }}
                 />
               )}

@@ -27,6 +27,7 @@ import {
 import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { NotificationCenter } from './NotificationCenter';
+import { RecentActivity } from './RecentActivity';
 
 const useStyles = makeStyles({
   header: {
@@ -189,6 +190,7 @@ export const Header: React.FC = () => {
         {user && (
           <>
             <NotificationCenter />
+            <RecentActivity />
             <Text className={styles.userName}>
               {user.displayName}
             </Text>

@@ -21,6 +21,7 @@ import {
   ChevronDownRegular,
   ChevronUpRegular,
 } from '@fluentui/react-icons';
+import { DW_COLORS } from '../../utils/buttonStyles';
 
 const useStyles = makeStyles({
   container: {
@@ -50,7 +51,7 @@ const useStyles = makeStyles({
     color: '#242424',
   },
   activeFiltersBadge: {
-    backgroundColor: '#1e6b7b',
+    backgroundColor: DW_COLORS.teal,
     color: 'white',
   },
   content: {
@@ -86,6 +87,8 @@ const useStyles = makeStyles({
     display: 'flex',
     flexWrap: 'wrap',
     gap: '12px',
+    alignSelf: 'flex-end',
+    paddingBottom: '6px',
   },
   clearButton: {
     color: '#d13438',

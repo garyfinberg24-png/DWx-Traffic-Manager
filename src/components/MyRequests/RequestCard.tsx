@@ -27,8 +27,9 @@ import {
   ArrowForwardRegular,
 } from '@fluentui/react-icons';
 import { Tooltip } from '@fluentui/react-components';
-import { ServiceRequest, FunnelStage, InterestLevel, STAGE_TRANSITIONS } from '../../types/ServiceRequest';
+import { ServiceRequest, FunnelStage, InterestLevel, STAGE_TRANSITIONS, SLAStatus } from '../../types/ServiceRequest';
 import { followUpService } from '../../services/FollowUpService';
+import { slaService } from '../../services/SLAService';
 import { StageProgressBar } from './StageProgressBar';
 import { DW_COLORS } from '../../utils/buttonStyles';
 import { format } from 'date-fns';
@@ -220,6 +221,13 @@ const useStyles = makeStyles({
     alignItems: 'center',
     gap: '4px',
   },
+  slaDot: {
+    width: '8px',
+    height: '8px',
+    borderRadius: '50%',
+    display: 'inline-block',
+    marginLeft: '6px',
+  },
 });
 
 // Stage colors
@@ -247,6 +255,18 @@ const formatCurrency = (value?: number): string => {
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
   }).format(value);
+};
+
+const SLA_COLORS: Record<SLAStatus, string> = {
+  'on-track': '#10B981',
+  'at-risk': '#F59E0B',
+  'breached': '#EF4444',
+};
+
+const SLA_LABELS: Record<SLAStatus, string> = {
+  'on-track': 'SLA: On Track',
+  'at-risk': 'SLA: At Risk',
+  'breached': 'SLA: Breached',
 };
 
 const getInterestStyle = (
@@ -282,6 +302,8 @@ export const RequestCard: React.FC<RequestCardProps> = ({ request, onClick, onQu
   const transitions = STAGE_TRANSITIONS[request.FunnelStage] || [];
 
   const urgency = followUpService.getDealUrgency(request);
+  const slaStatus = slaService.getSLAStatus(request);
+  const daysInStage = slaService.getTimeInCurrentStage(request);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' || e.key === ' ') {
@@ -306,16 +328,27 @@ export const RequestCard: React.FC<RequestCardProps> = ({ request, onClick, onQu
             <Text className={styles.clientName}>{request.ClientName}</Text>
             <Text className={styles.serviceName}>{request.ServiceName}</Text>
           </div>
-          <span
-            className={styles.stageBadge}
-            style={{
-              backgroundColor: stageColor.bg,
-              color: stageColor.text,
-            }}
-            role="status"
-            aria-label={`Stage: ${request.FunnelStage}`}
-          >
-            {request.FunnelStage}
+          <span style={{ display: 'flex', alignItems: 'center' }}>
+            <span
+              className={styles.stageBadge}
+              style={{
+                backgroundColor: stageColor.bg,
+                color: stageColor.text,
+              }}
+              role="status"
+              aria-label={`Stage: ${request.FunnelStage}`}
+            >
+              {request.FunnelStage}
+            </span>
+            {request.FunnelStage !== 'Won' && request.FunnelStage !== 'Lost' && (
+              <Tooltip content={`${SLA_LABELS[slaStatus]} (${daysInStage}d in stage)`} relationship="label">
+                <span
+                  className={styles.slaDot}
+                  style={{ backgroundColor: SLA_COLORS[slaStatus] }}
+                  aria-label={SLA_LABELS[slaStatus]}
+                />
+              </Tooltip>
+            )}
           </span>
         </div>
 

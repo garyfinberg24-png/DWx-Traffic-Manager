@@ -39,6 +39,8 @@ import {
   ServiceDuration,
   PricingModel,
   SpecialistRole,
+  SLATargets,
+  DEFAULT_SLA_TARGETS,
 } from '../../types/ServiceRequest';
 
 const SERVICE_CATEGORIES: ServiceCategory[] = [
@@ -184,7 +186,7 @@ interface ServiceFormProps {
   isLoading?: boolean;
 }
 
-type FormTab = 'basic' | 'content' | 'phases' | 'relations';
+type FormTab = 'basic' | 'content' | 'phases' | 'relations' | 'sla';
 
 export const ServiceForm: React.FC<ServiceFormProps> = ({
   open,
@@ -196,6 +198,7 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
   const styles = useStyles();
   const isEditMode = !!service;
   const [activeTab, setActiveTab] = useState<FormTab>('basic');
+  const [slaTargets, setSlaTargets] = useState<SLATargets>({});
 
   const {
     control,
@@ -239,6 +242,7 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
 
   useEffect(() => {
     if (service) {
+      setSlaTargets(service.SLATargets || {});
       reset({
         Title: service.Title,
         ShortDescription: service.ShortDescription,
@@ -262,6 +266,7 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
           : [{ name: '', description: '' }],
       });
     } else {
+      setSlaTargets({});
       reset({
         Title: '',
         ShortDescription: '',
@@ -309,6 +314,7 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
       IdealFor: splitLines(data.IdealForText || ''),
       RelatedCategories: data.RelatedCategories as ServiceCategory[],
       EngagementPhases: (data.EngagementPhases || []).filter(p => p.name.trim()),
+      SLATargets: Object.values(slaTargets).some(v => v != null && v > 0) ? slaTargets : undefined,
     };
     await onSubmit(input);
     onClose();
@@ -359,6 +365,7 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
               <Tab value="content">Content</Tab>
               <Tab value="phases">Engagement</Tab>
               <Tab value="relations">Relations</Tab>
+              <Tab value="sla">SLA Targets</Tab>
             </TabList>
 
             <form className={styles.form} onSubmit={handleSubmit(handleFormSubmit)}>
@@ -666,6 +673,68 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
                         ))}
                       </div>
                     )}
+                  </Field>
+                </div>
+              )}
+
+              {activeTab === 'sla' && (
+                <div className={styles.tabContent}>
+                  <Label style={{ fontSize: '13px', color: tokens.colorNeutralForeground3 }}>
+                    Set target days for each stage transition. Leave blank to use defaults based on complexity level.
+                  </Label>
+                  <Button
+                    appearance="subtle"
+                    size="small"
+                    onClick={() => {
+                      const complexity = (watch('ComplexityLevel') || 'Medium') as ServiceComplexity;
+                      setSlaTargets({ ...DEFAULT_SLA_TARGETS[complexity] });
+                    }}
+                  >
+                    Load defaults for {watch('ComplexityLevel') || 'Medium'} complexity
+                  </Button>
+                  <div className={styles.row}>
+                    <Field label="Lead to Qualified (days)">
+                      <Input
+                        type="number"
+                        value={slaTargets.LeadToQualified?.toString() || ''}
+                        onChange={(_, d) => setSlaTargets(prev => ({ ...prev, LeadToQualified: d.value ? Number(d.value) : undefined }))}
+                        placeholder="e.g. 3"
+                      />
+                    </Field>
+                    <Field label="Qualified to Discovery (days)">
+                      <Input
+                        type="number"
+                        value={slaTargets.QualifiedToDiscovery?.toString() || ''}
+                        onChange={(_, d) => setSlaTargets(prev => ({ ...prev, QualifiedToDiscovery: d.value ? Number(d.value) : undefined }))}
+                        placeholder="e.g. 5"
+                      />
+                    </Field>
+                  </div>
+                  <div className={styles.row}>
+                    <Field label="Discovery to Proposal (days)">
+                      <Input
+                        type="number"
+                        value={slaTargets.DiscoveryToProposal?.toString() || ''}
+                        onChange={(_, d) => setSlaTargets(prev => ({ ...prev, DiscoveryToProposal: d.value ? Number(d.value) : undefined }))}
+                        placeholder="e.g. 7"
+                      />
+                    </Field>
+                    <Field label="Proposal to Negotiation (days)">
+                      <Input
+                        type="number"
+                        value={slaTargets.ProposalToNegotiation?.toString() || ''}
+                        onChange={(_, d) => setSlaTargets(prev => ({ ...prev, ProposalToNegotiation: d.value ? Number(d.value) : undefined }))}
+                        placeholder="e.g. 5"
+                      />
+                    </Field>
+                  </div>
+                  <Field label="Negotiation to Won (days)">
+                    <Input
+                      type="number"
+                      value={slaTargets.NegotiationToWon?.toString() || ''}
+                      onChange={(_, d) => setSlaTargets(prev => ({ ...prev, NegotiationToWon: d.value ? Number(d.value) : undefined }))}
+                      placeholder="e.g. 5"
+                    />
                   </Field>
                 </div>
               )}

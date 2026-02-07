@@ -18,9 +18,11 @@ import {
   DocumentBulletList24Regular,
   Open24Regular,
   Checkmark16Regular,
+  Add24Regular,
 } from '@fluentui/react-icons';
 import { Proposal, ProposalStatus, PROPOSAL_STEPPER_STAGES } from '../../types/Proposal';
 import { proposalService } from '../../services/ProposalService';
+import { DW_COLORS } from '../../utils/buttonStyles';
 
 // ============================================================================
 // Types
@@ -29,6 +31,7 @@ import { proposalService } from '../../services/ProposalService';
 interface ProposalTrackerProps {
   serviceRequestId: number;
   onOpenProposal: (proposal: Proposal) => void;
+  onCreateProposal?: () => void;
 }
 
 // ============================================================================
@@ -80,11 +83,11 @@ const useStyles = makeStyles({
     fontWeight: '600',
   },
   stepDotCompleted: {
-    backgroundColor: '#107c10',
+    backgroundColor: DW_COLORS.success,
     color: 'white',
   },
   stepDotCurrent: {
-    backgroundColor: '#1a5a8a',
+    backgroundColor: DW_COLORS.primary,
     color: 'white',
   },
   stepDotFuture: {
@@ -97,7 +100,7 @@ const useStyles = makeStyles({
     backgroundColor: tokens.colorNeutralStroke2,
   },
   stepLineCompleted: {
-    backgroundColor: '#107c10',
+    backgroundColor: DW_COLORS.success,
   },
   metaRow: {
     display: 'flex',
@@ -143,6 +146,7 @@ function getStatusBadgeColor(status: ProposalStatus): 'informative' | 'warning' 
 export const ProposalTracker: React.FC<ProposalTrackerProps> = ({
   serviceRequestId,
   onOpenProposal,
+  onCreateProposal,
 }) => {
   const styles = useStyles();
   const [proposal, setProposal] = useState<Proposal | null>(null);
@@ -178,8 +182,19 @@ export const ProposalTracker: React.FC<ProposalTrackerProps> = ({
           </div>
         </div>
         <Text className={styles.emptyState}>
-          No proposal created yet. Open the Proposal Builder to get started.
+          No proposal created yet.
         </Text>
+        {onCreateProposal && (
+          <Button
+            appearance="primary"
+            icon={<Add24Regular />}
+            onClick={onCreateProposal}
+            style={{ backgroundColor: DW_COLORS.primary }}
+            size="small"
+          >
+            Create Proposal
+          </Button>
+        )}
       </div>
     );
   }
@@ -258,7 +273,7 @@ export const ProposalTracker: React.FC<ProposalTrackerProps> = ({
         appearance="primary"
         icon={<Open24Regular />}
         onClick={() => onOpenProposal(proposal)}
-        style={{ backgroundColor: '#1a5a8a' }}
+        style={{ backgroundColor: DW_COLORS.primary }}
         size="small"
       >
         Open Proposal

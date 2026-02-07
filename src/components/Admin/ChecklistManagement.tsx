@@ -30,6 +30,7 @@ import {
   CheckboxChecked24Regular,
   Edit24Regular,
 } from '@fluentui/react-icons';
+import { DW_COLORS } from '../../utils/buttonStyles';
 import { DEFAULT_CHECKLIST_ITEMS } from '../../types/Checklist';
 
 const useStyles = makeStyles({
@@ -86,7 +87,7 @@ const useStyles = makeStyles({
     width: '24px',
     height: '24px',
     borderRadius: '50%',
-    backgroundColor: '#1e6b7b',
+    backgroundColor: DW_COLORS.teal,
     color: 'white',
     fontWeight: tokens.fontWeightSemibold,
     fontSize: '12px',
@@ -202,7 +203,7 @@ const useStyles = makeStyles({
     flexShrink: 0,
   },
   primaryBtn: {
-    backgroundColor: '#1e6b7b',
+    backgroundColor: DW_COLORS.teal,
     ':hover': {
       backgroundColor: '#154f5c',
     },

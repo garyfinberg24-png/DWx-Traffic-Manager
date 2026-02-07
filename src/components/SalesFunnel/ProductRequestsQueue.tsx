@@ -24,6 +24,7 @@ import {
   BoxRegular,
   DismissCircleRegular,
 } from '@fluentui/react-icons';
+import { DW_COLORS } from '../../utils/buttonStyles';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
 import { ProductRequest, ProductRequestStatus } from '../../types/ProductRequest';
@@ -54,7 +55,7 @@ const useStyles = makeStyles({
     color: '#242424',
   },
   badge: {
-    backgroundColor: '#d13438',
+    backgroundColor: DW_COLORS.danger,
     color: 'white',
     fontSize: '11px',
     fontWeight: '600',
@@ -134,19 +135,19 @@ const useStyles = makeStyles({
     minWidth: '180px',
   },
   approveButton: {
-    backgroundColor: '#1e6b7b',
+    backgroundColor: DW_COLORS.teal,
     ':hover': {
       backgroundColor: '#165a68',
     },
   },
   confirmButton: {
-    backgroundColor: '#107c10',
+    backgroundColor: DW_COLORS.success,
     ':hover': {
       backgroundColor: '#0b5a0b',
     },
   },
   rejectButton: {
-    backgroundColor: '#d13438',
+    backgroundColor: DW_COLORS.danger,
     ':hover': {
       backgroundColor: '#a4262c',
     },
@@ -564,7 +565,7 @@ export const ProductRequestsQueue: React.FC<ProductRequestsQueueProps> = ({
                     icon={<ArrowRightRegular />}
                     onClick={() => handleBulkStatusChange('Awaiting Approval')}
                     size="small"
-                    style={{ backgroundColor: '#1e6b7b' }}
+                    style={{ backgroundColor: DW_COLORS.teal }}
                   >
                     Approve
                   </Button>
