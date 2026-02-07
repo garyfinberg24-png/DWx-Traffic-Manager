@@ -13,8 +13,6 @@ import {
   makeStyles,
   shorthands,
   DialogSurface,
-  DialogBody,
-  DialogContent,
   Dialog,
 } from '@fluentui/react-components';
 import {
@@ -1056,9 +1054,9 @@ export const ProductCatalog: React.FC = () => {
           if (!data.open) setSelectedProduct(null);
         }}
       >
-        <DialogSurface className={styles.modalSurface}>
+        <DialogSurface className={styles.modalSurface} aria-label="Product details">
           {selectedProduct && (
-            <DialogBody style={{ padding: 0 }}>
+            <>
               {/* Modal gradient hero */}
               <div
                 className={styles.modalHero}
@@ -1068,6 +1066,7 @@ export const ProductCatalog: React.FC = () => {
                 <button
                   className={styles.modalCloseBtn}
                   onClick={() => setSelectedProduct(null)}
+                  aria-label="Close"
                 >
                   <Dismiss24Regular />
                 </button>
@@ -1086,7 +1085,7 @@ export const ProductCatalog: React.FC = () => {
               </div>
 
               {/* Modal body */}
-              <DialogContent className={styles.modalBody}>
+              <div className={styles.modalBody}>
                 {/* Metadata chips */}
                 <div className={styles.modalMeta}>
                   <span className={styles.modalMetaItem}>
@@ -1137,8 +1136,8 @@ export const ProductCatalog: React.FC = () => {
                     Request Demo
                   </Button>
                 </div>
-              </DialogContent>
-            </DialogBody>
+              </div>
+            </>
           )}
         </DialogSurface>
       </Dialog>
