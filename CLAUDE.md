@@ -6,7 +6,7 @@
 
 **Project Origin**: Cloned from LP Booking App (v1.7.5) - a production Teams app for License Pulse demo scheduling.
 
-**Current Version**: v2.11.0 (February 2026) - Kanban Board + Quick-Create Deal + Email Tracking + PDF Export + Meeting Notes
+**Current Version**: v2.12.0 (February 2026) - List View Toggle + SLA Tracking + HyperParts Catalog + Hero Banners All Pages + Collapse Toggle
 
 > **IMPORTANT**: We are ONLY working on the DWx Traffic Manager project. We DO NOT make any changes to the LP Booking App. The LP Booking App is a separate production application and must not be modified.
 
@@ -481,6 +481,7 @@ DWx-Traffic-Manager/
 │   │   │   ├── Header.tsx                # Navigation header
 │   │   │   ├── ConfirmDialog.tsx         # Reusable confirm dialog
 │   │   │   ├── ErrorBoundary.tsx         # Error boundary
+│   │   │   ├── HeroCollapseToggle.tsx    # Shared hero collapse/expand toggle button (v2.12.0)
 │   │   │   ├── LoadingSpinner.tsx        # Loading indicator
 │   │   │   ├── NotificationCenter.tsx    # Notifications
 │   │   │   ├── UserGuide.tsx             # Onboarding guide
@@ -562,6 +563,8 @@ DWx-Traffic-Manager/
 │   │   ├── msalConfig.ts                 # MSAL configuration
 │   │   ├── testModeConfig.ts             # Mock data for E2E testing
 │   │   └── index.ts
+│   ├── hooks/
+│   │   └── useHeroCollapse.ts            # Hero collapse/expand with localStorage persistence (v2.12.0)
 │   ├── utils/
 │   │   ├── excelExport.ts                # Excel export utility
 │   │   ├── proposalPdfGenerator.ts       # PDF proposal export (jsPDF) (v2.11.0)
@@ -570,6 +573,7 @@ DWx-Traffic-Manager/
 │   ├── main.tsx                          # React entry point
 │   └── vite-env.d.ts
 ├── mockups/
+│   ├── hero-banners-all-pages.html       # 5-tab hero banner mockups for all pages (v2.12.0)
 │   ├── landing-page-variations.html      # 5 landing page design mockups (V4 approved)
 │   ├── services-page-variations.html     # 5 services page design mockups (V1 Hero approved)
 │   └── team-profile-modal.html           # 3 team profile modal variations (V2 Side-by-Side chosen)
@@ -968,6 +972,35 @@ Five features improving daily manager workflow. Client-side only, 2 new SharePoi
 
 **New Dependencies:** `@hello-pangea/dnd`, `jspdf`, `jspdf-autotable`
 
+### Phase 13: Hero Banners All Pages + Collapse Toggle (COMPLETE - v2.12.0)
+
+Hero banners added to all 7 main pages with shared collapse/expand toggle. Landing Page (full masthead) and Admin (sidebar layout) excluded.
+
+#### Shared Infrastructure - COMPLETE
+- [x] **useHeroCollapse.ts** — Custom hook in `src/hooks/` with localStorage persistence per page (`dwx-hero-collapsed-{pageId}`) + global default (`dwx-hero-default-minimised`)
+- [x] **HeroCollapseToggle.tsx** — Shared 32px chevron pill button, absolute-positioned at bottom-center of hero wrapper, `ChevronUp20Regular`/`ChevronDown20Regular`, tooltip, aria-expanded
+- [x] Exported from `src/components/Common/index.ts`
+
+#### Collapse Toggle Added to Existing Heroes - COMPLETE
+- [x] **ServiceCatalog.tsx** — Collapsed: title "Service Catalogue" + service/category count badges
+- [x] **ProductCatalog.tsx** — Collapsed: title + functional tab pills + item count badge (committed in prior session)
+- [x] **KnowledgeBase.tsx** — Collapsed: title "DWx Knowledge Centre" + FAQ/Terms/Articles count badges
+
+#### New Hero Banners on 4 Pages - COMPLETE
+- [x] **MyRequests.tsx** — Blue gradient (`#0d3a5c → #1a5a8a`), stats: active deals, pipeline value (ZAR), win rate. "New Request" button in hero
+- [x] **SalesFunnelDashboard.tsx** — Teal gradient (`#0d3a5c → #1e6b7b`), pipeline stats + urgency pills (Overdue/At Risk), Quick Create button
+- [x] **ManagerDashboard.tsx** — Blue gradient (`#0d3a5c → #1a5a8a`), total/pending request stats, Refresh + Export buttons
+- [x] **ServiceRequestForm.tsx** — Green-teal gradient (`#1e6b7b → #2a8d6e`), compact hero with 5-step wizard dot indicator
+
+**Collapse Behavior:**
+- Expanded: full hero (300-400px) with all content
+- Collapsed: 56px gradient strip with title + stat badges
+- CSS `maxHeight` + `opacity` transition at 350ms ease
+- State persisted in localStorage per page, survives navigation
+- Container padding changed to `0 64px 24px` (hero flush against header)
+
+**Design Mockup:** `mockups/hero-banners-all-pages.html` (5-tab mockup reviewed and approved)
+
 ### Pending / Round 4
 
 - [ ] Round 4: Medium-priority enhancements (M1-M10)
@@ -1167,6 +1200,8 @@ The app supports Account Managers from an external partner tenant:
 | `src/utils/proposalPdfGenerator.ts` | DW-branded PDF proposal export via jsPDF (v2.11.0) |
 | `src/types/EmailTracking.ts` | EmailType (12 types), EmailRecord interface (v2.11.0) |
 | `src/types/MeetingNotes.ts` | MeetingNotes interface, sentiment, defaults (v2.11.0) |
+| `src/hooks/useHeroCollapse.ts` | Hero collapse/expand hook with localStorage persistence (v2.12.0) |
+| `src/components/Common/HeroCollapseToggle.tsx` | Shared chevron toggle button for hero banners (v2.12.0) |
 | `src/services/SessionPrepService.ts` | Session prep CRUD + checklist management + completion tracking |
 | `src/services/AIPreparationService.ts` | Azure OpenAI integration for AI content generation |
 | `src/types/SessionPreparation.ts` | Session prep types (status, checklist, talking points, resources, agenda) |
@@ -1183,6 +1218,7 @@ The app supports Account Managers from an external partner tenant:
 | `src/components/LandingPage/LandingPage.tsx` | V4 Magazine layout + team profile modals + slogan rotator |
 | `mockups/landing-page-variations.html` | 5 landing page design mockups (V4 approved) |
 | `mockups/services-page-variations.html` | 5 services page design mockups (V1 Hero approved) |
+| `mockups/hero-banners-all-pages.html` | 5-tab hero banner mockups for all pages (v2.12.0) |
 | `mockups/team-profile-modal.html` | 3 team profile modal variations (V2 Side-by-Side chosen) |
 
 ## Confirmed Design Decisions
@@ -1207,6 +1243,8 @@ The app supports Account Managers from an external partner tenant:
 | **Kanban Won/Lost** | Context menu only — 5 drag columns (Lead→Negotiation), Won/Lost via 3-dot menu |
 | **Email Tracking Scope** | Key emails only (~12 types: stage changes, proposals, specialist, reminders) |
 | **PDF Export** | jsPDF + jspdf-autotable for client-side PDF generation |
+| **Hero Banners** | All 7 main pages have gradient hero banners with collapse toggle; Landing Page + Admin excluded |
+| **Hero Collapse** | Shared `useHeroCollapse` hook + `HeroCollapseToggle` component; per-page localStorage; 56px collapsed strip; 350ms transition |
 
 ## Product Catalog
 
@@ -1324,21 +1362,19 @@ DWxSupportingDocuments/
 ## Recent Commit History
 
 ```
+c0ace5b feat: Hero banners on all pages + collapse/expand toggle (v2.12.0)
+af6f539 style: Move modal badge to top-right, center title+subtitle on icon
+7df0447 fix: Remove DialogBody/DialogContent wrappers causing half-width hero
+6c51796 fix: Product modal hero full-width + remove white border at top edge
+009e1fa style: Tighten product detail modal - reduce width, compact layout
+afb72ff feat: V1 hero Products + Services catalogs + HyperCards/HyperAgents rename + KB redesign
+e424f16 fix: Remove all legacy LP Booking references + fix Kanban card click (v2.11.1)
+9869c24 feat: Kanban Board + Quick-Create Deal + Email Tracking + PDF Export + Meeting Notes (v2.11.0)
 16a7997 feat: Deal Activity Timeline + Follow-Up Reminders + Win/Loss Analysis (v2.10.0)
 94b5483 fix: Deep assessment security, performance, and workflow fixes (v2.9.2)
 b085667 feat: V1 hero banner Services page + client auto-populate + KB tab reorder (v2.9.1)
-9f65ace fix: Uniform 24px padding on admin content area for consistent spacing
-130ea07 refactor: Redesign SP Provisioning with tabbed layout (Overview, Lists, Seed Data, Tools)
-74ffd60 feat: Add Fix Default Views for SP lists + admin content area padding
-11f313e feat: Add comprehensive Knowledge Base seed data (50 entries) + fix DWxProposals provisioning
-860a76d fix: Add DWxProposals to SP Provisioning UI + fix hardcoded list count
-9984057 style: Transparent overlay header that blends seamlessly with landing page masthead
-1777c4e feat: Redesign admin panel with grouped sidebar navigation
-2d638eb docs: Update CLAUDE.md to v2.9.0 with Proposal Management System
 5e69c0e feat: Proposal Management System with AI generation + internal approval workflow (v2.9.0)
-d045a72 docs: Update CLAUDE.md to v2.8.0 with complete Phase 9 status
 b4fddfa feat: Add Landing Page content management + Knowledge Base with consumer UI (v2.8.0)
 0b671cf feat: V4 Magazine landing page + team profile modals + KB/LP content types (v2.7.0)
-b201029 feat: Add 5 new service categories + tabbed catalog + large detail modal
 b0b5b72 feat: Redesign email templates with LP Bookings style + add role infographics (v2.6.0)
 ```
