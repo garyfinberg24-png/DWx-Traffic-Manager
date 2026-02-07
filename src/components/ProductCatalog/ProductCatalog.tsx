@@ -957,7 +957,7 @@ export const ProductCatalog: React.FC = () => {
 
               {/* Tab-specific content row */}
               <div className={styles.heroContentRow}>
-                <div className={styles.heroLeft}>
+                <div className={isHyperParts ? styles.heroLeft : undefined} style={!isHyperParts ? { flex: 1 } : undefined}>
                   <div className={styles.heroTop}>
                     <div className={styles.heroIcon}>
                       <span style={{ color: currentConfig.accentColor, fontSize: '18px', display: 'flex' }}>
@@ -971,14 +971,16 @@ export const ProductCatalog: React.FC = () => {
                   </div>
                   <div className={styles.heroDesc}>{currentConfig.heroDescription}</div>
                 </div>
-                <div className={styles.heroStats}>
-                  {currentConfig.stats.map((stat, i) => (
-                    <div key={i} className={styles.heroStat}>
-                      <Text className={styles.heroStatValue}>{stat.value}</Text>
-                      <Text className={styles.heroStatLabel}>{stat.label}</Text>
-                    </div>
-                  ))}
-                </div>
+                {isHyperParts && (
+                  <div className={styles.heroStats}>
+                    {currentConfig.stats.map((stat, i) => (
+                      <div key={i} className={styles.heroStat}>
+                        <Text className={styles.heroStatValue}>{stat.value}</Text>
+                        <Text className={styles.heroStatLabel}>{stat.label}</Text>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </>
           )}
@@ -1055,9 +1057,6 @@ export const ProductCatalog: React.FC = () => {
         </div>
       ) : (
         <div className={styles.categorySection}>
-          <Text className={styles.categoryLabel} block>
-            Filter by category
-          </Text>
           <div className={styles.categoryChips}>
             <button
               className={styles.categoryChip}
