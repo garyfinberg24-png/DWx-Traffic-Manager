@@ -363,7 +363,7 @@ DWx-Traffic-Manager/
 │   │   │   ├── LandingPage.tsx          # V4 Magazine layout + team profile modals + slogan rotator
 │   │   │   └── index.ts
 │   │   ├── ProductCatalog/
-│   │   │   ├── ProductCatalog.tsx        # Tabbed view (Apps/WebParts/Cards)
+│   │   │   ├── ProductCatalog.tsx        # Tabbed view (Apps/HyperParts/Cards/Agents) + hero banner
 │   │   │   └── index.ts
 │   │   ├── ProductRequest/
 │   │   │   ├── ProductRequestForm.tsx    # Product demo/trial request form
@@ -543,7 +543,7 @@ DWx-Traffic-Manager/
 │   │   ├── WinLossAnalysis.ts            # Win/loss analysis types (v2.10.0)
 │   │   ├── EmailTracking.ts             # Email tracking types (v2.11.0)
 │   │   ├── MeetingNotes.ts              # Meeting notes types (v2.11.0)
-│   │   ├── Product.ts                    # Product catalog types (29 products)
+│   │   ├── Product.ts                    # Product catalog types (52 products: 16 Apps, 20 HyperParts, 6 Cards, 10 Agents)
 │   │   ├── ProductRequirements.ts        # Product requirements form types
 │   │   ├── ServiceRequirements.ts        # Service requirements types
 │   │   ├── Commercial.ts                 # Commercial metrics types
@@ -1210,69 +1210,89 @@ The app supports Account Managers from an external partner tenant:
 
 ## Product Catalog
 
-The Product Catalog displays DWx offerings in three categories with tabbed navigation:
+The Product Catalog displays DWx offerings in four categories with tabbed navigation:
 
-### DWx Apps (15 Products)
+### DWx Apps (16 Products)
 
 | Product | Category | Description |
 |---------|----------|-------------|
 | Asset Dashboard | Operations & IT | IT Asset Tracking & Management |
-| Building Access | Operations & IT | Access Control & Building Management |
+| CV Management | HR & People | Candidate Resume Repository |
 | Contract Manager | Document & Content | Contract Lifecycle Management |
-| Employee Directory | HR & People | Staff Directory & Org Chart |
-| Employee Onboarding | HR & People | New Hire Onboarding Portal |
-| Feedback Hub | Learning & Engagement | Employee Feedback & Surveys |
-| Incident Reporter | Operations & IT | Incident Reporting & Tracking |
-| Knowledge Base | Document & Content | Enterprise Knowledge Management |
-| Leave Manager | HR & People | Leave Requests & Tracking |
-| License Pulse | Operations & IT | Software License Management |
-| News Hub | Document & Content | Company News & Announcements |
-| Org Chart | HR & People | Interactive Org Chart |
-| Performance Hub | Learning & Engagement | Performance Reviews & Goals |
+| Document Hub | Document & Content | Enterprise Document Management |
+| External Sharing Hub | Document & Content | Secure External Collaboration |
+| Gamification | Learning & Engagement | Rewards & Recognition |
+| Integration Hub | Operations & IT | Connect Enterprise Systems |
+| License Management | Operations & IT | Software License Tracking |
+| License Pulse | Operations & IT | M365 License Analytics & Power BI Reporting |
 | Policy Manager | Document & Content | Policy Governance & Compliance |
-| Training Portal | Learning & Engagement | Training & Certifications |
+| Procurement Manager | Operations & IT | Purchase Order Workflows |
+| Quiz Builder | Learning & Engagement | Interactive Assessments |
+| Recruitment Manager | HR & People | Talent Acquisition Platform |
+| Reports Builder | Operations & IT | Dynamic Report Generation |
+| Survey Management | Learning & Engagement | Employee Feedback Platform |
+| Training & Skills | Learning & Engagement | Learning Management System |
 
-### SharePoint Web Parts (8 Products)
+### HyperParts Suite (20 SPFx Web Parts)
+
+The HyperParts Suite is a DWx-branded ecosystem of SPFx web parts. The tab features a purple gradient hero banner with sales copy and a scrollable pills filter with search.
 
 | Product | Category | Description |
 |---------|----------|-------------|
-| News Carousel | Intranet | News Slider & Announcements |
-| Quick Links Grid | Navigation | Custom Quick Links Navigation |
-| People Directory | HR & People | Employee Search & Profiles |
-| Events Calendar | Intranet | Company Events & Holidays |
-| Document Gallery | Intranet | Document Library Display |
-| Announcements Banner | Intranet | Full-width Announcement Bar |
-| Org Chart Web Part | HR & People | Interactive Org Chart Display |
-| FAQ Accordion | Utilities | Collapsible FAQ Sections |
+| HyperHero | Visuals & Branding | Dynamic Hero Layouts & Animations |
+| HyperNav | Navigation | Multi-level Personalized Navigation |
+| HyperNews Feed | Communication | Interactive Media Hub with Social Metrics |
+| HyperRollup | Content Discovery | Visual Query Builder & Content Rollup |
+| HyperProfile | People & Culture | Live Directory Cards with Teams Status |
+| HyperExplorer | Media & Files | Advanced File Previewer & ZIP Export |
+| HyperLocal | Utility | Weather, Clocks & Currency Converter |
+| HyperAction | Action & Workflow | Intelligent Multi-step Call-to-Action |
+| HyperTabs | Layout & Structure | Containerized Tabbed/Accordion Layout |
+| HyperPoll | Engagement | Real-time In-page Voting & Charts |
+| HyperTicker | Communication | Breaking News Marquee & Alerts |
+| HyperRecognition | People & Culture | Peer Kudos & Wall of Fame |
+| HyperFAQ | Knowledge | Searchable Knowledge Base with Voting |
+| HyperEvents Pro | Events | Unified Calendar with Outlook Sync |
+| HyperBreadcrumb | Navigation | Dynamic Hub-Site Path Detection |
+| HyperFeedback | Utility | Floating Screenshot & Ticket Widget |
+| HyperBirthdays | People & Culture | Automated Celebration Carousel |
+| HyperExternal | Integration | Secure SSO IFrame Wrapper |
+| HyperMetrics | Data & Analytics | Real-time KPI & Power BI Display |
+| HyperTimeline | Project Management | Interactive Project Roadmap Visualizer |
+
+**HyperParts Categories (15):** Visuals & Branding, Navigation, Communication, Content Discovery, People & Culture, Media & Files, Utility, Action & Workflow, Layout & Structure, Engagement, Knowledge, Events, Integration, Data & Analytics, Project Management
 
 ### Adaptive Cards (6 Products)
 
 | Product | Category | Description |
 |---------|----------|-------------|
-| Leave Request | HR & People | Submit Leave in Teams |
-| Approval Card | Workflows | Approval Actions in Chat |
-| Incident Alert | Operations & IT | Incident Notifications |
-| News Digest | Productivity | Daily News Summary |
-| Training Reminder | Learning & Engagement | Training Due Notifications |
-| Task Assignment | Workflows | Assign & Track Tasks |
+| Leave Request Card | HR & People | Submit & Approve Leave |
+| Approval Card | Workflows | Multi-stage Approvals |
+| Incident Report | Operations & IT | Report & Track Issues |
+| Feedback Card | Learning & Engagement | Quick Pulse Surveys |
+| Meeting Summary | Productivity | Auto-generated Notes |
+| Task Assignment | Productivity | Assign & Track Tasks |
 
 ### Product Type System
 
 ```typescript
-type ProductType = 'app' | 'webpart' | 'adaptive-card';
+type ProductType = 'app' | 'webpart' | 'adaptive-card' | 'agent';
 
 interface Product {
   id: string;
   name: string;
   subtitle: string;
+  description: string;
   type: ProductType;
-  category: string;
+  category: ProductCategory;
   version: string;
   brand: string;
   icon: string;
   gradient: string;  // CSS gradient name
 }
 ```
+
+**Key exports from Product.ts:** `DWX_APPS`, `HYPERPARTS` (replaces old `WEBPARTS`), `ADAPTIVE_CARDS`, `DWX_AGENTS`. A deprecated `WEBPARTS` alias still exists for backwards compatibility.
 
 ## Dashboard KPIs
 

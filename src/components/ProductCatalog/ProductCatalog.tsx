@@ -1,9 +1,9 @@
 /**
  * DWx Traffic Manager - Product Catalog
- * Displays DWx Apps, Web Parts, and Adaptive Cards with tabs
+ * Displays DWx Apps, HyperParts, Adaptive Cards, and Agents with tabs
  */
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Text,
@@ -28,7 +28,7 @@ import {
   Product,
   ProductType,
   DWX_APPS,
-  WEBPARTS,
+  HYPERPARTS,
   ADAPTIVE_CARDS,
   DWX_AGENTS,
   getCategoriesForType,
@@ -65,7 +65,7 @@ const useStyles = makeStyles({
     minWidth: 'auto',
   },
   tabsContainer: {
-    marginBottom: '20px',
+    marginBottom: '0',
     ...shorthands.borderBottom('2px', 'solid', '#e0e0e0'),
     paddingBottom: '0',
   },
@@ -89,6 +89,143 @@ const useStyles = makeStyles({
     ...shorthands.borderRadius('10px'),
     fontWeight: '500',
   },
+  // Hero banner (V1 Side-by-Side)
+  heroBanner: {
+    background: 'linear-gradient(135deg, #1e1040 0%, #2d1b69 30%, #4c1d95 60%, #7c3aed 100%)',
+    ...shorthands.borderRadius('0', '0', '16px', '16px'),
+    ...shorthands.padding('24px', '32px'),
+    marginBottom: '20px',
+    position: 'relative',
+    ...shorthands.overflow('hidden'),
+  },
+  heroInner: {
+    position: 'relative',
+    zIndex: 1,
+    display: 'flex',
+    alignItems: 'center',
+    gap: '32px',
+  },
+  heroLeft: {
+    flex: '1',
+    minWidth: '0',
+  },
+  heroTop: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '12px',
+    marginBottom: '10px',
+  },
+  heroIcon: {
+    width: '40px',
+    height: '40px',
+    ...shorthands.borderRadius('10px'),
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    ...shorthands.border('1px', 'solid', 'rgba(255,255,255,0.15)'),
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
+    fontSize: '20px',
+  },
+  heroTitle: {
+    fontSize: '20px',
+    fontWeight: '700',
+    color: 'white',
+    letterSpacing: '-0.3px',
+  },
+  heroTitleAccent: {
+    color: '#a78bfa',
+  },
+  heroText: {
+    fontSize: '13px',
+    lineHeight: '1.7',
+    color: 'rgba(255,255,255,0.75)',
+    maxWidth: '720px',
+  },
+  heroTextStrong: {
+    color: '#c4b5fd',
+    fontWeight: '600',
+  },
+  heroStats: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '12px',
+    flexShrink: 0,
+    paddingLeft: '32px',
+    ...shorthands.borderLeft('1px', 'solid', 'rgba(255,255,255,0.12)'),
+  },
+  heroStat: {
+    display: 'flex',
+    alignItems: 'baseline',
+    gap: '8px',
+  },
+  heroStatValue: {
+    fontSize: '20px',
+    fontWeight: '700',
+    color: 'white',
+    whiteSpace: 'nowrap',
+  },
+  heroStatLabel: {
+    fontSize: '10px',
+    color: 'rgba(255,255,255,0.45)',
+    textTransform: 'uppercase',
+    letterSpacing: '0.5px',
+    whiteSpace: 'nowrap',
+  },
+  // Scrollable pills filter (V2)
+  filterBar: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '12px',
+    marginBottom: '20px',
+  },
+  filterPillsScroll: {
+    display: 'flex',
+    gap: '6px',
+    overflowX: 'auto',
+    flex: '1',
+    scrollbarWidth: 'none',
+    // Fade mask applied via inline style
+  },
+  filterPill: {
+    ...shorthands.padding('5px', '14px'),
+    ...shorthands.borderRadius('16px'),
+    fontSize: '12px',
+    fontWeight: '500',
+    cursor: 'pointer',
+    transitionProperty: 'all',
+    transitionDuration: '0.15s',
+    ...shorthands.border('1px', 'solid', '#e0e0e0'),
+    backgroundColor: 'white',
+    color: '#555555',
+    whiteSpace: 'nowrap',
+    flexShrink: 0,
+  },
+  filterPillActive: {
+    backgroundColor: '#7c3aed',
+    color: 'white',
+    ...shorthands.borderColor('#7c3aed'),
+  },
+  pillCount: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    minWidth: '16px',
+    height: '16px',
+    ...shorthands.borderRadius('8px'),
+    fontSize: '10px',
+    marginLeft: '4px',
+    ...shorthands.padding('0', '4px'),
+  },
+  pillCountActive: {
+    backgroundColor: 'rgba(255,255,255,0.25)',
+    color: 'white',
+  },
+  pillCountInactive: {
+    backgroundColor: '#f0f0f0',
+    color: '#888888',
+  },
+  // Category filter (for non-HyperParts tabs)
   categorySection: {
     marginBottom: '24px',
   },
@@ -255,9 +392,9 @@ const TAB_CONFIG: Record<TabValue, { label: string; icon: React.ReactNode; produ
     color: DW_COLORS.primary,
   },
   webparts: {
-    label: 'Web Parts',
+    label: 'HyperParts',
     icon: <PuzzlePiece24Regular />,
-    products: WEBPARTS,
+    products: HYPERPARTS,
     color: '#7c3aed',
   },
   cards: {
@@ -279,8 +416,11 @@ export const ProductCatalog: React.FC = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<TabValue>('apps');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [searchQuery, setSearchQuery] = useState('');
+  const pillsRef = useRef<HTMLDivElement>(null);
 
   const currentConfig = TAB_CONFIG[activeTab];
+  const isHyperParts = activeTab === 'webparts';
 
   const categories = useMemo(() => {
     const typeMap: Record<TabValue, ProductType> = {
@@ -293,15 +433,32 @@ export const ProductCatalog: React.FC = () => {
   }, [activeTab]);
 
   const filteredProducts = useMemo(() => {
-    if (selectedCategory === 'all') {
-      return currentConfig.products;
+    let products = currentConfig.products;
+    if (selectedCategory !== 'all') {
+      products = products.filter((p) => p.category === selectedCategory);
     }
-    return currentConfig.products.filter((p) => p.category === selectedCategory);
-  }, [currentConfig.products, selectedCategory]);
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase().trim();
+      products = products.filter(
+        (p) => p.name.toLowerCase().includes(q) || p.subtitle.toLowerCase().includes(q) || p.category.toLowerCase().includes(q)
+      );
+    }
+    return products;
+  }, [currentConfig.products, selectedCategory, searchQuery]);
+
+  // Count products per category
+  const categoryCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    currentConfig.products.forEach((p) => {
+      counts[p.category] = (counts[p.category] || 0) + 1;
+    });
+    return counts;
+  }, [currentConfig.products]);
 
   const handleTabChange = (_event: SelectTabEvent, data: SelectTabData) => {
     setActiveTab(data.value as TabValue);
     setSelectedCategory('all');
+    setSearchQuery('');
   };
 
   const handleCategoryClick = (category: string) => {
@@ -309,7 +466,6 @@ export const ProductCatalog: React.FC = () => {
   };
 
   const handleRequestDemo = (product: Product) => {
-    // Navigate to request form with product pre-selected
     navigate('/product-request', { state: { productRequest: product } });
   };
 
@@ -358,7 +514,7 @@ export const ProductCatalog: React.FC = () => {
         <div className={styles.titleSection}>
           <Text className={styles.title}>Product Catalog</Text>
           <Text className={styles.subtitle}>
-            DWx applications, web parts, and adaptive cards for your digital workplace
+            DWx applications, HyperParts web parts, adaptive cards, and agents for your digital workplace
           </Text>
         </div>
         <Button
@@ -396,39 +552,149 @@ export const ProductCatalog: React.FC = () => {
         </TabList>
       </div>
 
-      {/* Category Filter */}
-      <div className={styles.categorySection}>
-        <Text className={styles.categoryLabel} block>
-          Filter by category
-        </Text>
-        <div className={styles.categoryChips}>
-          <button
-            className={`${styles.categoryChip} ${selectedCategory === 'all' ? styles.categoryChipActive : ''}`}
-            onClick={() => handleCategoryClick('all')}
-            style={
-              selectedCategory === 'all'
-                ? { backgroundColor: currentConfig.color, borderColor: currentConfig.color, color: 'white' }
-                : undefined
-            }
+      {/* HyperParts Hero Banner (only on webparts tab) */}
+      {isHyperParts && (
+        <div className={styles.heroBanner}>
+          <div className={styles.heroInner}>
+            <div className={styles.heroLeft}>
+              <div className={styles.heroTop}>
+                <div className={styles.heroIcon}>
+                  <PuzzlePiece24Regular style={{ color: '#a78bfa' }} />
+                </div>
+                <Text className={styles.heroTitle}>
+                  The <span className={styles.heroTitleAccent}>HyperParts</span> Suite
+                </Text>
+              </div>
+              <div className={styles.heroText}>
+                Step into the future of the digital workplace with the HyperParts Suite — a revolutionary
+                ecosystem of SPFx components engineered to shatter the limitations of standard SharePoint.
+                These components provide{' '}
+                <strong className={styles.heroTextStrong}>Hyper-Performance</strong>,{' '}
+                <strong className={styles.heroTextStrong}>Hyper-Flexibility</strong>, and{' '}
+                <strong className={styles.heroTextStrong}>Hyper-Integration</strong>, transforming your
+                intranet from a static document repository into a high-velocity, interactive command center.
+              </div>
+            </div>
+            <div className={styles.heroStats}>
+              <div className={styles.heroStat}>
+                <Text className={styles.heroStatValue}>20</Text>
+                <Text className={styles.heroStatLabel}>Web Parts</Text>
+              </div>
+              <div className={styles.heroStat}>
+                <Text className={styles.heroStatValue}>15</Text>
+                <Text className={styles.heroStatLabel}>Categories</Text>
+              </div>
+              <div className={styles.heroStat}>
+                <Text className={styles.heroStatValue}>SPFx 1.18+</Text>
+                <Text className={styles.heroStatLabel}>Framework</Text>
+              </div>
+              <div className={styles.heroStat}>
+                <Text className={styles.heroStatValue}>Fluent v9</Text>
+                <Text className={styles.heroStatLabel}>Design System</Text>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* HyperParts: Scrollable Pills + Search (V2 Filter) */}
+      {isHyperParts ? (
+        <div className={styles.filterBar}>
+          <div
+            ref={pillsRef}
+            className={styles.filterPillsScroll}
+            style={{
+              maskImage: 'linear-gradient(to right, black 90%, transparent 100%)',
+              WebkitMaskImage: 'linear-gradient(to right, black 90%, transparent 100%)',
+            }}
           >
-            All {currentConfig.label}
-          </button>
-          {categories.map((category) => (
             <button
-              key={category}
-              className={`${styles.categoryChip} ${selectedCategory === category ? styles.categoryChipActive : ''}`}
-              onClick={() => handleCategoryClick(category)}
+              className={`${styles.filterPill} ${selectedCategory === 'all' ? styles.filterPillActive : ''}`}
+              onClick={() => handleCategoryClick('all')}
               style={
-                selectedCategory === category
+                selectedCategory === 'all'
+                  ? { backgroundColor: currentConfig.color, borderColor: currentConfig.color }
+                  : undefined
+              }
+            >
+              All
+              <span className={`${styles.pillCount} ${selectedCategory === 'all' ? styles.pillCountActive : styles.pillCountInactive}`}>
+                {currentConfig.products.length}
+              </span>
+            </button>
+            {categories.map((category) => (
+              <button
+                key={category}
+                className={`${styles.filterPill} ${selectedCategory === category ? styles.filterPillActive : ''}`}
+                onClick={() => handleCategoryClick(category)}
+                style={
+                  selectedCategory === category
+                    ? { backgroundColor: currentConfig.color, borderColor: currentConfig.color }
+                    : undefined
+                }
+              >
+                {category}
+                <span className={`${styles.pillCount} ${selectedCategory === category ? styles.pillCountActive : styles.pillCountInactive}`}>
+                  {categoryCounts[category] || 0}
+                </span>
+              </button>
+            ))}
+          </div>
+          <input
+            type="text"
+            placeholder="Search HyperParts..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            style={{
+              padding: '7px 12px 7px 34px',
+              borderRadius: '8px',
+              border: '1px solid #d0d0d0',
+              fontSize: '13px',
+              color: '#333',
+              width: '240px',
+              flexShrink: 0,
+              outline: 'none',
+              backgroundImage: `url("data:image/svg+xml,%3Csvg width='14' height='14' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='11' cy='11' r='7' stroke='%239ca3af' stroke-width='2'/%3E%3Cline x1='16.5' y1='16.5' x2='21' y2='21' stroke='%239ca3af' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E")`,
+              backgroundRepeat: 'no-repeat',
+              backgroundPosition: '10px center',
+            }}
+          />
+        </div>
+      ) : (
+        /* Standard category chips for other tabs */
+        <div className={styles.categorySection}>
+          <Text className={styles.categoryLabel} block>
+            Filter by category
+          </Text>
+          <div className={styles.categoryChips}>
+            <button
+              className={`${styles.categoryChip} ${selectedCategory === 'all' ? styles.categoryChipActive : ''}`}
+              onClick={() => handleCategoryClick('all')}
+              style={
+                selectedCategory === 'all'
                   ? { backgroundColor: currentConfig.color, borderColor: currentConfig.color, color: 'white' }
                   : undefined
               }
             >
-              {category}
+              All {currentConfig.label}
             </button>
-          ))}
+            {categories.map((category) => (
+              <button
+                key={category}
+                className={`${styles.categoryChip} ${selectedCategory === category ? styles.categoryChipActive : ''}`}
+                onClick={() => handleCategoryClick(category)}
+                style={
+                  selectedCategory === category
+                    ? { backgroundColor: currentConfig.color, borderColor: currentConfig.color, color: 'white' }
+                    : undefined
+                }
+              >
+                {category}
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Products Grid */}
       <div className={styles.productsGrid}>

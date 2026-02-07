@@ -38,7 +38,7 @@ import {
 } from '@fluentui/react-icons';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
-import { Product, DWX_APPS, WEBPARTS, ADAPTIVE_CARDS, DWX_AGENTS } from '../../types/Product';
+import { Product, DWX_APPS, HYPERPARTS, ADAPTIVE_CARDS, DWX_AGENTS } from '../../types/Product';
 import { ProductRequirementsStep } from '../ServiceRequest/ProductRequirementsStep';
 import { getProductRequirements, validateProductRequirements } from '../../types/ProductRequirements';
 import { ClientIndustry, CompanySize } from '../../types/ServiceRequest';
@@ -332,7 +332,7 @@ const INDUSTRIES: ClientIndustry[] = [
 const COMPANY_SIZES: CompanySize[] = ['SMB', 'Medium', 'Large', 'Enterprise'];
 
 // All products combined
-const ALL_PRODUCTS: Product[] = [...DWX_APPS, ...WEBPARTS, ...ADAPTIVE_CARDS, ...DWX_AGENTS];
+const ALL_PRODUCTS: Product[] = [...DWX_APPS, ...HYPERPARTS, ...ADAPTIVE_CARDS, ...DWX_AGENTS];
 
 export const ProductRequestForm: React.FC = () => {
   const styles = useStyles();

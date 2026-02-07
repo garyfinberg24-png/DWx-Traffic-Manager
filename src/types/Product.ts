@@ -1,6 +1,6 @@
 /**
  * DWx Traffic Manager - Product Types
- * Types for DWx Apps, Web Parts, and Adaptive Cards
+ * Types for DWx Apps, HyperParts, Adaptive Cards, and Agents
  */
 
 export type ProductType = 'app' | 'webpart' | 'adaptive-card' | 'agent';
@@ -15,7 +15,22 @@ export type ProductCategory =
   | 'Utilities'
   | 'Workflows'
   | 'Productivity'
-  | 'AI & Automation';
+  | 'AI & Automation'
+  // HyperParts categories
+  | 'Visuals & Branding'
+  | 'Communication'
+  | 'Content Discovery'
+  | 'People & Culture'
+  | 'Media & Files'
+  | 'Utility'
+  | 'Action & Workflow'
+  | 'Layout & Structure'
+  | 'Engagement'
+  | 'Knowledge'
+  | 'Events'
+  | 'Integration'
+  | 'Data & Analytics'
+  | 'Project Management';
 
 export interface Product {
   id: string;
@@ -226,105 +241,32 @@ export const DWX_APPS: Product[] = [
   },
 ];
 
-// SharePoint Web Parts (8 web parts)
-export const WEBPARTS: Product[] = [
-  {
-    id: 'news-carousel',
-    name: 'News Carousel',
-    subtitle: 'Animated News Slider',
-    description: 'Dynamic news carousel with animations, filtering, and customizable layouts.',
-    type: 'webpart',
-    category: 'Intranet',
-    version: 'v1.5.0',
-    icon: '📰',
-    gradient: 'royal-purple',
-    brand: 'SHAREPOINT',
-  },
-  {
-    id: 'employee-directory',
-    name: 'Employee Directory',
-    subtitle: 'Staff Search & Profiles',
-    description: 'Searchable employee directory with profiles, org hierarchy, and contact details.',
-    type: 'webpart',
-    category: 'HR & People',
-    version: 'v2.1.0',
-    icon: '👤',
-    gradient: 'indigo',
-    brand: 'SHAREPOINT',
-  },
-  {
-    id: 'quick-links',
-    name: 'Quick Links',
-    subtitle: 'Customizable Link Tiles',
-    description: 'Configurable quick links web part with icons, grouping, and audience targeting.',
-    type: 'webpart',
-    category: 'Navigation',
-    version: 'v1.8.0',
-    icon: '🔗',
-    gradient: 'violet',
-    brand: 'SHAREPOINT',
-  },
-  {
-    id: 'celebrations',
-    name: 'Celebrations',
-    subtitle: 'Birthdays & Anniversaries',
-    description: 'Display upcoming birthdays and work anniversaries with celebration features.',
-    type: 'webpart',
-    category: 'HR & People',
-    version: 'v1.3.0',
-    icon: '🎂',
-    gradient: 'pink',
-    brand: 'SHAREPOINT',
-  },
-  {
-    id: 'org-chart',
-    name: 'Org Chart',
-    subtitle: 'Interactive Organization Tree',
-    description: 'Visual organization chart with drill-down, search, and profile integration.',
-    type: 'webpart',
-    category: 'HR & People',
-    version: 'v2.0.0',
-    icon: '🏢',
-    gradient: 'ocean-depth',
-    brand: 'SHAREPOINT',
-  },
-  {
-    id: 'weather-widget',
-    name: 'Weather Widget',
-    subtitle: 'Multi-location Forecast',
-    description: 'Weather forecasts for multiple office locations with configurable display options.',
-    type: 'webpart',
-    category: 'Utilities',
-    version: 'v1.2.0',
-    icon: '⛅',
-    gradient: 'sky',
-    brand: 'SHAREPOINT',
-  },
-  {
-    id: 'kpi-dashboard',
-    name: 'KPI Dashboard',
-    subtitle: 'Real-time Metrics Display',
-    description: 'Configurable KPI tiles with data from SharePoint lists or external sources.',
-    type: 'webpart',
-    category: 'Operations & IT',
-    version: 'v1.6.0',
-    icon: '📈',
-    gradient: 'emerald',
-    brand: 'SHAREPOINT',
-  },
-  {
-    id: 'events-calendar',
-    name: 'Events Calendar',
-    subtitle: 'Company Events & Holidays',
-    description: 'Company-wide events calendar with filtering, reminders, and Teams integration.',
-    type: 'webpart',
-    category: 'Intranet',
-    version: 'v1.9.0',
-    icon: '📅',
-    gradient: 'amber',
-    brand: 'SHAREPOINT',
-  },
+// HyperParts - DWx SPFx Web Parts (20 web parts)
+export const HYPERPARTS: Product[] = [
+  { id: 'hyper-hero', name: 'HyperHero', subtitle: 'Dynamic Hero Layouts & Animations', description: 'Replaces static layouts with a CSS Grid engine. Supports video backgrounds, Lottie animations, dynamic AI-based content binding, and 10+ grid configurations.', type: 'webpart', category: 'Visuals & Branding', version: 'v1.0.0', icon: '🖼️', gradient: 'royal-purple', brand: 'HYPERPARTS' },
+  { id: 'hyper-nav', name: 'HyperNav', subtitle: 'Multi-level Personalized Navigation', description: 'Transcends simple lists with multi-level nesting. Personalized "My Links" based on AD attributes, SVG icon support, and audience visibility at the individual link level.', type: 'webpart', category: 'Navigation', version: 'v1.0.0', icon: '🧭', gradient: 'indigo', brand: 'HYPERPARTS' },
+  { id: 'hyper-news', name: 'HyperNews Feed', subtitle: 'Interactive Media Hub with Social Metrics', description: 'Moves from static updates to an interactive media hub. Infinite scroll, in-line modal "Quick Read," estimated read time, and social engagement metrics (likes/views).', type: 'webpart', category: 'Communication', version: 'v1.0.0', icon: '📰', gradient: 'sky', brand: 'HYPERPARTS' },
+  { id: 'hyper-rollup', name: 'HyperRollup', subtitle: 'Visual Query Builder & Content Rollup', description: 'Superior version of Highlighted Content. Visual Query Builder for non-devs, custom Handlebars/React result templates, and "Export to CSV/Excel" functionality.', type: 'webpart', category: 'Content Discovery', version: 'v1.0.0', icon: '🔍', gradient: 'emerald', brand: 'HYPERPARTS' },
+  { id: 'hyper-profile', name: 'HyperProfile', subtitle: 'Live Directory Cards with Teams Status', description: 'Live, interactive directory cards. Real-time Teams status, integrated "Schedule Meeting" button, Org-chart hover states, and Skill-tag searching.', type: 'webpart', category: 'People & Culture', version: 'v1.0.0', icon: '👤', gradient: 'pink', brand: 'HYPERPARTS' },
+  { id: 'hyper-explorer', name: 'HyperExplorer', subtitle: 'Advanced File Previewer & ZIP Export', description: 'Advanced file interaction. Multi-file previewer, folder breadcrumbs within the part, "Download as ZIP" capability, and integrated PDF annotation.', type: 'webpart', category: 'Media & Files', version: 'v1.0.0', icon: '📁', gradient: 'coral', brand: 'HYPERPARTS' },
+  { id: 'hyper-local', name: 'HyperLocal', subtitle: 'Weather, Clocks & Currency Converter', description: 'Context-aware utility. IP-based weather, multiple world clocks, live currency conversion, and stock ticker integration with corporate branding.', type: 'webpart', category: 'Utility', version: 'v1.0.0', icon: '🌍', gradient: 'teal', brand: 'HYPERPARTS' },
+  { id: 'hyper-action', name: 'HyperAction', subtitle: 'Intelligent Multi-step Call-to-Action', description: 'Intelligent Call-to-Action. Multi-step buttons (logic-based), Power Automate triggers on click, and conditional button text based on user permissions.', type: 'webpart', category: 'Action & Workflow', version: 'v1.0.0', icon: '⚡', gradient: 'amber', brand: 'HYPERPARTS' },
+  { id: 'hyper-tabs', name: 'HyperTabs', subtitle: 'Containerized Tabbed/Accordion Layout', description: 'A containerized layout part. Allows users to host other web parts inside a tabbed or accordion interface to maximize vertical screen real estate.', type: 'webpart', category: 'Layout & Structure', version: 'v1.0.0', icon: '📑', gradient: 'slate', brand: 'HYPERPARTS' },
+  { id: 'hyper-poll', name: 'HyperPoll', subtitle: 'Real-time In-page Voting & Charts', description: 'Real-time feedback engine. In-page voting with animated Chart.js results; no redirect to MS Forms; supports anonymous or tracked entries.', type: 'webpart', category: 'Engagement', version: 'v1.0.0', icon: '📊', gradient: 'rose', brand: 'HYPERPARTS' },
+  { id: 'hyper-ticker', name: 'HyperTicker', subtitle: 'Breaking News Marquee & Alerts', description: 'Global alert marquee. Scrolling "Breaking News" bar for the top of the site; supports Emergency Alert levels and manual or RSS feed inputs.', type: 'webpart', category: 'Communication', version: 'v1.0.0', icon: '📢', gradient: 'ocean-depth', brand: 'HYPERPARTS' },
+  { id: 'hyper-recognition', name: 'HyperRecognition', subtitle: 'Peer Kudos & Wall of Fame', description: 'Peer-to-peer social recognition. A "Wall of Fame" for kudos and anniversaries; integrated with SharePoint lists and Microsoft Teams notifications.', type: 'webpart', category: 'People & Culture', version: 'v1.0.0', icon: '⭐', gradient: 'violet', brand: 'HYPERPARTS' },
+  { id: 'hyper-faq', name: 'HyperFAQ', subtitle: 'Searchable Knowledge Base with Voting', description: 'Intelligent knowledge base. Searchable accordion with "Was this helpful?" voting; auto-ranks most popular questions; "Ask a Guru" submission form.', type: 'webpart', category: 'Knowledge', version: 'v1.0.0', icon: '❓', gradient: 'corporate-blue', brand: 'HYPERPARTS' },
+  { id: 'hyper-events', name: 'HyperEvents Pro', subtitle: 'Unified Calendar with Outlook Sync', description: 'Unified scheduling. Aggregates Personal, Exchange, and SharePoint calendars; "Add to Outlook" 1-click sync; color-coding by event type.', type: 'webpart', category: 'Events', version: 'v1.0.0', icon: '📅', gradient: 'cyan', brand: 'HYPERPARTS' },
+  { id: 'hyper-breadcrumb', name: 'HyperBreadcrumb', subtitle: 'Dynamic Hub-Site Path Detection', description: 'Dynamic site-pathing. Automatically detects Hub-Site hierarchy; customizable separators; supports "breadcrumb-injection" for deep-level pages.', type: 'webpart', category: 'Navigation', version: 'v1.0.0', icon: '🔗', gradient: 'violet', brand: 'HYPERPARTS' },
+  { id: 'hyper-feedback', name: 'HyperFeedback', subtitle: 'Floating Screenshot & Ticket Widget', description: 'Internal Support/UX widget. Floating widget to capture screenshots and page metadata; automatically logs tickets to a SharePoint List or DevOps.', type: 'webpart', category: 'Utility', version: 'v1.0.0', icon: '💬', gradient: 'forest-teal', brand: 'HYPERPARTS' },
+  { id: 'hyper-birthdays', name: 'HyperBirthdays', subtitle: 'Automated Celebration Carousel', description: 'Automated celebration carousel. Syncs with Entra ID (Azure AD); automated "Happy Birthday" or "Work Anniversary" cards with 1-click Teams messaging.', type: 'webpart', category: 'People & Culture', version: 'v1.0.0', icon: '🎂', gradient: 'lime', brand: 'HYPERPARTS' },
+  { id: 'hyper-external', name: 'HyperExternal', subtitle: 'Secure SSO IFrame Wrapper', description: "Secure IFrame 2.0. Authentication-aware wrapper for legacy apps; SSO support; custom header/footer injection to match SharePoint's UI.", type: 'webpart', category: 'Integration', version: 'v1.0.0', icon: '🔌', gradient: 'blue-gray', brand: 'HYPERPARTS' },
+  { id: 'hyper-metrics', name: 'HyperMetrics', subtitle: 'Real-time KPI & Power BI Display', description: 'Real-time KPI display. Connects to Power BI or Excel; displays "Goal vs. Actual" progress bars and color-coded status indicators.', type: 'webpart', category: 'Data & Analytics', version: 'v1.0.0', icon: '📈', gradient: 'charcoal', brand: 'HYPERPARTS' },
+  { id: 'hyper-timeline', name: 'HyperTimeline', subtitle: 'Interactive Project Roadmap Visualizer', description: 'Project roadmap visualizer. Interactive horizontal/vertical timeline for project milestones; supports hover-over details and "Click to view document."', type: 'webpart', category: 'Project Management', version: 'v1.0.0', icon: '📋', gradient: 'ocean-depth', brand: 'HYPERPARTS' },
 ];
+
+/** @deprecated Use HYPERPARTS instead */
+export const WEBPARTS = HYPERPARTS;
 
 // Adaptive Cards for Teams (6 cards)
 export const ADAPTIVE_CARDS: Product[] = [
@@ -528,7 +470,7 @@ export const DWX_AGENTS: Product[] = [
 
 // Get all products
 export const getAllProducts = (): Product[] => {
-  return [...DWX_APPS, ...WEBPARTS, ...ADAPTIVE_CARDS, ...DWX_AGENTS];
+  return [...DWX_APPS, ...HYPERPARTS, ...ADAPTIVE_CARDS, ...DWX_AGENTS];
 };
 
 // Get products by type

@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HyperParts Product Catalog - DWx Traffic Manager</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif; background: #f5f5f5; color: #333; }
+    .container { max-width: 1400px; margin: 0 auto; padding: 24px 64px; }
+
+    /* Header */
+    .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; }
+    .title { font-size: 28px; font-weight: 700; color: #333; }
+    .subtitle { font-size: 14px; color: #6c757d; margin-top: 4px; }
+    .back-btn { padding: 8px 16px; border: 1px solid #d0d0d0; border-radius: 6px; background: white; cursor: pointer; font-size: 13px; color: #333; }
+
+    /* Tabs */
+    .tabs { display: flex; gap: 0; border-bottom: 2px solid #e0e0e0; margin-bottom: 0; }
+    .tab { padding: 12px 20px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 14px; color: #6c757d; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all 0.2s; }
+    .tab:hover { color: #333; }
+    .tab.active { color: #333; font-weight: 600; }
+    .tab.active.tab-hyperparts { border-bottom-color: #7c3aed; }
+    .tab-icon { display: flex; align-items: center; }
+    .tab-icon svg { width: 20px; height: 20px; }
+    .tab-badge { font-size: 11px; padding: 2px 8px; border-radius: 10px; font-weight: 500; }
+    .tab-badge-outline { border: 1px solid #ccc; color: #6c757d; }
+    .tab-badge-filled { color: white; }
+    .tab-badge-hyperparts { background: #7c3aed; }
+
+    /* ===== HERO VARIATIONS ===== */
+    .variation-label {
+      display: inline-block; font-size: 10px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 1px; padding: 3px 10px; border-radius: 4px;
+      background: #7c3aed; color: white; margin-bottom: 12px;
+    }
+    .variation-section { margin-bottom: 28px; }
+
+    /* V1: Side-by-side (text left, stats right) */
+    .hero-v1 {
+      background: linear-gradient(135deg, #1e1040 0%, #2d1b69 30%, #4c1d95 60%, #7c3aed 100%);
+      border-radius: 0 0 16px 16px;
+      padding: 24px 32px;
+      position: relative; overflow: hidden;
+    }
+    .hero-v1::before {
+      content: ''; position: absolute; top: -60%; right: -15%;
+      width: 400px; height: 400px;
+      background: radial-gradient(circle, rgba(124,58,237,0.3) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero-v1-inner { position: relative; z-index: 1; display: flex; align-items: center; gap: 32px; }
+    .hero-v1-left { flex: 1; min-width: 0; }
+    .hero-v1-top { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+    .hero-v1-icon {
+      width: 40px; height: 40px; border-radius: 10px;
+      background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15);
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .hero-v1-icon svg { width: 22px; height: 22px; stroke: #a78bfa; fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+    .hero-v1-title { font-size: 20px; font-weight: 700; color: white; letter-spacing: -0.3px; }
+    .hero-v1-title span { color: #a78bfa; }
+    .hero-v1-text { font-size: 13px; line-height: 1.7; color: rgba(255,255,255,0.75); max-width: 720px; }
+    .hero-v1-text strong { color: #c4b5fd; font-weight: 600; }
+    .hero-v1-stats {
+      display: flex; flex-direction: column; gap: 12px; flex-shrink: 0;
+      padding-left: 32px; border-left: 1px solid rgba(255,255,255,0.12);
+    }
+    .hero-v1-stat { display: flex; align-items: baseline; gap: 8px; }
+    .hero-v1-stat-value { font-size: 20px; font-weight: 700; color: white; white-space: nowrap; }
+    .hero-v1-stat-label { font-size: 10px; color: rgba(255,255,255,0.45); text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap; }
+
+    /* V2: Compact single row (icon + title + text + stats inline) */
+    .hero-v2 {
+      background: linear-gradient(135deg, #1e1040 0%, #2d1b69 30%, #4c1d95 60%, #7c3aed 100%);
+      border-radius: 0 0 16px 16px;
+      padding: 18px 32px;
+      position: relative; overflow: hidden;
+    }
+    .hero-v2::before {
+      content: ''; position: absolute; top: -80%; right: -15%;
+      width: 400px; height: 400px;
+      background: radial-gradient(circle, rgba(124,58,237,0.3) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero-v2-inner { position: relative; z-index: 1; display: flex; align-items: center; gap: 20px; }
+    .hero-v2-icon {
+      width: 36px; height: 36px; border-radius: 8px;
+      background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15);
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .hero-v2-icon svg { width: 20px; height: 20px; stroke: #a78bfa; fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+    .hero-v2-text { flex: 1; min-width: 0; }
+    .hero-v2-title { font-size: 16px; font-weight: 700; color: white; margin-bottom: 2px; }
+    .hero-v2-title span { color: #a78bfa; }
+    .hero-v2-subtitle { font-size: 12px; color: rgba(255,255,255,0.65); line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .hero-v2-subtitle strong { color: #c4b5fd; font-weight: 600; }
+    .hero-v2-stats { display: flex; gap: 20px; flex-shrink: 0; }
+    .hero-v2-stat { text-align: center; }
+    .hero-v2-stat-value { font-size: 16px; font-weight: 700; color: white; line-height: 1.2; }
+    .hero-v2-stat-label { font-size: 9px; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 0.5px; }
+    .hero-v2-stat-divider { width: 1px; background: rgba(255,255,255,0.1); align-self: stretch; }
+
+    /* V3: Slim banner (title + truncated text + CTA) */
+    .hero-v3 {
+      background: linear-gradient(90deg, #1e1040 0%, #2d1b69 25%, #4c1d95 60%, #7c3aed 100%);
+      border-radius: 0 0 12px 12px;
+      padding: 14px 28px;
+      position: relative; overflow: hidden;
+    }
+    .hero-v3::before {
+      content: ''; position: absolute; top: -100%; right: -10%;
+      width: 300px; height: 300px;
+      background: radial-gradient(circle, rgba(124,58,237,0.3) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero-v3-inner { position: relative; z-index: 1; display: flex; align-items: center; gap: 16px; }
+    .hero-v3-icon {
+      width: 32px; height: 32px; border-radius: 8px;
+      background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15);
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .hero-v3-icon svg { width: 18px; height: 18px; stroke: #a78bfa; fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+    .hero-v3-text { flex: 1; min-width: 0; }
+    .hero-v3-title { font-size: 15px; font-weight: 700; color: white; display: inline; }
+    .hero-v3-title span { color: #a78bfa; }
+    .hero-v3-dash { color: rgba(255,255,255,0.3); margin: 0 10px; }
+    .hero-v3-desc { font-size: 12px; color: rgba(255,255,255,0.6); display: inline; }
+    .hero-v3-desc strong { color: #c4b5fd; font-weight: 600; }
+    .hero-v3-chips { display: flex; gap: 8px; flex-shrink: 0; }
+    .hero-v3-chip {
+      padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 600;
+      background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.8);
+      border: 1px solid rgba(255,255,255,0.1); white-space: nowrap;
+    }
+
+    /* V2 Filter: Scrollable Pills + Search */
+    .filter-bar { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; margin-top: 20px; }
+    .filter-pills-scroll {
+      display: flex; gap: 6px; overflow-x: auto; flex: 1;
+      scrollbar-width: none; -ms-overflow-style: none;
+      mask-image: linear-gradient(to right, black 90%, transparent 100%);
+      -webkit-mask-image: linear-gradient(to right, black 90%, transparent 100%);
+    }
+    .filter-pills-scroll::-webkit-scrollbar { display: none; }
+    .pill {
+      padding: 5px 14px; border-radius: 16px; font-size: 12px; font-weight: 500;
+      cursor: pointer; transition: all 0.15s; border: 1px solid #e0e0e0;
+      background: white; color: #555; white-space: nowrap; flex-shrink: 0;
+    }
+    .pill:hover { border-color: #7c3aed; color: #7c3aed; }
+    .pill.active { background: #7c3aed; color: white; border-color: #7c3aed; }
+    .pill .pill-count {
+      display: inline-flex; align-items: center; justify-content: center;
+      min-width: 16px; height: 16px; border-radius: 8px; font-size: 10px;
+      margin-left: 4px; padding: 0 4px;
+    }
+    .pill.active .pill-count { background: rgba(255,255,255,0.25); color: white; }
+    .pill:not(.active) .pill-count { background: #f0f0f0; color: #888; }
+    .filter-search {
+      padding: 7px 12px 7px 34px; border-radius: 8px; border: 1px solid #d0d0d0;
+      font-size: 13px; color: #333; width: 240px; flex-shrink: 0;
+      background-image: url("data:image/svg+xml,%3Csvg width='14' height='14' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='11' cy='11' r='7' stroke='%239ca3af' stroke-width='2'/%3E%3Cline x1='16.5' y1='16.5' x2='21' y2='21' stroke='%239ca3af' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: 10px center;
+    }
+    .filter-search:focus { outline: none; border-color: #7c3aed; box-shadow: 0 0 0 2px rgba(124,58,237,0.15); }
+
+    /* Products Grid */
+    .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
+    .product-card { border-radius: 12px; overflow: hidden; border: 1px solid #e0e0e0; background: white; transition: all 0.2s; cursor: pointer; }
+    .product-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+
+    /* Card Header */
+    .card-header { height: 100px; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; }
+    .card-splash { text-align: center; color: white; padding: 12px; display: flex; flex-direction: column; align-items: center; }
+    .card-brand { font-size: 8px; letter-spacing: 1.5px; opacity: 0.8; margin-bottom: 2px; text-transform: uppercase; }
+    .card-dwx { font-size: 16px; font-weight: 800; margin-bottom: 6px; }
+    .card-dwx span { color: rgba(255,255,255,0.7); }
+    .card-icon { display: flex; align-items: center; justify-content: center; }
+    .card-icon svg { width: 32px; height: 32px; stroke: white; fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+    .card-version { position: absolute; top: 8px; right: 8px; background: rgba(255,255,255,0.2); padding: 2px 8px; border-radius: 10px; font-size: 10px; color: white; font-weight: 500; }
+
+    /* Card Body */
+    .card-content { padding: 12px; }
+    .category-tag { display: inline-block; font-size: 10px; padding: 2px 8px; border-radius: 8px; margin-bottom: 6px; font-weight: 500; background: #f3e8ff; color: #7c3aed; }
+    .product-name { font-size: 14px; font-weight: 700; color: #333; margin-bottom: 2px; line-height: 1.2; }
+    .product-subtitle { font-size: 11px; color: #6c757d; margin-bottom: 8px; }
+    .card-footer { display: flex; justify-content: space-between; align-items: center; padding-top: 8px; border-top: 1px solid #f0f0f0; }
+    .view-link { font-size: 11px; color: #7c3aed; font-weight: 500; text-decoration: none; cursor: pointer; }
+    .view-link:hover { text-decoration: underline; }
+    .demo-btn { padding: 6px 12px; font-size: 11px; background: #7c3aed; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 500; }
+    .demo-btn:hover { background: #6d28d9; }
+
+    /* Gradients */
+    .grad-visuals { background: linear-gradient(135deg, #7c3aed 0%, #5b21b6 100%); }
+    .grad-navigation { background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); }
+    .grad-communication { background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%); }
+    .grad-content { background: linear-gradient(135deg, #10b981 0%, #059669 100%); }
+    .grad-people { background: linear-gradient(135deg, #ec4899 0%, #db2777 100%); }
+    .grad-media { background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); }
+    .grad-utility { background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%); }
+    .grad-action { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); }
+    .grad-layout { background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%); }
+    .grad-engagement { background: linear-gradient(135deg, #e11d48 0%, #be123c 100%); }
+    .grad-knowledge { background: linear-gradient(135deg, #1a5a8a 0%, #0d3a5c 100%); }
+    .grad-events { background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%); }
+    .grad-integration { background: linear-gradient(135deg, #64748b 0%, #475569 100%); }
+    .grad-data { background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); }
+    .grad-project { background: linear-gradient(135deg, #0369a1 0%, #075985 100%); }
+
+    /* ===== MODAL ===== */
+    .modal-overlay { display: none; position: fixed; inset: 0; z-index: 1000; align-items: center; justify-content: center; background: rgba(0,0,0,0.4); backdrop-filter: blur(2px); }
+    .modal-overlay.open { display: flex; }
+    .modal-dialog { width: 920px; max-width: 92vw; max-height: 90vh; background: white; border-radius: 12px; box-shadow: 0 12px 48px rgba(0,0,0,0.25); overflow: hidden; display: flex; flex-direction: column; animation: modalSlide 0.2s ease; }
+    @keyframes modalSlide { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+    .modal-hero { padding: 24px 32px; display: flex; align-items: center; gap: 20px; color: white; flex-shrink: 0; border-radius: 12px 12px 0 0; }
+    .modal-hero-icon { width: 56px; height: 56px; border-radius: 14px; background: rgba(255,255,255,0.15); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .modal-hero-icon svg { width: 28px; height: 28px; stroke: white; fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+    .modal-hero-text { flex: 1; min-width: 0; }
+    .modal-hero-category { display: inline-block; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px; padding: 3px 10px; border-radius: 10px; background: rgba(255,255,255,0.2); margin-bottom: 6px; }
+    .modal-hero-title { font-size: 22px; font-weight: 700; color: white; line-height: 1.2; margin-bottom: 4px; }
+    .modal-hero-subtitle { font-size: 14px; color: rgba(255,255,255,0.85); line-height: 1.4; }
+    .modal-close-btn { min-width: 36px; height: 36px; padding: 0; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: background 0.2s; }
+    .modal-close-btn:hover { background: rgba(255,255,255,0.2); }
+    .modal-close-btn svg { width: 20px; height: 20px; stroke: white; fill: none; stroke-width: 2; stroke-linecap: round; }
+    .modal-scroll { flex: 1; overflow-y: auto; overflow-x: hidden; }
+    .modal-content-grid { display: grid; grid-template-columns: 1fr 280px; gap: 0; min-height: 0; }
+    .modal-main { display: flex; flex-direction: column; border-right: 1px solid #e8e8e8; }
+    .modal-sidebar { display: flex; flex-direction: column; background: #fafafa; }
+    .modal-section { border-bottom: 1px solid #f0f0f0; }
+    .modal-section-header { display: flex; align-items: center; gap: 8px; padding: 14px 24px; border-bottom: 1px solid #f0f0f0; background: #fafafa; }
+    .modal-section-icon { width: 18px; height: 18px; flex-shrink: 0; }
+    .modal-section-icon svg { width: 18px; height: 18px; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; fill: none; }
+    .modal-section-title { font-size: 13px; font-weight: 600; color: #242424; }
+    .modal-section-body { padding: 16px 24px; }
+    .modal-about { font-size: 14px; color: #424242; line-height: 1.7; }
+    .modal-bullet-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px; }
+    .modal-bullet-item { display: flex; align-items: flex-start; gap: 8px; font-size: 13px; color: #424242; line-height: 1.5; }
+    .modal-bullet-icon { width: 16px; height: 16px; flex-shrink: 0; margin-top: 2px; }
+    .modal-bullet-icon svg { width: 16px; height: 16px; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; fill: none; }
+    .modal-quick-facts { display: flex; flex-direction: column; gap: 16px; padding: 16px 20px; border-bottom: 1px solid #f0f0f0; }
+    .modal-fact { display: flex; flex-direction: column; gap: 3px; }
+    .modal-fact-label { font-size: 10px; color: #616161; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 500; }
+    .modal-fact-value { font-size: 14px; font-weight: 600; color: #242424; display: flex; align-items: center; gap: 6px; }
+    .modal-fact-icon { width: 14px; height: 14px; }
+    .modal-fact-icon svg { width: 14px; height: 14px; stroke: #616161; fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+    .complexity-badge { display: inline-flex; align-items: center; padding: 3px 10px; border-radius: 4px; font-size: 12px; font-weight: 600; }
+    .complexity-spfx { background: #e8e8f4; color: #6264a7; }
+    .modal-evolution { padding: 16px 20px; border-bottom: 1px solid #f0f0f0; }
+    .modal-evolution-label { font-size: 10px; color: #616161; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 500; margin-bottom: 8px; }
+    .modal-evolution-block { background: #f8f7ff; border-left: 3px solid #7c3aed; border-radius: 0 6px 6px 0; padding: 12px 14px; }
+    .modal-evolution-text { font-size: 13px; color: #555; line-height: 1.6; }
+    .modal-tech-section { padding: 16px 20px; border-bottom: 1px solid #f0f0f0; }
+    .modal-tech-label { font-size: 10px; color: #616161; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 500; margin-bottom: 8px; width: 100%; }
+    .modal-tech-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+    .modal-tech-chip { display: inline-flex; align-items: center; gap: 4px; padding: 5px 10px; background: #e8f4fc; border-radius: 6px; font-size: 12px; font-weight: 500; color: #1a5a8a; border: 1px solid #cce4f0; }
+    .modal-footer { padding: 14px 24px; background: #fafafa; border-top: 1px solid #e1e1e1; display: flex; justify-content: flex-end; gap: 12px; flex-shrink: 0; }
+    .modal-btn { padding: 8px 20px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.15s; }
+    .modal-btn-secondary { background: white; border: 1px solid #d0d0d0; color: #333; }
+    .modal-btn-secondary:hover { background: #f5f5f5; }
+    .modal-btn-primary { background: #1a5a8a; border: none; color: white; display: inline-flex; align-items: center; gap: 6px; }
+    .modal-btn-primary:hover { background: #145a7a; }
+    .modal-btn-primary svg { width: 14px; height: 14px; stroke: white; fill: none; stroke-width: 2; stroke-linecap: round; }
+
+    /* Notes */
+    .note { background: #fffbeb; border: 1px solid #fcd34d; border-radius: 8px; padding: 16px; margin-top: 32px; }
+    .note-title { font-weight: 600; color: #92400e; margin-bottom: 4px; }
+    .note-text { font-size: 13px; color: #78350f; }
+
+    /* Divider */
+    .section-divider { height: 1px; background: #e5e7eb; margin: 8px 0 20px 0; }
+
+    /* Height indicator */
+    .height-badge { display: inline-block; font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 4px; background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; margin-left: 8px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <!-- Header -->
+    <div class="header">
+      <div>
+        <div class="title">Product Catalog</div>
+        <div class="subtitle">DWx applications, HyperParts web parts, adaptive cards, and agents for your digital workplace</div>
+      </div>
+      <button class="back-btn">&larr; Back to Home</button>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <div class="tab">
+        <span class="tab-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#6c757d" stroke-width="1.5"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg></span>
+        <span>DWx Apps</span>
+        <span class="tab-badge tab-badge-outline">16</span>
+      </div>
+      <div class="tab tab-hyperparts active">
+        <span class="tab-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="1.5"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg></span>
+        <span>HyperParts</span>
+        <span class="tab-badge tab-badge-filled tab-badge-hyperparts">20</span>
+      </div>
+      <div class="tab">
+        <span class="tab-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#6c757d" stroke-width="1.5"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span>
+        <span>Adaptive Cards</span>
+        <span class="tab-badge tab-badge-outline">6</span>
+      </div>
+      <div class="tab">
+        <span class="tab-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#6c757d" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M6 20v-2a4 4 0 014-4h4a4 4 0 014 4v2"/></svg></span>
+        <span>DWx Agents</span>
+        <span class="tab-badge tab-badge-outline">10</span>
+      </div>
+    </div>
+
+    <!-- ================================================================ -->
+    <!-- HERO VARIATION 1: Side-by-side (text left, stats right column)   -->
+    <!-- ================================================================ -->
+    <div class="variation-section">
+      <span class="variation-label">Hero V1 &mdash; Side-by-Side</span>
+      <span class="height-badge">~110px</span>
+      <div class="hero-v1">
+        <div class="hero-v1-inner">
+          <div class="hero-v1-left">
+            <div class="hero-v1-top">
+              <div class="hero-v1-icon">
+                <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+              </div>
+              <div class="hero-v1-title">The <span>HyperParts</span> Suite</div>
+            </div>
+            <div class="hero-v1-text">
+              Step into the future of the digital workplace with the HyperParts Suite &mdash; a revolutionary ecosystem of SPFx components engineered to shatter the limitations of standard SharePoint. These components provide <strong>Hyper-Performance</strong>, <strong>Hyper-Flexibility</strong>, and <strong>Hyper-Integration</strong>, transforming your intranet from a static document repository into a high-velocity, interactive command center.
+            </div>
+          </div>
+          <div class="hero-v1-stats">
+            <div class="hero-v1-stat">
+              <div class="hero-v1-stat-value">20</div>
+              <div class="hero-v1-stat-label">Web Parts</div>
+            </div>
+            <div class="hero-v1-stat">
+              <div class="hero-v1-stat-value">15</div>
+              <div class="hero-v1-stat-label">Categories</div>
+            </div>
+            <div class="hero-v1-stat">
+              <div class="hero-v1-stat-value">SPFx 1.18+</div>
+              <div class="hero-v1-stat-label">Framework</div>
+            </div>
+            <div class="hero-v1-stat">
+              <div class="hero-v1-stat-value">Fluent v9</div>
+              <div class="hero-v1-stat-label">Design System</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================================================================ -->
+    <!-- HERO VARIATION 2: Single-row compact (icon + title + text + stats inline) -->
+    <!-- ================================================================ -->
+    <div class="variation-section">
+      <span class="variation-label">Hero V2 &mdash; Compact Two-line</span>
+      <span class="height-badge">~70px</span>
+      <div class="hero-v2">
+        <div class="hero-v2-inner">
+          <div class="hero-v2-icon">
+            <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+          </div>
+          <div class="hero-v2-text">
+            <div class="hero-v2-title">The <span>HyperParts</span> Suite</div>
+            <div class="hero-v2-subtitle">
+              A revolutionary ecosystem of SPFx components providing <strong>Hyper-Performance</strong>, <strong>Hyper-Flexibility</strong>, and <strong>Hyper-Integration</strong> &mdash; transforming your intranet into a high-velocity command center.
+            </div>
+          </div>
+          <div class="hero-v2-stats">
+            <div class="hero-v2-stat">
+              <div class="hero-v2-stat-value">20</div>
+              <div class="hero-v2-stat-label">Parts</div>
+            </div>
+            <div class="hero-v2-stat-divider"></div>
+            <div class="hero-v2-stat">
+              <div class="hero-v2-stat-value">15</div>
+              <div class="hero-v2-stat-label">Categories</div>
+            </div>
+            <div class="hero-v2-stat-divider"></div>
+            <div class="hero-v2-stat">
+              <div class="hero-v2-stat-value">1.18+</div>
+              <div class="hero-v2-stat-label">SPFx</div>
+            </div>
+            <div class="hero-v2-stat-divider"></div>
+            <div class="hero-v2-stat">
+              <div class="hero-v2-stat-value">v9</div>
+              <div class="hero-v2-stat-label">Fluent</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================================================================ -->
+    <!-- HERO VARIATION 3: Slim banner bar (minimal height)               -->
+    <!-- ================================================================ -->
+    <div class="variation-section">
+      <span class="variation-label">Hero V3 &mdash; Slim Banner</span>
+      <span class="height-badge">~50px</span>
+      <div class="hero-v3">
+        <div class="hero-v3-inner">
+          <div class="hero-v3-icon">
+            <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+          </div>
+          <div class="hero-v3-text">
+            <span class="hero-v3-title">The <span>HyperParts</span> Suite</span>
+            <span class="hero-v3-dash">&mdash;</span>
+            <span class="hero-v3-desc"><strong>Hyper-Performance</strong>, <strong>Hyper-Flexibility</strong>, <strong>Hyper-Integration</strong>. Next-gen SPFx for the modern digital workplace.</span>
+          </div>
+          <div class="hero-v3-chips">
+            <span class="hero-v3-chip">20 Parts</span>
+            <span class="hero-v3-chip">15 Categories</span>
+            <span class="hero-v3-chip">SPFx 1.18+</span>
+            <span class="hero-v3-chip">Fluent v9</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-divider"></div>
+
+    <!-- Filter V2: Scrollable Pills + Search -->
+    <div class="filter-bar">
+      <div class="filter-pills-scroll">
+        <button class="pill active">All <span class="pill-count">20</span></button>
+        <button class="pill">Visuals & Branding <span class="pill-count">1</span></button>
+        <button class="pill">Navigation <span class="pill-count">2</span></button>
+        <button class="pill">Communication <span class="pill-count">2</span></button>
+        <button class="pill">Content Discovery <span class="pill-count">1</span></button>
+        <button class="pill">People & Culture <span class="pill-count">3</span></button>
+        <button class="pill">Media & Files <span class="pill-count">1</span></button>
+        <button class="pill">Utility <span class="pill-count">2</span></button>
+        <button class="pill">Action & Workflow <span class="pill-count">1</span></button>
+        <button class="pill">Layout & Structure <span class="pill-count">1</span></button>
+        <button class="pill">Engagement <span class="pill-count">1</span></button>
+        <button class="pill">Knowledge <span class="pill-count">1</span></button>
+        <button class="pill">Events <span class="pill-count">1</span></button>
+        <button class="pill">Integration <span class="pill-count">1</span></button>
+        <button class="pill">Data & Analytics <span class="pill-count">1</span></button>
+        <button class="pill">Project Mgmt <span class="pill-count">1</span></button>
+      </div>
+      <input type="text" class="filter-search" placeholder="Search HyperParts...">
+    </div>
+
+    <!-- Products Grid -->
+    <div class="products-grid" id="productsGrid"></div>
+
+    <!-- Design Notes -->
+    <div class="note" style="margin-top: 32px;">
+      <div class="note-title">Hero Variations</div>
+      <div class="note-text">
+        <ul style="margin-top: 8px; padding-left: 20px; line-height: 1.8;">
+          <li><strong>V1 &mdash; Side-by-Side (~110px)</strong>: Text on left, stats stacked vertically on right with divider. Keeps full sales copy visible. Best balance of content and compactness.</li>
+          <li><strong>V2 &mdash; Compact Two-line (~70px)</strong>: Title + truncated tagline on left, stats inline on right. Saves significant vertical space while keeping stats prominent.</li>
+          <li><strong>V3 &mdash; Slim Banner (~50px)</strong>: Everything on one line. Title, short tagline, and stats as compact chips. Maximum vertical space recovery &mdash; feels like a branded toolbar.</li>
+          <li>All use <strong>Filter V2 (Scrollable Pills)</strong> with horizontal scroll, count badges, and search input.</li>
+          <li>Previous hero was <strong>~185px</strong> tall. V1 saves ~40%, V2 saves ~62%, V3 saves ~73%.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal-dialog" id="modalDialog">
+      <div class="modal-hero" id="modalHero">
+        <div class="modal-hero-icon" id="modalHeroIcon"></div>
+        <div class="modal-hero-text">
+          <div class="modal-hero-category" id="modalCategory"></div>
+          <div class="modal-hero-title" id="modalTitle"></div>
+          <div class="modal-hero-subtitle" id="modalSubtitle"></div>
+        </div>
+        <button class="modal-close-btn" onclick="closeModal()" title="Close">
+          <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="modal-scroll">
+        <div class="modal-content-grid">
+          <div class="modal-main" id="modalMain"></div>
+          <div class="modal-sidebar" id="modalSidebar"></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="modal-btn modal-btn-secondary" onclick="closeModal()">Close</button>
+        <button class="modal-btn modal-btn-primary">Request Demo <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></button>
+      </div>
+    </div>
+  </div>
+
+<script>
+const ICONS = {
+  'hyper-hero': '<svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/><path d="M7 8l3 3 4-5 3 4"/></svg>',
+  'hyper-nav': '<svg viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="15" y2="18"/><polyline points="17 16 19 18 21 16"/></svg>',
+  'hyper-news': '<svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="18" rx="2"/><line x1="6" y1="8" x2="10" y2="8"/><line x1="6" y1="12" x2="18" y2="12"/><line x1="6" y1="16" x2="18" y2="16"/><rect x="13" y="6" width="5" height="4" rx="0.5"/></svg>',
+  'hyper-rollup': '<svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="21" y2="21"/><line x1="8" y1="11" x2="14" y2="11"/><line x1="11" y1="8" x2="11" y2="14"/></svg>',
+  'hyper-profile': '<svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M6 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/><circle cx="18" cy="6" r="2.5"/><path d="M18 5v2"/><path d="M17 6h2"/></svg>',
+  'hyper-explorer': '<svg viewBox="0 0 24 24"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/><line x1="9" y1="14" x2="15" y2="14"/></svg>',
+  'hyper-local': '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15 15 0 014 10 15 15 0 01-4 10 15 15 0 01-4-10A15 15 0 0112 2z"/></svg>',
+  'hyper-action': '<svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>',
+  'hyper-tabs': '<svg viewBox="0 0 24 24"><rect x="3" y="8" width="18" height="13" rx="2"/><path d="M3 11h18"/><rect x="5" y="5" width="5" height="3" rx="1"/><rect x="11" y="5" width="5" height="3" rx="1"/></svg>',
+  'hyper-poll': '<svg viewBox="0 0 24 24"><rect x="4" y="14" width="4" height="7" rx="1"/><rect x="10" y="8" width="4" height="13" rx="1"/><rect x="16" y="3" width="4" height="18" rx="1"/></svg>',
+  'hyper-ticker': '<svg viewBox="0 0 24 24"><rect x="1" y="8" width="22" height="8" rx="2"/><line x1="7" y1="12" x2="17" y2="12"/><polyline points="3 8 3 5 21 5 21 8"/><circle cx="4" cy="12" r="1" fill="white" stroke="none"/></svg>',
+  'hyper-recognition': '<svg viewBox="0 0 24 24"><polygon points="12 2 15 9 22 9 16.5 13.5 18.5 21 12 17 5.5 21 7.5 13.5 2 9 9 9"/></svg>',
+  'hyper-faq': '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9 9a3 3 0 015.12 2.13c0 2-3.12 2.37-3.12 4.37"/><line x1="12" y1="19" x2="12" y2="19" stroke-width="2.5" stroke-linecap="round"/></svg>',
+  'hyper-events': '<svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><circle cx="12" cy="15" r="2"/></svg>',
+  'hyper-breadcrumb': '<svg viewBox="0 0 24 24"><polyline points="4 12 8 12 11 8 13 16 16 12 20 12"/><circle cx="4" cy="12" r="1.5"/><circle cx="20" cy="12" r="1.5"/></svg>',
+  'hyper-feedback': '<svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/><line x1="9" y1="9" x2="15" y2="9"/><line x1="9" y1="13" x2="13" y2="13"/></svg>',
+  'hyper-birthdays': '<svg viewBox="0 0 24 24"><rect x="2" y="11" width="20" height="11" rx="2"/><path d="M6 11V8"/><path d="M12 11V6"/><path d="M18 11V8"/><circle cx="6" cy="6" r="1.5"/><circle cx="12" cy="4" r="1.5"/><circle cx="18" cy="6" r="1.5"/><line x1="2" y1="17" x2="22" y2="17"/></svg>',
+  'hyper-external': '<svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><rect x="7" y="7" width="10" height="10" rx="1" stroke-dasharray="2 2"/><polyline points="14 3 21 3 21 10"/><line x1="21" y1="3" x2="14" y2="10"/></svg>',
+  'hyper-metrics': '<svg viewBox="0 0 24 24"><line x1="3" y1="21" x2="3" y2="3"/><line x1="3" y1="21" x2="21" y2="21"/><polyline points="6 16 10 10 14 13 20 6"/><circle cx="20" cy="6" r="1.5"/></svg>',
+  'hyper-timeline': '<svg viewBox="0 0 24 24"><line x1="12" y1="3" x2="12" y2="21"/><circle cx="12" cy="6" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="18" r="2"/><line x1="14" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="10" y2="12"/><line x1="14" y1="18" x2="20" y2="18"/></svg>'
+};
+
+const SECTION_ICONS = {
+  about: '<svg viewBox="0 0 24 24" stroke="#1a5a8a"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6" stroke-width="2.5" stroke-linecap="round"/><line x1="3" y1="12" x2="3.01" y2="12" stroke-width="2.5" stroke-linecap="round"/><line x1="3" y1="18" x2="3.01" y2="18" stroke-width="2.5" stroke-linecap="round"/></svg>',
+  features: '<svg viewBox="0 0 24 24" stroke="#1a5a8a"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>',
+  check: '<svg viewBox="0 0 24 24" stroke="#1a5a8a"><polyline points="20 6 9 17 4 12"/></svg>',
+};
+
+const PRODUCTS = [
+  { id: 'hyper-hero', name: 'HyperHero', subtitle: 'Dynamic Hero Layouts & Animations', category: 'Visuals & Branding', gradient: 'grad-visuals', version: 'v1.0.0', description: 'Replaces static layouts with a CSS Grid engine. Supports video backgrounds, Lottie animations, dynamic AI-based content binding, and 10+ grid configurations.', evolution: 'Replaces static layouts with a CSS Grid engine.', features: ['Video & Lottie animated backgrounds', 'Dynamic AI-based content binding', '10+ configurable grid layouts', 'CSS Grid engine for responsive design', 'Customizable call-to-action overlays'], tech: ['CSS Grid', 'Lottie', 'SPFx 1.18+', 'React 18'] },
+  { id: 'hyper-nav', name: 'HyperNav', subtitle: 'Multi-level Personalized Navigation', category: 'Navigation', gradient: 'grad-navigation', version: 'v1.0.0', description: 'Transcends simple lists with multi-level nesting. Personalized "My Links" based on AD attributes, SVG icon support, and audience visibility at the individual link level.', evolution: 'Transcends simple lists with multi-level nesting.', features: ['Multi-level nested navigation', 'Personalized "My Links" via AD attributes', 'SVG icon support per link', 'Audience visibility per link', 'Responsive mega-menu layout'], tech: ['Graph API', 'Entra ID', 'SPFx 1.18+'] },
+  { id: 'hyper-news', name: 'HyperNews Feed', subtitle: 'Interactive Media Hub with Social Metrics', category: 'Communication', gradient: 'grad-communication', version: 'v1.0.0', description: 'Moves from static updates to an interactive media hub. Infinite scroll, in-line modal "Quick Read," estimated read time, and social engagement metrics (likes/views).', evolution: 'Moves from static updates to an interactive media hub.', features: ['Infinite scroll news feed', 'In-line "Quick Read" modal', 'Estimated read time per article', 'Social engagement metrics (likes/views)', 'Category-based filtering'], tech: ['SharePoint REST', 'React 18', 'SPFx 1.18+'] },
+  { id: 'hyper-rollup', name: 'HyperRollup', subtitle: 'Visual Query Builder & Content Rollup', category: 'Content Discovery', gradient: 'grad-content', version: 'v1.0.0', description: 'Superior version of Highlighted Content. Visual Query Builder for non-devs, custom Handlebars/React result templates, and "Export to CSV/Excel" functionality.', evolution: 'Superior version of Highlighted Content.', features: ['Visual Query Builder (no-code)', 'Custom Handlebars/React templates', 'Export to CSV/Excel', 'Cross-site content aggregation', 'Real-time result preview'], tech: ['SharePoint Search', 'Handlebars', 'xlsx', 'SPFx 1.18+'] },
+  { id: 'hyper-profile', name: 'HyperProfile', subtitle: 'Live Directory Cards with Teams Status', category: 'People & Culture', gradient: 'grad-people', version: 'v1.0.0', description: 'Live, interactive directory cards. Real-time Teams status, integrated "Schedule Meeting" button, Org-chart hover states, and Skill-tag searching.', evolution: 'Live, interactive directory cards.', features: ['Real-time Teams presence status', 'Integrated "Schedule Meeting" button', 'Org-chart hover navigation', 'Skill-tag searching & filtering', 'Profile card quick-actions'], tech: ['Graph API', 'Teams Presence', 'Entra ID', 'SPFx 1.18+'] },
+  { id: 'hyper-explorer', name: 'HyperExplorer', subtitle: 'Advanced File Previewer & ZIP Export', category: 'Media & Files', gradient: 'grad-media', version: 'v1.0.0', description: 'Advanced file interaction. Multi-file previewer, folder breadcrumbs within the part, "Download as ZIP" capability, and integrated PDF annotation.', evolution: 'Advanced file interaction.', features: ['Multi-file inline previewer', 'Folder breadcrumb navigation', 'Download as ZIP', 'Integrated PDF annotation', 'Drag-and-drop file management'], tech: ['Graph API', 'JSZip', 'PDF.js', 'SPFx 1.18+'] },
+  { id: 'hyper-local', name: 'HyperLocal', subtitle: 'Weather, Clocks & Currency Converter', category: 'Utility', gradient: 'grad-utility', version: 'v1.0.0', description: 'Context-aware utility. IP-based weather, multiple world clocks, live currency conversion, and stock ticker integration with corporate branding.', evolution: 'Context-aware utility.', features: ['IP-based weather detection', 'Multiple world clocks', 'Live currency conversion', 'Stock ticker integration', 'Corporate-branded widget skins'], tech: ['OpenWeather API', 'Exchange Rate API', 'SPFx 1.18+'] },
+  { id: 'hyper-action', name: 'HyperAction', subtitle: 'Intelligent Multi-step Call-to-Action', category: 'Action & Workflow', gradient: 'grad-action', version: 'v1.0.0', description: 'Intelligent Call-to-Action. Multi-step buttons (logic-based), Power Automate triggers on click, and conditional button text based on user permissions.', evolution: 'Intelligent Call-to-Action.', features: ['Multi-step logic-based buttons', 'Power Automate trigger on click', 'Conditional text by user permissions', 'Progress indicator integration', 'Customizable button themes'], tech: ['Power Automate', 'Graph API', 'SPFx 1.18+'] },
+  { id: 'hyper-tabs', name: 'HyperTabs', subtitle: 'Containerized Tabbed/Accordion Layout', category: 'Layout & Structure', gradient: 'grad-layout', version: 'v1.0.0', description: 'A containerized layout part. Allows users to host other web parts inside a tabbed or accordion interface to maximize vertical screen real estate.', evolution: 'A containerized layout part.', features: ['Tabbed & accordion views', 'Host other web parts inside tabs', 'Maximizes vertical screen space', 'Drag-and-drop tab reordering', 'Per-tab audience targeting'], tech: ['SPFx Dynamic Data', 'React 18', 'SPFx 1.18+'] },
+  { id: 'hyper-poll', name: 'HyperPoll', subtitle: 'Real-time In-page Voting & Charts', category: 'Engagement', gradient: 'grad-engagement', version: 'v1.0.0', description: 'Real-time feedback engine. In-page voting with animated Chart.js results; no redirect to MS Forms; supports anonymous or tracked entries.', evolution: 'Real-time feedback engine.', features: ['In-page voting (no redirects)', 'Animated Chart.js results', 'Anonymous or tracked entries', 'Multi-question polls', 'Scheduled open/close windows'], tech: ['Chart.js', 'SharePoint Lists', 'SPFx 1.18+'] },
+  { id: 'hyper-ticker', name: 'HyperTicker', subtitle: 'Breaking News Marquee & Alerts', category: 'Communication', gradient: 'grad-communication', version: 'v1.0.0', description: 'Global alert marquee. Scrolling "Breaking News" bar for the top of the site; supports Emergency Alert levels and manual or RSS feed inputs.', evolution: 'Global alert marquee.', features: ['Scrolling marquee banner', 'Emergency Alert severity levels', 'Manual or RSS feed inputs', 'Customizable scroll speed', 'Dismissible per-user'], tech: ['RSS Parser', 'CSS Animations', 'SPFx 1.18+'] },
+  { id: 'hyper-recognition', name: 'HyperRecognition', subtitle: 'Peer Kudos & Wall of Fame', category: 'People & Culture', gradient: 'grad-people', version: 'v1.0.0', description: 'Peer-to-peer social recognition. A "Wall of Fame" for kudos and anniversaries; integrated with SharePoint lists and Microsoft Teams notifications.', evolution: 'Peer-to-peer social recognition.', features: ['"Wall of Fame" display', 'Peer kudos submissions', 'Anniversary auto-detection', 'Teams notification integration', 'Leaderboard & gamification'], tech: ['Graph API', 'Teams Webhooks', 'SharePoint Lists', 'SPFx 1.18+'] },
+  { id: 'hyper-faq', name: 'HyperFAQ', subtitle: 'Searchable Knowledge Base with Voting', category: 'Knowledge', gradient: 'grad-knowledge', version: 'v1.0.0', description: 'Intelligent knowledge base. Searchable accordion with "Was this helpful?" voting; auto-ranks most popular questions; "Ask a Guru" submission form.', evolution: 'Intelligent knowledge base.', features: ['Searchable accordion interface', '"Was this helpful?" voting', 'Auto-ranked popular questions', '"Ask a Guru" submission form', 'Category & tag filtering'], tech: ['SharePoint Search', 'React 18', 'SPFx 1.18+'] },
+  { id: 'hyper-events', name: 'HyperEvents Pro', subtitle: 'Unified Calendar with Outlook Sync', category: 'Events', gradient: 'grad-events', version: 'v1.0.0', description: 'Unified scheduling. Aggregates Personal, Exchange, and SharePoint calendars; "Add to Outlook" 1-click sync; color-coding by event type.', evolution: 'Unified scheduling.', features: ['Multi-calendar aggregation', '"Add to Outlook" 1-click sync', 'Color-coding by event type', 'Recurring event support', 'RSVP tracking & attendance'], tech: ['Graph Calendar API', 'Exchange', 'SPFx 1.18+'] },
+  { id: 'hyper-breadcrumb', name: 'HyperBreadcrumb', subtitle: 'Dynamic Hub-Site Path Detection', category: 'Navigation', gradient: 'grad-navigation', version: 'v1.0.0', description: 'Dynamic site-pathing. Automatically detects Hub-Site hierarchy; customizable separators; supports "breadcrumb-injection" for deep-level pages.', evolution: 'Dynamic site-pathing.', features: ['Auto Hub-Site hierarchy detection', 'Customizable separators', 'Breadcrumb-injection for deep pages', 'Responsive truncation', 'Clickable path segments'], tech: ['SP Hub API', 'SPFx 1.18+'] },
+  { id: 'hyper-feedback', name: 'HyperFeedback', subtitle: 'Floating Screenshot & Ticket Widget', category: 'Utility', gradient: 'grad-utility', version: 'v1.0.0', description: 'Internal Support/UX widget. Floating widget to capture screenshots and page metadata; automatically logs tickets to a SharePoint List or DevOps.', evolution: 'Internal Support/UX widget.', features: ['Floating feedback widget', 'Auto screenshot capture', 'Page metadata collection', 'Logs to SharePoint or DevOps', 'Sentiment & category tagging'], tech: ['html2canvas', 'Azure DevOps API', 'SPFx 1.18+'] },
+  { id: 'hyper-birthdays', name: 'HyperBirthdays', subtitle: 'Automated Celebration Carousel', category: 'People & Culture', gradient: 'grad-people', version: 'v1.0.0', description: 'Automated celebration carousel. Syncs with Entra ID (Azure AD); automated "Happy Birthday" or "Work Anniversary" cards with 1-click Teams messaging.', evolution: 'Automated celebration carousel.', features: ['Entra ID (Azure AD) sync', 'Auto birthday/anniversary detection', '1-click Teams messaging', 'Carousel & list display modes', 'Custom celebration templates'], tech: ['Entra ID', 'Graph API', 'Teams', 'SPFx 1.18+'] },
+  { id: 'hyper-external', name: 'HyperExternal', subtitle: 'Secure SSO IFrame Wrapper', category: 'Integration', gradient: 'grad-integration', version: 'v1.0.0', description: "Secure IFrame 2.0. Authentication-aware wrapper for legacy apps; SSO support; custom header/footer injection to match SharePoint's UI.", evolution: 'Secure IFrame 2.0.', features: ['Authentication-aware IFrame', 'SSO pass-through support', 'Custom header/footer injection', 'SharePoint UI matching', 'Content security policies'], tech: ['MSAL', 'CSP Headers', 'SPFx 1.18+'] },
+  { id: 'hyper-metrics', name: 'HyperMetrics', subtitle: 'Real-time KPI & Power BI Display', category: 'Data & Analytics', gradient: 'grad-data', version: 'v1.0.0', description: 'Real-time KPI display. Connects to Power BI or Excel; displays "Goal vs. Actual" progress bars and color-coded status indicators.', evolution: 'Real-time KPI display.', features: ['Power BI & Excel data sources', '"Goal vs. Actual" progress bars', 'Color-coded status indicators', 'Sparkline mini-charts', 'Auto-refresh intervals'], tech: ['Power BI Embed', 'Excel REST', 'SPFx 1.18+'] },
+  { id: 'hyper-timeline', name: 'HyperTimeline', subtitle: 'Interactive Project Roadmap Visualizer', category: 'Project Management', gradient: 'grad-project', version: 'v1.0.0', description: 'Project roadmap visualizer. Interactive horizontal/vertical timeline for project milestones; supports hover-over details and "Click to view document."', evolution: 'Project roadmap visualizer.', features: ['Horizontal & vertical layouts', 'Milestone markers with hover details', '"Click to view document" links', 'Phase color-coding', 'Filterable by project or team'], tech: ['SharePoint Lists', 'React 18', 'SPFx 1.18+'] }
+];
+
+function renderCards() {
+  document.getElementById('productsGrid').innerHTML = PRODUCTS.map(p => `
+    <div class="product-card" onclick="openModal('${p.id}')">
+      <div class="card-header ${p.gradient}">
+        <span class="card-version">${p.version}</span>
+        <div class="card-splash">
+          <div class="card-brand">HYPERPARTS</div>
+          <div class="card-dwx">DW<span>x</span></div>
+          <div class="card-icon">${ICONS[p.id]}</div>
+        </div>
+      </div>
+      <div class="card-content">
+        <span class="category-tag">${p.category}</span>
+        <div class="product-name">${p.name}</div>
+        <div class="product-subtitle">${p.subtitle}</div>
+        <div class="card-footer">
+          <span class="view-link" onclick="event.stopPropagation(); openModal('${p.id}')">View details &rarr;</span>
+          <button class="demo-btn" onclick="event.stopPropagation();">Request Demo</button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function openModal(id) {
+  const p = PRODUCTS.find(x => x.id === id);
+  if (!p) return;
+  document.getElementById('modalHero').className = 'modal-hero ' + p.gradient;
+  document.getElementById('modalHeroIcon').innerHTML = ICONS[p.id];
+  document.getElementById('modalCategory').textContent = p.category;
+  document.getElementById('modalTitle').textContent = p.name;
+  document.getElementById('modalSubtitle').textContent = p.subtitle;
+  document.getElementById('modalMain').innerHTML = `
+    <div class="modal-section"><div class="modal-section-header"><span class="modal-section-icon">${SECTION_ICONS.about}</span><span class="modal-section-title">About This Web Part</span></div><div class="modal-section-body"><div class="modal-about">${p.description}</div></div></div>
+    <div class="modal-section"><div class="modal-section-header"><span class="modal-section-icon">${SECTION_ICONS.features}</span><span class="modal-section-title">Key Features</span></div><div class="modal-section-body"><ul class="modal-bullet-list">${p.features.map(f => `<li class="modal-bullet-item"><span class="modal-bullet-icon">${SECTION_ICONS.check}</span><span>${f}</span></li>`).join('')}</ul></div></div>`;
+  document.getElementById('modalSidebar').innerHTML = `
+    <div class="modal-quick-facts"><div class="modal-fact"><span class="modal-fact-label">Category</span><span class="modal-fact-value">${p.category}</span></div><div class="modal-fact"><span class="modal-fact-label">Version</span><span class="modal-fact-value"><span class="modal-fact-icon"><svg viewBox="0 0 24 24"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="10"/></svg></span>${p.version}</span></div><div class="modal-fact"><span class="modal-fact-label">Type</span><span class="complexity-badge complexity-spfx">SPFx Web Part</span></div><div class="modal-fact"><span class="modal-fact-label">Brand</span><span class="modal-fact-value"><span class="modal-fact-icon"><svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg></span>HyperParts</span></div></div>
+    <div class="modal-evolution"><div class="modal-evolution-label">Evolution</div><div class="modal-evolution-block"><div class="modal-evolution-text">${p.evolution} Part of the <strong>HyperParts</strong> suite &mdash; next-generation SPFx web parts engineered by DWx.</div></div></div>
+    <div class="modal-tech-section"><div class="modal-tech-label">Tech Stack</div><div class="modal-tech-chips">${p.tech.map(t => `<span class="modal-tech-chip">${t}</span>`).join('')}</div></div>`;
+  document.getElementById('modalOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+document.getElementById('modalOverlay').addEventListener('click', function(e) { if (e.target === this) closeModal(); });
+document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeModal(); });
+renderCards();
+</script>
+</body>
+</html>
