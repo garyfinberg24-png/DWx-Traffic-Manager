@@ -29,7 +29,7 @@ import {
 } from '@fluentui/react-icons';
 import { useNavigate } from 'react-router-dom';
 import { Booking } from '../../types/Booking';
-import { deserializeChecklistItems } from '../../types/Checklist';
+import { deserializeDealChecklist as deserializeChecklistItems } from '../../types/Checklist';
 import { format } from 'date-fns';
 import { useAuth } from '../../contexts/AuthContext';
 import { DW_COLORS } from '../../utils/buttonStyles';

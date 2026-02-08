@@ -22,6 +22,7 @@ import {
   Sparkle24Regular,
   BoxRegular,
   History24Regular,
+  CheckboxChecked24Regular,
 } from '@fluentui/react-icons';
 import { makeStyles } from '@fluentui/react-components';
 import { useAuth } from '../../contexts/AuthContext';
@@ -39,6 +40,8 @@ import { DW_COLORS } from '../../utils/buttonStyles';
 import { format } from 'date-fns';
 import { DealActivityTimeline } from './DealActivityTimeline';
 import { EmailTimeline } from './EmailTimeline';
+import { DealChecklist } from './DealChecklist';
+import type { DealChecklistItem } from '../../types/Checklist';
 import {
   DetailModalShell,
   DetailSection,
@@ -203,6 +206,7 @@ const TABS: ModalTab[] = [
   { value: 'commercial', label: 'Commercial', icon: <MoneyRegular style={{ width: '16px', height: '16px' }} /> },
   { value: 'schedule', label: 'Schedule', icon: <CalendarLtr24Regular style={{ width: '16px', height: '16px' }} /> },
   { value: 'actions', label: 'Actions', icon: <ArrowRightRegular style={{ width: '16px', height: '16px' }} /> },
+  { value: 'checklist', label: 'Checklist', icon: <CheckboxChecked24Regular style={{ width: '16px', height: '16px' }} /> },
   { value: 'activity', label: 'Activity', icon: <History24Regular style={{ width: '16px', height: '16px' }} /> },
 ];
 
@@ -396,6 +400,22 @@ export const RequestDetails: React.FC<RequestDetailsProps> = ({
       showToast('Failed to update stage', 'error');
     } finally {
       setUpdating(false);
+    }
+  };
+
+  const handleChecklistUpdate = async (updatedItems: DealChecklistItem[]) => {
+    if (!user) return;
+    try {
+      await serviceRequestService.updateDealChecklist(
+        request.Id,
+        updatedItems,
+        user.email,
+        user.displayName
+      );
+      onRequestUpdated?.({ ...request, DealChecklist: updatedItems });
+    } catch (err) {
+      console.error('Error updating checklist:', err);
+      showToast('Failed to save checklist', 'error');
     }
   };
 
@@ -964,6 +984,15 @@ export const RequestDetails: React.FC<RequestDetailsProps> = ({
   // Render active tab content
   // ========================================================================
 
+  const renderChecklistTab = () => (
+    <DealChecklist
+      requestId={request.Id}
+      items={request.DealChecklist || []}
+      onUpdate={handleChecklistUpdate}
+      readOnly={isTerminal}
+    />
+  );
+
   const renderActivityTab = () => (
     <DealActivityTimeline entityId={request.Id} entityType="ServiceRequest" />
   );
@@ -980,6 +1009,8 @@ export const RequestDetails: React.FC<RequestDetailsProps> = ({
         return renderScheduleTab();
       case 'actions':
         return renderActionsTab();
+      case 'checklist':
+        return renderChecklistTab();
       case 'activity':
         return renderActivityTab();
       default:

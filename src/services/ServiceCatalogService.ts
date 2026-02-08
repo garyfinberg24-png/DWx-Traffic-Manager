@@ -13,6 +13,8 @@ import {
   SpecialistRole,
   SLATargets,
 } from '../types/ServiceRequest';
+import type { ServiceChecklistItem } from '../types/Checklist';
+import { DEFAULT_SERVICE_CHECKLISTS } from '../types/Checklist';
 
 class ServiceCatalogService {
   private readonly listName = config.sharepoint.servicesListName;
@@ -107,6 +109,7 @@ class ServiceCatalogService {
         IdealFor_JSON: data.IdealFor ? JSON.stringify(data.IdealFor) : null,
         RelatedCategories_JSON: data.RelatedCategories ? JSON.stringify(data.RelatedCategories) : null,
         SLATargets_JSON: data.SLATargets ? JSON.stringify(data.SLATargets) : null,
+        Checklist_JSON: data.Checklist ? JSON.stringify(data.Checklist) : null,
       };
 
       const result = await graphService.createListItem(this.listName, itemData);
@@ -147,6 +150,7 @@ class ServiceCatalogService {
       if (data.IdealFor !== undefined) itemData.IdealFor_JSON = JSON.stringify(data.IdealFor);
       if (data.RelatedCategories !== undefined) itemData.RelatedCategories_JSON = JSON.stringify(data.RelatedCategories);
       if (data.SLATargets !== undefined) itemData.SLATargets_JSON = JSON.stringify(data.SLATargets);
+      if (data.Checklist !== undefined) itemData.Checklist_JSON = JSON.stringify(data.Checklist);
 
       const result = await graphService.updateListItem(this.listName, id, itemData);
 
@@ -261,6 +265,7 @@ class ServiceCatalogService {
     const idealFor = parseJson<string[]>('IdealFor_JSON');
     const relatedCategories = parseJson<ServiceCategory[]>('RelatedCategories_JSON');
     const slaTargets = parseJson<SLATargets>('SLATargets_JSON');
+    const checklist = parseJson<ServiceChecklistItem[]>('Checklist_JSON');
 
     // Fall back to DEFAULT_SERVICES if SharePoint doesn't have rich content
     const defaultMatch = DEFAULT_SERVICES.find(s => s.Title === title);
@@ -286,6 +291,7 @@ class ServiceCatalogService {
       KeyBenefits: keyBenefits || defaultMatch?.KeyBenefits,
       IdealFor: idealFor || defaultMatch?.IdealFor,
       SLATargets: slaTargets,
+      Checklist: checklist || DEFAULT_SERVICE_CHECKLISTS[this.getFieldValue(item, 'Category', 'Power Platform') as ServiceCategory],
       Created: this.getFieldValue(item, 'Created', ''),
       Modified: this.getFieldValue(item, 'Modified', ''),
     };

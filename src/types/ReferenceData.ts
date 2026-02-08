@@ -122,14 +122,39 @@ export interface AccountManagerSharePointItem {
 // ==================== TEAM MEMBERS ====================
 
 // Team Member Roles (Account Manager removed - use Account Managers list instead)
-export type TeamMemberRole = 'Developer' | 'Demo Specialist' | 'Implementer' | 'Support' | 'Project Manager';
+export type TeamMemberRole =
+  | 'Solution Architect'
+  | 'Senior Developer'
+  | 'Junior Developer'
+  | 'SharePoint Engineer'
+  | 'SPFx'
+  | 'Power Platform'
+  | 'Consultant'
+  | 'Business Analyst'
+  | 'QA Lead'
+  | 'Designer'
+  | 'Demo Specialist'
+  | 'Implementer'
+  | 'Project Manager'
+  | 'Trainer'
+  | 'Support';
 
 export const TEAM_MEMBER_ROLES: TeamMemberRole[] = [
-  'Developer',
+  'Solution Architect',
+  'Senior Developer',
+  'Junior Developer',
+  'SharePoint Engineer',
+  'SPFx',
+  'Power Platform',
+  'Consultant',
+  'Business Analyst',
+  'QA Lead',
+  'Designer',
   'Demo Specialist',
   'Implementer',
-  'Support',
   'Project Manager',
+  'Trainer',
+  'Support',
 ];
 
 // Team Member Entity
@@ -140,7 +165,6 @@ export interface TeamMember {
   Phone?: string;
   Role: TeamMemberRole; // Primary role (for backwards compatibility)
   Roles?: TeamMemberRole[]; // Multiple roles (stored as comma-separated in SharePoint)
-  Department?: string;
   IsActive: boolean;
   Created?: string;
   Modified?: string;
@@ -153,7 +177,6 @@ export interface TeamMemberInput {
   Phone?: string;
   Role: TeamMemberRole; // Primary role
   Roles?: TeamMemberRole[]; // Multiple roles
-  Department?: string;
   IsActive: boolean;
 }
 
@@ -173,6 +196,7 @@ export type ClientIndustry =
   | 'Healthcare'
   | 'Manufacturing'
   | 'Retail'
+  | 'Energy'
   | 'Government'
   | 'Education'
   | 'Other';
@@ -183,6 +207,7 @@ export const CLIENT_INDUSTRIES: ClientIndustry[] = [
   'Healthcare',
   'Manufacturing',
   'Retail',
+  'Energy',
   'Government',
   'Education',
   'Other',
@@ -227,7 +252,6 @@ export interface TeamMemberSharePointItem {
   Email: string;
   Phone?: string;
   Role: string;
-  Department?: string;
   IsActive: boolean;
   Created?: string;
   Modified?: string;
@@ -276,9 +300,6 @@ export const clientToDropdownOption = (client: Client): DropdownOption => ({
 });
 
 // Filter helpers
-export const getDevelopers = (members: TeamMember[]): TeamMember[] =>
-  members.filter((m) => (m.Role === 'Developer' || m.Roles?.includes('Developer')) && m.IsActive);
-
 export const getDemoSpecialists = (members: TeamMember[]): TeamMember[] =>
   members.filter((m) => (m.Role === 'Demo Specialist' || m.Roles?.includes('Demo Specialist')) && m.IsActive);
 

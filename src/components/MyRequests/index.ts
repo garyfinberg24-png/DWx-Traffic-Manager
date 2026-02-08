@@ -11,4 +11,5 @@ export { DetailModalShell } from './DetailModalShell';
 export { DraftCard } from './DraftCard';
 export { DraftsTabContent } from './DraftsTabContent';
 export { DealActivityTimeline } from './DealActivityTimeline';
+export { DealChecklist } from './DealChecklist';
 export { EmailTimeline } from './EmailTimeline';

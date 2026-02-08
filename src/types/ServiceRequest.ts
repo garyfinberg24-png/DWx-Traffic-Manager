@@ -55,6 +55,7 @@ export interface DWService {
   IdealFor?: string[];
   IsPopular?: boolean;
   SLATargets?: SLATargets;
+  Checklist?: import('./Checklist').ServiceChecklistItem[];
   Created?: string;
   Modified?: string;
 }
@@ -84,6 +85,7 @@ export interface DWServiceInput {
   IdealFor?: string[];
   IsPopular?: boolean;
   SLATargets?: SLATargets;
+  Checklist?: import('./Checklist').ServiceChecklistItem[];
 }
 
 // ============================================================================
@@ -141,6 +143,7 @@ export type ClientIndustry =
   | 'Healthcare'
   | 'Retail'
   | 'Manufacturing'
+  | 'Energy'
   | 'Government'
   | 'Education'
   | 'Legal'
@@ -231,6 +234,9 @@ export interface ServiceRequest {
 
   // SLA Tracking
   StageTimestamps?: StageTimestamps;
+
+  // Deal Checklist (v2.13.0)
+  DealChecklist?: import('./Checklist').DealChecklistItem[];
 
   // Audit
   Created: string;

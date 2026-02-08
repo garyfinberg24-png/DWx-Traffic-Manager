@@ -312,6 +312,8 @@ class DWxSharePointProvisioningService {
         { internalName: 'RelatedCategories_JSON', displayName: 'Related Categories (JSON)', type: 'Note' },
         // SLA Targets (v2.12.0)
         { internalName: 'SLATargets_JSON', displayName: 'SLA Targets JSON', type: 'Note' },
+        // Service Checklist Template (v2.13.0)
+        { internalName: 'Checklist_JSON', displayName: 'Checklist JSON', type: 'Note' },
       ],
     };
   }
@@ -341,7 +343,7 @@ class DWxSharePointProvisioningService {
           internalName: 'Industry',
           displayName: 'Industry',
           type: 'Choice',
-          choices: ['Technology', 'Finance', 'Healthcare', 'Retail', 'Manufacturing', 'Government', 'Education', 'Other'],
+          choices: ['Technology', 'Finance', 'Healthcare', 'Retail', 'Manufacturing', 'Energy', 'Government', 'Education', 'Other'],
         },
         {
           internalName: 'CompanySize',
@@ -406,6 +408,8 @@ class DWxSharePointProvisioningService {
         { internalName: 'EmailThread_JSON', displayName: 'Email Thread JSON', type: 'Note' },
         // SLA Tracking (v2.12.0)
         { internalName: 'StageTimestamps_JSON', displayName: 'Stage Timestamps JSON', type: 'Note' },
+        // Deal Checklist (v2.13.0)
+        { internalName: 'DealChecklist_JSON', displayName: 'Deal Checklist JSON', type: 'Note' },
       ],
     };
   }
@@ -423,7 +427,7 @@ class DWxSharePointProvisioningService {
           internalName: 'Industry',
           displayName: 'Industry',
           type: 'Choice',
-          choices: ['Technology', 'Finance', 'Healthcare', 'Retail', 'Manufacturing', 'Government', 'Education', 'Other'],
+          choices: ['Technology', 'Finance', 'Healthcare', 'Retail', 'Manufacturing', 'Energy', 'Government', 'Education', 'Other'],
         },
         {
           internalName: 'CompanySize',
@@ -443,6 +447,8 @@ class DWxSharePointProvisioningService {
           choices: ['Prospect', 'Active', 'Churned'],
           defaultValue: 'Prospect',
         },
+        { internalName: 'Phone', displayName: 'Phone', type: 'Text' },
+        { internalName: 'Address', displayName: 'Address', type: 'Text' },
         { internalName: 'Notes', displayName: 'Notes', type: 'Note' },
       ],
     };
@@ -539,7 +545,7 @@ class DWxSharePointProvisioningService {
           internalName: 'Industry',
           displayName: 'Industry',
           type: 'Choice',
-          choices: ['Technology', 'Finance', 'Healthcare', 'Retail', 'Manufacturing', 'Government', 'Education', 'Other'],
+          choices: ['Technology', 'Finance', 'Healthcare', 'Retail', 'Manufacturing', 'Energy', 'Government', 'Education', 'Other'],
         },
         {
           internalName: 'CompanySize',
@@ -610,7 +616,6 @@ class DWxSharePointProvisioningService {
           type: 'Choice',
           choices: ['Solution Architect', 'Technical Specialist', 'Consultant', 'Senior Consultant', 'Demo Specialist', 'Project Manager'],
         },
-        { internalName: 'Department', displayName: 'Department', type: 'Text' },
         { internalName: 'IsActive', displayName: 'Is Active', type: 'Boolean', defaultValue: '1' },
       ],
     };
@@ -1200,12 +1205,12 @@ class DWxSharePointProvisioningService {
     const results: Array<{ name: string; success: boolean; message: string }> = [];
 
     const seedData = [
-      { Title: 'Gary Finberg', Email: 'gary@firsttech.digital', Phone: '+27 82 555 0001', Role: 'Solution Architect', Department: 'Digital Workplace', IsActive: true },
-      { Title: 'Wimpie Baard', Email: 'wimpie.baard@firsttech.digital', Phone: '+27 82 555 0002', Role: 'Technical Specialist', Department: 'Digital Workplace', IsActive: true },
-      { Title: 'Gulzar Ismail', Email: 'Gulzar.Ismail@firsttech.digital', Phone: '+27 82 555 0003', Role: 'Senior Consultant', Department: 'Digital Workplace', IsActive: true },
-      { Title: 'Chris van Niekerk', Email: 'chris@firsttech.digital', Phone: '+27 82 555 0004', Role: 'Consultant', Department: 'Digital Workplace', IsActive: true },
-      { Title: 'Sarah Mitchell', Email: 'sarah.mitchell@firsttech.digital', Phone: '+27 82 555 0005', Role: 'Demo Specialist', Department: 'Pre-Sales', IsActive: true },
-      { Title: 'James Peterson', Email: 'james.peterson@firsttech.digital', Phone: '+27 82 555 0006', Role: 'Project Manager', Department: 'Digital Workplace', IsActive: true },
+      { Title: 'Gary Finberg', Email: 'gary@firsttech.digital', Phone: '+27 82 555 0001', Role: 'Solution Architect', IsActive: true },
+      { Title: 'Wimpie Baard', Email: 'wimpie.baard@firsttech.digital', Phone: '+27 82 555 0002', Role: 'Technical Specialist', IsActive: true },
+      { Title: 'Gulzar Ismail', Email: 'Gulzar.Ismail@firsttech.digital', Phone: '+27 82 555 0003', Role: 'Senior Consultant', IsActive: true },
+      { Title: 'Chris van Niekerk', Email: 'chris@firsttech.digital', Phone: '+27 82 555 0004', Role: 'Consultant', IsActive: true },
+      { Title: 'Sarah Mitchell', Email: 'sarah.mitchell@firsttech.digital', Phone: '+27 82 555 0005', Role: 'Demo Specialist', IsActive: true },
+      { Title: 'James Peterson', Email: 'james.peterson@firsttech.digital', Phone: '+27 82 555 0006', Role: 'Project Manager', IsActive: true },
     ];
 
     try {
@@ -1226,24 +1231,32 @@ class DWxSharePointProvisioningService {
   }
 
   /**
-   * Seed the DWxClients list with sample client organizations
+   * Seed the DWxClients list with top SA enterprise companies
    */
   async seedClientsData(): Promise<{ results: Array<{ name: string; success: boolean; message: string }> }> {
     const results: Array<{ name: string; success: boolean; message: string }> = [];
 
     const seedData = [
-      { Title: 'Nedbank Group', PrimaryContactName: 'Pieter van der Merwe', PrimaryContactEmail: 'pieter.vandermerwe@nedbank.co.za', DecisionMakerName: 'Zanele Mthembu', DecisionMakerEmail: 'zanele.mthembu@nedbank.co.za', Industry: 'Finance', CompanySize: 'Enterprise (1000+)', IsPremium: true, ContractStatus: 'Active', AccountManagerEmail: 'gary@firsttech.digital', EngagementCount: 8, TotalRevenue: 1250000, LastEngagementDate: '2025-11-15T00:00:00Z' },
-      { Title: 'Discovery Health', PrimaryContactName: 'Nomsa Dlamini', PrimaryContactEmail: 'nomsa.dlamini@discovery.co.za', DecisionMakerName: 'Rethabile Molefe', DecisionMakerEmail: 'rethabile.molefe@discovery.co.za', Industry: 'Healthcare', CompanySize: 'Enterprise (1000+)', IsPremium: true, ContractStatus: 'Active', AccountManagerEmail: 'wimpie.baard@firsttech.digital', EngagementCount: 5, TotalRevenue: 890000, LastEngagementDate: '2025-12-01T00:00:00Z' },
-      { Title: 'Sasol Limited', PrimaryContactName: 'Johan Botha', PrimaryContactEmail: 'johan.botha@sasol.com', DecisionMakerName: 'Lindiwe Nkosi', DecisionMakerEmail: 'lindiwe.nkosi@sasol.com', Industry: 'Manufacturing', CompanySize: 'Enterprise (1000+)', IsPremium: true, ContractStatus: 'Active', AccountManagerEmail: 'Gulzar.Ismail@firsttech.digital', EngagementCount: 3, TotalRevenue: 675000, LastEngagementDate: '2025-10-20T00:00:00Z' },
-      { Title: 'MTN South Africa', PrimaryContactName: 'Thabo Mokoena', PrimaryContactEmail: 'thabo.mokoena@mtn.co.za', DecisionMakerName: 'Charles Molapisi', DecisionMakerEmail: 'charles.molapisi@mtn.co.za', Industry: 'Technology', CompanySize: 'Enterprise (1000+)', IsPremium: true, ContractStatus: 'Active', AccountManagerEmail: 'gary@firsttech.digital', EngagementCount: 6, TotalRevenue: 1050000, LastEngagementDate: '2026-01-10T00:00:00Z' },
-      { Title: 'Woolworths Holdings', PrimaryContactName: 'Anita Naidoo', PrimaryContactEmail: 'anita.naidoo@woolworths.co.za', DecisionMakerName: 'Roy Bagattini', DecisionMakerEmail: 'roy.bagattini@woolworths.co.za', Industry: 'Retail', CompanySize: 'Large (250-1000)', IsPremium: false, ContractStatus: 'Active', AccountManagerEmail: 'chris@firsttech.digital', EngagementCount: 2, TotalRevenue: 320000, LastEngagementDate: '2025-09-05T00:00:00Z' },
-      { Title: 'Sanlam Life', PrimaryContactName: 'Liezel du Plessis', PrimaryContactEmail: 'liezel.duplessis@sanlam.co.za', DecisionMakerName: 'Paul Hanratty', DecisionMakerEmail: 'paul.hanratty@sanlam.co.za', Industry: 'Finance', CompanySize: 'Enterprise (1000+)', IsPremium: true, ContractStatus: 'Active', AccountManagerEmail: 'james.peterson@firsttech.digital', EngagementCount: 4, TotalRevenue: 580000, LastEngagementDate: '2025-11-28T00:00:00Z' },
-      { Title: 'Capitec Bank', PrimaryContactName: 'Sipho Mabena', PrimaryContactEmail: 'sipho.mabena@capitecbank.co.za', DecisionMakerName: 'Gerrie Fourie', DecisionMakerEmail: 'gerrie.fourie@capitecbank.co.za', Industry: 'Finance', CompanySize: 'Large (250-1000)', IsPremium: false, ContractStatus: 'Prospect', AccountManagerEmail: 'gary@firsttech.digital', EngagementCount: 0, TotalRevenue: 0 },
-      { Title: 'Shoprite Holdings', PrimaryContactName: 'Fathima Patel', PrimaryContactEmail: 'fathima.patel@shoprite.co.za', DecisionMakerName: 'Pieter Engelbrecht', DecisionMakerEmail: 'pieter.engelbrecht@shoprite.co.za', Industry: 'Retail', CompanySize: 'Enterprise (1000+)', IsPremium: false, ContractStatus: 'Active', AccountManagerEmail: 'wimpie.baard@firsttech.digital', EngagementCount: 1, TotalRevenue: 150000, LastEngagementDate: '2025-08-15T00:00:00Z' },
-      { Title: 'Old Mutual', PrimaryContactName: 'David Tshabalala', PrimaryContactEmail: 'david.tshabalala@oldmutual.co.za', DecisionMakerName: 'Iain Williamson', DecisionMakerEmail: 'iain.williamson@oldmutual.co.za', Industry: 'Finance', CompanySize: 'Enterprise (1000+)', IsPremium: true, ContractStatus: 'Active', AccountManagerEmail: 'Gulzar.Ismail@firsttech.digital', EngagementCount: 7, TotalRevenue: 920000, LastEngagementDate: '2026-01-05T00:00:00Z' },
-      { Title: 'Anglo American SA', PrimaryContactName: 'Heinrich Kruger', PrimaryContactEmail: 'heinrich.kruger@angloamerican.com', DecisionMakerName: 'Duncan Wanblad', DecisionMakerEmail: 'duncan.wanblad@angloamerican.com', Industry: 'Manufacturing', CompanySize: 'Enterprise (1000+)', IsPremium: false, ContractStatus: 'Prospect', AccountManagerEmail: 'chris@firsttech.digital', EngagementCount: 0, TotalRevenue: 0 },
-      { Title: 'Standard Bank', PrimaryContactName: 'Lerato Khumalo', PrimaryContactEmail: 'lerato.khumalo@standardbank.co.za', DecisionMakerName: 'Sim Tshabalala', DecisionMakerEmail: 'sim.tshabalala@standardbank.co.za', Industry: 'Finance', CompanySize: 'Enterprise (1000+)', IsPremium: true, ContractStatus: 'Active', AccountManagerEmail: 'james.peterson@firsttech.digital', EngagementCount: 10, TotalRevenue: 1800000, LastEngagementDate: '2026-01-20T00:00:00Z' },
-      { Title: 'Pick n Pay', PrimaryContactName: 'Rajan Govender', PrimaryContactEmail: 'rajan.govender@pnp.co.za', DecisionMakerName: 'Sean Summers', DecisionMakerEmail: 'sean.summers@pnp.co.za', Industry: 'Retail', CompanySize: 'Large (250-1000)', IsPremium: false, ContractStatus: 'Churned', AccountManagerEmail: 'wimpie.baard@firsttech.digital', EngagementCount: 2, TotalRevenue: 180000, LastEngagementDate: '2024-06-10T00:00:00Z' },
+      { Title: 'Woolworths Holdings', PrimaryContactName: 'Anita Naidoo', PrimaryContactEmail: 'anita.naidoo@woolworths.co.za', DecisionMakerName: 'Roy Memory', DecisionMakerEmail: 'roy.memory@woolworths.co.za', Phone: '+27 21 407 9111', Industry: 'Retail', CompanySize: 'Enterprise (1000+)', IsPremium: true, ContractStatus: 'Active', AccountManagerEmail: 'gary@firsttech.digital', EngagementCount: 6, TotalRevenue: 950000, LastEngagementDate: '2026-01-15T00:00:00Z', Address: 'Woolworths House, 93 Longmarket Street, Cape Town, 8001' },
+      { Title: 'SASOL Limited', PrimaryContactName: 'Johan Botha', PrimaryContactEmail: 'johan.botha@sasol.com', DecisionMakerName: 'Lindiwe Nkosi', DecisionMakerEmail: 'lindiwe.nkosi@sasol.com', Phone: '+27 10 344 5000', Industry: 'Manufacturing', CompanySize: 'Enterprise (1000+)', IsPremium: true, ContractStatus: 'Active', AccountManagerEmail: 'Gulzar.Ismail@firsttech.digital', EngagementCount: 4, TotalRevenue: 1150000, LastEngagementDate: '2025-12-10T00:00:00Z', Address: 'Sasol Place, 50 Katherine Street, Sandton, 2196' },
+      { Title: 'Nampak Limited', PrimaryContactName: 'Hennie van Zyl', PrimaryContactEmail: 'hennie.vanzyl@nampak.com', DecisionMakerName: 'Phildon Memory', DecisionMakerEmail: 'phildon.memory@nampak.com', Phone: '+27 11 719 6300', Industry: 'Manufacturing', CompanySize: 'Large (250-1000)', IsPremium: false, ContractStatus: 'Active', AccountManagerEmail: 'chris@firsttech.digital', EngagementCount: 2, TotalRevenue: 280000, LastEngagementDate: '2025-10-20T00:00:00Z', Address: 'Office G6, 1 Waterhouse Place, Century City, 7441' },
+      { Title: 'Old Mutual', PrimaryContactName: 'David Tshabalala', PrimaryContactEmail: 'david.tshabalala@oldmutual.co.za', DecisionMakerName: 'Iain Williamson', DecisionMakerEmail: 'iain.williamson@oldmutual.co.za', Phone: '+27 21 509 9111', Industry: 'Finance', CompanySize: 'Enterprise (1000+)', IsPremium: true, ContractStatus: 'Active', AccountManagerEmail: 'gary@firsttech.digital', EngagementCount: 8, TotalRevenue: 1350000, LastEngagementDate: '2026-01-22T00:00:00Z', Address: 'Mutualpark, Jan Smuts Drive, Pinelands, Cape Town, 7405' },
+      { Title: 'Sanlam', PrimaryContactName: 'Liezel du Plessis', PrimaryContactEmail: 'liezel.duplessis@sanlam.co.za', DecisionMakerName: 'Paul Hanratty', DecisionMakerEmail: 'paul.hanratty@sanlam.co.za', Phone: '+27 21 947 9111', Industry: 'Finance', CompanySize: 'Enterprise (1000+)', IsPremium: true, ContractStatus: 'Active', AccountManagerEmail: 'james.peterson@firsttech.digital', EngagementCount: 5, TotalRevenue: 780000, LastEngagementDate: '2025-11-28T00:00:00Z', Address: '2 Strand Road, Bellville, Cape Town, 7530' },
+      { Title: 'Shoprite Holdings', PrimaryContactName: 'Fathima Patel', PrimaryContactEmail: 'fathima.patel@shoprite.co.za', DecisionMakerName: 'Pieter Engelbrecht', DecisionMakerEmail: 'pieter.engelbrecht@shoprite.co.za', Phone: '+27 21 980 4000', Industry: 'Retail', CompanySize: 'Enterprise (1000+)', IsPremium: true, ContractStatus: 'Active', AccountManagerEmail: 'wimpie.baard@firsttech.digital', EngagementCount: 3, TotalRevenue: 620000, LastEngagementDate: '2025-11-05T00:00:00Z', Address: 'Cnr William Dabs & Old Paarl Roads, Brackenfell, Cape Town, 7560' },
+      { Title: 'Ackermans', PrimaryContactName: 'Riana Steyn', PrimaryContactEmail: 'riana.steyn@ackermans.co.za', DecisionMakerName: 'Charl de Villiers', DecisionMakerEmail: 'charl.devilliers@ackermans.co.za', Phone: '+27 21 928 1040', Industry: 'Retail', CompanySize: 'Large (250-1000)', IsPremium: false, ContractStatus: 'Active', AccountManagerEmail: 'chris@firsttech.digital', EngagementCount: 1, TotalRevenue: 145000, LastEngagementDate: '2025-09-12T00:00:00Z', Address: 'Produksie Street, Kuilsriver, Cape Town, 7579' },
+      { Title: 'The Foschini Group (TFG)', PrimaryContactName: 'Thabo Mokoena', PrimaryContactEmail: 'thabo.mokoena@tfg.co.za', DecisionMakerName: 'Anthony Memory', DecisionMakerEmail: 'anthony.memory@tfg.co.za', Phone: '+27 21 938 1911', Industry: 'Retail', CompanySize: 'Enterprise (1000+)', IsPremium: true, ContractStatus: 'Active', AccountManagerEmail: 'Gulzar.Ismail@firsttech.digital', EngagementCount: 4, TotalRevenue: 520000, LastEngagementDate: '2025-12-18T00:00:00Z', Address: 'Stanley Lewis Centre, 340 Voortrekker Road, Parow East, Cape Town, 7500' },
+      { Title: 'Feltex', PrimaryContactName: 'Pieter Swanepoel', PrimaryContactEmail: 'pieter.swanepoel@feltex.co.za', DecisionMakerName: 'Andre Memory', DecisionMakerEmail: 'andre.memory@feltex.co.za', Phone: '+27 31 460 4200', Industry: 'Manufacturing', CompanySize: 'Medium (50-250)', IsPremium: false, ContractStatus: 'Prospect', AccountManagerEmail: 'wimpie.baard@firsttech.digital', EngagementCount: 0, TotalRevenue: 0, Address: '291 Paisley Road, Jacobs, Durban, KwaZulu-Natal, 4026' },
+      { Title: 'Clicks Group', PrimaryContactName: 'Nomsa Dlamini', PrimaryContactEmail: 'nomsa.dlamini@clicks.co.za', DecisionMakerName: 'Bertina Engelbrecht', DecisionMakerEmail: 'bertina.engelbrecht@clicks.co.za', Phone: '+27 21 460 1911', Industry: 'Healthcare', CompanySize: 'Enterprise (1000+)', IsPremium: true, ContractStatus: 'Active', AccountManagerEmail: 'gary@firsttech.digital', EngagementCount: 5, TotalRevenue: 680000, LastEngagementDate: '2026-01-08T00:00:00Z', Address: 'Cnr Searle & Pontac Streets, Cape Town, 8000' },
+      { Title: 'Nedbank', PrimaryContactName: 'Pieter van der Merwe', PrimaryContactEmail: 'pieter.vandermerwe@nedbank.co.za', DecisionMakerName: 'Zanele Mthembu', DecisionMakerEmail: 'zanele.mthembu@nedbank.co.za', Phone: '+27 11 294 4444', Industry: 'Finance', CompanySize: 'Enterprise (1000+)', IsPremium: true, ContractStatus: 'Active', AccountManagerEmail: 'james.peterson@firsttech.digital', EngagementCount: 7, TotalRevenue: 1250000, LastEngagementDate: '2026-01-20T00:00:00Z', Address: '135 Rivonia Road, Sandown, Sandton, 2196' },
+      { Title: 'ABSA Group', PrimaryContactName: 'Lerato Khumalo', PrimaryContactEmail: 'lerato.khumalo@absa.co.za', DecisionMakerName: 'Arrie Rautenbach', DecisionMakerEmail: 'arrie.rautenbach@absa.co.za', Phone: '+27 11 350 4000', Industry: 'Finance', CompanySize: 'Enterprise (1000+)', IsPremium: true, ContractStatus: 'Active', AccountManagerEmail: 'Gulzar.Ismail@firsttech.digital', EngagementCount: 9, TotalRevenue: 1580000, LastEngagementDate: '2026-02-01T00:00:00Z', Address: '7th Floor, Absa Towers West, 15 Troye Street, Johannesburg, 2001' },
+      { Title: 'Netcare', PrimaryContactName: 'Sipho Mabena', PrimaryContactEmail: 'sipho.mabena@netcare.co.za', DecisionMakerName: 'Richard Memory', DecisionMakerEmail: 'richard.memory@netcare.co.za', Phone: '+27 11 301 0499', Industry: 'Healthcare', CompanySize: 'Enterprise (1000+)', IsPremium: true, ContractStatus: 'Active', AccountManagerEmail: 'wimpie.baard@firsttech.digital', EngagementCount: 3, TotalRevenue: 450000, LastEngagementDate: '2025-11-15T00:00:00Z', Address: '76 Maude Street, Corner West Street, Sandton, 2196' },
+      { Title: 'SPAR Group', PrimaryContactName: 'Derek van Niekerk', PrimaryContactEmail: 'derek.vanniekerk@spar.co.za', DecisionMakerName: 'Brett Memory', DecisionMakerEmail: 'brett.memory@spar.co.za', Phone: '+27 31 719 1900', Industry: 'Retail', CompanySize: 'Enterprise (1000+)', IsPremium: true, ContractStatus: 'Active', AccountManagerEmail: 'Gulzar.Ismail@firsttech.digital', EngagementCount: 2, TotalRevenue: 310000, LastEngagementDate: '2025-12-05T00:00:00Z', Address: '22 Chancery Lane, Pinetown, KwaZulu-Natal, 3610' },
+      { Title: 'OUTsurance', PrimaryContactName: 'Marelize Joubert', PrimaryContactEmail: 'marelize.joubert@outsurance.co.za', DecisionMakerName: 'Marthinus Memory', DecisionMakerEmail: 'marthinus.memory@outsurance.co.za', Phone: '+27 10 753 2430', Industry: 'Finance', CompanySize: 'Large (250-1000)', IsPremium: false, ContractStatus: 'Active', AccountManagerEmail: 'james.peterson@firsttech.digital', EngagementCount: 1, TotalRevenue: 95000, LastEngagementDate: '2025-10-22T00:00:00Z', Address: '1241 Embankment Road, Zwartkop Ext 7, Centurion, 0157' },
+      { Title: 'Discovery Health', PrimaryContactName: 'Thabo Mokoena', PrimaryContactEmail: 'thabo.mokoena@discovery.co.za', DecisionMakerName: 'Adrian Gore', DecisionMakerEmail: 'adrian.gore@discovery.co.za', Phone: '+27 11 529 2888', Industry: 'Healthcare', CompanySize: 'Enterprise (1000+)', IsPremium: true, ContractStatus: 'Active', AccountManagerEmail: 'gary@firsttech.digital', EngagementCount: 5, TotalRevenue: 920000, LastEngagementDate: '2026-01-10T00:00:00Z', Address: '1 Discovery Place, Sandton, Gauteng, 2196' },
+      { Title: 'MTN South Africa', PrimaryContactName: 'Nomsa Dlamini', PrimaryContactEmail: 'nomsa.dlamini@mtn.com', DecisionMakerName: 'Ralph Mupita', DecisionMakerEmail: 'ralph.mupita@mtn.com', Phone: '+27 11 912 3000', Industry: 'Technology', CompanySize: 'Enterprise (1000+)', IsPremium: true, ContractStatus: 'Active', AccountManagerEmail: 'wimpie.baard@firsttech.digital', EngagementCount: 4, TotalRevenue: 780000, LastEngagementDate: '2025-12-18T00:00:00Z', Address: '216 14th Avenue, Fairland, Johannesburg, Gauteng, 2195' },
+      { Title: 'Standard Bank', PrimaryContactName: 'Johan Botha', PrimaryContactEmail: 'johan.botha@standardbank.co.za', DecisionMakerName: 'Lungisa Fuzile', DecisionMakerEmail: 'lungisa.fuzile@standardbank.co.za', Phone: '+27 11 636 1061', Industry: 'Finance', CompanySize: 'Enterprise (1000+)', IsPremium: true, ContractStatus: 'Active', AccountManagerEmail: 'Gulzar.Ismail@firsttech.digital', EngagementCount: 6, TotalRevenue: 1100000, LastEngagementDate: '2026-01-28T00:00:00Z', Address: '5 Simmonds Street, Johannesburg, Gauteng, 2001' },
+      { Title: 'Pick n Pay', PrimaryContactName: 'Anele Mthembu', PrimaryContactEmail: 'anele.mthembu@pnp.co.za', DecisionMakerName: 'Sean Summers', DecisionMakerEmail: 'sean.summers@pnp.co.za', Phone: '+27 21 658 1000', Industry: 'Retail', CompanySize: 'Enterprise (1000+)', IsPremium: true, ContractStatus: 'Active', AccountManagerEmail: 'chris@firsttech.digital', EngagementCount: 3, TotalRevenue: 420000, LastEngagementDate: '2025-11-30T00:00:00Z', Address: '101 Rosmead Avenue, Kenilworth, Cape Town, Western Cape, 7708' },
+      { Title: 'Vivo Energy', PrimaryContactName: 'Francois du Plessis', PrimaryContactEmail: 'francois.duplessis@vivoenergy.com', DecisionMakerName: 'Stan Mittelman', DecisionMakerEmail: 'stan.mittelman@vivoenergy.com', Phone: '+27 21 403 4911', Industry: 'Energy', CompanySize: 'Enterprise (1000+)', IsPremium: true, ContractStatus: 'Prospect', AccountManagerEmail: 'gary@firsttech.digital', EngagementCount: 0, TotalRevenue: 0, Address: 'Engen Court, Thibault Square, Cape Town, Western Cape, 8001' },
     ];
 
     try {
@@ -1362,44 +1375,44 @@ class DWxSharePointProvisioningService {
     const seedData = [
       // Lead Stage (2) - New inquiries, no specialist assigned
       {
-        Title: 'Capitec Bank - M365 Tenant Assessment',
+        Title: 'Feltex - M365 Tenant Assessment',
         ServiceName: 'M365 Tenant Assessment',
-        AccountManagerName: 'Gary Finberg', AccountManagerEmail: 'gary@firsttech.digital', AccountManagerTenant: 'Internal',
-        ClientName: 'Capitec Bank', ContactName: 'Sipho Mabena', ContactEmail: 'sipho.mabena@capitecbank.co.za', ContactPhone: '+27 21 809 0000',
-        Industry: 'Finance', CompanySize: 'Large (250-1000)',
+        AccountManagerName: 'Wimpie Baard', AccountManagerEmail: 'wimpie.baard@firsttech.digital', AccountManagerTenant: 'Internal',
+        ClientName: 'Feltex', ContactName: 'Pieter Swanepoel', ContactEmail: 'pieter.swanepoel@feltex.co.za', ContactPhone: '+27 11 688 2000',
+        Industry: 'Manufacturing', CompanySize: 'Medium (50-250)',
         FunnelStage: 'Lead', InterestLevel: 'Warm',
-        DealValue: 180000, DealProbability: 20, ExpectedCloseDate: '2026-06-30T00:00:00Z',
-        Budget: 'R150K - R200K', Timeline: 'Q3 2026',
-        Requirements: 'Full security and compliance audit of their M365 environment. Capitec is expanding their digital banking platform and needs to ensure their M365 tenant meets financial services compliance requirements including POPIA and the South African Reserve Bank regulations.',
-        Comments: 'New prospect - Sipho attended our webinar on M365 security best practices for financial services.',
+        DealValue: 120000, DealProbability: 20, ExpectedCloseDate: '2026-06-30T00:00:00Z',
+        Budget: 'R100K - R150K', Timeline: 'Q3 2026',
+        Requirements: 'Security and compliance audit of their M365 environment. Feltex is modernising their manufacturing IT stack and needs POPIA compliance verification across their collaboration tools.',
+        Comments: 'New prospect - Pieter attended our webinar on M365 security best practices for manufacturing.',
         StageTimestamps_JSON: JSON.stringify({ Lead: '2026-02-01T08:30:00Z' }),
       },
       {
-        Title: 'Anglo American SA - SharePoint Migration',
+        Title: 'Nampak Limited - SharePoint Migration',
         ServiceName: 'SharePoint Migration',
         AccountManagerName: 'Chris van Niekerk', AccountManagerEmail: 'chris@firsttech.digital', AccountManagerTenant: 'Internal',
-        ClientName: 'Anglo American SA', ContactName: 'Heinrich Kruger', ContactEmail: 'heinrich.kruger@angloamerican.com', ContactPhone: '+27 11 638 9111',
-        Industry: 'Manufacturing', CompanySize: 'Enterprise (1000+)',
+        ClientName: 'Nampak Limited', ContactName: 'Hennie van Zyl', ContactEmail: 'hennie.vanzyl@nampak.com', ContactPhone: '+27 11 719 6300',
+        Industry: 'Manufacturing', CompanySize: 'Large (250-1000)',
         FunnelStage: 'Lead', InterestLevel: 'Cold',
-        DealValue: 650000, DealProbability: 10, ExpectedCloseDate: '2026-09-30T00:00:00Z',
-        Budget: 'R500K - R800K', Timeline: 'H2 2026',
-        Requirements: 'Migration of on-premises SharePoint 2016 farm to SharePoint Online. Approximately 2TB of content across 150 site collections used by mining operations, engineering, and corporate teams across South Africa.',
-        Comments: 'Initial inquiry via website contact form. Large-scale migration with complex permissions and custom workflows.',
+        DealValue: 480000, DealProbability: 10, ExpectedCloseDate: '2026-09-30T00:00:00Z',
+        Budget: 'R400K - R600K', Timeline: 'H2 2026',
+        Requirements: 'Migration of on-premises SharePoint 2016 farm to SharePoint Online. Approximately 1.5TB of content across packaging design documents, compliance records, and operational manuals for SA, UK, and African operations.',
+        Comments: 'Initial inquiry via website contact form. Large-scale migration with complex permissions across multiple subsidiaries.',
         StageTimestamps_JSON: JSON.stringify({ Lead: '2026-01-28T10:15:00Z' }),
       },
       // Qualified Stage (2) - Interest validated, specialist being assigned
       {
-        Title: 'MTN South Africa - Enterprise Copilot Agents',
+        Title: 'The Foschini Group (TFG) - Enterprise Copilot Agents',
         ServiceName: 'Enterprise Copilot Agents',
-        AccountManagerName: 'Gary Finberg', AccountManagerEmail: 'gary@firsttech.digital', AccountManagerTenant: 'Internal',
-        ClientName: 'MTN South Africa', ContactName: 'Thabo Mokoena', ContactEmail: 'thabo.mokoena@mtn.co.za', ContactPhone: '+27 83 180 0000',
-        Industry: 'Technology', CompanySize: 'Enterprise (1000+)',
+        AccountManagerName: 'Gulzar Ismail', AccountManagerEmail: 'Gulzar.Ismail@firsttech.digital', AccountManagerTenant: 'Internal',
+        ClientName: 'The Foschini Group (TFG)', ContactName: 'Thabo Mokoena', ContactEmail: 'thabo.mokoena@tfg.co.za', ContactPhone: '+27 21 938 1911',
+        Industry: 'Retail', CompanySize: 'Enterprise (1000+)',
         FunnelStage: 'Qualified', InterestLevel: 'Hot',
         DealValue: 750000, DealProbability: 40, ExpectedCloseDate: '2026-05-31T00:00:00Z',
         Budget: 'R600K - R900K', Timeline: 'Q2 2026',
         AssignedSpecialistName: 'Gary Finberg', AssignedSpecialistEmail: 'gary@firsttech.digital', AssignedSpecialistRole: 'Solution Architect',
-        Requirements: 'Design and implement Copilot agents for their customer service and internal IT help desk. MTN wants to reduce call centre load by 30% through AI-powered self-service for both customers and employees.',
-        Comments: 'Premium client with strong executive sponsorship. CTO is driving the AI transformation agenda.',
+        Requirements: 'Design and implement Copilot agents for TFG\'s retail operations across Foschini, Markham, Sportscene, and @home. Agents will assist store managers with stock queries, HR self-service, and customer service escalations.',
+        Comments: 'Premium client with strong executive sponsorship. CTO is driving the AI transformation agenda across all retail brands.',
         StageTimestamps_JSON: JSON.stringify({ Lead: '2026-01-10T09:00:00Z', Qualified: '2026-01-15T14:30:00Z' }),
       },
       {
@@ -1418,10 +1431,10 @@ class DWxSharePointProvisioningService {
       },
       // Discovery Stage (2) - Meeting scheduled, specialist assigned
       {
-        Title: 'Nedbank Group - Power Platform Development',
+        Title: 'Nedbank - Power Platform Development',
         ServiceName: 'Power Platform Development',
-        AccountManagerName: 'Gary Finberg', AccountManagerEmail: 'gary@firsttech.digital', AccountManagerTenant: 'Internal',
-        ClientName: 'Nedbank Group', ContactName: 'Pieter van der Merwe', ContactEmail: 'pieter.vandermerwe@nedbank.co.za', ContactPhone: '+27 11 294 4444',
+        AccountManagerName: 'James Peterson', AccountManagerEmail: 'james.peterson@firsttech.digital', AccountManagerTenant: 'Internal',
+        ClientName: 'Nedbank', ContactName: 'Pieter van der Merwe', ContactEmail: 'pieter.vandermerwe@nedbank.co.za', ContactPhone: '+27 11 294 4444',
         Industry: 'Finance', CompanySize: 'Enterprise (1000+)',
         FunnelStage: 'Discovery', InterestLevel: 'Hot',
         DealValue: 450000, DealProbability: 60, ExpectedCloseDate: '2026-04-15T00:00:00Z',
@@ -1433,26 +1446,26 @@ class DWxSharePointProvisioningService {
         StageTimestamps_JSON: JSON.stringify({ Lead: '2026-01-05T08:00:00Z', Qualified: '2026-01-08T15:00:00Z', Discovery: '2026-01-12T10:00:00Z' }),
       },
       {
-        Title: 'Discovery Health - SPFx Development',
+        Title: 'Netcare - SPFx Development',
         ServiceName: 'SPFx Development',
         AccountManagerName: 'Wimpie Baard', AccountManagerEmail: 'wimpie.baard@firsttech.digital', AccountManagerTenant: 'Internal',
-        ClientName: 'Discovery Health', ContactName: 'Nomsa Dlamini', ContactEmail: 'nomsa.dlamini@discovery.co.za', ContactPhone: '+27 11 529 2888',
+        ClientName: 'Netcare', ContactName: 'Sipho Mabena', ContactEmail: 'sipho.mabena@netcare.co.za', ContactPhone: '+27 11 301 0000',
         Industry: 'Healthcare', CompanySize: 'Enterprise (1000+)',
         FunnelStage: 'Discovery', InterestLevel: 'Hot',
         DealValue: 520000, DealProbability: 55, ExpectedCloseDate: '2026-04-30T00:00:00Z',
         Budget: 'R450K - R600K', Timeline: 'Q2 2026',
         ConfirmedDateTime: '2026-03-18T14:00:00Z',
         AssignedSpecialistName: 'Wimpie Baard', AssignedSpecialistEmail: 'wimpie.baard@firsttech.digital', AssignedSpecialistRole: 'Technical Specialist',
-        Requirements: 'Custom SPFx web parts for their Vitality wellness programme intranet. Need interactive health dashboard web parts that integrate with Discovery Vitality APIs to show employee wellness metrics, gym booking, and rewards tracking within SharePoint.',
-        Comments: 'Complex SPFx project with external API integration. Discovery session scheduled for March 18.',
+        Requirements: 'Custom SPFx web parts for Netcare\'s hospital intranet. Need interactive patient flow dashboards, staff rostering views, and compliance tracking web parts that integrate with their hospital management system across 54 hospitals.',
+        Comments: 'Complex SPFx project with healthcare system integration. Discovery session scheduled for March 18.',
         StageTimestamps_JSON: JSON.stringify({ Lead: '2026-01-08T09:30:00Z', Qualified: '2026-01-14T11:00:00Z', Discovery: '2026-01-20T14:00:00Z' }),
       },
       // Proposal Stage (2) - Discovery complete, proposal being prepared
       {
-        Title: 'Sasol Limited - SharePoint Migration',
+        Title: 'SASOL Limited - SharePoint Migration',
         ServiceName: 'SharePoint Migration',
         AccountManagerName: 'Gulzar Ismail', AccountManagerEmail: 'Gulzar.Ismail@firsttech.digital', AccountManagerTenant: 'Internal',
-        ClientName: 'Sasol Limited', ContactName: 'Johan Botha', ContactEmail: 'johan.botha@sasol.com', ContactPhone: '+27 10 344 5000',
+        ClientName: 'SASOL Limited', ContactName: 'Johan Botha', ContactEmail: 'johan.botha@sasol.com', ContactPhone: '+27 10 344 5000',
         Industry: 'Manufacturing', CompanySize: 'Enterprise (1000+)',
         FunnelStage: 'Proposal', InterestLevel: 'Warm',
         DealValue: 850000, DealProbability: 50, ExpectedCloseDate: '2026-04-30T00:00:00Z',
@@ -1465,17 +1478,17 @@ class DWxSharePointProvisioningService {
         StageTimestamps_JSON: JSON.stringify({ Lead: '2025-12-02T08:00:00Z', Qualified: '2025-12-10T14:00:00Z', Discovery: '2025-12-20T09:00:00Z', Proposal: '2026-02-10T09:00:00Z' }),
       },
       {
-        Title: 'Sanlam Life - Microsoft Viva Suite',
+        Title: 'Sanlam - Microsoft Viva Suite',
         ServiceName: 'Microsoft Viva Suite',
         AccountManagerName: 'James Peterson', AccountManagerEmail: 'james.peterson@firsttech.digital', AccountManagerTenant: 'Internal',
-        ClientName: 'Sanlam Life', ContactName: 'Liezel du Plessis', ContactEmail: 'liezel.duplessis@sanlam.co.za', ContactPhone: '+27 21 947 9111',
+        ClientName: 'Sanlam', ContactName: 'Liezel du Plessis', ContactEmail: 'liezel.duplessis@sanlam.co.za', ContactPhone: '+27 21 947 9111',
         Industry: 'Finance', CompanySize: 'Enterprise (1000+)',
         FunnelStage: 'Proposal', InterestLevel: 'Warm',
         DealValue: 380000, DealProbability: 45, ExpectedCloseDate: '2026-05-15T00:00:00Z',
         Budget: 'R300K - R450K', Timeline: 'Q2-Q3 2026',
         ConfirmedDateTime: '2026-02-05T11:00:00Z',
         AssignedSpecialistName: 'Gulzar Ismail', AssignedSpecialistEmail: 'Gulzar.Ismail@firsttech.digital', AssignedSpecialistRole: 'Senior Consultant',
-        Requirements: 'Full Microsoft Viva implementation across Sanlam Life division: Viva Connections for their intranet, Viva Learning for FAIS compliance training, Viva Insights for hybrid work analytics, and Viva Engage for cross-departmental collaboration. 4,500 employees in scope.',
+        Requirements: 'Full Microsoft Viva implementation across Sanlam: Viva Connections for their intranet, Viva Learning for FAIS compliance training, Viva Insights for hybrid work analytics, and Viva Engage for cross-departmental collaboration. 4,500 employees in scope.',
         Comments: 'Discovery session completed. Sanlam is particularly interested in Viva Learning for regulatory compliance training tracking.',
         NextSteps: 'Draft proposal with phased rollout starting with Viva Connections and Learning',
         StageTimestamps_JSON: JSON.stringify({ Lead: '2025-11-15T10:00:00Z', Qualified: '2025-11-22T09:00:00Z', Discovery: '2025-12-05T11:00:00Z', Proposal: '2026-02-05T11:00:00Z' }),
@@ -1484,7 +1497,7 @@ class DWxSharePointProvisioningService {
       {
         Title: 'Old Mutual - Enterprise Copilot Agents',
         ServiceName: 'Enterprise Copilot Agents',
-        AccountManagerName: 'Gulzar Ismail', AccountManagerEmail: 'Gulzar.Ismail@firsttech.digital', AccountManagerTenant: 'Internal',
+        AccountManagerName: 'Gary Finberg', AccountManagerEmail: 'gary@firsttech.digital', AccountManagerTenant: 'Internal',
         ClientName: 'Old Mutual', ContactName: 'David Tshabalala', ContactEmail: 'david.tshabalala@oldmutual.co.za', ContactPhone: '+27 21 509 9111',
         Industry: 'Finance', CompanySize: 'Enterprise (1000+)',
         FunnelStage: 'Negotiation', InterestLevel: 'Hot',
@@ -1498,10 +1511,10 @@ class DWxSharePointProvisioningService {
         StageTimestamps_JSON: JSON.stringify({ Lead: '2025-10-01T08:00:00Z', Qualified: '2025-10-08T10:00:00Z', Discovery: '2025-10-20T10:00:00Z', Proposal: '2025-11-15T09:00:00Z', Negotiation: '2026-01-20T10:00:00Z' }),
       },
       {
-        Title: 'Standard Bank - M365 Tenant Assessment',
+        Title: 'ABSA Group - M365 Tenant Assessment',
         ServiceName: 'M365 Tenant Assessment',
-        AccountManagerName: 'James Peterson', AccountManagerEmail: 'james.peterson@firsttech.digital', AccountManagerTenant: 'Internal',
-        ClientName: 'Standard Bank', ContactName: 'Lerato Khumalo', ContactEmail: 'lerato.khumalo@standardbank.co.za', ContactPhone: '+27 11 636 9111',
+        AccountManagerName: 'Gulzar Ismail', AccountManagerEmail: 'Gulzar.Ismail@firsttech.digital', AccountManagerTenant: 'Internal',
+        ClientName: 'ABSA Group', ContactName: 'Lerato Khumalo', ContactEmail: 'lerato.khumalo@absa.co.za', ContactPhone: '+27 11 350 4000',
         Industry: 'Finance', CompanySize: 'Enterprise (1000+)',
         FunnelStage: 'Negotiation', InterestLevel: 'Warm',
         DealValue: 250000, DealProbability: 65, ExpectedCloseDate: '2026-03-15T00:00:00Z',
@@ -1509,7 +1522,7 @@ class DWxSharePointProvisioningService {
         ConfirmedDateTime: '2026-01-15T09:00:00Z',
         AssignedSpecialistName: 'Chris van Niekerk', AssignedSpecialistEmail: 'chris@firsttech.digital', AssignedSpecialistRole: 'Consultant',
         Requirements: 'Comprehensive M365 security and governance assessment ahead of their planned migration of retail banking teams to Teams. Focus on DLP policies, sensitivity labels, conditional access, and SARB (South African Reserve Bank) regulatory compliance.',
-        Comments: 'Assessment scope agreed. Negotiating timeline - Standard Bank wants completion before Q2 board meeting.',
+        Comments: 'Assessment scope agreed. Negotiating timeline - ABSA wants completion before Q2 board meeting.',
         NextSteps: 'Confirm start date and provision access to tenant analytics',
         StageTimestamps_JSON: JSON.stringify({ Lead: '2025-10-15T09:00:00Z', Qualified: '2025-10-22T14:00:00Z', Discovery: '2025-11-05T09:00:00Z', Proposal: '2025-12-01T10:00:00Z', Negotiation: '2026-01-15T09:00:00Z' }),
       },
@@ -1517,14 +1530,14 @@ class DWxSharePointProvisioningService {
       {
         Title: 'Woolworths Holdings - Power Platform Development',
         ServiceName: 'Power Platform Development',
-        AccountManagerName: 'Chris van Niekerk', AccountManagerEmail: 'chris@firsttech.digital', AccountManagerTenant: 'Internal',
+        AccountManagerName: 'Gary Finberg', AccountManagerEmail: 'gary@firsttech.digital', AccountManagerTenant: 'Internal',
         ClientName: 'Woolworths Holdings', ContactName: 'Anita Naidoo', ContactEmail: 'anita.naidoo@woolworths.co.za', ContactPhone: '+27 21 407 9111',
-        Industry: 'Retail', CompanySize: 'Large (250-1000)',
+        Industry: 'Retail', CompanySize: 'Enterprise (1000+)',
         FunnelStage: 'Won', InterestLevel: 'Hot',
         DealValue: 320000, DealProbability: 100, ExpectedCloseDate: '2026-01-31T00:00:00Z',
         Budget: 'R300K - R350K', Timeline: 'Q1 2026',
         ConfirmedDateTime: '2025-12-10T10:00:00Z',
-        AssignedSpecialistName: 'Sarah Mitchell', AssignedSpecialistEmail: 'sarah.mitchell@firsttech.digital', AssignedSpecialistRole: 'Technical Specialist',
+        AssignedSpecialistName: 'Wimpie Baard', AssignedSpecialistEmail: 'wimpie.baard@firsttech.digital', AssignedSpecialistRole: 'Technical Specialist',
         Requirements: 'Power Automate workflows for supply chain approvals and Power BI dashboards for store performance analytics across Woolworths Food, Fashion, and Beauty divisions.',
         WinLossReason: 'Strong demo of retail-specific Power Platform solutions. Competitive pricing and proven experience with SA retail sector.',
         Comments: 'Contract signed January 31. Project kickoff scheduled for February 15.',
@@ -1532,51 +1545,51 @@ class DWxSharePointProvisioningService {
         StageTimestamps_JSON: JSON.stringify({ Lead: '2025-09-01T08:00:00Z', Qualified: '2025-09-05T10:00:00Z', Discovery: '2025-09-15T10:00:00Z', Proposal: '2025-10-10T09:00:00Z', Negotiation: '2025-11-15T14:00:00Z', Won: '2026-01-31T11:00:00Z' }),
       },
       {
-        Title: 'Nedbank Group - M365 Tenant Assessment',
+        Title: 'Clicks Group - M365 Tenant Assessment',
         ServiceName: 'M365 Tenant Assessment',
         AccountManagerName: 'Gary Finberg', AccountManagerEmail: 'gary@firsttech.digital', AccountManagerTenant: 'Internal',
-        ClientName: 'Nedbank Group', ContactName: 'Pieter van der Merwe', ContactEmail: 'pieter.vandermerwe@nedbank.co.za', ContactPhone: '+27 11 294 4444',
-        Industry: 'Finance', CompanySize: 'Enterprise (1000+)',
+        ClientName: 'Clicks Group', ContactName: 'Nomsa Dlamini', ContactEmail: 'nomsa.dlamini@clicks.co.za', ContactPhone: '+27 21 460 1911',
+        Industry: 'Healthcare', CompanySize: 'Enterprise (1000+)',
         FunnelStage: 'Won', InterestLevel: 'Hot',
         DealValue: 175000, DealProbability: 100, ExpectedCloseDate: '2025-12-15T00:00:00Z',
         Budget: 'R150K - R200K', Timeline: 'Q4 2025',
         ConfirmedDateTime: '2025-11-01T09:00:00Z',
         AssignedSpecialistName: 'Gulzar Ismail', AssignedSpecialistEmail: 'Gulzar.Ismail@firsttech.digital', AssignedSpecialistRole: 'Senior Consultant',
-        Requirements: 'Full M365 tenant security and governance assessment. Review of Secure Score, DLP policies, compliance center configuration, and identity management practices.',
-        WinLossReason: 'Existing relationship and deep understanding of banking compliance requirements. Fast turnaround commitment.',
-        Comments: 'Assessment completed successfully. Led to the current Power Platform Development opportunity.',
+        Requirements: 'Full M365 tenant security and governance assessment. Review of Secure Score, DLP policies, compliance center configuration, and identity management across 800+ Clicks and Musica stores.',
+        WinLossReason: 'Strong healthcare retail expertise and deep understanding of POPIA requirements. Fast turnaround commitment.',
+        Comments: 'Assessment completed successfully. Led to further discussions about SPFx intranet enhancements.',
         NextSteps: 'Remediation tracking in progress. Follow-up assessment in 6 months.',
         StageTimestamps_JSON: JSON.stringify({ Lead: '2025-08-15T08:00:00Z', Qualified: '2025-08-18T11:00:00Z', Discovery: '2025-08-25T09:00:00Z', Proposal: '2025-09-15T10:00:00Z', Negotiation: '2025-10-10T14:00:00Z', Won: '2025-12-15T09:00:00Z' }),
       },
       // Lost Stage (2) - Opportunities that didn't convert
       {
-        Title: 'Pick n Pay - SharePoint Migration',
+        Title: 'Ackermans - SharePoint Migration',
         ServiceName: 'SharePoint Migration',
-        AccountManagerName: 'Wimpie Baard', AccountManagerEmail: 'wimpie.baard@firsttech.digital', AccountManagerTenant: 'Internal',
-        ClientName: 'Pick n Pay', ContactName: 'Rajan Govender', ContactEmail: 'rajan.govender@pnp.co.za', ContactPhone: '+27 21 658 1000',
+        AccountManagerName: 'Chris van Niekerk', AccountManagerEmail: 'chris@firsttech.digital', AccountManagerTenant: 'Internal',
+        ClientName: 'Ackermans', ContactName: 'Riana Steyn', ContactEmail: 'riana.steyn@ackermans.co.za', ContactPhone: '+27 21 938 1000',
         Industry: 'Retail', CompanySize: 'Large (250-1000)',
         FunnelStage: 'Lost', InterestLevel: 'Cold',
-        DealValue: 420000, DealProbability: 0, ExpectedCloseDate: '2025-09-30T00:00:00Z',
-        Budget: 'R350K - R500K', Timeline: 'Q4 2025',
-        Requirements: 'Migration of legacy SharePoint 2013 intranet to SharePoint Online. 1.2TB of content across 80 site collections.',
-        WinLossReason: 'Client chose competitor with lower pricing. Also concerns about disruption during peak trading season (November-December).',
-        Comments: 'Lost to a Johannesburg-based consultancy. Client indicated they may revisit in Q3 2026 after settling into the new platform.',
-        NextSteps: 'Schedule follow-up call in July 2026 to discuss potential remediation or Phase 2 work.',
+        DealValue: 220000, DealProbability: 0, ExpectedCloseDate: '2025-09-30T00:00:00Z',
+        Budget: 'R180K - R250K', Timeline: 'Q4 2025',
+        Requirements: 'Migration of SharePoint 2013 intranet to SharePoint Online. 800GB of content across store operations and HR documents.',
+        WinLossReason: 'Parent company (Pepkor/TFG) decided to consolidate migration across all brands with a single vendor. May revisit for brand-specific customisation.',
+        Comments: 'Lost to group-wide consolidation decision. Ackermans IT team was satisfied with our proposal but decision was taken at holding company level.',
+        NextSteps: 'Follow up in Q3 2026 to discuss brand-specific SharePoint customisation post-migration.',
         StageTimestamps_JSON: JSON.stringify({ Lead: '2025-05-10T08:00:00Z', Qualified: '2025-05-20T10:00:00Z', Discovery: '2025-06-05T14:00:00Z', Proposal: '2025-07-01T09:00:00Z', Negotiation: '2025-08-15T10:00:00Z', Lost: '2025-09-30T16:00:00Z' }),
       },
       {
-        Title: 'MTN South Africa - Microsoft Viva Suite',
+        Title: 'Nedbank - Microsoft Viva Suite',
         ServiceName: 'Microsoft Viva Suite',
-        AccountManagerName: 'Gary Finberg', AccountManagerEmail: 'gary@firsttech.digital', AccountManagerTenant: 'Internal',
-        ClientName: 'MTN South Africa', ContactName: 'Thabo Mokoena', ContactEmail: 'thabo.mokoena@mtn.co.za', ContactPhone: '+27 83 180 0000',
-        Industry: 'Technology', CompanySize: 'Enterprise (1000+)',
+        AccountManagerName: 'James Peterson', AccountManagerEmail: 'james.peterson@firsttech.digital', AccountManagerTenant: 'Internal',
+        ClientName: 'Nedbank', ContactName: 'Pieter van der Merwe', ContactEmail: 'pieter.vandermerwe@nedbank.co.za', ContactPhone: '+27 11 294 4444',
+        Industry: 'Finance', CompanySize: 'Enterprise (1000+)',
         FunnelStage: 'Lost', InterestLevel: 'Warm',
         DealValue: 350000, DealProbability: 0, ExpectedCloseDate: '2025-12-31T00:00:00Z',
         Budget: 'R300K - R400K', Timeline: 'Q4 2025',
-        Requirements: 'Viva Connections and Viva Learning implementation for MTN call centre and retail store staff. 8,000 frontline workers in scope.',
-        WinLossReason: 'Budget constraints - MTN reallocated digital workplace budget to 5G network rollout. Interest remains for 2026.',
-        Comments: 'MTN still interested in Copilot Agents (separate active deal). Viva may be revisited once 5G investment phase completes.',
-        NextSteps: 'Maintain relationship through Copilot Agents engagement. Revisit Viva conversation in Q3 2026.',
+        Requirements: 'Viva Connections and Viva Learning implementation for Nedbank retail and corporate banking staff. 12,000 employees in scope.',
+        WinLossReason: 'Budget constraints - Nedbank reallocated digital workplace budget to core banking platform upgrade. Interest remains for 2026.',
+        Comments: 'Nedbank still interested in Power Platform (separate active deal). Viva may be revisited once banking platform upgrade completes.',
+        NextSteps: 'Maintain relationship through Power Platform engagement. Revisit Viva conversation in Q3 2026.',
         StageTimestamps_JSON: JSON.stringify({ Lead: '2025-07-01T09:00:00Z', Qualified: '2025-07-15T11:00:00Z', Discovery: '2025-08-10T10:00:00Z', Proposal: '2025-09-20T09:00:00Z', Lost: '2025-12-31T17:00:00Z' }),
       },
     ];
@@ -1607,11 +1620,11 @@ class DWxSharePointProvisioningService {
     const seedData = [
       // Pending Review (2)
       {
-        Title: 'Nedbank Group - Asset Dashboard Demo',
+        Title: 'Nedbank - Asset Dashboard Demo',
         ProductId: 'asset-dashboard', ProductName: 'Asset Dashboard', ProductType: 'App', ProductCategory: 'Operations & IT',
         RequestType: 'Demo',
-        AccountManagerName: 'Gary Finberg', AccountManagerEmail: 'gary@firsttech.digital',
-        ClientName: 'Nedbank Group', ContactName: 'Pieter van der Merwe', ContactEmail: 'pieter.vandermerwe@nedbank.co.za', ContactPhone: '+27 11 294 4444',
+        AccountManagerName: 'James Peterson', AccountManagerEmail: 'james.peterson@firsttech.digital',
+        ClientName: 'Nedbank', ContactName: 'Pieter van der Merwe', ContactEmail: 'pieter.vandermerwe@nedbank.co.za', ContactPhone: '+27 11 294 4444',
         Industry: 'Finance', CompanySize: 'Enterprise (1000+)', IsPremiumClient: true,
         Status: 'Pending Review',
         LicenseCount: 500, EstimatedValue: 85000,
@@ -1708,6 +1721,69 @@ class DWxSharePointProvisioningService {
         LicenseCount: 500, EstimatedValue: 15000,
         Comments: 'Budget reallocated to other priorities following their migration project decision. May revisit in Q4 2026.',
       },
+      // Additional product requests for new SA clients
+      {
+        Title: 'Clicks Group - Employee Directory Trial',
+        ProductId: 'employee-directory', ProductName: 'Employee Directory', ProductType: 'App', ProductCategory: 'HR & People',
+        RequestType: 'Trial Deployment',
+        AccountManagerName: 'Gary Finberg', AccountManagerEmail: 'gary@firsttech.digital',
+        ClientName: 'Clicks Group', ContactName: 'Nomsa Dlamini', ContactEmail: 'nomsa.dlamini@clicks.co.za', ContactPhone: '+27 21 460 1911',
+        Industry: 'Healthcare', CompanySize: 'Enterprise (1000+)', IsPremiumClient: true,
+        Status: 'Pending Review',
+        LicenseCount: 2500, EstimatedValue: 40000,
+        Comments: 'Need employee directory with org chart for their 8,000+ staff across Clicks, Musica, and The Body Shop divisions.',
+      },
+      {
+        Title: 'SPAR Group - Leave Request Card Demo',
+        ProductId: 'leave-request-card', ProductName: 'Leave Request', ProductType: 'Adaptive Card', ProductCategory: 'HR & People',
+        RequestType: 'Demo',
+        AccountManagerName: 'Gulzar Ismail', AccountManagerEmail: 'Gulzar.Ismail@firsttech.digital',
+        ClientName: 'SPAR Group', ContactName: 'Derek van Niekerk', ContactEmail: 'derek.vanniekerk@spar.co.za', ContactPhone: '+27 31 719 1900',
+        Industry: 'Retail', CompanySize: 'Enterprise (1000+)', IsPremiumClient: true,
+        Status: 'Awaiting Approval',
+        LicenseCount: 5000, EstimatedValue: 30000,
+        AssignedSpecialistName: 'Chris van Niekerk', AssignedSpecialistEmail: 'chris@firsttech.digital', AssignedSpecialistRole: 'Consultant',
+        Comments: 'Leave management via Teams adaptive cards for SPAR distribution centre and regional office staff across KZN.',
+      },
+      {
+        Title: 'ABSA Group - Contract Manager Trial',
+        ProductId: 'contract-manager', ProductName: 'Contract Manager', ProductType: 'App', ProductCategory: 'Document & Content',
+        RequestType: 'Trial Deployment',
+        AccountManagerName: 'Gulzar Ismail', AccountManagerEmail: 'Gulzar.Ismail@firsttech.digital',
+        ClientName: 'ABSA Group', ContactName: 'Lerato Khumalo', ContactEmail: 'lerato.khumalo@absa.co.za', ContactPhone: '+27 11 350 4000',
+        Industry: 'Finance', CompanySize: 'Enterprise (1000+)', IsPremiumClient: true,
+        Status: 'Confirmed',
+        LicenseCount: 1500, EstimatedValue: 95000,
+        ConfirmedDateTime: '2026-03-25T11:00:00Z',
+        AssignedSpecialistName: 'Gary Finberg', AssignedSpecialistEmail: 'gary@firsttech.digital', AssignedSpecialistRole: 'Solution Architect',
+        Comments: 'Contract lifecycle management for their legal and procurement departments across corporate and retail banking divisions.',
+      },
+      {
+        Title: 'OUTsurance - Approval Card Demo',
+        ProductId: 'approval-card', ProductName: 'Approval Card', ProductType: 'Adaptive Card', ProductCategory: 'Workflows',
+        RequestType: 'Demo',
+        AccountManagerName: 'James Peterson', AccountManagerEmail: 'james.peterson@firsttech.digital',
+        ClientName: 'OUTsurance', ContactName: 'Marelize Joubert', ContactEmail: 'marelize.joubert@outsurance.co.za', ContactPhone: '+27 10 753 2430',
+        Industry: 'Finance', CompanySize: 'Large (250-1000)', IsPremiumClient: false,
+        Status: 'Pending Review',
+        LicenseCount: 800, EstimatedValue: 18000,
+        Comments: 'Multi-stage approval workflows for claims processing and underwriting decisions via Teams adaptive cards.',
+      },
+      {
+        Title: 'Sanlam - Survey Management Trial',
+        ProductId: 'survey-management', ProductName: 'Survey Management', ProductType: 'App', ProductCategory: 'Learning & Engagement',
+        RequestType: 'Trial Deployment',
+        AccountManagerName: 'James Peterson', AccountManagerEmail: 'james.peterson@firsttech.digital',
+        ClientName: 'Sanlam', ContactName: 'Liezel du Plessis', ContactEmail: 'liezel.duplessis@sanlam.co.za', ContactPhone: '+27 21 947 9111',
+        Industry: 'Finance', CompanySize: 'Enterprise (1000+)', IsPremiumClient: true,
+        Status: 'Completed',
+        LicenseCount: 4000, EstimatedValue: 55000,
+        ConfirmedDateTime: '2026-01-20T09:00:00Z',
+        AssignedSpecialistName: 'Gulzar Ismail', AssignedSpecialistEmail: 'Gulzar.Ismail@firsttech.digital', AssignedSpecialistRole: 'Consultant',
+        Outcome: 'Sanlam signed for 4,000 licences to run quarterly pulse surveys across all business units.',
+        Comments: 'Employee feedback platform for quarterly engagement surveys across Sanlam Life, Investments, and Corporate divisions.',
+        NextSteps: 'Full rollout for Q2 2026 pulse survey. Training sessions for HR team leaders in March.',
+      },
     ];
 
     try {
@@ -1744,18 +1820,18 @@ class DWxSharePointProvisioningService {
 
       // Session Prep #1: Nedbank Discovery - Ready (fully prepared)
       const nedbankReq = discoveryRequests.find(
-        (r) => r.fields?.ClientName === 'Nedbank Group'
+        (r) => r.fields?.ClientName === 'Nedbank'
       );
       if (nedbankReq) {
         try {
           await graphService.createListItem('DWxSessionPrep', {
-            Title: 'Prep - Nedbank Group - 2026-03-15',
+            Title: 'Prep - Nedbank - 2026-03-15',
             ServiceRequestId: parseInt(nedbankReq.id),
             SpecialistEmail: 'gary@firsttech.digital',
             SpecialistName: 'Gary Finberg',
             Status: 'Ready',
             ClientProfile_JSON: JSON.stringify({
-              companyOverview: 'Nedbank Group is one of South Africa\'s "Big Four" banking groups, headquartered in Johannesburg. With over 200 branches and 30,000 employees, they serve 7.8 million clients across personal, business, corporate, and wealth management segments. Their "Old Mutual Two Degrees" partnership focuses on shared-value banking.',
+              companyOverview: 'Nedbank is one of South Africa\'s "Big Four" banking groups, headquartered in Johannesburg. With over 200 branches and 30,000 employees, they serve 7.8 million clients across personal, business, corporate, and wealth management segments. Their "Old Mutual Two Degrees" partnership focuses on shared-value banking.',
               industry: 'Finance',
               companySize: 'Enterprise',
               keyStakeholders: ['Pieter van der Merwe (IT Director, Branch Technology)', 'Zanele Mthembu (CTO)', 'Busi Mavuso (Head of Digital Channels)'],
@@ -1815,12 +1891,12 @@ class DWxSharePointProvisioningService {
             CompletedAt: '2026-02-04T12:00:00Z',
             ReminderSent: true,
           });
-          results.push({ name: 'Nedbank Group - Ready', success: true, message: 'Created successfully' });
+          results.push({ name: 'Nedbank - Ready', success: true, message: 'Created successfully' });
         } catch (err) {
-          results.push({ name: 'Nedbank Group - Ready', success: false, message: err instanceof Error ? err.message : 'Unknown error' });
+          results.push({ name: 'Nedbank - Ready', success: false, message: err instanceof Error ? err.message : 'Unknown error' });
         }
       } else {
-        results.push({ name: 'Nedbank Group - Ready', success: false, message: 'Could not find Nedbank Discovery service request to link' });
+        results.push({ name: 'Nedbank - Ready', success: false, message: 'Could not find Nedbank Discovery service request to link' });
       }
 
       // Session Prep #2: Discovery Health SPFx - In Progress (partial checklist)

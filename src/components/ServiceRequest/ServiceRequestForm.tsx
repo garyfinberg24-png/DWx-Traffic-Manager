@@ -94,7 +94,7 @@ const useStyles = makeStyles({
     ...shorthands.padding('0'),
     position: 'relative',
     ...shorthands.overflow('hidden'),
-    background: 'linear-gradient(135deg, #1e6b7b 0%, #2a8d6e 100%)',
+    background: 'linear-gradient(135deg, #0d3a5c 0%, #1a5a8a 50%, #1e6b7b 100%)',
   },
   heroExpanded: {
     maxHeight: '200px',
@@ -145,7 +145,7 @@ const useStyles = makeStyles({
     fontSize: '22px',
   },
   heroTitleAccentSR: {
-    color: '#86efac',
+    color: '#7dd3fc',
   },
   heroSubtitleSR: {
     fontSize: '13px',
@@ -477,6 +477,7 @@ const INDUSTRIES: ClientIndustry[] = [
   'Healthcare',
   'Retail',
   'Manufacturing',
+  'Energy',
   'Government',
   'Education',
   'Legal',
@@ -1057,9 +1058,6 @@ export const ServiceRequestForm: React.FC<ServiceRequestFormProps> = ({
                 style={{
                   position: 'relative',
                   borderRadius: '14px',
-                  boxShadow: isSelected ? '0 0 0 2px #1e6b7b, 0 4px 16px rgba(30,107,123,0.18)' : 'none',
-                  transform: isSelected ? 'scale(1.02)' : 'none',
-                  transition: 'box-shadow 0.2s ease, transform 0.2s ease',
                 }}
               >
                 {isSelected && (

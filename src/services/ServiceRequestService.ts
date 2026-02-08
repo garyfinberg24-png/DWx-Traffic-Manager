@@ -21,6 +21,8 @@ import {
   Specialist,
   StageTimestamps,
 } from '../types/ServiceRequest';
+import { DealChecklistItem, deserializeDealChecklist, createDealChecklist, serializeChecklist } from '../types/Checklist';
+import { serviceCatalogService } from './ServiceCatalogService';
 
 class ServiceRequestService {
   private readonly listName = config.sharepoint.listName;
@@ -56,7 +58,9 @@ class ServiceRequestService {
         ? Math.round(data.DealValue * (data.DealProbability / 100))
         : undefined;
 
-      const itemData = {
+      // Build payload — only include fields that have actual values.
+      // SharePoint Graph API rejects empty strings for DateTime/Number columns.
+      const itemData: Record<string, unknown> = {
         Title: title,
         ServiceId: data.ServiceId,
         ServiceName: data.ServiceName,
@@ -64,41 +68,72 @@ class ServiceRequestService {
         AccountManagerEmail: userEmail,
         AccountManagerTenant: isExternal ? 'External' : 'Internal',
         ClientName: data.ClientName,
-        ClientId: data.ClientId,
-        ContactName: data.ContactName,
-        ContactEmail: data.ContactEmail,
-        ContactPhone: data.ContactPhone,
-        Industry: data.Industry,
-        CompanySize: data.CompanySize,
         FunnelStage: 'Lead' as FunnelStage, // Always starts as Lead
         InterestLevel: data.InterestLevel,
-        DealValue: data.DealValue,
-        DealProbability: data.DealProbability,
-        WeightedPipeline: weightedPipeline,
-        ExpectedCloseDate: data.ExpectedCloseDate,
-        Budget: data.Budget,
-        Timeline: data.Timeline,
-        ProposedSlot1: data.ProposedSlot1,
-        ProposedSlot2: data.ProposedSlot2 || '',
-        ProposedSlot3: data.ProposedSlot3 || '',
-        Requirements: data.Requirements,
-        ServiceHistory: data.ServiceHistory,
-        Comments: data.Comments,
         // SLA: Record initial stage timestamp
         StageTimestamps_JSON: JSON.stringify({ Lead: new Date().toISOString() }),
-        // Tender-specific fields (only included when provided)
-        ...(data.TenderReferenceNumber && { TenderReferenceNumber: data.TenderReferenceNumber }),
-        ...(data.BriefingSessionDate && { BriefingSessionDate: data.BriefingSessionDate }),
-        ...(data.SubmissionDeadline && { SubmissionDeadline: data.SubmissionDeadline }),
-        ...(data.TenderManagerName && { TenderManagerName: data.TenderManagerName }),
-        ...(data.TenderManagerEmail && { TenderManagerEmail: data.TenderManagerEmail }),
-        ...(data.TechnicalSectionOnly !== undefined && { TechnicalSectionOnly: data.TechnicalSectionOnly }),
-        ...(data.CVRequired !== undefined && { CVRequired: data.CVRequired }),
       };
 
-      // Create the request in SharePoint
-      const result = await graphService.createListItem(this.listName, itemData);
+      // Optional fields — only add when they have a truthy/meaningful value
+      if (data.ClientId) itemData.ClientId = data.ClientId;
+      if (data.ContactName) itemData.ContactName = data.ContactName;
+      if (data.ContactEmail) itemData.ContactEmail = data.ContactEmail;
+      if (data.ContactPhone) itemData.ContactPhone = data.ContactPhone;
+      if (data.Industry) itemData.Industry = data.Industry;
+      if (data.CompanySize) itemData.CompanySize = data.CompanySize;
+      if (data.DealValue != null) itemData.DealValue = data.DealValue;
+      if (data.DealProbability != null) itemData.DealProbability = data.DealProbability;
+      if (weightedPipeline != null) itemData.WeightedPipeline = weightedPipeline;
+      if (data.ExpectedCloseDate) itemData.ExpectedCloseDate = data.ExpectedCloseDate;
+      if (data.Budget) itemData.Budget = data.Budget;
+      if (data.Timeline) itemData.Timeline = data.Timeline;
+      if (data.ProposedSlot1) itemData.ProposedSlot1 = data.ProposedSlot1;
+      if (data.ProposedSlot2) itemData.ProposedSlot2 = data.ProposedSlot2;
+      if (data.ProposedSlot3) itemData.ProposedSlot3 = data.ProposedSlot3;
+      if (data.Requirements) itemData.Requirements = data.Requirements;
+      if (data.ServiceHistory) itemData.ServiceHistory = data.ServiceHistory;
+      if (data.Comments) itemData.Comments = data.Comments;
+
+      // Tender-specific fields (only included when provided)
+      if (data.TenderReferenceNumber) itemData.TenderReferenceNumber = data.TenderReferenceNumber;
+      if (data.BriefingSessionDate) itemData.BriefingSessionDate = data.BriefingSessionDate;
+      if (data.SubmissionDeadline) itemData.SubmissionDeadline = data.SubmissionDeadline;
+      if (data.TenderManagerName) itemData.TenderManagerName = data.TenderManagerName;
+      if (data.TenderManagerEmail) itemData.TenderManagerEmail = data.TenderManagerEmail;
+      if (data.TechnicalSectionOnly !== undefined) itemData.TechnicalSectionOnly = data.TechnicalSectionOnly;
+      if (data.CVRequired !== undefined) itemData.CVRequired = data.CVRequired;
+
+      // Create the request in SharePoint (retry without unrecognized fields if needed)
+      let result;
+      try {
+        result = await graphService.createListItem(this.listName, itemData);
+      } catch (createErr: unknown) {
+        const errMsg = createErr instanceof Error ? createErr.message : String(createErr);
+        if (errMsg.includes('is not recognized') || errMsg.includes('invalid field')) {
+          // Column may not be provisioned yet — strip unrecognized Note fields and retry
+          const { StageTimestamps_JSON: _ts, ...coreData } = itemData;
+          result = await graphService.createListItem(this.listName, coreData);
+        } else {
+          throw createErr;
+        }
+      }
       const request = this.mapToServiceRequest(result);
+
+      // Copy service checklist to deal (silent — never fails the create)
+      try {
+        if (data.ServiceId) {
+          const service = await serviceCatalogService.getServiceById(data.ServiceId);
+          if (service?.Checklist && service.Checklist.length > 0) {
+            const dealChecklist = createDealChecklist(service.Checklist);
+            await graphService.updateListItem(this.listName, request.Id, {
+              DealChecklist_JSON: serializeChecklist(dealChecklist),
+            });
+            request.DealChecklist = dealChecklist;
+          }
+        }
+      } catch (checklistErr) {
+        console.warn('Could not copy service checklist to deal:', checklistErr);
+      }
 
       // Log audit entry
       await auditService.logCreate('ServiceRequest', request.Id, title, {
@@ -888,6 +923,31 @@ class ServiceRequestService {
   /**
    * Map SharePoint list item to ServiceRequest
    */
+  /**
+   * Update the deal checklist (check/uncheck items)
+   */
+  async updateDealChecklist(
+    requestId: number,
+    checklist: DealChecklistItem[],
+    _userEmail: string,
+    userName: string
+  ): Promise<void> {
+    try {
+      const graphService = getGraphService();
+      await graphService.updateListItem(this.listName, requestId, {
+        DealChecklist_JSON: serializeChecklist(checklist),
+      });
+
+      await auditService.logUpdate('ServiceRequest', requestId, `Checklist updated by ${userName}`, {
+        completedCount: checklist.filter((i) => i.isCompleted).length,
+        totalCount: checklist.length,
+      });
+    } catch (error) {
+      console.error('Error updating deal checklist:', error);
+      throw error;
+    }
+  }
+
   private mapToServiceRequest(item: Record<string, unknown>): ServiceRequest {
     const fields = (item.fields as Record<string, unknown>) || item;
 
@@ -928,6 +988,7 @@ class ServiceRequestService {
       NextSteps: fields.NextSteps as string,
       Comments: fields.Comments as string,
       StageTimestamps: this.parseStageTimestamps(fields.StageTimestamps_JSON as string),
+      DealChecklist: deserializeDealChecklist(fields.DealChecklist_JSON as string) || undefined,
       Created: fields.Created as string || '',
       Modified: fields.Modified as string,
     };
