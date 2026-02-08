@@ -20,6 +20,12 @@ import {
   Card,
   TabList,
   Tab,
+  Dialog,
+  DialogSurface,
+  DialogBody,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
 } from '@fluentui/react-components';
 import {
   Database24Regular,
@@ -42,6 +48,8 @@ import {
   Eye24Regular,
   Checkmark20Regular,
   Dismiss20Regular,
+  Delete24Regular,
+  Warning24Regular,
 } from '@fluentui/react-icons';
 import { DW_COLORS } from '../../utils/buttonStyles';
 import { dwxSharePointProvisioningService } from '../../services/DWxSharePointProvisioningService';
@@ -400,6 +408,11 @@ export const DWxSharePointProvisioning: React.FC = () => {
   const [proposalsCount, setProposalsCount] = useState(0);
   const [postMortemsCount, setPostMortemsCount] = useState(0);
 
+  // Seed confirmation dialog
+  const [seedConfirmOpen, setSeedConfirmOpen] = useState(false);
+  const [pendingSeedConfig, setPendingSeedConfig] = useState<SeedConfig | null>(null);
+  const [isClearing, setIsClearing] = useState(false);
+
   // Tools
   const [isFixingViews, setIsFixingViews] = useState(false);
   const [viewFixProgress, setViewFixProgress] = useState('');
@@ -523,6 +536,53 @@ export const DWxSharePointProvisioning: React.FC = () => {
     }
   };
 
+  const handleSeedClick = (cfg: SeedConfig) => {
+    if (cfg.count > 0) {
+      setPendingSeedConfig(cfg);
+      setSeedConfirmOpen(true);
+    } else {
+      runSeed(cfg.seedFn, cfg.listName, setterMap[cfg.listName]);
+    }
+  };
+
+  const handleSeedConfirm = async (mode: 'merge' | 'clear') => {
+    if (!pendingSeedConfig) return;
+    const cfg = pendingSeedConfig;
+    setSeedConfirmOpen(false);
+    setPendingSeedConfig(null);
+
+    if (mode === 'clear') {
+      setIsClearing(true);
+      try {
+        await dwxSharePointProvisioningService.clearListData(cfg.listName);
+      } catch {
+        // Continue with seed even if clear had partial errors
+      }
+      setIsClearing(false);
+    }
+
+    await runSeed(cfg.seedFn, cfg.listName, setterMap[cfg.listName]);
+  };
+
+  const handleClearList = async (cfg: SeedConfig) => {
+    setIsClearing(true);
+    setError(null);
+    setSeedResults(null);
+    try {
+      const { deleted, errors } = await dwxSharePointProvisioningService.clearListData(cfg.listName);
+      setSeedResults([{
+        service: cfg.label,
+        success: errors === 0,
+        message: `Cleared ${deleted} items${errors > 0 ? ` (${errors} errors)` : ''}`,
+      }]);
+      setterMap[cfg.listName](0);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : `Failed to clear ${cfg.listName}`);
+    } finally {
+      setIsClearing(false);
+    }
+  };
+
   const seedAllData = async () => {
     setIsSeedingAll(true);
     setError(null);
@@ -583,7 +643,7 @@ export const DWxSharePointProvisioning: React.FC = () => {
   const readyCount = allLists.filter(l => l.exists).length;
   const allListsExist = readyCount === expectedListCount;
   const missingLists = allLists.filter(s => !s.exists);
-  const anySeeding = isSeeding || isSeedingAll;
+  const anySeeding = isSeeding || isSeedingAll || isClearing;
 
   const totalSeedItems = servicesCount + teamMembersCount + clientsCount + accountManagersCount +
     specialistsCount + managersCount + serviceRequestsCount + productRequestsCount + sessionPrepCount +
@@ -904,13 +964,25 @@ export const DWxSharePointProvisioning: React.FC = () => {
                 {hasData && (
                   <Badge appearance="tint" color="success" className={styles.seedBadge}>{cfg.count} items</Badge>
                 )}
+                {hasData && (
+                  <Button
+                    size="small"
+                    appearance="subtle"
+                    icon={<Delete24Regular />}
+                    onClick={() => handleClearList(cfg)}
+                    disabled={!exists || anySeeding || isClearing}
+                    title="Clear all items from this list"
+                  >
+                    Clear
+                  </Button>
+                )}
                 <Button
                   size="small"
                   appearance="outline"
                   icon={<Add24Regular />}
-                  onClick={() => runSeed(cfg.seedFn, cfg.listName, setterMap[cfg.listName])}
-                  disabled={!exists || anySeeding || !depMet}
-                  title={hasData ? 'Add more seed data (existing data is kept)' : `Seed ${cfg.seedCount} items`}
+                  onClick={() => handleSeedClick(cfg)}
+                  disabled={!exists || anySeeding || isClearing || !depMet}
+                  title={hasData ? 'Seed data (duplicates will be skipped)' : `Seed ${cfg.seedCount} items`}
                 >
                   {hasData ? 'Reseed' : `Seed ${cfg.seedCount}`}
                 </Button>
@@ -1071,6 +1143,43 @@ export const DWxSharePointProvisioning: React.FC = () => {
       {activeTab === 'lists' && renderLists()}
       {activeTab === 'seed-data' && renderSeedData()}
       {activeTab === 'tools' && renderTools()}
+
+      {/* Seed confirmation dialog */}
+      <Dialog open={seedConfirmOpen} onOpenChange={(_, data) => { if (!data.open) { setSeedConfirmOpen(false); setPendingSeedConfig(null); } }}>
+        <DialogSurface>
+          <DialogBody>
+            <DialogTitle>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Warning24Regular style={{ color: '#f59e0b' }} />
+                {pendingSeedConfig?.label} already has data
+              </div>
+            </DialogTitle>
+            <DialogContent>
+              <Text block style={{ marginBottom: '12px' }}>
+                <strong>{pendingSeedConfig?.count} items</strong> already exist in {pendingSeedConfig?.listName}.
+                How would you like to proceed?
+              </Text>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <Card style={{ padding: '12px', cursor: 'pointer', border: '1px solid #e5e7eb' }} onClick={() => handleSeedConfirm('merge')}>
+                  <Text weight="semibold" block>Merge (skip duplicates)</Text>
+                  <Text size={200} style={{ color: tokens.colorNeutralForeground3 }}>
+                    Only add items that don't already exist. Existing data is preserved.
+                  </Text>
+                </Card>
+                <Card style={{ padding: '12px', cursor: 'pointer', border: '1px solid #fee2e2' }} onClick={() => handleSeedConfirm('clear')}>
+                  <Text weight="semibold" block style={{ color: '#dc2626' }}>Clear &amp; Reseed</Text>
+                  <Text size={200} style={{ color: tokens.colorNeutralForeground3 }}>
+                    Delete all existing items first, then seed fresh data.
+                  </Text>
+                </Card>
+              </div>
+            </DialogContent>
+            <DialogActions>
+              <Button appearance="secondary" onClick={() => { setSeedConfirmOpen(false); setPendingSeedConfig(null); }}>Cancel</Button>
+            </DialogActions>
+          </DialogBody>
+        </DialogSurface>
+      </Dialog>
     </div>
   );
 };

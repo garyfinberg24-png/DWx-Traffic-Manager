@@ -482,6 +482,7 @@ class DWxSharePointProvisioningService {
         },
         { internalName: 'IsPremium', displayName: 'Is Premium', type: 'Boolean', defaultValue: '0' },
         { internalName: 'AccountManagerEmail', displayName: 'Account Manager Email', type: 'Text' },
+        { internalName: 'AccountManagerName', displayName: 'Account Manager Name', type: 'Text' },
         { internalName: 'EngagementCount', displayName: 'Engagement Count', type: 'Number' },
         { internalName: 'TotalRevenue', displayName: 'Total Revenue (ZAR)', type: 'Currency' },
         { internalName: 'LastEngagementDate', displayName: 'Last Engagement Date', type: 'DateTime' },
@@ -494,6 +495,7 @@ class DWxSharePointProvisioningService {
         },
         { internalName: 'Phone', displayName: 'Phone', type: 'Text' },
         { internalName: 'Address', displayName: 'Address', type: 'Text' },
+        { internalName: 'BusinessUnit', displayName: 'Business Unit', type: 'Text' },
         { internalName: 'Notes', displayName: 'Notes', type: 'Note' },
       ],
     };
@@ -1251,8 +1253,13 @@ class DWxSharePointProvisioningService {
     try {
       const graphService = getGraphService();
       const validColumns = await this.getListColumnNames('DWxServices');
+      const existing = await this.getExistingTitles('DWxServices');
 
       for (const service of DW_SERVICES_SEED_DATA) {
+        if (existing.has(service.Title.toLowerCase())) {
+          results.push({ service: service.Title, success: true, message: 'Already exists - skipped' });
+          continue;
+        }
         try {
           // Find matching DEFAULT_SERVICES entry for rich content
           const richContent = DEFAULT_SERVICES.find(s => s.Title === service.Title);
@@ -1321,7 +1328,12 @@ class DWxSharePointProvisioningService {
     try {
       const graphService = getGraphService();
       const validColumns = await this.getListColumnNames('DWxTeamMembers');
+      const existing = await this.getExistingTitles('DWxTeamMembers');
       for (const member of seedData) {
+        if (existing.has(member.Title.toLowerCase())) {
+          results.push({ name: member.Title, success: true, message: 'Already exists - skipped' });
+          continue;
+        }
         try {
           const filtered = this.filterFieldsForList(member, validColumns);
           await graphService.createListItem('DWxTeamMembers', filtered);
@@ -1369,7 +1381,12 @@ class DWxSharePointProvisioningService {
     try {
       const graphService = getGraphService();
       const validColumns = await this.getListColumnNames('DWxClients');
+      const existing = await this.getExistingTitles('DWxClients');
       for (const client of seedData) {
+        if (existing.has(client.Title.toLowerCase())) {
+          results.push({ name: client.Title, success: true, message: 'Already exists - skipped' });
+          continue;
+        }
         try {
           const filtered = this.filterFieldsForList(client, validColumns);
           await graphService.createListItem('DWxClients', filtered);
@@ -1402,7 +1419,12 @@ class DWxSharePointProvisioningService {
     try {
       const graphService = getGraphService();
       const validColumns = await this.getListColumnNames('DWxAccountManagers');
+      const existing = await this.getExistingTitles('DWxAccountManagers');
       for (const am of seedData) {
+        if (existing.has(am.Title.toLowerCase())) {
+          results.push({ name: am.Title, success: true, message: 'Already exists - skipped' });
+          continue;
+        }
         try {
           const filtered = this.filterFieldsForList(am, validColumns);
           await graphService.createListItem('DWxAccountManagers', filtered);
@@ -1435,7 +1457,12 @@ class DWxSharePointProvisioningService {
     try {
       const graphService = getGraphService();
       const validColumns = await this.getListColumnNames('DWxSpecialists');
+      const existing = await this.getExistingTitles('DWxSpecialists');
       for (const specialist of seedData) {
+        if (existing.has(specialist.Title.toLowerCase())) {
+          results.push({ name: specialist.Title, success: true, message: 'Already exists - skipped' });
+          continue;
+        }
         try {
           const filtered = this.filterFieldsForList(specialist, validColumns);
           await graphService.createListItem('DWxSpecialists', filtered);
@@ -1465,7 +1492,12 @@ class DWxSharePointProvisioningService {
     try {
       const graphService = getGraphService();
       const validColumns = await this.getListColumnNames('DWxManagers');
+      const existing = await this.getExistingTitles('DWxManagers');
       for (const manager of seedData) {
+        if (existing.has(manager.Title.toLowerCase())) {
+          results.push({ name: manager.Title, success: true, message: 'Already exists - skipped' });
+          continue;
+        }
         try {
           const filtered = this.filterFieldsForList(manager, validColumns);
           await graphService.createListItem('DWxManagers', filtered);
@@ -1712,7 +1744,12 @@ class DWxSharePointProvisioningService {
     try {
       const graphService = getGraphService();
       const validColumns = await this.getListColumnNames('DWxServiceRequests');
+      const existing = await this.getExistingTitles('DWxServiceRequests');
       for (const request of seedData) {
+        if (existing.has(request.Title.toLowerCase())) {
+          results.push({ name: request.Title, success: true, message: 'Already exists - skipped' });
+          continue;
+        }
         try {
           const filtered = this.filterFieldsForList(request, validColumns);
           await graphService.createListItem('DWxServiceRequests', filtered);
@@ -1906,7 +1943,12 @@ class DWxSharePointProvisioningService {
     try {
       const graphService = getGraphService();
       const validColumns = await this.getListColumnNames('DWxProductRequests');
+      const existing = await this.getExistingTitles('DWxProductRequests');
       for (const request of seedData) {
+        if (existing.has(request.Title.toLowerCase())) {
+          results.push({ name: request.Title, success: true, message: 'Already exists - skipped' });
+          continue;
+        }
         try {
           const filtered = this.filterFieldsForList(request, validColumns);
           await graphService.createListItem('DWxProductRequests', filtered);
@@ -1931,6 +1973,7 @@ class DWxSharePointProvisioningService {
     try {
       const graphService = getGraphService();
       const validColumns = await this.getListColumnNames('DWxSessionPrep');
+      const existingPreps = await this.getExistingTitles('DWxSessionPrep');
 
       // Find Discovery-stage service requests to link session prep records
       const serviceRequests = await graphService.getListItems('DWxServiceRequests') as Array<{ id: string; fields?: { FunnelStage?: string; ClientName?: string } }>;
@@ -1943,7 +1986,9 @@ class DWxSharePointProvisioningService {
         (r) => r.fields?.ClientName === 'Nedbank'
       );
       if (nedbankReq) {
-        try {
+        if (existingPreps.has('prep - nedbank - 2026-03-15')) {
+          results.push({ name: 'Prep - Nedbank', success: true, message: 'Already exists - skipped' });
+        } else try {
           await graphService.createListItem('DWxSessionPrep', this.filterFieldsForList({
             Title: 'Prep - Nedbank - 2026-03-15',
             ServiceRequestId: parseInt(nedbankReq.id),
@@ -2024,7 +2069,9 @@ class DWxSharePointProvisioningService {
         (r) => r.fields?.ClientName === 'Discovery Health'
       );
       if (discoveryHealthReq) {
-        try {
+        if (existingPreps.has('prep - discovery health - 2026-03-18')) {
+          results.push({ name: 'Discovery Health - In Progress', success: true, message: 'Already exists - skipped' });
+        } else try {
           await graphService.createListItem('DWxSessionPrep', this.filterFieldsForList({
             Title: 'Prep - Discovery Health - 2026-03-18',
             ServiceRequestId: parseInt(discoveryHealthReq.id),
@@ -2099,7 +2146,9 @@ class DWxSharePointProvisioningService {
         (r) => r.fields?.ClientName === 'MTN South Africa'
       );
       if (mtnReq) {
-        try {
+        if (existingPreps.has('prep - mtn south africa - pending')) {
+          results.push({ name: 'MTN - Not Started', success: true, message: 'Already exists - skipped' });
+        } else try {
           await graphService.createListItem('DWxSessionPrep', this.filterFieldsForList({
             Title: 'Prep - MTN South Africa - Pending',
             ServiceRequestId: parseInt(mtnReq.id),
@@ -2529,8 +2578,13 @@ class DWxSharePointProvisioningService {
       },
     ];
 
-    // Create all entries
+    // Create entries, skipping duplicates
+    const existing = await this.getExistingTitles('DWxKnowledgeBase');
     for (const entry of entries) {
+      if (existing.has(entry.Title.toLowerCase())) {
+        results.push({ name: entry.Title, success: true, message: 'Already exists - skipped' });
+        continue;
+      }
       try {
         await graphService.createListItem('DWxKnowledgeBase', this.filterFieldsForList(entry, validColumns));
         results.push({ name: entry.Title, success: true, message: `Created ${entry.Type}: ${entry.Title}` });
@@ -2637,6 +2691,40 @@ class DWxSharePointProvisioningService {
     } catch {
       return 0;
     }
+  }
+
+  /**
+   * Get existing Title values from a list (for duplicate detection during seeding)
+   */
+  async getExistingTitles(listTitle: string): Promise<Set<string>> {
+    try {
+      const graphService = getGraphService();
+      const items = await graphService.getListItems(listTitle) as Array<{ fields?: { Title?: string } }>;
+      return new Set(items.map(i => i.fields?.Title?.toLowerCase() || '').filter(Boolean));
+    } catch {
+      return new Set();
+    }
+  }
+
+  /**
+   * Clear all items from a list (for re-seeding)
+   */
+  async clearListData(listTitle: string): Promise<{ deleted: number; errors: number }> {
+    const graphService = getGraphService();
+    const items = await graphService.getListItems(listTitle) as Array<{ id: string }>;
+    let deleted = 0;
+    let errors = 0;
+
+    for (const item of items) {
+      try {
+        await graphService.deleteListItem(listTitle, parseInt(item.id, 10));
+        deleted++;
+      } catch {
+        errors++;
+      }
+    }
+
+    return { deleted, errors };
   }
 }
 
