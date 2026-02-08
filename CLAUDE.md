@@ -6,7 +6,7 @@
 
 **Project Origin**: Cloned from LP Booking App (v1.7.5) - a production Teams app for License Pulse demo scheduling.
 
-**Current Version**: v2.14.0 (February 2026) - Post Mortem & Issues Tracking (AI-powered analysis + Insights dashboard + AM accountability)
+**Current Version**: v2.14.1 (February 2026) - Quick Create Service+Product + Dashboard Product Queue + Won UX
 
 > **IMPORTANT**: We are ONLY working on the DWx Traffic Manager project. We DO NOT make any changes to the LP Booking App. The LP Booking App is a separate production application and must not be modified.
 
@@ -430,10 +430,10 @@ DWx-Traffic-Manager/
 │   │   │   ├── KanbanBoard.tsx           # Drag-and-drop Kanban board (v2.11.0)
 │   │   │   ├── KanbanColumn.tsx          # Droppable column component (v2.11.0)
 │   │   │   ├── KanbanCard.tsx            # Draggable deal card (v2.11.0)
-│   │   │   ├── QuickCreateDialog.tsx     # Quick deal creation dialog (v2.11.0)
+│   │   │   ├── QuickCreateDialog.tsx     # Quick create dialog — service + product requests (v2.14.1)
 │   │   │   └── index.ts
 │   │   ├── Dashboard/
-│   │   │   ├── ManagerDashboard.tsx      # Dashboard with tabs
+│   │   │   ├── ManagerDashboard.tsx      # Dashboard with sidebar nav (14 tabs incl. Service + Product Queue)
 │   │   │   ├── KPICards.tsx              # KPI metric cards
 │   │   │   ├── StatusChart.tsx           # Status pie chart
 │   │   │   ├── TypeChart.tsx             # Type distribution
@@ -981,10 +981,14 @@ Five features improving daily manager workflow. Client-side only, 2 new SharePoi
 - [x] Wired into SalesFunnelDashboard.tsx as "Board" tab (manager-only) with ColumnTripleRegular icon
 - [x] Uses `@hello-pangea/dnd` for React 18-compatible drag-and-drop
 
-#### Feature 2: Quick-Create Deal - COMPLETE
-- [x] **QuickCreateDialog.tsx** — Compact Dialog (480px) with 5 fields: Client (freeform Combobox with auto-populate), Service (Dropdown), Deal Value (optional), Interest Level (RadioGroup), Notes (optional Textarea)
+#### Feature 2: Quick-Create Deal - COMPLETE (Enhanced v2.14.1)
+- [x] **QuickCreateDialog.tsx** — Compact Dialog (480px) with request type toggle (Service/Product), shared + type-specific fields
+- [x] Service mode: Client, Service dropdown, Interest Level, Deal Value, 3 time slots, Client Context, Notes
+- [x] Product mode: Client, Category dropdown (Apps/HyperParts/Cards/Agents), Product dropdown (cascading), Request Type (Demo/Trial), Deal Value, 3 time slots, Client Context, Notes
 - [x] Auto-fills contact info from DWxClients on selection (reuses client auto-populate pattern)
-- [x] Creates Lead-stage request via serviceRequestService.createRequest()
+- [x] Service requests → `serviceRequestService.createRequest()` → "Added to Service Queue" toast
+- [x] Product requests → `productRequestService.createRequest()` → "Added to Product Queue" toast
+- [x] `onProductCreated` callback wired in SalesFunnelDashboard → prepends to product requests state
 - [x] "Quick Create" button in SalesFunnelDashboard header (manager-only, next to Export)
 
 #### Feature 3: Email Thread Tracking - COMPLETE
@@ -1347,7 +1351,7 @@ The app supports Account Managers from an external partner tenant:
 | `src/components/MyRequests/DealActivityTimeline.tsx` | Chronological audit log feed component (v2.10.0) |
 | `src/components/Dashboard/WinLossTab.tsx` | Win/loss Recharts dashboard tab (v2.10.0) |
 | `src/components/SalesFunnel/KanbanBoard.tsx` | Drag-and-drop Kanban board with 5 columns (v2.11.0) |
-| `src/components/SalesFunnel/QuickCreateDialog.tsx` | Quick deal creation dialog (v2.11.0) |
+| `src/components/SalesFunnel/QuickCreateDialog.tsx` | Quick create dialog — service + product requests with cascading dropdowns (v2.14.1) |
 | `src/services/EmailTrackingService.ts` | Email thread tracking per deal (v2.11.0) |
 | `src/components/MyRequests/EmailTimeline.tsx` | Email communication timeline display (v2.11.0) |
 | `src/components/SessionPrep/MeetingNotesEditor.tsx` | Post-discovery meeting notes capture (v2.11.0) |
@@ -1413,6 +1417,9 @@ The app supports Account Managers from an external partner tenant:
 | **Post Mortem AI Analysis** | 6 AI methods run in parallel via `Promise.allSettled()` with graceful degradation. Includes SLA timeline, accountability scores, root cause, issues, lessons, action items |
 | **Post Mortem Conditional Tab** | 8th tab in RequestDetails, only visible for Won/Lost deals via `buildTabs()` + `useMemo` pattern |
 | **Insights Dashboard** | InsightsTab in ManagerDashboard Analytics group — aggregate cross-deal analytics with Recharts charts |
+| **Quick Create Dual-Mode** | Service/Product toggle with cascading Category → Product dropdowns, dual submit routing to Service Queue or Product Queue, Client Context field for AM mail trail paste |
+| **Dashboard Product Queue** | ManagerDashboard sidebar shows both "Service Queue" and "Product Queue" badges; SalesFunnelDashboard passes `onProductCreated` to QuickCreateDialog |
+| **Won Deal UX** | Trophy24Regular icon on Won button/menu, branded green gradient confirmation dialog in RequestsQueue |
 
 ## Product Catalog
 
@@ -1530,6 +1537,7 @@ DWxSupportingDocuments/
 ## Recent Commit History
 
 ```
+55df8cd feat: Quick Create Service+Product + Dashboard Product Queue + Won UX (v2.14.1)
 b4d3993 feat: Post Mortem & Issues Tracking with AI-powered analysis + Insights dashboard (v2.14.0)
 724952b style: Admin table fixes + Quick Create from Service Details + UI refinements
 41d78bd feat: Service Checklists + Client seed Energy fix (v2.13.0)
@@ -1543,6 +1551,4 @@ e424f16 fix: Remove all legacy LP Booking references + fix Kanban card click (v2
 16a7997 feat: Deal Activity Timeline + Follow-Up Reminders + Win/Loss Analysis (v2.10.0)
 b085667 feat: V1 hero banner Services page + client auto-populate + KB tab reorder (v2.9.1)
 5e69c0e feat: Proposal Management System with AI generation + internal approval workflow (v2.9.0)
-b4fddfa feat: Add Landing Page content management + Knowledge Base with consumer UI (v2.8.0)
-0b671cf feat: V4 Magazine landing page + team profile modals + KB/LP content types (v2.7.0)
 ```
