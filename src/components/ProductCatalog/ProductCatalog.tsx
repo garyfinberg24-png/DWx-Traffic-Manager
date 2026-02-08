@@ -466,6 +466,7 @@ const useStyles = makeStyles({
     display: 'flex',
     alignItems: 'center',
     gap: '12px',
+    marginTop: '24px',
     marginBottom: '20px',
   },
   filterPillsScroll: {
@@ -517,6 +518,7 @@ const useStyles = makeStyles({
     display: 'flex',
     alignItems: 'center',
     gap: '12px',
+    marginTop: '24px',
     marginBottom: '24px',
   },
   categoryLabel: {
@@ -552,7 +554,7 @@ const useStyles = makeStyles({
 
   // Product card — fixed height with pinned button
   productCard: {
-    ...shorthands.borderRadius('12px'),
+    ...shorthands.borderRadius('4px'),
     ...shorthands.overflow('hidden'),
     cursor: 'pointer',
     transitionProperty: 'all',
@@ -1007,7 +1009,6 @@ export const ProductCatalog: React.FC = () => {
                     className={`${styles.tabBtn} ${activeTab === key ? styles.tabBtnActive : ''}`}
                     onClick={() => handleTabClick(key)}
                   >
-                    <span style={{ display: 'flex', alignItems: 'center', fontSize: '16px' }}>{config.icon}</span>
                     <span>{config.label}</span>
                     <span className={`${styles.tabCount} ${activeTab === key ? styles.tabCountActive : ''}`}>
                       {config.products.length}

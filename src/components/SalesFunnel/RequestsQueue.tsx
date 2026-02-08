@@ -67,7 +67,10 @@ const useStyles = makeStyles({
     marginLeft: '8px',
   },
   content: {
-    padding: '0',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '10px',
+    padding: '12px 16px',
     maxHeight: '500px',
     overflowY: 'auto',
   },
@@ -77,16 +80,19 @@ const useStyles = makeStyles({
     color: '#616161',
   },
   requestItem: {
+    backgroundColor: '#ffffff',
+    borderRadius: '10px',
+    border: '1px solid #e5e7eb',
+    borderLeft: '4px solid transparent',
     padding: '16px 20px',
-    borderBottom: '1px solid #f0f0f0',
     display: 'flex',
     flexDirection: 'column',
     gap: '12px',
-    ':last-child': {
-      borderBottom: 'none',
-    },
+    transition: 'all 0.15s ease',
     ':hover': {
-      backgroundColor: '#fafafa',
+      boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+      border: '1px solid #d1d5db',
+      borderLeft: '4px solid transparent',
     },
   },
   requestHeader: {
@@ -97,45 +103,65 @@ const useStyles = makeStyles({
   requestInfo: {
     display: 'flex',
     flexDirection: 'column',
-    gap: '4px',
+    gap: '3px',
+    minWidth: 0,
   },
   clientName: {
-    fontSize: '15px',
-    fontWeight: '600',
-    color: '#242424',
+    fontSize: '14px',
+    fontWeight: '700',
+    color: '#111827',
   },
   serviceName: {
-    fontSize: '13px',
-    color: '#616161',
+    fontSize: '12px',
+    color: '#6b7280',
+    fontWeight: '500',
   },
   stageBadge: {
     display: 'inline-flex',
     alignItems: 'center',
-    padding: '4px 10px',
-    borderRadius: '4px',
-    fontSize: '12px',
-    fontWeight: '500',
+    padding: '3px 10px',
+    borderRadius: '6px',
+    fontSize: '11px',
+    fontWeight: '600',
+    flexShrink: 0,
+    letterSpacing: '0.1px',
   },
   requestMeta: {
     display: 'flex',
-    gap: '16px',
+    gap: '6px',
     flexWrap: 'wrap',
+    alignItems: 'center',
   },
   metaItem: {
-    display: 'flex',
+    display: 'inline-flex',
     alignItems: 'center',
     gap: '4px',
-    fontSize: '12px',
-    color: '#616161',
+    fontSize: '11px',
+    fontWeight: '500',
+    color: '#6b7280',
+    padding: '2px 8px',
+    borderRadius: '6px',
+    backgroundColor: '#f3f4f6',
   },
-  actions: {
+  actionsRow: {
     display: 'flex',
-    gap: '8px',
     alignItems: 'center',
+    gap: '10px',
     flexWrap: 'wrap',
   },
+  actionsSpacer: {
+    flex: 1,
+  },
+  actionButtons: {
+    display: 'flex',
+    gap: '8px',
+    flexShrink: 0,
+  },
   specialistDropdown: {
-    minWidth: '180px',
+    minWidth: '220px',
+  },
+  slotDropdown: {
+    minWidth: '220px',
   },
   advanceButton: {
     backgroundColor: DW_COLORS.teal,
@@ -153,8 +179,8 @@ const useStyles = makeStyles({
     display: 'inline-flex',
     alignItems: 'center',
     gap: '2px',
-    padding: '2px 6px',
-    borderRadius: '4px',
+    padding: '2px 8px',
+    borderRadius: '6px',
     fontSize: '11px',
     fontWeight: '500',
   },
@@ -589,7 +615,9 @@ export const RequestsQueue: React.FC<RequestsQueueProps> = ({
                 <Dropdown
                   className={styles.bulkDropdown}
                   placeholder="Assign specialist..."
+                  size="small"
                   selectedOptions={bulkSpecialist ? [bulkSpecialist] : []}
+                  value={bulkSpecialist ? specialists.find(s => s.Email === bulkSpecialist)?.Title || '' : ''}
                   onOptionSelect={(_, data) => setBulkSpecialist(data.optionValue as string)}
                   disabled={loadingSpecialists}
                 >
@@ -671,7 +699,10 @@ export const RequestsQueue: React.FC<RequestsQueueProps> = ({
               <div
                 key={request.Id}
                 className={styles.requestItem}
-                style={isSelected ? { backgroundColor: 'rgba(30, 107, 123, 0.05)' } : undefined}
+                style={{
+                  borderLeftColor: stageColor.text,
+                  ...(isSelected ? { backgroundColor: 'rgba(30, 107, 123, 0.05)' } : {}),
+                }}
               >
                 <div className={styles.requestItemWithCheckbox}>
                   <Checkbox
@@ -694,49 +725,61 @@ export const RequestsQueue: React.FC<RequestsQueueProps> = ({
                       </span>
                     </div>
 
-                <div className={styles.requestMeta}>
-                  <span className={styles.metaItem}>
-                    <PersonRegular style={{ width: '14px', height: '14px' }} />
-                    {request.AccountManagerName}
-                  </span>
-                  <span className={styles.metaItem}>
-                    <MoneyRegular style={{ width: '14px', height: '14px' }} />
-                    {formatCurrency(request.DealValue)}
-                  </span>
-                  <span
-                    className={styles.interestBadge}
-                    style={{
-                      backgroundColor:
-                        request.InterestLevel === 'Hot'
-                          ? 'rgba(209, 52, 56, 0.1)'
-                          : request.InterestLevel === 'Warm'
-                          ? 'rgba(247, 99, 12, 0.1)'
-                          : 'rgba(107, 130, 140, 0.1)',
-                      color:
-                        request.InterestLevel === 'Hot'
-                          ? '#d13438'
-                          : request.InterestLevel === 'Warm'
-                          ? '#f7630c'
-                          : '#6b828c',
-                    }}
-                  >
-                    {request.InterestLevel === 'Hot' ? '🔥' : request.InterestLevel === 'Warm' ? '☀️' : '❄️'}{' '}
-                    {request.InterestLevel}
-                  </span>
-                </div>
+                    {/* Row 2: Meta pills */}
+                    <div className={styles.requestMeta}>
+                      <span className={styles.metaItem}>
+                        <PersonRegular style={{ width: '14px', height: '14px' }} />
+                        {request.AccountManagerName}
+                      </span>
+                      <span className={styles.metaItem}>
+                        <MoneyRegular style={{ width: '14px', height: '14px' }} />
+                        {formatCurrency(request.DealValue)}
+                      </span>
+                      <span
+                        className={styles.interestBadge}
+                        style={{
+                          backgroundColor:
+                            request.InterestLevel === 'Hot'
+                              ? 'rgba(209, 52, 56, 0.1)'
+                              : request.InterestLevel === 'Warm'
+                              ? 'rgba(247, 99, 12, 0.1)'
+                              : 'rgba(107, 130, 140, 0.1)',
+                          color:
+                            request.InterestLevel === 'Hot'
+                              ? '#d13438'
+                              : request.InterestLevel === 'Warm'
+                              ? '#f7630c'
+                              : '#6b828c',
+                        }}
+                      >
+                        {request.InterestLevel}
+                      </span>
+                      {request.AssignedSpecialistName && (
+                        <span className={styles.metaItem}>
+                          <PersonRegular style={{ width: '14px', height: '14px' }} />
+                          {request.AssignedSpecialistName}
+                        </span>
+                      )}
+                    </div>
 
-                <div className={styles.actions}>
-                  {isProcessing ? (
-                    <Spinner size="tiny" />
-                  ) : (
-                    <>
-                      {/* Specialist Assignment */}
-                      {needsSpecialist && (
-                        <>
+                    {/* Row 3: Dropdowns (left) + action buttons (right) */}
+                    {!isProcessing ? (
+                      <div className={styles.actionsRow}>
+                        {needsSpecialist && (
                           <Dropdown
                             className={styles.specialistDropdown}
-                            placeholder="Select specialist..."
-                            selectedOptions={selectedSpecialists[request.Id] ? [selectedSpecialists[request.Id]] : []}
+                            placeholder="Assign specialist..."
+                            size="small"
+                            selectedOptions={
+                              selectedSpecialists[request.Id]
+                                ? [selectedSpecialists[request.Id]]
+                                : []
+                            }
+                            value={
+                              selectedSpecialists[request.Id]
+                                ? specialists.find(s => s.Email === selectedSpecialists[request.Id])?.Title || ''
+                                : ''
+                            }
                             onOptionSelect={(_, data) =>
                               setSelectedSpecialists((prev) => ({
                                 ...prev,
@@ -747,59 +790,73 @@ export const RequestsQueue: React.FC<RequestsQueueProps> = ({
                           >
                             {specialists.map((s) => (
                               <Option key={s.Email} value={s.Email} text={`${s.Title} (${s.Role})`}>
-                                {s.Title} ({s.Role})
+                                {s.Title} ({s.Role}) — {s.CurrentDealCount}/{s.MaxConcurrentDeals}
                               </Option>
                             ))}
                           </Dropdown>
+                        )}
+
+                        {needsSpecialist && (
                           <Button
                             appearance="secondary"
                             icon={<PersonRegular />}
                             onClick={() => handleAssignSpecialist(request)}
                             disabled={!selectedSpecialists[request.Id]}
+                            size="small"
                           >
                             Assign
                           </Button>
-                        </>
-                      )}
+                        )}
 
-                      {/* Confirm Meeting (for Discovery stage) */}
-                      {request.FunnelStage === 'Discovery' && !request.ConfirmedDateTime && (
-                        <Dropdown
-                          placeholder="Confirm slot..."
-                          onOptionSelect={(_, data) =>
-                            handleConfirmMeeting(request, data.optionValue as string)
-                          }
-                        >
-                          <Option value={request.ProposedSlot1} text={format(new Date(request.ProposedSlot1), 'MMM d @ h:mm a')}>
-                            {format(new Date(request.ProposedSlot1), 'MMM d @ h:mm a')}
-                          </Option>
-                          {request.ProposedSlot2 && (
-                            <Option value={request.ProposedSlot2} text={format(new Date(request.ProposedSlot2), 'MMM d @ h:mm a')}>
-                              {format(new Date(request.ProposedSlot2), 'MMM d @ h:mm a')}
+                        {/* Confirm Meeting (for Discovery stage) */}
+                        {request.FunnelStage === 'Discovery' && !request.ConfirmedDateTime && (
+                          <Dropdown
+                            className={styles.slotDropdown}
+                            placeholder="Confirm slot..."
+                            size="small"
+                            selectedOptions={[]}
+                            value=""
+                            onOptionSelect={(_, data) =>
+                              handleConfirmMeeting(request, data.optionValue as string)
+                            }
+                          >
+                            <Option value={request.ProposedSlot1} text={format(new Date(request.ProposedSlot1), 'MMM d @ h:mm a')}>
+                              {format(new Date(request.ProposedSlot1), 'MMM d @ h:mm a')}
                             </Option>
-                          )}
-                          {request.ProposedSlot3 && (
-                            <Option value={request.ProposedSlot3} text={format(new Date(request.ProposedSlot3), 'MMM d @ h:mm a')}>
-                              {format(new Date(request.ProposedSlot3), 'MMM d @ h:mm a')}
-                            </Option>
-                          )}
-                        </Dropdown>
-                      )}
+                            {request.ProposedSlot2 && (
+                              <Option value={request.ProposedSlot2} text={format(new Date(request.ProposedSlot2), 'MMM d @ h:mm a')}>
+                                {format(new Date(request.ProposedSlot2), 'MMM d @ h:mm a')}
+                              </Option>
+                            )}
+                            {request.ProposedSlot3 && (
+                              <Option value={request.ProposedSlot3} text={format(new Date(request.ProposedSlot3), 'MMM d @ h:mm a')}>
+                                {format(new Date(request.ProposedSlot3), 'MMM d @ h:mm a')}
+                              </Option>
+                            )}
+                          </Dropdown>
+                        )}
 
-                      {/* Advance Stage */}
-                      {nextStage && (
-                        <Button
-                          className={styles.advanceButton}
-                          appearance="primary"
-                          icon={<ArrowRightRegular />}
-                          onClick={() => handleAdvanceStage(request)}
-                        >
-                          {nextStage === 'Won' ? 'Mark Won' : `→ ${nextStage}`}
-                        </Button>
-                      )}
-                    </>
-                  )}
-                </div>
+                        {/* Spacer pushes buttons to right */}
+                        <div className={styles.actionsSpacer} />
+
+                        {/* Action buttons */}
+                        <div className={styles.actionButtons}>
+                          {nextStage && (
+                            <Button
+                              className={styles.advanceButton}
+                              appearance="primary"
+                              icon={<ArrowRightRegular />}
+                              onClick={() => handleAdvanceStage(request)}
+                              size="small"
+                            >
+                              {nextStage === 'Won' ? 'Mark Won' : `→ ${nextStage}`}
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                    ) : (
+                      <Spinner size="tiny" />
+                    )}
                   </div>
                 </div>
               </div>

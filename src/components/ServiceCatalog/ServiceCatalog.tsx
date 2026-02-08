@@ -109,6 +109,32 @@ const useStyles = makeStyles({
     ...shorthands.padding('3px', '10px'),
     ...shorthands.borderRadius('10px'),
   },
+  collapsedTabPill: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    ...shorthands.gap('6px'),
+    fontSize: '12px',
+    fontWeight: '600',
+    color: 'white',
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    ...shorthands.padding('4px', '14px'),
+    ...shorthands.borderRadius('14px'),
+    ...shorthands.border('1px', 'solid', 'rgba(255,255,255,0.3)'),
+    cursor: 'pointer',
+  },
+  collapsedTabPillInactive: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    ...shorthands.gap('6px'),
+    fontSize: '12px',
+    fontWeight: '500',
+    color: 'rgba(255,255,255,0.6)',
+    backgroundColor: 'transparent',
+    ...shorthands.padding('4px', '14px'),
+    ...shorthands.borderRadius('14px'),
+    ...shorthands.border('1px', 'solid', 'rgba(255,255,255,0.15)'),
+    cursor: 'pointer',
+  },
   heroDecoration: {
     position: 'absolute',
     top: '-80px',
@@ -118,6 +144,49 @@ const useStyles = makeStyles({
     ...shorthands.borderRadius('50%'),
     background: 'radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 70%)',
     pointerEvents: 'none',
+  },
+
+  // Glassmorphic tab row (matches ProductCatalog.tabsRow)
+  tabsRow: {
+    display: 'flex',
+    gap: '6px',
+    ...shorthands.padding('20px', '32px', '0'),
+    position: 'relative',
+    zIndex: 2,
+  },
+  tabBtn: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '8px',
+    ...shorthands.padding('8px', '20px'),
+    ...shorthands.borderRadius('20px'),
+    ...shorthands.border('1px', 'solid', 'rgba(255,255,255,0.25)'),
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    color: 'rgba(255,255,255,0.7)',
+    fontSize: '13px',
+    fontWeight: '600',
+    cursor: 'pointer',
+    transitionProperty: 'all',
+    transitionDuration: '0.2s',
+    backdropFilter: 'blur(8px)',
+  },
+  tabBtnActive: {
+    backgroundColor: 'rgba(255,255,255,0.22)',
+    color: 'white',
+    ...shorthands.borderColor('rgba(255,255,255,0.45)'),
+    boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+  },
+  tabCount: {
+    fontSize: '11px',
+    fontWeight: '700',
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    ...shorthands.padding('1px', '8px'),
+    ...shorthands.borderRadius('10px'),
+    minWidth: '22px',
+    textAlign: 'center' as const,
+  },
+  tabCountActive: {
+    backgroundColor: 'rgba(255,255,255,0.3)',
   },
 
   // Row 1: Page header (matches ProductCatalog.heroHeaderRow)
@@ -157,49 +226,7 @@ const useStyles = makeStyles({
     flexShrink: 0,
   },
 
-  // Row 2: Glassmorphic search bar (in position of Products' tab pills)
-  heroSearchRow: {
-    ...shorthands.padding('14px', '32px', '0'),
-    position: 'relative',
-    zIndex: 2,
-    display: 'flex',
-    alignItems: 'center',
-    gap: '16px',
-  },
-  heroSearchBar: {
-    display: 'flex',
-    alignItems: 'center',
-    flex: '1',
-    maxWidth: '560px',
-    backgroundColor: 'rgba(255,255,255,0.08)',
-    ...shorthands.border('1px', 'solid', 'rgba(255,255,255,0.25)'),
-    ...shorthands.borderRadius('20px'),
-    backdropFilter: 'blur(8px)',
-    ...shorthands.overflow('hidden'),
-  },
-  heroSearchIcon: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingLeft: '16px',
-    color: 'rgba(255,255,255,0.5)',
-  },
-  heroSearchInput: {
-    flex: 1,
-    backgroundColor: 'transparent',
-    ...shorthands.border('none'),
-    ...shorthands.padding('10px', '16px'),
-    fontSize: '13px',
-    color: '#ffffff',
-    ...shorthands.outline('none'),
-  },
-  heroSearchCount: {
-    fontSize: '12px',
-    color: 'rgba(255,255,255,0.5)',
-    whiteSpace: 'nowrap',
-  },
-
-  // Row 3: Hero content (icon + title + desc | stats) — matches ProductCatalog.heroContentRow
+  // Row 2: Hero content — matches ProductCatalog.heroContentRow
   heroContentRow: {
     display: 'flex',
     alignItems: 'center',
@@ -207,10 +234,6 @@ const useStyles = makeStyles({
     ...shorthands.padding('18px', '32px', '22px'),
     position: 'relative',
     zIndex: 2,
-  },
-  heroLeft: {
-    flex: '1',
-    minWidth: '0',
   },
   heroTop: {
     display: 'flex',
@@ -241,39 +264,13 @@ const useStyles = makeStyles({
     color: 'rgba(255,255,255,0.7)',
     maxWidth: '700px',
   },
-  heroStats: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '10px',
-    flexShrink: 0,
-    paddingLeft: '32px',
-    ...shorthands.borderLeft('1px', 'solid', 'rgba(255,255,255,0.12)'),
-  },
-  heroStat: {
-    display: 'flex',
-    alignItems: 'baseline',
-    gap: '8px',
-  },
-  heroStatValue: {
-    fontSize: '18px',
-    fontWeight: '700',
-    color: 'white',
-    whiteSpace: 'nowrap',
-  },
-  heroStatLabel: {
-    fontSize: '10px',
-    color: 'rgba(255,255,255,0.45)',
-    textTransform: 'uppercase',
-    letterSpacing: '0.5px',
-    whiteSpace: 'nowrap',
-  },
-
   // Filter bar — below hero, inside container (matches ProductCatalog.filterBar)
   filterBar: {
     display: 'flex',
     alignItems: 'center',
     gap: '12px',
-    marginBottom: '20px',
+    marginTop: '24px',
+    marginBottom: '24px',
   },
   filterPillsScroll: {
     display: 'flex',
@@ -283,16 +280,16 @@ const useStyles = makeStyles({
     scrollbarWidth: 'none',
   },
   filterPill: {
-    ...shorthands.padding('5px', '14px'),
-    ...shorthands.borderRadius('16px'),
-    fontSize: '12px',
+    ...shorthands.padding('8px', '16px'),
+    ...shorthands.borderRadius('20px'),
+    fontSize: '13px',
     fontWeight: '500',
     cursor: 'pointer',
     transitionProperty: 'all',
-    transitionDuration: '0.15s',
-    ...shorthands.border('1px', 'solid', '#e0e0e0'),
+    transitionDuration: '0.2s',
+    ...shorthands.border('1px', 'solid', '#d0d0d0'),
     backgroundColor: 'white',
-    color: '#555555',
+    color: '#333333',
     whiteSpace: 'nowrap',
     flexShrink: 0,
     display: 'inline-flex',
@@ -326,21 +323,6 @@ const useStyles = makeStyles({
   pillCountInactive: {
     backgroundColor: '#f0f0f0',
     color: '#888888',
-  },
-
-  // Content area
-  toolbar: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: '24px',
-  },
-  resultsInfo: {
-    fontSize: '13px',
-    color: '#6b7280',
-    display: 'flex',
-    alignItems: 'center',
-    gap: '6px',
   },
 
   // Services Grid
@@ -402,11 +384,32 @@ const POPULAR_TITLES = new Set([
   'Ad-Hoc Technical Support',
 ]);
 
+/** Returns true if a hex colour is "light" (needs dark text for contrast) */
+const isLightColor = (hex: string): boolean => {
+  const c = hex.replace('#', '');
+  const r = parseInt(c.substring(0, 2), 16);
+  const g = parseInt(c.substring(2, 4), 16);
+  const b = parseInt(c.substring(4, 6), 16);
+  // W3C perceived-brightness formula
+  return (r * 299 + g * 587 + b * 114) / 1000 > 160;
+};
+
+// Hero tab groupings (matches Products 4-pill pattern)
+type HeroTab = 'all' | 'development' | 'advisory' | 'engagement' | 'support';
+
+const HERO_TABS: { id: HeroTab; label: string; categories: ServiceCategory[] }[] = [
+  { id: 'all', label: 'All Services', categories: [] },
+  { id: 'development', label: 'Development', categories: ['Power Platform', 'SPFx Development', 'SharePoint Migration'] },
+  { id: 'advisory', label: 'Advisory', categories: ['M365 Assessment', 'Strategic Advisory', 'Copilot Agents'] },
+  { id: 'engagement', label: 'Engagement', categories: ['Proposal', 'Tender', 'Training', 'MS Viva'] },
+  { id: 'support', label: 'Support', categories: ['Ad-Hoc Support', 'SLA'] },
+];
+
 type CatalogTab = 'Popular' | 'All' | ServiceCategory;
 
 const CATALOG_TABS: { id: CatalogTab; label: string; color: string }[] = [
-  { id: 'Popular', label: 'Popular', color: DW_COLORS.teal },
   { id: 'All', label: 'All Services', color: '#374151' },
+  { id: 'Popular', label: 'Popular', color: DW_COLORS.teal },
   { id: 'Power Platform', label: 'Power Platform', color: categoryColors['Power Platform'] },
   { id: 'SPFx Development', label: 'SPFx', color: categoryColors['SPFx Development'] },
   { id: 'SharePoint Migration', label: 'Migrations', color: categoryColors['SharePoint Migration'] },
@@ -439,7 +442,8 @@ export const ServiceCatalog: React.FC<ServiceCatalogProps> = ({ onRequestService
   const [error, setError] = useState<string | null>(null);
   const [searchText, setSearchText] = useState('');
   const debouncedSearch = useDeferredValue(searchText);
-  const [selectedTab, setSelectedTab] = useState<CatalogTab>('Popular');
+  const [heroTab, setHeroTab] = useState<HeroTab>('all');
+  const [selectedTab, setSelectedTab] = useState<CatalogTab>('All');
   const [selectedService, setSelectedService] = useState<DWService | null>(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [fullDetailsService, setFullDetailsService] = useState<DWService | null>(null);
@@ -462,8 +466,16 @@ export const ServiceCatalog: React.FC<ServiceCatalogProps> = ({ onRequestService
     loadServices();
   }, []);
 
+  // Services filtered by hero tab (broad grouping)
+  const heroFilteredServices = useMemo(() => {
+    if (heroTab === 'all') return services;
+    const tab = HERO_TABS.find(t => t.id === heroTab);
+    if (!tab) return services;
+    return services.filter(s => tab.categories.includes(s.Category));
+  }, [services, heroTab]);
+
   const filteredServices = useMemo(() => {
-    return services.filter((service) => {
+    return heroFilteredServices.filter((service) => {
       if (selectedTab === 'Popular') {
         if (!service.IsPopular && !POPULAR_TITLES.has(service.Title)) return false;
       } else if (selectedTab !== 'All') {
@@ -480,17 +492,15 @@ export const ServiceCatalog: React.FC<ServiceCatalogProps> = ({ onRequestService
       }
       return true;
     });
-  }, [services, selectedTab, debouncedSearch]);
+  }, [heroFilteredServices, selectedTab, debouncedSearch]);
 
   const categoryCounts = useMemo(() => {
     const counts = new Map<string, number>();
-    services.forEach(s => {
+    heroFilteredServices.forEach(s => {
       counts.set(s.Category, (counts.get(s.Category) || 0) + 1);
     });
     return counts;
-  }, [services]);
-
-  const uniqueCategories = categoryCounts.size;
+  }, [heroFilteredServices]);
 
   const handleServiceClick = (service: DWService) => {
     setSelectedService(service);
@@ -523,9 +533,16 @@ export const ServiceCatalog: React.FC<ServiceCatalogProps> = ({ onRequestService
   };
 
   const getTabCount = (tab: CatalogTab): number => {
-    if (tab === 'Popular') return services.filter(s => s.IsPopular || POPULAR_TITLES.has(s.Title)).length;
-    if (tab === 'All') return services.length;
+    if (tab === 'Popular') return heroFilteredServices.filter(s => s.IsPopular || POPULAR_TITLES.has(s.Title)).length;
+    if (tab === 'All') return heroFilteredServices.length;
     return categoryCounts.get(tab) || 0;
+  };
+
+  const getHeroTabCount = (tab: HeroTab): number => {
+    if (tab === 'all') return services.length;
+    const config = HERO_TABS.find(t => t.id === tab);
+    if (!config) return 0;
+    return services.filter(s => config.categories.includes(s.Category)).length;
   };
 
   if (loading) {
@@ -549,8 +566,16 @@ export const ServiceCatalog: React.FC<ServiceCatalogProps> = ({ onRequestService
           {isCollapsed ? (
             <div className={styles.collapsedStrip}>
               <span className={styles.collapsedTitle}>Service Catalog</span>
-              <span className={styles.collapsedBadge}>{services.length} Services</span>
-              <span className={styles.collapsedBadge}>{uniqueCategories} Categories</span>
+              {HERO_TABS.map((tab) => (
+                <button
+                  key={tab.id}
+                  className={heroTab === tab.id ? styles.collapsedTabPill : styles.collapsedTabPillInactive}
+                  onClick={() => setHeroTab(tab.id)}
+                >
+                  {tab.label}
+                </button>
+              ))}
+              <span className={styles.collapsedBadge}>{getHeroTabCount(heroTab)} services</span>
             </div>
           ) : (
             <>
@@ -571,27 +596,25 @@ export const ServiceCatalog: React.FC<ServiceCatalogProps> = ({ onRequestService
                 </button>
               </div>
 
-              {/* Row 2: Glassmorphic search bar */}
-              <div className={styles.heroSearchRow}>
-                <div className={styles.heroSearchBar}>
-                  <div className={styles.heroSearchIcon}>
-                    <SearchRegular style={{ width: '16px', height: '16px' }} />
-                  </div>
-                  <input
-                    className={styles.heroSearchInput}
-                    placeholder="Search services by name, category, or keyword..."
-                    value={searchText}
-                    onChange={(e) => setSearchText(e.target.value)}
-                  />
-                </div>
-                <span className={styles.heroSearchCount}>
-                  {services.length} services available
-                </span>
+              {/* Row 2: Glassmorphic tab pills */}
+              <div className={styles.tabsRow}>
+                {HERO_TABS.map((tab) => (
+                  <button
+                    key={tab.id}
+                    className={`${styles.tabBtn} ${heroTab === tab.id ? styles.tabBtnActive : ''}`}
+                    onClick={() => setHeroTab(tab.id)}
+                  >
+                    <span>{tab.label}</span>
+                    <span className={`${styles.tabCount} ${heroTab === tab.id ? styles.tabCountActive : ''}`}>
+                      {getHeroTabCount(tab.id)}
+                    </span>
+                  </button>
+                ))}
               </div>
 
-              {/* Row 3: Content — title + description | stats */}
+              {/* Row 3: Content — title + description */}
               <div className={styles.heroContentRow}>
-                <div className={styles.heroLeft}>
+                <div style={{ flex: 1 }}>
                   <div className={styles.heroTop}>
                     <div className={styles.heroIcon}>
                       <GridRegular style={{ color: '#7dd3fc', fontSize: '18px' }} />
@@ -603,24 +626,6 @@ export const ServiceCatalog: React.FC<ServiceCatalogProps> = ({ onRequestService
                   </div>
                   <div className={styles.heroDesc}>
                     From Power Platform to Copilot Agents, SharePoint migrations to strategic advisory — find the right Microsoft 365 solution and request a pre-sales consultation.
-                  </div>
-                </div>
-                <div className={styles.heroStats}>
-                  <div className={styles.heroStat}>
-                    <Text className={styles.heroStatValue}>{services.length}</Text>
-                    <Text className={styles.heroStatLabel}>Services</Text>
-                  </div>
-                  <div className={styles.heroStat}>
-                    <Text className={styles.heroStatValue}>{uniqueCategories}</Text>
-                    <Text className={styles.heroStatLabel}>Categories</Text>
-                  </div>
-                  <div className={styles.heroStat}>
-                    <Text className={styles.heroStatValue}>4</Text>
-                    <Text className={styles.heroStatLabel}>Complexity Tiers</Text>
-                  </div>
-                  <div className={styles.heroStat}>
-                    <Text className={styles.heroStatValue}>ZAR</Text>
-                    <Text className={styles.heroStatLabel}>Currency</Text>
                   </div>
                 </div>
               </div>
@@ -661,7 +666,11 @@ export const ServiceCatalog: React.FC<ServiceCatalogProps> = ({ onRequestService
                 className={`${styles.filterPill} ${isActive ? styles.filterPillActive : ''}`}
                 style={
                   isActive
-                    ? { backgroundColor: tab.color, borderColor: tab.color }
+                    ? {
+                        backgroundColor: tab.color,
+                        borderColor: tab.color,
+                        color: isLightColor(tab.color) ? '#1f2937' : 'white',
+                      }
                     : undefined
                 }
                 onClick={() => setSelectedTab(tab.id)}
@@ -672,12 +681,21 @@ export const ServiceCatalog: React.FC<ServiceCatalogProps> = ({ onRequestService
                 {tab.id !== 'Popular' && tab.id !== 'All' && (
                   <span
                     className={styles.pillDot}
-                    style={{ backgroundColor: isActive ? 'rgba(255,255,255,0.5)' : tab.color }}
+                    style={{
+                      backgroundColor: isActive
+                        ? (isLightColor(tab.color) ? 'rgba(0,0,0,0.2)' : 'rgba(255,255,255,0.5)')
+                        : tab.color,
+                    }}
                   />
                 )}
                 {tab.label}
                 <span
                   className={`${styles.pillCount} ${isActive ? styles.pillCountActive : styles.pillCountInactive}`}
+                  style={
+                    isActive && isLightColor(tab.color)
+                      ? { backgroundColor: 'rgba(0,0,0,0.12)', color: '#1f2937' }
+                      : undefined
+                  }
                 >
                   {count}
                 </span>
@@ -685,17 +703,28 @@ export const ServiceCatalog: React.FC<ServiceCatalogProps> = ({ onRequestService
             );
           })}
         </div>
+        <input
+          type="text"
+          placeholder="Search services..."
+          value={searchText}
+          onChange={(e) => setSearchText(e.target.value)}
+          style={{
+            padding: '7px 12px 7px 34px',
+            borderRadius: '8px',
+            border: '1px solid #d0d0d0',
+            fontSize: '13px',
+            color: '#333',
+            width: '240px',
+            flexShrink: 0,
+            outline: 'none',
+            backgroundImage: `url("data:image/svg+xml,%3Csvg width='14' height='14' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='11' cy='11' r='7' stroke='%239ca3af' stroke-width='2'/%3E%3Cline x1='16.5' y1='16.5' x2='21' y2='21' stroke='%239ca3af' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E")`,
+            backgroundRepeat: 'no-repeat',
+            backgroundPosition: '10px center',
+          }}
+        />
       </div>
 
       {/* Content */}
-      <div className={styles.toolbar}>
-        <span className={styles.resultsInfo}>
-          <GridRegular style={{ width: '16px', height: '16px' }} />
-          {filteredServices.length} {filteredServices.length === 1 ? 'service' : 'services'}
-          {searchText && ` matching "${searchText}"`}
-        </span>
-      </div>
-
       {filteredServices.length > 0 ? (
         <div className={styles.grid}>
           {filteredServices.map((service) => (

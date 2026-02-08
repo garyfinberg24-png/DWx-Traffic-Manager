@@ -35,16 +35,12 @@ import { format } from 'date-fns';
 
 const useStyles = makeStyles({
   container: {
-    backgroundColor: '#ffffff',
-    borderRadius: '12px',
-    boxShadow: '0 1px 3px rgba(0,0,0,0.08)',
-    border: '1px solid #e8e8e8',
-    overflow: 'hidden',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '0',
   },
   header: {
     padding: '16px 20px',
-    borderBottom: '1px solid #e8e8e8',
-    backgroundColor: '#fafafa',
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -52,10 +48,10 @@ const useStyles = makeStyles({
   title: {
     fontSize: '16px',
     fontWeight: '600',
-    color: '#242424',
+    color: '#111827',
   },
   badge: {
-    backgroundColor: DW_COLORS.danger,
+    backgroundColor: '#10b981',
     color: 'white',
     fontSize: '11px',
     fontWeight: '600',
@@ -64,75 +60,103 @@ const useStyles = makeStyles({
     marginLeft: '8px',
   },
   content: {
-    padding: '0',
-    maxHeight: '500px',
-    overflowY: 'auto',
-  },
-  emptyState: {
-    padding: '40px 20px',
-    textAlign: 'center',
-    color: '#616161',
-  },
-  requestItem: {
-    padding: '16px 20px',
-    borderBottom: '1px solid #f0f0f0',
     display: 'flex',
     flexDirection: 'column',
     gap: '12px',
-    ':last-child': {
-      borderBottom: 'none',
-    },
+    padding: '0 16px 16px',
+    maxHeight: '600px',
+    overflowY: 'auto',
+  },
+  emptyState: {
+    padding: '48px 20px',
+    textAlign: 'center',
+    color: '#9ca3af',
+    fontSize: '13px',
+  },
+  requestItem: {
+    backgroundColor: '#ffffff',
+    borderRadius: '10px',
+    border: '1px solid #e5e7eb',
+    borderLeft: '4px solid transparent',
+    padding: '16px 20px',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '12px',
+    transition: 'all 0.15s ease',
     ':hover': {
-      backgroundColor: '#fafafa',
+      boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+      border: '1px solid #d1d5db',
+      borderLeft: '4px solid transparent',
     },
   },
   requestHeader: {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
+    gap: '12px',
   },
   requestInfo: {
     display: 'flex',
     flexDirection: 'column',
-    gap: '4px',
+    gap: '3px',
+    minWidth: 0,
   },
   clientName: {
-    fontSize: '15px',
-    fontWeight: '600',
-    color: '#242424',
+    fontSize: '14px',
+    fontWeight: '700',
+    color: '#111827',
   },
   productName: {
-    fontSize: '13px',
-    color: '#616161',
+    fontSize: '12px',
+    color: '#6b7280',
+    fontWeight: '500',
   },
   statusBadge: {
     display: 'inline-flex',
     alignItems: 'center',
-    padding: '4px 10px',
-    borderRadius: '4px',
-    fontSize: '12px',
-    fontWeight: '500',
+    padding: '3px 10px',
+    borderRadius: '6px',
+    fontSize: '11px',
+    fontWeight: '600',
+    flexShrink: 0,
+    letterSpacing: '0.1px',
   },
   requestMeta: {
     display: 'flex',
-    gap: '16px',
+    gap: '6px',
     flexWrap: 'wrap',
+    alignItems: 'center',
   },
   metaItem: {
-    display: 'flex',
+    display: 'inline-flex',
     alignItems: 'center',
     gap: '4px',
-    fontSize: '12px',
-    color: '#616161',
+    fontSize: '11px',
+    fontWeight: '500',
+    color: '#6b7280',
+    padding: '2px 8px',
+    borderRadius: '6px',
+    backgroundColor: '#f3f4f6',
   },
-  actions: {
+  actionsRow: {
     display: 'flex',
-    gap: '8px',
     alignItems: 'center',
+    gap: '10px',
     flexWrap: 'wrap',
   },
+  actionsSpacer: {
+    flex: 1,
+  },
+  actionButtons: {
+    display: 'flex',
+    gap: '8px',
+    flexShrink: 0,
+  },
   specialistDropdown: {
-    minWidth: '180px',
+    minWidth: '220px',
+  },
+  slotDropdown: {
+    minWidth: '220px',
   },
   approveButton: {
     backgroundColor: DW_COLORS.teal,
@@ -156,19 +180,21 @@ const useStyles = makeStyles({
     display: 'inline-flex',
     alignItems: 'center',
     gap: '4px',
-    padding: '2px 8px',
-    borderRadius: '4px',
+    padding: '3px 8px',
+    borderRadius: '6px',
     fontSize: '11px',
-    fontWeight: '500',
+    fontWeight: '600',
   },
   // Bulk selection styles
   bulkToolbar: {
     display: 'flex',
     alignItems: 'center',
     gap: '12px',
-    padding: '12px 20px',
-    backgroundColor: '#e8f4f6',
-    borderBottom: '1px solid #1e6b7b',
+    padding: '10px 16px',
+    margin: '0 16px 12px',
+    backgroundColor: 'rgba(30, 107, 123, 0.06)',
+    border: '1px solid rgba(30, 107, 123, 0.2)',
+    borderRadius: '10px',
   },
   bulkToolbarText: {
     fontSize: '13px',
@@ -204,13 +230,13 @@ const useStyles = makeStyles({
   },
 });
 
-// Status colors
-const statusColors: Record<ProductRequestStatus, { bg: string; text: string }> = {
-  'Pending Review': { bg: 'rgba(107, 114, 128, 0.15)', text: '#4B5563' },
-  'Awaiting Approval': { bg: 'rgba(245, 158, 11, 0.15)', text: '#B45309' },
-  'Confirmed': { bg: 'rgba(16, 185, 129, 0.15)', text: '#059669' },
-  'Completed': { bg: 'rgba(59, 130, 246, 0.15)', text: '#2563EB' },
-  'Cancelled': { bg: 'rgba(239, 68, 68, 0.15)', text: '#DC2626' },
+// Status colors with accent border
+const statusColors: Record<ProductRequestStatus, { bg: string; text: string; accent: string }> = {
+  'Pending Review': { bg: '#f3f4f6', text: '#4B5563', accent: '#9ca3af' },
+  'Awaiting Approval': { bg: '#fef3c7', text: '#92400e', accent: '#f59e0b' },
+  'Confirmed': { bg: '#d1fae5', text: '#065f46', accent: '#10b981' },
+  'Completed': { bg: '#dbeafe', text: '#1e40af', accent: '#3b82f6' },
+  'Cancelled': { bg: '#fee2e2', text: '#991b1b', accent: '#ef4444' },
 };
 
 // Allowed status transitions from the queue
@@ -537,7 +563,9 @@ export const ProductRequestsQueue: React.FC<ProductRequestsQueueProps> = ({
                 <Dropdown
                   className={styles.bulkDropdown}
                   placeholder="Assign specialist..."
+                  size="small"
                   selectedOptions={bulkSpecialist ? [bulkSpecialist] : []}
+                  value={bulkSpecialist ? specialists.find(s => s.Email === bulkSpecialist)?.Title || '' : ''}
                   onOptionSelect={(_, data) => setBulkSpecialist(data.optionValue as string)}
                   disabled={loadingSpecialists}
                 >
@@ -621,7 +649,10 @@ export const ProductRequestsQueue: React.FC<ProductRequestsQueueProps> = ({
               <div
                 key={request.Id}
                 className={styles.requestItem}
-                style={isSelected ? { backgroundColor: 'rgba(30, 107, 123, 0.05)' } : undefined}
+                style={{
+                  borderLeftColor: statusColor.accent,
+                  ...(isSelected ? { backgroundColor: 'rgba(30, 107, 123, 0.04)', borderColor: 'rgba(30, 107, 123, 0.2)' } : {}),
+                }}
               >
                 <div className={styles.requestItemWithCheckbox}>
                   <Checkbox
@@ -631,7 +662,7 @@ export const ProductRequestsQueue: React.FC<ProductRequestsQueueProps> = ({
                     aria-label={`Select ${request.ClientName} - ${request.ProductName}`}
                   />
                   <div className={styles.requestContent}>
-                    {/* Header row: client + status */}
+                    {/* Row 1: Client name + status badge */}
                     <div className={styles.requestHeader}>
                       <div className={styles.requestInfo}>
                         <Text className={styles.clientName}>{request.ClientName}</Text>
@@ -647,58 +678,59 @@ export const ProductRequestsQueue: React.FC<ProductRequestsQueueProps> = ({
                       </span>
                     </div>
 
-                {/* Meta row: AM, type, value, premium */}
-                <div className={styles.requestMeta}>
-                  <span className={styles.metaItem}>
-                    <PersonRegular style={{ width: '14px', height: '14px' }} />
-                    {request.AccountManagerName}
-                  </span>
-                  <span
-                    className={styles.typeBadge}
-                    style={{
-                      backgroundColor: request.RequestType === 'Demo'
-                        ? 'rgba(139, 92, 246, 0.1)'
-                        : 'rgba(59, 130, 246, 0.1)',
-                      color: request.RequestType === 'Demo' ? '#7C3AED' : '#2563EB',
-                    }}
-                  >
-                    <BoxRegular style={{ width: '12px', height: '12px' }} />
-                    {request.RequestType}
-                  </span>
-                  {request.EstimatedValue && (
-                    <span className={styles.metaItem}>
-                      {formatCurrency(request.EstimatedValue)}
-                    </span>
-                  )}
-                  {request.IsPremiumClient && (
-                    <Badge appearance="filled" color="warning" size="small">
-                      Premium
-                    </Badge>
-                  )}
-                  {request.AssignedSpecialistName && (
-                    <span className={styles.metaItem}>
-                      <PersonRegular style={{ width: '14px', height: '14px' }} />
-                      {request.AssignedSpecialistName}
-                    </span>
-                  )}
-                </div>
+                    {/* Row 2: Meta pills */}
+                    <div className={styles.requestMeta}>
+                      <span className={styles.metaItem}>
+                        <PersonRegular style={{ width: '14px', height: '14px' }} />
+                        {request.AccountManagerName}
+                      </span>
+                      <span
+                        className={styles.typeBadge}
+                        style={{
+                          backgroundColor: request.RequestType === 'Demo'
+                            ? 'rgba(139, 92, 246, 0.1)'
+                            : 'rgba(59, 130, 246, 0.1)',
+                          color: request.RequestType === 'Demo' ? '#7C3AED' : '#2563EB',
+                        }}
+                      >
+                        <BoxRegular style={{ width: '12px', height: '12px' }} />
+                        {request.RequestType}
+                      </span>
+                      {request.EstimatedValue && (
+                        <span className={styles.metaItem}>
+                          {formatCurrency(request.EstimatedValue)}
+                        </span>
+                      )}
+                      {request.IsPremiumClient && (
+                        <Badge appearance="filled" color="warning" size="small">
+                          Premium
+                        </Badge>
+                      )}
+                      {request.AssignedSpecialistName && (
+                        <span className={styles.metaItem}>
+                          <PersonRegular style={{ width: '14px', height: '14px' }} />
+                          {request.AssignedSpecialistName}
+                        </span>
+                      )}
+                    </div>
 
-                {/* Actions row */}
-                <div className={styles.actions}>
-                  {isProcessing ? (
-                    <Spinner size="tiny" />
-                  ) : (
-                    <>
-                      {/* Specialist Assignment */}
-                      {needsSpecialist && (
-                        <>
+                    {/* Row 3: Dropdowns (left) + action buttons (right) */}
+                    {!isProcessing ? (
+                      <div className={styles.actionsRow}>
+                        {needsSpecialist && (
                           <Dropdown
                             className={styles.specialistDropdown}
                             placeholder="Assign specialist..."
+                            size="small"
                             selectedOptions={
                               selectedSpecialists[request.Id]
                                 ? [selectedSpecialists[request.Id]]
                                 : []
+                            }
+                            value={
+                              selectedSpecialists[request.Id]
+                                ? specialists.find(s => s.Email === selectedSpecialists[request.Id])?.Title || ''
+                                : ''
                             }
                             onOptionSelect={(_, data) =>
                               setSelectedSpecialists((prev) => ({
@@ -718,104 +750,117 @@ export const ProductRequestsQueue: React.FC<ProductRequestsQueueProps> = ({
                               </Option>
                             ))}
                           </Dropdown>
+                        )}
+
+                        {needsSpecialist && (
                           <Button
                             appearance="secondary"
                             icon={<PersonRegular />}
                             onClick={() => handleAssignSpecialist(request)}
                             disabled={!selectedSpecialists[request.Id]}
+                            size="small"
                           >
                             Assign
                           </Button>
-                        </>
-                      )}
+                        )}
 
-                      {/* Confirm Demo/Trial slot */}
-                      {canConfirmDemo && (
-                        <Dropdown
-                          placeholder="Confirm slot..."
-                          onOptionSelect={(_, data) =>
-                            handleConfirmDemo(request, data.optionValue as string)
-                          }
-                        >
-                          {request.ProposedSlot1 && (
-                            <Option
-                              value={request.ProposedSlot1}
-                              text={format(new Date(request.ProposedSlot1), 'MMM d @ h:mm a')}
-                            >
-                              <CalendarRegular style={{ width: '14px', height: '14px', marginRight: '4px' }} />
-                              {format(new Date(request.ProposedSlot1), 'MMM d @ h:mm a')}
-                            </Option>
-                          )}
-                          {request.ProposedSlot2 && (
-                            <Option
-                              value={request.ProposedSlot2}
-                              text={format(new Date(request.ProposedSlot2), 'MMM d @ h:mm a')}
-                            >
-                              <CalendarRegular style={{ width: '14px', height: '14px', marginRight: '4px' }} />
-                              {format(new Date(request.ProposedSlot2), 'MMM d @ h:mm a')}
-                            </Option>
-                          )}
-                          {request.ProposedSlot3 && (
-                            <Option
-                              value={request.ProposedSlot3}
-                              text={format(new Date(request.ProposedSlot3), 'MMM d @ h:mm a')}
-                            >
-                              <CalendarRegular style={{ width: '14px', height: '14px', marginRight: '4px' }} />
-                              {format(new Date(request.ProposedSlot3), 'MMM d @ h:mm a')}
-                            </Option>
-                          )}
-                        </Dropdown>
-                      )}
-
-                      {/* Status advancement buttons */}
-                      {transitions.map((nextStatus) => {
-                        // Skip Confirmed if we can confirm demo (handled by slot dropdown above)
-                        if (nextStatus === 'Confirmed' && canConfirmDemo) return null;
-
-                        if (nextStatus === 'Cancelled') {
-                          return (
-                            <Button
-                              key={nextStatus}
-                              className={styles.rejectButton}
-                              appearance="primary"
-                              icon={<DismissRegular />}
-                              onClick={() => handleAdvanceStatus(request, nextStatus)}
-                              size="small"
-                            >
-                              Cancel
-                            </Button>
-                          );
-                        }
-
-                        if (nextStatus === 'Completed') {
-                          return (
-                            <Button
-                              key={nextStatus}
-                              className={styles.confirmButton}
-                              appearance="primary"
-                              icon={<CheckmarkRegular />}
-                              onClick={() => handleAdvanceStatus(request, nextStatus)}
-                            >
-                              Complete
-                            </Button>
-                          );
-                        }
-
-                        return (
-                          <Button
-                            key={nextStatus}
-                            className={styles.approveButton}
-                            appearance="primary"
-                            icon={<ArrowRightRegular />}
-                            onClick={() => handleAdvanceStatus(request, nextStatus)}
+                        {canConfirmDemo && (
+                          <Dropdown
+                            className={styles.slotDropdown}
+                            placeholder="Confirm slot..."
+                            size="small"
+                            selectedOptions={[]}
+                            value=""
+                            onOptionSelect={(_, data) =>
+                              handleConfirmDemo(request, data.optionValue as string)
+                            }
                           >
-                            {nextStatus === 'Awaiting Approval' ? 'Approve' : `→ ${nextStatus}`}
-                          </Button>
-                        );
-                      })}
-                    </>
-                  )}
-                </div>
+                            {request.ProposedSlot1 && (
+                              <Option
+                                value={request.ProposedSlot1}
+                                text={format(new Date(request.ProposedSlot1), 'MMM d @ h:mm a')}
+                              >
+                                <CalendarRegular style={{ width: '14px', height: '14px', marginRight: '4px' }} />
+                                {format(new Date(request.ProposedSlot1), 'MMM d @ h:mm a')}
+                              </Option>
+                            )}
+                            {request.ProposedSlot2 && (
+                              <Option
+                                value={request.ProposedSlot2}
+                                text={format(new Date(request.ProposedSlot2), 'MMM d @ h:mm a')}
+                              >
+                                <CalendarRegular style={{ width: '14px', height: '14px', marginRight: '4px' }} />
+                                {format(new Date(request.ProposedSlot2), 'MMM d @ h:mm a')}
+                              </Option>
+                            )}
+                            {request.ProposedSlot3 && (
+                              <Option
+                                value={request.ProposedSlot3}
+                                text={format(new Date(request.ProposedSlot3), 'MMM d @ h:mm a')}
+                              >
+                                <CalendarRegular style={{ width: '14px', height: '14px', marginRight: '4px' }} />
+                                {format(new Date(request.ProposedSlot3), 'MMM d @ h:mm a')}
+                              </Option>
+                            )}
+                          </Dropdown>
+                        )}
+
+                        {/* Spacer pushes buttons to right */}
+                        <div className={styles.actionsSpacer} />
+
+                        {/* Action buttons */}
+                        <div className={styles.actionButtons}>
+                          {transitions.map((nextStatus) => {
+                            if (nextStatus === 'Confirmed' && canConfirmDemo) return null;
+
+                            if (nextStatus === 'Cancelled') {
+                              return (
+                                <Button
+                                  key={nextStatus}
+                                  className={styles.rejectButton}
+                                  appearance="primary"
+                                  icon={<DismissRegular />}
+                                  onClick={() => handleAdvanceStatus(request, nextStatus)}
+                                  size="small"
+                                >
+                                  Cancel
+                                </Button>
+                              );
+                            }
+
+                            if (nextStatus === 'Completed') {
+                              return (
+                                <Button
+                                  key={nextStatus}
+                                  className={styles.confirmButton}
+                                  appearance="primary"
+                                  icon={<CheckmarkRegular />}
+                                  onClick={() => handleAdvanceStatus(request, nextStatus)}
+                                  size="small"
+                                >
+                                  Complete
+                                </Button>
+                              );
+                            }
+
+                            return (
+                              <Button
+                                key={nextStatus}
+                                className={styles.approveButton}
+                                appearance="primary"
+                                icon={<ArrowRightRegular />}
+                                onClick={() => handleAdvanceStatus(request, nextStatus)}
+                                size="small"
+                              >
+                                {nextStatus === 'Awaiting Approval' ? 'Approve' : nextStatus}
+                              </Button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    ) : (
+                      <Spinner size="tiny" />
+                    )}
                   </div>
                 </div>
               </div>

@@ -407,6 +407,13 @@ const useStyles = makeStyles({
     ...shorthands.padding('24px'),
     maxHeight: 'calc(100vh - 220px)',
   },
+  contentAreaFlush: {
+    flex: 1,
+    overflowY: 'auto',
+    overflowX: 'hidden',
+    ...shorthands.padding('0'),
+    maxHeight: 'calc(100vh - 220px)',
+  },
 
   // Overview tab sub-styles
   chartsRow: {
@@ -735,7 +742,7 @@ export const ManagerDashboard: React.FC = () => {
 
           {/* Content Area */}
           {dashboardData && (
-            <div className={styles.contentArea}>
+            <div className={selectedTab === 'pipeline' ? styles.contentAreaFlush : styles.contentArea}>
               {/* Overview Tab */}
               {selectedTab === 'overview' && (
                 <>

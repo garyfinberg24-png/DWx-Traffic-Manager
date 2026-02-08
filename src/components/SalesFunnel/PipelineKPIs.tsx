@@ -26,14 +26,15 @@ const useStyles = makeStyles({
     padding: '20px',
     backgroundColor: '#ffffff',
     borderRadius: '12px',
-    boxShadow: '0 1px 3px rgba(0,0,0,0.08)',
-    border: '1px solid #e8e8e8',
+    boxShadow: '0 1px 3px rgba(0,0,0,0.06)',
+    border: '1px solid #e5e7eb',
+    borderLeft: '4px solid transparent',
     display: 'flex',
     flexDirection: 'column',
     gap: '12px',
     transition: 'box-shadow 0.2s ease',
     ':hover': {
-      boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+      boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
     },
   },
   cardHeader: {
@@ -218,7 +219,7 @@ export const PipelineKPIs: React.FC<PipelineKPIsProps> = ({ metrics, winRates, p
     <div className={styles.container}>
       {kpiCards.map((card, index) => (
         <Tooltip key={index} content={card.tooltip || card.label} relationship="label">
-          <div className={styles.card}>
+          <div className={styles.card} style={{ borderLeftColor: card.iconColor }}>
             <div className={styles.cardHeader}>
               <Text className={styles.cardLabel}>{card.label}</Text>
               <div
