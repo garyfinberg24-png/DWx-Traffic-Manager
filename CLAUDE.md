@@ -6,7 +6,7 @@
 
 **Project Origin**: Cloned from LP Booking App (v1.7.5) - a production Teams app for License Pulse demo scheduling.
 
-**Current Version**: v2.12.0 (February 2026) - List View Toggle + SLA Tracking + HyperParts Catalog + Hero Banners All Pages + Collapse Toggle
+**Current Version**: v2.12.1 (February 2026) - Product Requests Tab Search/Filter/Sort + Card Redesign
 
 > **IMPORTANT**: We are ONLY working on the DWx Traffic Manager project. We DO NOT make any changes to the LP Booking App. The LP Booking App is a separate production application and must not be modified.
 
@@ -381,7 +381,7 @@ DWx-Traffic-Manager/
 │   │   │   ├── ProductRequirementsStep.tsx
 │   │   │   └── index.ts
 │   │   ├── MyRequests/
-│   │   │   ├── MyRequests.tsx            # Request list with stage filtering + product request tab
+│   │   │   ├── MyRequests.tsx            # Request list with stage filtering + product request tab (search/filter/sort/card redesign v2.12.1)
 │   │   │   ├── RequestCard.tsx           # Request card with stage badge
 │   │   │   ├── RequestDetails.tsx        # Full service request details modal
 │   │   │   ├── ProductRequestDetails.tsx # Full product request details modal (NEW v2.2.0)
@@ -1001,6 +1001,36 @@ Hero banners added to all 7 main pages with shared collapse/expand toggle. Landi
 
 **Design Mockup:** `mockups/hero-banners-all-pages.html` (5-tab mockup reviewed and approved)
 
+### Phase 13a: Product Requests Tab Enhancement (COMPLETE - v2.12.1)
+
+Full search, filter, sort, and card redesign for the Product Requests tab in My Requests — achieving parity with the Service Requests tab.
+
+#### Search/Filter/Sort Infrastructure - COMPLETE
+
+- [x] **Search toolbar** — SearchBox (product/client/contact), Request Type dropdown (All/Demo/Trial Deployment), Sort dropdown (5 options), grid/list view toggle
+- [x] **Status pill filters** — All, Pending Review, Awaiting Approval, Confirmed, Completed, Cancelled with count badges
+- [x] **AdvancedFilterPanel** — 6 filters: product name, client name, min/max est. value, created date range, has specialist checkbox
+- [x] **Pagination** — Reuses `usePagination` hook with 20 items per page
+- [x] **Summary stats row** — 4 stat cards: Open Requests, Est. Value (ZAR), Pending, Confirmed/Completed
+- [x] **List view** — Full table with Product, Type, Client, Status, Request Type, Specialist, Est. Value, Scheduled, Created columns
+- [x] **Empty state** — Contextual: "No product requests yet" (with Browse Products CTA) vs "No matching requests" (filter active)
+
+#### Card Redesign - COMPLETE
+
+- [x] **Colored left border accent** — 4px border using `PRODUCT_STATUS_COLORS[status].accent` (grey/amber/green/blue/red)
+- [x] **Meta pill badges** — Grey rounded pills with icons: PersonRegular (AM), BoxRegular (type), value (ZAR), StarRegular (Premium), PersonRegular (Specialist)
+- [x] **Text hierarchy** — Client name as bold 14px/700 title, Product name (Type) as 12px/600 subtitle, status badge top-right with soft bg/text
+- [x] **Footer alignment** — `flex: 1` on meta pills row pushes footer to bottom; CSS Grid `align-items: stretch` ensures equal card heights per row
+- [x] **Footer content** — CalendarRegular + schedule date (confirmed/proposed/not scheduled) | Created date
+
+**Key Constants:**
+
+- `PRODUCT_STATUS_COLORS` — Maps each status to `{ bg, text, accent }` for card styling
+- `PRODUCT_STATUS_METADATA` — Maps each status to `{ color }` for pill filter dots
+- `PRODUCT_TYPE_OPTIONS` — `['All', 'Demo', 'Trial Deployment']`
+- `PRODUCT_SORT_OPTIONS` — 5 sort options (newest, oldest, highest/lowest value, product name A-Z)
+- `PRODUCT_ADVANCED_FILTER_CONFIG` — 6 `FilterConfig[]` entries for AdvancedFilterPanel
+
 ### Pending / Round 4
 
 - [ ] Round 4: Medium-priority enhancements (M1-M10)
@@ -1245,6 +1275,8 @@ The app supports Account Managers from an external partner tenant:
 | **PDF Export** | jsPDF + jspdf-autotable for client-side PDF generation |
 | **Hero Banners** | All 7 main pages have gradient hero banners with collapse toggle; Landing Page + Admin excluded |
 | **Hero Collapse** | Shared `useHeroCollapse` hook + `HeroCollapseToggle` component; per-page localStorage; 56px collapsed strip; 350ms transition |
+| **Product Request Cards** | Accent border by status, meta pill badges with icons, client name as title, grid footer alignment via flex: 1 |
+| **Product Requests Tab** | Full search/filter/sort parity with Service Requests tab — SearchBox, type filter, sort, advanced filters, grid/list toggle, pagination |
 
 ## Product Catalog
 
@@ -1362,12 +1394,13 @@ DWxSupportingDocuments/
 ## Recent Commit History
 
 ```
+2a476fd feat: Product Requests tab — search/filter/sort + card redesign (v2.12.1)
+bb498b7 style: Refine queue cards, filter UX, and service catalog layout
+57e68bb style: Unify Products hero to single DWx blue/teal gradient + remove stats
+29120a0 style: Replace emoji product icons with Fluent UI SVG line icons
+40ec266 style: Refine My Requests page UI + fix Advanced Filters daterange overlap
+81abd20 feat: Compact heroes + KB redesign + stepper refinements + service card polish (v2.12.0)
 c0ace5b feat: Hero banners on all pages + collapse/expand toggle (v2.12.0)
-af6f539 style: Move modal badge to top-right, center title+subtitle on icon
-7df0447 fix: Remove DialogBody/DialogContent wrappers causing half-width hero
-6c51796 fix: Product modal hero full-width + remove white border at top edge
-009e1fa style: Tighten product detail modal - reduce width, compact layout
-afb72ff feat: V1 hero Products + Services catalogs + HyperCards/HyperAgents rename + KB redesign
 e424f16 fix: Remove all legacy LP Booking references + fix Kanban card click (v2.11.1)
 9869c24 feat: Kanban Board + Quick-Create Deal + Email Tracking + PDF Export + Meeting Notes (v2.11.0)
 16a7997 feat: Deal Activity Timeline + Follow-Up Reminders + Win/Loss Analysis (v2.10.0)
@@ -1376,5 +1409,4 @@ b085667 feat: V1 hero banner Services page + client auto-populate + KB tab reord
 5e69c0e feat: Proposal Management System with AI generation + internal approval workflow (v2.9.0)
 b4fddfa feat: Add Landing Page content management + Knowledge Base with consumer UI (v2.8.0)
 0b671cf feat: V4 Magazine landing page + team profile modals + KB/LP content types (v2.7.0)
-b0b5b72 feat: Redesign email templates with LP Bookings style + add role infographics (v2.6.0)
 ```
