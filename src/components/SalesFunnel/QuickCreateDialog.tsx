@@ -175,41 +175,8 @@ const useStyles = makeStyles({
     color: '#1a5a8a',
     border: '1px solid #cce4f0',
   },
-  requestTypeToggle: {
-    display: 'flex',
-    gap: '0px',
-    borderRadius: '8px',
-    overflow: 'hidden',
-    border: '1px solid #d1d5db',
-  },
-  requestTypeButton: {
-    flex: 1,
-    padding: '8px 12px',
-    fontSize: '13px',
-    fontWeight: '500',
-    border: 'none',
-    cursor: 'pointer',
-    transition: 'all 0.15s ease',
-    backgroundColor: '#f9fafb',
-    color: '#6b7280',
-  },
-  requestTypeButtonActive: {
-    flex: 1,
-    padding: '8px 12px',
-    fontSize: '13px',
-    fontWeight: '600',
-    border: 'none',
-    cursor: 'pointer',
-    transition: 'all 0.15s ease',
-    backgroundColor: DW_COLORS.primary,
-    color: 'white',
-  },
-  divider: {
-    height: '1px',
-    backgroundColor: '#e5e7eb',
-    marginTop: '4px',
-    marginBottom: '4px',
-  },
+  // Note: requestTypeToggle uses inline styles + <div role="button"> to avoid
+  // Fluent UI DialogSurface CSS resetting native <button> elements
 });
 
 // ============================================================================
@@ -621,23 +588,62 @@ const QuickCreateDialog: React.FC<QuickCreateDialogProps> = ({
           </div>
         ) : (
           <div className={styles.body}>
-            {/* Request Type Toggle — hidden when pre-selected service */}
+            {/* Request Type Toggle — uses <div> not <button> to avoid Fluent UI DialogSurface button resets */}
             {!preSelectedService && (
-              <div className={styles.requestTypeToggle}>
-                <button
-                  className={requestMode === 'service' ? styles.requestTypeButtonActive : styles.requestTypeButton}
+              <div style={{
+                display: 'flex',
+                borderRadius: '8px',
+                overflow: 'hidden',
+                border: '1px solid #d1d5db',
+              }}>
+                <div
+                  role="button"
+                  tabIndex={0}
+                  style={{
+                    flex: 1,
+                    padding: '10px 12px',
+                    fontSize: '13px',
+                    fontWeight: requestMode === 'service' ? 600 : 500,
+                    cursor: 'pointer',
+                    backgroundColor: requestMode === 'service' ? DW_COLORS.primary : '#f9fafb',
+                    color: requestMode === 'service' ? 'white' : '#6b7280',
+                    transition: 'all 0.15s ease',
+                    textAlign: 'center' as const,
+                    lineHeight: '1.4',
+                    userSelect: 'none' as const,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
                   onClick={() => handleModeChange('service')}
-                  type="button"
+                  onKeyDown={(e) => e.key === 'Enter' && handleModeChange('service')}
                 >
                   Service Request
-                </button>
-                <button
-                  className={requestMode === 'product' ? styles.requestTypeButtonActive : styles.requestTypeButton}
+                </div>
+                <div
+                  role="button"
+                  tabIndex={0}
+                  style={{
+                    flex: 1,
+                    padding: '10px 12px',
+                    fontSize: '13px',
+                    fontWeight: requestMode === 'product' ? 600 : 500,
+                    cursor: 'pointer',
+                    backgroundColor: requestMode === 'product' ? DW_COLORS.primary : '#f9fafb',
+                    color: requestMode === 'product' ? 'white' : '#6b7280',
+                    transition: 'all 0.15s ease',
+                    textAlign: 'center' as const,
+                    lineHeight: '1.4',
+                    userSelect: 'none' as const,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
                   onClick={() => handleModeChange('product')}
-                  type="button"
+                  onKeyDown={(e) => e.key === 'Enter' && handleModeChange('product')}
                 >
                   Product Request
-                </button>
+                </div>
               </div>
             )}
 

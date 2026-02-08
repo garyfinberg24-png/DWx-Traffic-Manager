@@ -28,6 +28,7 @@ import {
   ChevronDownRegular,
   ChevronRightRegular,
   Lightbulb24Regular,
+  DocumentTable24Regular,
 } from '@fluentui/react-icons';
 import { useAuth } from '../../contexts/AuthContext';
 import { dashboardService } from '../../services/DashboardService';
@@ -53,6 +54,7 @@ import { ResourcesTab } from './ResourcesTab';
 import { WinLossTab } from './WinLossTab';
 import { SLADashboardTab } from './SLADashboardTab';
 import { InsightsTab } from './InsightsTab';
+import { ReportsTab } from './ReportsTab';
 import { useToast } from '../../contexts/ToastContext';
 import { DW_COLORS } from '../../utils/buttonStyles';
 import { useHeroCollapse } from '../../hooks/useHeroCollapse';
@@ -69,7 +71,7 @@ import { ProductRequest } from '../../types/ProductRequest';
 // Types
 // ============================================================================
 
-type DashboardTab = 'overview' | 'pipeline' | 'approvals' | 'productQueue' | 'calendar' | 'timeline' | 'performance' | 'clients' | 'commercial' | 'gamification' | 'resources' | 'winloss' | 'sla' | 'insights';
+type DashboardTab = 'overview' | 'pipeline' | 'approvals' | 'productQueue' | 'calendar' | 'timeline' | 'performance' | 'clients' | 'commercial' | 'gamification' | 'resources' | 'winloss' | 'sla' | 'insights' | 'reports';
 
 interface NavItem {
   value: DashboardTab;
@@ -115,6 +117,7 @@ const NAV_GROUPS: NavGroup[] = [
       { value: 'clients', label: 'Client Activity', icon: Building24Regular },
       { value: 'winloss', label: 'Win/Loss', icon: ChartMultipleRegular },
       { value: 'insights', label: 'Insights', icon: Lightbulb24Regular },
+      { value: 'reports', label: 'Reports', icon: DocumentTable24Regular },
     ],
   },
   {
@@ -868,6 +871,11 @@ export const ManagerDashboard: React.FC = () => {
               {/* Insights Tab */}
               {selectedTab === 'insights' && (
                 <InsightsTab serviceRequests={serviceRequests} />
+              )}
+
+              {/* Reports Tab */}
+              {selectedTab === 'reports' && (
+                <ReportsTab requests={serviceRequests} />
               )}
             </div>
           )}

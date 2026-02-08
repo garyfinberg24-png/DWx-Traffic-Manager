@@ -243,7 +243,7 @@ class ServiceCatalogService {
   /**
    * Map SharePoint list item to DWService
    */
-  private mapToService(item: Record<string, unknown>): DWService {
+  private mapToService = (item: Record<string, unknown>): DWService => {
     let requiredRoles: SpecialistRole[] = [];
     try {
       const rolesField = this.getFieldValue(item, 'RequiredRoles', '');

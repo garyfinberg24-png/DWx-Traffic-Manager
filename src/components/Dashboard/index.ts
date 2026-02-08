@@ -15,3 +15,4 @@ export { ResourcesTab } from './ResourcesTab';
 export { WinLossTab } from './WinLossTab';
 export { SLADashboardTab } from './SLADashboardTab';
 export { InsightsTab } from './InsightsTab';
+export { ReportsTab } from './ReportsTab';
