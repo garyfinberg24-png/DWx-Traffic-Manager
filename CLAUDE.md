@@ -6,7 +6,7 @@
 
 **Project Origin**: Cloned from LP Booking App (v1.7.5) - a production Teams app for License Pulse demo scheduling.
 
-**Current Version**: v2.12.1 (February 2026) - Product Requests Tab Search/Filter/Sort + Card Redesign
+**Current Version**: v2.13.0 (February 2026) - Service Checklists (Admin template editor + per-deal tracking) + Client seed Energy fix
 
 > **IMPORTANT**: We are ONLY working on the DWx Traffic Manager project. We DO NOT make any changes to the LP Booking App. The LP Booking App is a separate production application and must not be modified.
 
@@ -176,6 +176,8 @@ const STAGE_TRANSITIONS = {
 | WinLossReason | Text | Outcome explanation |
 | NextSteps | Multi-line | Follow-up actions |
 | Comments | Multi-line | Internal notes |
+| EmailThread_JSON | Note | Email tracking log per deal (v2.11.0) |
+| DealChecklist_JSON | Note | Per-deal checklist with completion tracking (v2.13.0) |
 
 ### DWxServices (Service Catalog)
 
@@ -199,8 +201,9 @@ const STAGE_TRANSITIONS = {
 | **KeyBenefits_JSON** | Note | JSON array of benefits |
 | **IdealFor_JSON** | Note | JSON array of ideal client profiles |
 | **RelatedCategories_JSON** | Note | JSON array of related ServiceCategory values |
+| **Checklist_JSON** | Note | JSON array of ServiceChecklistItem (per-service template checklist) |
 
-> **Note**: The 5 JSON columns (WhatsIncluded_JSON through RelatedCategories_JSON) store rich content for service detail pages. If empty, the app falls back to DEFAULT_SERVICES data in `src/types/ServiceRequest.ts`.
+> **Note**: The 5 content JSON columns (WhatsIncluded_JSON through RelatedCategories_JSON) store rich content for service detail pages. If empty, the app falls back to DEFAULT_SERVICES data in `src/types/ServiceRequest.ts`. The `Checklist_JSON` column stores per-service checklist templates managed via Admin > Checklist, with defaults from `DEFAULT_SERVICE_CHECKLISTS` in `Checklist.ts`.
 
 ### DWxClients (Client Master Data)
 
@@ -209,7 +212,7 @@ const STAGE_TRANSITIONS = {
 | Title | Text | Company name |
 | PrimaryContactName/Email | Text | Main contact |
 | DecisionMakerName/Email | Text | Contract signer |
-| Industry | Choice | Industry vertical |
+| Industry | Choice | Industry vertical (Technology, Finance, Healthcare, Retail, Manufacturing, Energy, Government, Education, Other) |
 | CompanySize | Choice | Size category |
 | IsPremium | Yes/No | Priority status |
 | AccountManagerEmail | Text | Assigned AM |
@@ -387,6 +390,7 @@ DWx-Traffic-Manager/
 │   │   │   ├── ProductRequestDetails.tsx # Full product request details modal (NEW v2.2.0)
 │   │   │   ├── StageProgressBar.tsx      # Visual funnel stage progress
 │   │   │   ├── DealActivityTimeline.tsx  # Chronological audit log feed (v2.10.0)
+│   │   │   ├── DealChecklist.tsx        # Per-deal checklist with completion tracking (v2.13.0)
 │   │   │   ├── EmailTimeline.tsx        # Email communication timeline (v2.11.0)
 │   │   │   └── index.ts
 │   │   ├── SalesFunnel/
@@ -433,7 +437,7 @@ DWx-Traffic-Manager/
 │   │   │   ├── EntraUserPicker.tsx       # Entra ID user search
 │   │   │   ├── ManagerSettings.tsx       # Manager access control
 │   │   │   ├── GuestInvitations.tsx      # Guest user management
-│   │   │   ├── ChecklistManagement.tsx   # Checklist management
+│   │   │   ├── ChecklistManagement.tsx   # Per-service checklist template editor (v2.13.0)
 │   │   │   ├── DocumentManagement.tsx    # Document management
 │   │   │   ├── LandingPageManagement.tsx # Landing page content CRUD (v2.8.0)
 │   │   │   ├── KnowledgeBaseManagement.tsx # KB/FAQ/Glossary CRUD (v2.8.0)
@@ -553,7 +557,7 @@ DWx-Traffic-Manager/
 │   │   ├── Booking.ts                    # Legacy booking types
 │   │   ├── User.ts                       # User types + FALLBACK_MANAGER_EMAILS
 │   │   ├── ReferenceData.ts              # Team members, clients, AM types
-│   │   ├── Checklist.ts                  # Checklist types
+│   │   ├── Checklist.ts                  # Service checklist types + DEFAULT_SERVICE_CHECKLISTS (v2.13.0)
 │   │   ├── Notification.ts               # Notification types
 │   │   ├── Template.ts                   # Template types
 │   │   ├── ApiResponses.ts               # API response types
@@ -640,7 +644,7 @@ The admin panel uses a grouped sidebar navigation layout (redesigned v2.9.1) wit
 | Specialists | SpecialistManagement | Specialist CRUD with workload tracking |
 | Manager Access | ManagerSettings | Manager access control |
 | Guest Invitations | GuestInvitations | Guest user management |
-| Checklist | ChecklistManagement | Checklist management |
+| Checklist | ChecklistManagement | Per-service checklist template editor (v2.13.0) |
 | Documents | DocumentManagement | Document management |
 | Landing Page | LandingPageManagement | Landing page content CRUD (slogans, team, testimonial, etc.) |
 | Knowledge Base | KnowledgeBaseManagement | KB Articles/FAQ/Glossary CRUD (Articles tab default) |
@@ -1031,6 +1035,38 @@ Full search, filter, sort, and card redesign for the Product Requests tab in My 
 - `PRODUCT_SORT_OPTIONS` — 5 sort options (newest, oldest, highest/lowest value, product name A-Z)
 - `PRODUCT_ADVANCED_FILTER_CONFIG` — 6 `FilterConfig[]` entries for AdvancedFilterPanel
 
+### Phase 14: Service Checklists + Client Seed Fix (COMPLETE - v2.13.0)
+
+Per-service checklist templates (Admin) with per-deal completion tracking. Replaces legacy LP Booking deployment checklist.
+
+#### Checklist Architecture - COMPLETE
+
+- [x] **Checklist.ts rewrite** — `ServiceChecklistItem` (template), `DealChecklistItem` (per-deal with completion), `ChecklistSummary` (computed), serialization helpers, `createDealChecklist()` copy function
+- [x] **DEFAULT_SERVICE_CHECKLISTS** — 12 service categories, 5-8 items each (Power Platform, SPFx, Migration, Assessment, Copilot, Viva, Training, Proposal, Tender, Ad-Hoc, SLA, Strategic Advisory)
+- [x] **Storage**: `Checklist_JSON` (Note) on DWxServices for templates, `DealChecklist_JSON` (Note) on DWxServiceRequests for per-deal tracking
+
+#### Admin UI - COMPLETE
+
+- [x] **ChecklistManagement.tsx rewrite** — Service category dropdown + checklist item editor (add/edit/delete/reorder) + save to SP via ServiceCatalogService + reset to defaults
+- [x] **ServiceCatalogService** — `getServiceChecklist()` and `updateServiceChecklist()` methods for `Checklist_JSON` read/write
+
+#### Deal-Level Tracking - COMPLETE
+
+- [x] **DealChecklist.tsx** — Checkboxes + ProgressBar + completion % + required item asterisks + read-only mode for terminal deals
+- [x] **RequestDetails.tsx** — "Checklist" tab (7th tab) with CheckboxChecked24Regular icon, `handleChecklistUpdate` handler
+- [x] **ServiceRequestService** — Auto-copy service checklist on deal creation, `updateDealChecklist()` method with audit logging
+- [x] **SP Provisioning** — `Checklist_JSON` + `DealChecklist_JSON` columns added to list definitions
+
+#### Client Seed Fix - COMPLETE
+
+- [x] **'Energy' industry** — Added to DWxClients Choice values + `ClientIndustry` type in both `ReferenceData.ts` and `ServiceRequest.ts` + INDUSTRIES array in ServiceRequestForm.tsx
+
+**SharePoint Schema Changes (2 columns, no new lists):**
+| List | Column | Type |
+|------|--------|------|
+| DWxServices | Checklist_JSON | Note |
+| DWxServiceRequests | DealChecklist_JSON | Note |
+
 ### Pending / Round 4
 
 - [ ] Round 4: Medium-priority enhancements (M1-M10)
@@ -1232,6 +1268,9 @@ The app supports Account Managers from an external partner tenant:
 | `src/types/MeetingNotes.ts` | MeetingNotes interface, sentiment, defaults (v2.11.0) |
 | `src/hooks/useHeroCollapse.ts` | Hero collapse/expand hook with localStorage persistence (v2.12.0) |
 | `src/components/Common/HeroCollapseToggle.tsx` | Shared chevron toggle button for hero banners (v2.12.0) |
+| `src/types/Checklist.ts` | Service checklist types + DEFAULT_SERVICE_CHECKLISTS for all 12 categories (v2.13.0) |
+| `src/components/Admin/ChecklistManagement.tsx` | Per-service checklist template editor (v2.13.0) |
+| `src/components/MyRequests/DealChecklist.tsx` | Per-deal checklist with completion tracking (v2.13.0) |
 | `src/services/SessionPrepService.ts` | Session prep CRUD + checklist management + completion tracking |
 | `src/services/AIPreparationService.ts` | Azure OpenAI integration for AI content generation |
 | `src/types/SessionPreparation.ts` | Session prep types (status, checklist, talking points, resources, agenda) |
@@ -1277,6 +1316,7 @@ The app supports Account Managers from an external partner tenant:
 | **Hero Collapse** | Shared `useHeroCollapse` hook + `HeroCollapseToggle` component; per-page localStorage; 56px collapsed strip; 350ms transition |
 | **Product Request Cards** | Accent border by status, meta pill badges with icons, client name as title, grid footer alignment via flex: 1 |
 | **Product Requests Tab** | Full search/filter/sort parity with Service Requests tab — SearchBox, type filter, sort, advanced filters, grid/list toggle, pagination |
+| **Service Checklists** | Per-service templates in Admin (Checklist_JSON on DWxServices) + per-deal copies (DealChecklist_JSON on DWxServiceRequests). Auto-copy on deal creation. 12 default checklists. |
 
 ## Product Catalog
 
@@ -1394,11 +1434,11 @@ DWxSupportingDocuments/
 ## Recent Commit History
 
 ```
+41d78bd feat: Service Checklists + Client seed Energy fix (v2.13.0)
+e7c81cf [docs] Update CLAUDE.md to v2.12.1 with Product Requests tab enhancements
 2a476fd feat: Product Requests tab — search/filter/sort + card redesign (v2.12.1)
-bb498b7 style: Refine queue cards, filter UX, and service catalog layout
 57e68bb style: Unify Products hero to single DWx blue/teal gradient + remove stats
 29120a0 style: Replace emoji product icons with Fluent UI SVG line icons
-40ec266 style: Refine My Requests page UI + fix Advanced Filters daterange overlap
 81abd20 feat: Compact heroes + KB redesign + stepper refinements + service card polish (v2.12.0)
 c0ace5b feat: Hero banners on all pages + collapse/expand toggle (v2.12.0)
 e424f16 fix: Remove all legacy LP Booking references + fix Kanban card click (v2.11.1)

@@ -1,113 +1,120 @@
-# SharePoint List Columns for Deployment Checklist
+# SharePoint Columns for Service Checklists (v2.13.0)
 
-Add the following columns to your `DWxServiceRequests` SharePoint list to support the Deployment Readiness Checklist feature.
+Service Checklists replaced the legacy LP Booking "Deployment Checklist" in v2.13.0. Checklists are now per-service templates managed in Admin, with per-deal copies for completion tracking.
 
-## Required New Columns
+## Architecture
 
-### 1. ChecklistData
-- **Type:** Multiple lines of text
-- **Description:** Stores the checklist items as JSON
-- **Required:** No
-- **Default:** Empty
+| List | Column | Type | Purpose |
+|------|--------|------|---------|
+| `DWxServices` | `Checklist_JSON` | Note (Multi-line text) | Per-service checklist template |
+| `DWxServiceRequests` | `DealChecklist_JSON` | Note (Multi-line text) | Per-deal checklist with completion tracking |
 
-### 2. ChecklistComplete
-- **Type:** Yes/No
-- **Description:** Indicates if all checklist items are completed
-- **Required:** No
-- **Default:** No
+Both columns are provisioned automatically via the SP Provisioning tool in Admin > System > SP Provisioning.
 
-### 3. ChecklistDueDate
-- **Type:** Date and Time
-- **Description:** The due date for the checklist (automatically calculated as 3 days before deployment)
-- **Required:** No
-- **Default:** Empty
-
----
-
-## Steps to Add Columns in SharePoint
-
-1. Go to your SharePoint site: `https://hallofd.sharepoint.com/sites/DWxTrafficManager`
-2. Navigate to the `DWxServiceRequests` list
-3. Click the **+** icon to add a column
-
-### Adding ChecklistData Column:
-1. Click **+ Add column** → **Multiple lines of text**
-2. Name: `ChecklistData`
-3. Type: Plain text
-4. Click **Save**
-
-### Adding ChecklistComplete Column:
-1. Click **+ Add column** → **Yes/No**
-2. Name: `ChecklistComplete`
-3. Default value: No
-4. Click **Save**
-
-### Adding ChecklistDueDate Column:
-1. Click **+ Add column** → **Date and Time**
-2. Name: `ChecklistDueDate`
-3. Include time: No (optional)
-4. Click **Save**
-
----
-
-## Checklist JSON Structure
-
-The `ChecklistData` column stores a JSON array with the following structure:
+## Template Checklist JSON Structure (DWxServices.Checklist_JSON)
 
 ```json
 [
   {
-    "id": "bom",
-    "label": "Bill of Materials Available",
-    "description": "The Bill of Materials (BOM) document has been prepared and is available for the deployment team.",
-    "isCompleted": true,
-    "completedBy": "Gary Finberg",
-    "completedAt": "2026-01-15T10:30:00.000Z"
+    "id": "default_1",
+    "label": "Tenant Access Confirmed",
+    "description": "Client has granted admin/contributor access to the target M365 tenant.",
+    "isRequired": true,
+    "sortOrder": 1
   },
   {
-    "id": "licenses",
-    "label": "Licenses Provisioned",
-    "description": "All required licenses have been provisioned for the client environment.",
-    "isCompleted": false
+    "id": "default_2",
+    "label": "Business Requirements Documented",
+    "description": "Functional requirements have been gathered and signed off by the client.",
+    "isRequired": true,
+    "sortOrder": 2
   }
-  // ... more items
 ]
 ```
 
----
+### TypeScript Interface
 
-## Default Checklist Items
+```typescript
+interface ServiceChecklistItem {
+  id: string;
+  label: string;
+  description: string;
+  isRequired: boolean;
+  sortOrder: number;
+}
+```
 
-When a Deployment booking is confirmed, the following checklist items are created:
+## Deal Checklist JSON Structure (DWxServiceRequests.DealChecklist_JSON)
 
-| ID | Label | Description |
-|----|-------|-------------|
-| `bom` | Bill of Materials Available | The Bill of Materials (BOM) document has been prepared and is available for the deployment team. |
-| `licenses` | Licenses Provisioned | All required licenses have been provisioned for the client environment. |
-| `service_account` | Service Account Provisioned | The service account has been created and configured with appropriate permissions. |
-| `environment` | Environment Created | The deployment environment (dev/test/prod) has been set up and configured. |
-| `powerbi_workspace` | Power BI Workspace Created | The Power BI workspace has been created and access has been granted to relevant users. |
+```json
+[
+  {
+    "id": "default_1",
+    "label": "Tenant Access Confirmed",
+    "description": "Client has granted admin/contributor access to the target M365 tenant.",
+    "isRequired": true,
+    "sortOrder": 1,
+    "isCompleted": true,
+    "completedBy": "Gary Finberg",
+    "completedAt": "2026-02-08T10:30:00.000Z"
+  },
+  {
+    "id": "default_2",
+    "label": "Business Requirements Documented",
+    "description": "Functional requirements have been gathered and signed off by the client.",
+    "isRequired": true,
+    "sortOrder": 2,
+    "isCompleted": false
+  }
+]
+```
 
----
+### TypeScript Interface
 
-## Business Rules
+```typescript
+interface DealChecklistItem extends ServiceChecklistItem {
+  isCompleted: boolean;
+  completedBy?: string;
+  completedAt?: string;
+}
+```
 
-1. **Checklist Due Date:** Automatically calculated as **3 days before** the confirmed deployment date
-2. **Overdue Status:** If the current date is past the due date and checklist is incomplete, booking may need to be rescheduled
-3. **Rescheduling:** If checklist is not complete 3 days before deployment, the booking status should be changed to "Rescheduling Required"
+## Default Checklists (12 Service Categories)
 
----
+Each service category has 5-8 default checklist items defined in `src/types/Checklist.ts` (`DEFAULT_SERVICE_CHECKLISTS`). These are used as fallback when a service has no custom checklist saved.
 
-## Power Automate Integration (Optional)
+| Category | Items | Key Items |
+|----------|-------|-----------|
+| Power Platform | 6 | Tenant access, requirements, data sources, environment, security, licensing |
+| SPFx Development | 6 | SP access, app catalog, dev environment, design specs, test plan, API perms |
+| SharePoint Migration | 7 | Source audit, content inventory, user mapping, migration tool, rollback, comms, target site |
+| M365 Assessment | 5 | Tenant admin access, scope, stakeholder interviews, documentation, secure score |
+| Copilot Agents | 6 | Copilot licences, plugin permissions, compliance, test users, training, knowledge sources |
+| MS Viva | 5 | Viva licences, dashboard design, home site, champions, success metrics |
+| Training | 5 | Audience, topics, training environment, logistics, materials |
+| Proposal | 5 | Client requirements, solution approach, pricing, template, review deadline |
+| Tender | 7 | Tender document, compliance, submission deadline, response team, pricing, references, legal |
+| Ad-Hoc Support | 4 | Issue description, access, priority, hours budget |
+| SLA | 5 | SLA document, service hours, monitoring, escalation contacts, quarterly review |
+| Strategic Advisory | 6 | Executive sponsor, current state, objectives, roadmap timeframe, workshop, budget |
 
-You can add a scheduled Power Automate flow to check for overdue checklists:
+## Workflow
 
-1. **Trigger:** Recurrence (daily at 9 AM)
-2. **Action:** Get items from SharePoint list where:
-   - `BookingType eq 'Deployment'`
-   - `ChecklistComplete eq false`
-   - `Status eq 'Confirmed'`
-   - `ChecklistDueDate le [today]`
-3. **For each** overdue item:
-   - Update item: Status = "Rescheduling Required"
-   - Send email notification to Account Manager
+1. **Admin manages templates**: Admin > Checklist tab > Select service category > Add/edit/reorder items > Save
+2. **Auto-copy on deal creation**: When a deal is created via `ServiceRequestService.createRequest()`, the service's checklist template is copied to the deal as `DealChecklist_JSON`
+3. **Completion tracking**: Specialist/manager checks off items in the deal's Checklist tab (RequestDetails.tsx)
+4. **Progress bar**: Shows completion percentage (completed / total items)
+5. **Required items**: Marked with asterisk; `ChecklistSummary.isComplete` is true only when all required items are done
+6. **Read-only for terminal deals**: Won/Lost deals show checklist in read-only mode
+
+## Related Files
+
+| File | Purpose |
+|------|---------|
+| `src/types/Checklist.ts` | Type definitions + DEFAULT_SERVICE_CHECKLISTS + serialization helpers |
+| `src/components/Admin/ChecklistManagement.tsx` | Admin template editor UI |
+| `src/components/MyRequests/DealChecklist.tsx` | Deal-level checklist display |
+| `src/components/MyRequests/RequestDetails.tsx` | Checklist tab integration |
+| `src/services/ServiceCatalogService.ts` | `getServiceChecklist()` / `updateServiceChecklist()` |
+| `src/services/ServiceRequestService.ts` | `createDealChecklist()` on create + `updateDealChecklist()` |
+| `src/services/DWxSharePointProvisioningService.ts` | Column definitions for both lists |
