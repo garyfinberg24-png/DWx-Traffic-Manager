@@ -6,7 +6,7 @@
 
 **Project Origin**: Cloned from LP Booking App (v1.7.5) - a production Teams app for License Pulse demo scheduling.
 
-**Current Version**: v2.13.0 (February 2026) - Service Checklists (Admin template editor + per-deal tracking) + Client seed Energy fix
+**Current Version**: v2.14.0 (February 2026) - Post Mortem & Issues Tracking (AI-powered analysis + Insights dashboard + AM accountability)
 
 > **IMPORTANT**: We are ONLY working on the DWx Traffic Manager project. We DO NOT make any changes to the LP Booking App. The LP Booking App is a separate production application and must not be modified.
 
@@ -41,6 +41,7 @@
 | **Landing Page Content List** | `DWxLandingPageContent` |
 | **Knowledge Base List** | `DWxKnowledgeBase` |
 | **Proposals List** | `DWxProposals` |
+| **Post Mortems List** | `DWxPostMortems` |
 | **Document Library** | `DWxSupportingDocuments` |
 | **Pre-Sales Calendar Email** | `lpbookings@firsttech.digital` |
 
@@ -68,7 +69,7 @@
 - **Data Storage**: SharePoint Online via Microsoft Graph API
 - **Calendar Operations**: Microsoft Graph API
 - **Email**: Microsoft Graph API
-- **AI**: Azure OpenAI (GPT-4o) for session preparation + proposal content generation
+- **AI**: Azure OpenAI (GPT-4o) for session preparation + proposal content generation + post-mortem analysis
 
 ### Infrastructure
 - **IaC**: Bicep templates for Azure resource provisioning
@@ -110,8 +111,8 @@ Lead → Qualified → Discovery → Proposal → Negotiation → Won
 | **Discovery** | Slot confirmed | Calendar event + Teams link | Meeting completed |
 | **Proposal** | Discovery notes captured | Prepare proposal | Proposal sent |
 | **Negotiation** | Client reviewing | Track engagement | Decision made |
-| **Won** | Contract signed | Update client lifetime value | Terminal |
-| **Lost** | Client declined | Capture reason, schedule follow-up | Terminal (can reopen) |
+| **Won** | Contract signed | Update client lifetime value, auto-create post-mortem | Terminal |
+| **Lost** | Client declined | Capture reason, schedule follow-up, auto-create post-mortem | Terminal (can reopen) |
 
 ### Stage Transition Rules
 
@@ -340,13 +341,40 @@ const STAGE_TRANSITIONS = {
 | ApprovedByName | Text | Approver name |
 | ApprovedDate | DateTime | When internally approved |
 
+### DWxPostMortems (v2.14.0)
+
+| Column | Type | Description |
+|--------|------|-------------|
+| Title | Text | Auto: "Post Mortem - {Client} - {Service}" |
+| ServiceRequestId | Number | Link to parent DWxServiceRequests |
+| ClientName | Text | Client name |
+| ServiceName | Text | Service name |
+| FinalStage | Choice | Won, Lost |
+| WinLossReason | Text | From ServiceRequest |
+| DealValue | Currency | Deal value (ZAR) |
+| AccountManagerName/Email | Text | AM details |
+| SpecialistName/Email | Text | Specialist details |
+| Status | Choice | Draft, Under Review, Review Complete, Actions In Progress, Closed |
+| Issues_JSON | Note | `PostMortemIssue[]` — categorized issues with severity + ownership |
+| Lessons_JSON | Note | `LessonLearned[]` — takeaways with type + applicable services |
+| ActionItems_JSON | Note | `ActionItem[]` — assignable improvements with status tracking |
+| TimelineAnalysis_JSON | Note | AI: stage-by-stage SLA efficiency analysis |
+| AccountabilityAssessment_JSON | Note | AI: AM/Specialist/Client/System attribution scores |
+| RootCauseAnalysis_JSON | Note | AI: primary cause + contributing factors + preventability |
+| SpecialistNotes | Note | Specialist reflections |
+| ManagerNotes | Note | Manager review comments |
+| ReviewedDate | DateTime | When manager reviewed |
+| ReviewedBy | Text | Reviewer name |
+| ClosedDate | DateTime | When all actions completed |
+| AIGeneratedAt | DateTime | When AI analysis ran |
+
 ### DWxAuditLog
 
 | Column | Type | Description |
 |--------|------|-------------|
 | Title | Text | Action summary |
 | Action | Choice | CREATE, UPDATE, DELETE, VIEW, APPROVE, REJECT, RESCHEDULE, LOGIN, LOGOUT |
-| EntityType | Text | Booking, TeamMember, Client, Checklist, User, AccountManager, ServiceRequest, Service, Specialist, ProductRequest, SessionPrep, LandingPageContent, KnowledgeBase, Proposal |
+| EntityType | Text | Booking, TeamMember, Client, Checklist, User, AccountManager, ServiceRequest, Service, Specialist, ProductRequest, SessionPrep, LandingPageContent, KnowledgeBase, Proposal, PostMortem |
 | EntityId | Text | ID of affected entity |
 | EntityName | Text | Human-readable entity name |
 | PerformedBy | Text | User display name |
@@ -420,6 +448,7 @@ DWx-Traffic-Manager/
 │   │   │   ├── ResourcesTab.tsx          # Resource allocation
 │   │   │   ├── GamificationTab.tsx       # Gamification dashboard
 │   │   │   ├── WinLossTab.tsx            # Win/loss analysis dashboard (v2.10.0)
+│   │   │   ├── InsightsTab.tsx           # Cross-deal post-mortem analytics (v2.14.0)
 │   │   │   └── index.ts
 │   │   ├── Admin/
 │   │   │   ├── AdminPage.tsx             # Admin with grouped sidebar navigation (12 tabs)
@@ -466,6 +495,14 @@ DWx-Traffic-Manager/
 │   │   │   ├── PrepChecklist.tsx         # Pre-meeting checklist with completion tracking
 │   │   │   ├── MeetingNotesEditor.tsx   # Post-discovery meeting notes capture (v2.11.0)
 │   │   │   └── index.ts
+│   │   ├── PostMortem/
+│   │   │   ├── PostMortemTab.tsx         # Per-deal post-mortem view (8th tab in RequestDetails) (v2.14.0)
+│   │   │   ├── IssueEditor.tsx           # Issue management (category/severity/owner) (v2.14.0)
+│   │   │   ├── LessonEditor.tsx          # Lessons learned editor (v2.14.0)
+│   │   │   ├── ActionItemsSection.tsx    # Action items with status workflow (v2.14.0)
+│   │   │   ├── TimelineReview.tsx        # SLA timeline + root cause display (v2.14.0)
+│   │   │   ├── AccountabilityCard.tsx    # AI accountability scores (v2.14.0)
+│   │   │   └── index.ts
 │   │   ├── Proposal/
 │   │   │   ├── ProposalBuilder.tsx       # Main proposal dialog (11 tabs + AI generation) (v2.9.0)
 │   │   │   ├── ProposalTracker.tsx       # Status card for RequestDetails (v2.9.0)
@@ -503,18 +540,19 @@ DWx-Traffic-Manager/
 │   │   ├── PipelineService.ts            # Dashboard metrics + analytics
 │   │   ├── CommercialService.ts          # Commercial metrics
 │   │   ├── GamificationService.ts        # Gamification logic
-│   │   ├── DWxNotificationService.ts     # DW-branded notifications (27 methods)
+│   │   ├── PostMortemService.ts           # Post-mortem CRUD + AI orchestration + analytics (v2.14.0)
+│   │   ├── DWxNotificationService.ts     # DW-branded notifications (31 methods)
 │   │   ├── FollowUpService.ts            # Stale deal detection + follow-up reminders (v2.10.0)
 │   │   ├── WinLossAnalysisService.ts     # Win/loss analysis computation (v2.10.0)
 │   │   ├── EmailTrackingService.ts       # Email thread tracking per deal (v2.11.0)
 │   │   ├── SessionPrepService.ts         # Session preparation CRUD + checklist management
-│   │   ├── AIPreparationService.ts       # Azure OpenAI integration for AI content generation
+│   │   ├── AIPreparationService.ts       # Azure OpenAI integration for AI content generation (session prep + proposals + post-mortems)
 │   │   ├── ProposalService.ts            # Proposal CRUD + status workflow + section persistence (v2.9.0)
 │   │   ├── LandingPageContentService.ts  # Landing page content CRUD (v2.8.0)
 │   │   ├── KnowledgeBaseService.ts       # Knowledge base CRUD (v2.8.0)
 │   │   ├── AuthService.ts                # MSAL authentication + Teams SSO
 │   │   ├── GraphService.ts               # Microsoft Graph API
-│   │   ├── AuditService.ts               # Change tracking (13 entity types)
+│   │   ├── AuditService.ts               # Change tracking (14 entity types)
 │   │   ├── ProductRequestService.ts      # Product request CRUD + confirmProductDemo + specialist assignment
 │   │   ├── ManagerService.ts             # Manager access CRUD
 │   │   ├── AccountManagerService.ts      # AM CRUD operations
@@ -525,7 +563,7 @@ DWx-Traffic-Manager/
 │   │   ├── GuestInvitationService.ts     # Guest user management
 │   │   ├── DWxSharePointProvisioningService.ts # DWx list provisioning (Graph API)
 │   │   ├── SharePointService.ts          # SharePoint REST API
-│   │   ├── EmailTemplates.ts             # Email template strings (31 templates)
+│   │   ├── EmailTemplates.ts             # Email template strings (35 templates)
 │   │   ├── PowerAutomateService.ts       # Power Automate with retry/circuit breaker
 │   │   ├── MockAuthService.ts            # Mock auth for E2E testing
 │   │   ├── MockGraphService.ts           # Mock Graph for E2E testing
@@ -546,6 +584,7 @@ DWx-Traffic-Manager/
 │   │   ├── Proposal.ts                   # Proposal types, 11 section interfaces, defaults, templates (v2.9.0)
 │   │   ├── FollowUp.ts                   # Stale deal detection types (v2.10.0)
 │   │   ├── WinLossAnalysis.ts            # Win/loss analysis types (v2.10.0)
+│   │   ├── PostMortem.ts                # Post-mortem types, issue taxonomy, AI analysis, analytics (v2.14.0)
 │   │   ├── EmailTracking.ts             # Email tracking types (v2.11.0)
 │   │   ├── MeetingNotes.ts              # Meeting notes types (v2.11.0)
 │   │   ├── Product.ts                    # Product catalog types (52 products: 16 Apps, 20 HyperParts, 6 Cards, 10 Agents)
@@ -674,6 +713,7 @@ VITE_DOCUMENT_LIBRARY=DWxSupportingDocuments
 VITE_LANDING_PAGE_CONTENT_LIST=DWxLandingPageContent
 VITE_KNOWLEDGE_BASE_LIST=DWxKnowledgeBase
 VITE_PROPOSALS_LIST=DWxProposals
+VITE_POST_MORTEMS_LIST=DWxPostMortems
 
 # Calendar
 VITE_PRESALES_CALENDAR_EMAIL=lpbookings@firsttech.digital
@@ -948,7 +988,7 @@ Five features improving daily manager workflow. Client-side only, 2 new SharePoi
 - [x] "Quick Create" button in SalesFunnelDashboard header (manager-only, next to Export)
 
 #### Feature 3: Email Thread Tracking - COMPLETE
-- [x] **EmailTracking.ts** — EmailType union (12 types: request_created, stage_changed, specialist_assigned, etc.), EmailRecord interface
+- [x] **EmailTracking.ts** — EmailType union (16 types: request_created, stage_changed, specialist_assigned, post_mortem_created, etc.), EmailRecord interface
 - [x] **EmailTrackingService.ts** — Singleton with logEmail() (silent failure, never throws) and getEmailsForRequest() (sorted by sentAt desc)
 - [x] **EmailTimeline.tsx** — Vertical timeline of sent emails with type badges, recipients, timestamps
 - [x] Modified DWxNotificationService.ts — sendEmail() accepts optional requestId + emailType, calls emailTrackingService.logEmail() after successful send. ~12 key notification methods updated
@@ -1067,6 +1107,53 @@ Per-service checklist templates (Admin) with per-deal completion tracking. Repla
 | DWxServices | Checklist_JSON | Note |
 | DWxServiceRequests | DealChecklist_JSON | Note |
 
+### Phase 15: Post Mortem & Issues Tracking (COMPLETE - v2.14.0)
+
+AI-powered post-mortem system for completed deals (Won and Lost) with issue tracking, AM accountability, lessons learned, and cross-deal pattern analytics.
+
+#### Types & Infrastructure - COMPLETE
+
+- [x] **PostMortem.ts** — Full type definitions: `PostMortemIssue` (7 categories, 4 severities, 5 owners), `LessonLearned` (5 types), `ActionItem` (5 statuses), `TimelineAnalysis`, `AccountabilityAssessment`, `RootCauseAnalysis`, `InsightsSummary`, status transitions, color maps, serialization helpers
+- [x] **DWxPostMortems list** — 22-column SharePoint list definition added to provisioning service
+- [x] **environmentConfig.ts** — Added `postMortemsListName`
+- [x] **AuditService.ts** — Added `'PostMortem'` to `AuditEntity` union (14 total)
+
+#### Service Layer - COMPLETE
+
+- [x] **PostMortemService.ts** — CRUD (`create`, `getById`, `getByRequestId`, `getAll`, `update`) + `updateActionItem()` with status transition validation + `saveAIAnalysis()` + analytics (`getInsightsSummary`, `getRecurringPatterns`, `getAMPerformancePatterns`)
+- [x] **AIPreparationService.ts** — 6 new methods: `generatePostMortemTimelineAnalysis` (temp 0.3), `generateAccountabilityAssessment` (temp 0.5), `generateRootCauseAnalysis` (temp 0.4), `suggestPostMortemIssues` (temp 0.6), `suggestPostMortemLessons` (temp 0.6), `suggestPostMortemActionItems` (temp 0.6)
+- [x] **Auto-creation** — `ServiceRequestService.handleStageTransitionActions()` auto-creates post-mortem on Won/Lost via dynamic import
+- [x] **Email templates** — 4 new templates: `postMortemCreated`, `postMortemReviewed`, `actionItemAssigned`, `amAccountabilityAlert`
+- [x] **Notifications** — 4 new methods in DWxNotificationService (31 total)
+- [x] **EmailTracking.ts** — 4 new EmailType values: `post_mortem_created`, `post_mortem_reviewed`, `action_item_assigned`, `am_accountability_alert` (16 total)
+
+#### Per-Deal UI - COMPLETE
+
+- [x] **PostMortemTab.tsx** — Main post-mortem view: status management, AI generation via `Promise.allSettled()`, issue/lesson/action CRUD, specialist/manager notes, status workflow buttons
+- [x] **IssueEditor.tsx** — Issue list grouped by category with add/edit/delete dialogs, severity/owner badges, color-coded
+- [x] **LessonEditor.tsx** — Lesson list grouped by type with add/edit/delete, AI-generated sparkle indicator
+- [x] **ActionItemsSection.tsx** — Action items grouped by status, status transition buttons, priority/assignee/due date
+- [x] **TimelineReview.tsx** — SLA stage timeline bars (green/yellow/red) with AI summary, bottleneck highlights, root cause analysis
+- [x] **AccountabilityCard.tsx** — 2x2 grid of score cards (AM/Specialist/Client/System) with expandable details
+- [x] **RequestDetails.tsx** — Post Mortem as conditional 8th tab (Won/Lost only) via `buildTabs()` + `useMemo`
+
+#### Dashboard Analytics - COMPLETE
+
+- [x] **InsightsTab.tsx** — Aggregate analytics: 4 hero cards, Recharts BarChart (issues by category) + PieChart (by owner), recurring patterns table, AM performance table, system improvement opportunities
+- [x] **ManagerDashboard.tsx** — "Insights" tab added to Analytics nav group with Lightbulb24Regular icon
+
+**Post-Mortem Status Workflow:**
+
+```
+Draft → Under Review → Review Complete → Actions In Progress → Closed
+                ↑              ↓
+                └── Draft (revision)
+```
+
+**Issue Taxonomy:** 7 categories (Communication, Process, Technical, Commercial, Client-Side, Resource, Documentation) × 4 severities (Low, Medium, High, Critical) × 5 owners (Account Manager, Specialist, Management, Client, System)
+
+**AI Analysis:** 6 methods run in parallel via `Promise.allSettled()` with graceful degradation. Context assembled from deal data, SLA breakdown, audit log, checklist completion, email history.
+
 ### Pending / Round 4
 
 - [ ] Round 4: Medium-priority enhancements (M1-M10)
@@ -1144,7 +1231,8 @@ type AuditEntity =
   | 'ProductRequest'
   | 'LandingPageContent'
   | 'KnowledgeBase'
-  | 'Proposal';
+  | 'Proposal'
+  | 'PostMortem';
 ```
 
 ### Product Request Status Workflow
@@ -1249,9 +1337,9 @@ The app supports Account Managers from an external partner tenant:
 | `src/types/Proposal.ts` | All proposal types, 11 section interfaces, status workflow, defaults, templates |
 | `src/services/ProposalService.ts` | Proposal CRUD + status transitions + section persistence |
 | `src/components/Proposal/ProposalBuilder.tsx` | Main proposal dialog (11 tabs + AI generation) |
-| `src/services/AuditService.ts` | Audit logging (13 entity types) |
-| `src/services/DWxNotificationService.ts` | 27 notification methods (service + product + session prep + proposal + follow-up events) |
-| `src/services/EmailTemplates.ts` | 31 DW-branded email templates |
+| `src/services/AuditService.ts` | Audit logging (14 entity types) |
+| `src/services/DWxNotificationService.ts` | 31 notification methods (service + product + session prep + proposal + follow-up + post-mortem events) |
+| `src/services/EmailTemplates.ts` | 35 DW-branded email templates |
 | `src/services/FollowUpService.ts` | Stale deal detection + follow-up reminders (v2.10.0) |
 | `src/services/WinLossAnalysisService.ts` | Win/loss analysis computation - 7 analysis methods (v2.10.0) |
 | `src/types/FollowUp.ts` | DealUrgency, StaleDealInfo, AttentionSummary types (v2.10.0) |
@@ -1264,15 +1352,19 @@ The app supports Account Managers from an external partner tenant:
 | `src/components/MyRequests/EmailTimeline.tsx` | Email communication timeline display (v2.11.0) |
 | `src/components/SessionPrep/MeetingNotesEditor.tsx` | Post-discovery meeting notes capture (v2.11.0) |
 | `src/utils/proposalPdfGenerator.ts` | DW-branded PDF proposal export via jsPDF (v2.11.0) |
-| `src/types/EmailTracking.ts` | EmailType (12 types), EmailRecord interface (v2.11.0) |
+| `src/types/EmailTracking.ts` | EmailType (16 types), EmailRecord interface (v2.11.0+v2.14.0) |
 | `src/types/MeetingNotes.ts` | MeetingNotes interface, sentiment, defaults (v2.11.0) |
 | `src/hooks/useHeroCollapse.ts` | Hero collapse/expand hook with localStorage persistence (v2.12.0) |
 | `src/components/Common/HeroCollapseToggle.tsx` | Shared chevron toggle button for hero banners (v2.12.0) |
 | `src/types/Checklist.ts` | Service checklist types + DEFAULT_SERVICE_CHECKLISTS for all 12 categories (v2.13.0) |
 | `src/components/Admin/ChecklistManagement.tsx` | Per-service checklist template editor (v2.13.0) |
 | `src/components/MyRequests/DealChecklist.tsx` | Per-deal checklist with completion tracking (v2.13.0) |
+| `src/types/PostMortem.ts` | Post-mortem types, issue taxonomy, AI analysis, status transitions, color maps (v2.14.0) |
+| `src/services/PostMortemService.ts` | Post-mortem CRUD + AI orchestration + analytics aggregation (v2.14.0) |
+| `src/components/PostMortem/PostMortemTab.tsx` | Per-deal post-mortem view (8th tab in RequestDetails) (v2.14.0) |
+| `src/components/Dashboard/InsightsTab.tsx` | Cross-deal post-mortem analytics dashboard (v2.14.0) |
 | `src/services/SessionPrepService.ts` | Session prep CRUD + checklist management + completion tracking |
-| `src/services/AIPreparationService.ts` | Azure OpenAI integration for AI content generation |
+| `src/services/AIPreparationService.ts` | Azure OpenAI integration for AI content generation (session prep + proposals + post-mortems) |
 | `src/types/SessionPreparation.ts` | Session prep types (status, checklist, talking points, resources, agenda) |
 | `src/services/GraphService.ts` | Graph API + calendar conflict detection with error flag |
 | `src/services/DWxSharePointProvisioningService.ts` | All DWx list provisioning via Graph API |
@@ -1317,6 +1409,10 @@ The app supports Account Managers from an external partner tenant:
 | **Product Request Cards** | Accent border by status, meta pill badges with icons, client name as title, grid footer alignment via flex: 1 |
 | **Product Requests Tab** | Full search/filter/sort parity with Service Requests tab — SearchBox, type filter, sort, advanced filters, grid/list toggle, pagination |
 | **Service Checklists** | Per-service templates in Admin (Checklist_JSON on DWxServices) + per-deal copies (DealChecklist_JSON on DWxServiceRequests). Auto-copy on deal creation. 12 default checklists. |
+| **Post Mortem Auto-Creation** | Auto-creates on Won/Lost stage transition via dynamic import in ServiceRequestService (non-blocking, never fails the transition) |
+| **Post Mortem AI Analysis** | 6 AI methods run in parallel via `Promise.allSettled()` with graceful degradation. Includes SLA timeline, accountability scores, root cause, issues, lessons, action items |
+| **Post Mortem Conditional Tab** | 8th tab in RequestDetails, only visible for Won/Lost deals via `buildTabs()` + `useMemo` pattern |
+| **Insights Dashboard** | InsightsTab in ManagerDashboard Analytics group — aggregate cross-deal analytics with Recharts charts |
 
 ## Product Catalog
 
@@ -1434,17 +1530,17 @@ DWxSupportingDocuments/
 ## Recent Commit History
 
 ```
+b4d3993 feat: Post Mortem & Issues Tracking with AI-powered analysis + Insights dashboard (v2.14.0)
+724952b style: Admin table fixes + Quick Create from Service Details + UI refinements
 41d78bd feat: Service Checklists + Client seed Energy fix (v2.13.0)
 e7c81cf [docs] Update CLAUDE.md to v2.12.1 with Product Requests tab enhancements
 2a476fd feat: Product Requests tab — search/filter/sort + card redesign (v2.12.1)
 57e68bb style: Unify Products hero to single DWx blue/teal gradient + remove stats
-29120a0 style: Replace emoji product icons with Fluent UI SVG line icons
 81abd20 feat: Compact heroes + KB redesign + stepper refinements + service card polish (v2.12.0)
 c0ace5b feat: Hero banners on all pages + collapse/expand toggle (v2.12.0)
 e424f16 fix: Remove all legacy LP Booking references + fix Kanban card click (v2.11.1)
 9869c24 feat: Kanban Board + Quick-Create Deal + Email Tracking + PDF Export + Meeting Notes (v2.11.0)
 16a7997 feat: Deal Activity Timeline + Follow-Up Reminders + Win/Loss Analysis (v2.10.0)
-94b5483 fix: Deep assessment security, performance, and workflow fixes (v2.9.2)
 b085667 feat: V1 hero banner Services page + client auto-populate + KB tab reorder (v2.9.1)
 5e69c0e feat: Proposal Management System with AI generation + internal approval workflow (v2.9.0)
 b4fddfa feat: Add Landing Page content management + Knowledge Base with consumer UI (v2.8.0)
