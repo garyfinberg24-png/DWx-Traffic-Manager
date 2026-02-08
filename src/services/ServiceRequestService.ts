@@ -377,8 +377,20 @@ class ServiceRequestService {
         updateData.NextSteps = nextSteps;
       }
 
-      // Update in SharePoint
-      const result = await graphService.updateListItem(this.listName, requestId, updateData);
+      // Update in SharePoint (retry without SLA column if not provisioned yet)
+      let result;
+      try {
+        result = await graphService.updateListItem(this.listName, requestId, updateData);
+      } catch (updateErr: unknown) {
+        const errMsg = updateErr instanceof Error ? updateErr.message : String(updateErr);
+        if (errMsg.includes('StageTimestamps_JSON') && (errMsg.includes('is not recognized') || errMsg.includes('invalid field'))) {
+          // Column not provisioned — strip SLA field and retry
+          const { StageTimestamps_JSON: _ts, ...coreData } = updateData;
+          result = await graphService.updateListItem(this.listName, requestId, coreData);
+        } else {
+          throw updateErr;
+        }
+      }
       const updatedRequest = this.mapToServiceRequest(result);
 
       // If Won, update client lifetime value (TotalRevenue, EngagementCount, etc.)
