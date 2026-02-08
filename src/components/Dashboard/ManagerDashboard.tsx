@@ -26,6 +26,7 @@ import {
   CheckboxChecked24Regular,
   ChevronDownRegular,
   ChevronRightRegular,
+  Lightbulb24Regular,
 } from '@fluentui/react-icons';
 import { useAuth } from '../../contexts/AuthContext';
 import { dashboardService } from '../../services/DashboardService';
@@ -50,6 +51,7 @@ import { CommercialTab } from './CommercialTab';
 import { ResourcesTab } from './ResourcesTab';
 import { WinLossTab } from './WinLossTab';
 import { SLADashboardTab } from './SLADashboardTab';
+import { InsightsTab } from './InsightsTab';
 import { useToast } from '../../contexts/ToastContext';
 import { DW_COLORS } from '../../utils/buttonStyles';
 import { useHeroCollapse } from '../../hooks/useHeroCollapse';
@@ -63,7 +65,7 @@ import { serviceRequestService } from '../../services/ServiceRequestService';
 // Types
 // ============================================================================
 
-type DashboardTab = 'overview' | 'pipeline' | 'approvals' | 'calendar' | 'timeline' | 'performance' | 'clients' | 'commercial' | 'gamification' | 'resources' | 'winloss' | 'sla';
+type DashboardTab = 'overview' | 'pipeline' | 'approvals' | 'calendar' | 'timeline' | 'performance' | 'clients' | 'commercial' | 'gamification' | 'resources' | 'winloss' | 'sla' | 'insights';
 
 interface NavItem {
   value: DashboardTab;
@@ -107,6 +109,7 @@ const NAV_GROUPS: NavGroup[] = [
       { value: 'performance', label: 'AM Performance', icon: People24Regular },
       { value: 'clients', label: 'Client Activity', icon: Building24Regular },
       { value: 'winloss', label: 'Win/Loss', icon: ChartMultipleRegular },
+      { value: 'insights', label: 'Insights', icon: Lightbulb24Regular },
     ],
   },
   {
@@ -827,6 +830,11 @@ export const ManagerDashboard: React.FC = () => {
               {/* SLA Tab */}
               {selectedTab === 'sla' && (
                 <SLADashboardTab requests={serviceRequests} />
+              )}
+
+              {/* Insights Tab */}
+              {selectedTab === 'insights' && (
+                <InsightsTab serviceRequests={serviceRequests} />
               )}
             </div>
           )}

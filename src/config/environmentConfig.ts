@@ -31,6 +31,8 @@ export const config = {
     knowledgeBaseListName: import.meta.env.VITE_KNOWLEDGE_BASE_LIST || 'DWxKnowledgeBase',
     // Proposals list
     proposalsListName: import.meta.env.VITE_PROPOSALS_LIST || 'DWxProposals',
+    // Post Mortems list
+    postMortemsListName: import.meta.env.VITE_POST_MORTEMS_LIST || 'DWxPostMortems',
     // Document library for uploads
     documentLibrary: import.meta.env.VITE_DOCUMENT_LIBRARY || 'DWxSupportingDocuments',
   },

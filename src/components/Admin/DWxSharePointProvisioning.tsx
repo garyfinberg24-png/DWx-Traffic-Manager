@@ -121,6 +121,10 @@ const LIST_INFO: Record<string, { description: string; icon: React.ReactElement 
     description: 'Proposal management',
     icon: <DocumentText24Regular />,
   },
+  DWxPostMortems: {
+    description: 'Post-mortem analysis',
+    icon: <Sparkle24Regular />,
+  },
   DWxSupportingDocuments: {
     description: 'Document library',
     icon: <FolderOpen24Regular />,
@@ -394,6 +398,7 @@ export const DWxSharePointProvisioning: React.FC = () => {
   const [landingPageContentCount, setLandingPageContentCount] = useState(0);
   const [knowledgeBaseCount, setKnowledgeBaseCount] = useState(0);
   const [proposalsCount, setProposalsCount] = useState(0);
+  const [postMortemsCount, setPostMortemsCount] = useState(0);
 
   // Tools
   const [isFixingViews, setIsFixingViews] = useState(false);
@@ -426,6 +431,7 @@ export const DWxSharePointProvisioning: React.FC = () => {
         { listName: 'DWxLandingPageContent', setter: setLandingPageContentCount },
         { listName: 'DWxKnowledgeBase', setter: setKnowledgeBaseCount },
         { listName: 'DWxProposals', setter: setProposalsCount },
+        { listName: 'DWxPostMortems', setter: setPostMortemsCount },
       ];
 
       await Promise.all(
@@ -482,6 +488,7 @@ export const DWxSharePointProvisioning: React.FC = () => {
         case 'DWxLandingPageContent': result = await dwxSharePointProvisioningService.provisionLandingPageContentList(); break;
         case 'DWxKnowledgeBase': result = await dwxSharePointProvisioningService.provisionKnowledgeBaseList(); break;
         case 'DWxProposals': result = await dwxSharePointProvisioningService.provisionProposalsList(); break;
+        case 'DWxPostMortems': result = await dwxSharePointProvisioningService.provisionPostMortemsList(); break;
         case 'DWxSupportingDocuments': result = await dwxSharePointProvisioningService.provisionDocumentLibrary(); break;
         default: throw new Error(`Unknown list: ${listName}`);
       }
@@ -609,6 +616,7 @@ export const DWxSharePointProvisioning: React.FC = () => {
     DWxLandingPageContent: landingPageContentCount,
     DWxKnowledgeBase: knowledgeBaseCount,
     DWxProposals: proposalsCount,
+    DWxPostMortems: postMortemsCount,
   };
 
   const setterMap: Record<string, (n: number) => void> = {
@@ -624,6 +632,7 @@ export const DWxSharePointProvisioning: React.FC = () => {
     DWxLandingPageContent: setLandingPageContentCount,
     DWxKnowledgeBase: setKnowledgeBaseCount,
     DWxProposals: setProposalsCount,
+    DWxPostMortems: setPostMortemsCount,
   };
 
   // ── Results renderer ───────────────────────────────────────────────────
@@ -1012,6 +1021,7 @@ export const DWxSharePointProvisioning: React.FC = () => {
             <li><strong>DWxLandingPageContent</strong> - Landing page CMS</li>
             <li><strong>DWxKnowledgeBase</strong> - FAQ, Glossary, Articles</li>
             <li><strong>DWxProposals</strong> - Proposal management</li>
+            <li><strong>DWxPostMortems</strong> - Post-mortem analysis</li>
             <li><strong>DWxAuditLog</strong> - Audit trail</li>
             <li><strong>DWxSupportingDocuments</strong> - Document library</li>
           </ul>

@@ -827,13 +827,61 @@ class DWxSharePointProvisioningService {
     };
   }
 
+  private get postMortemsListDefinition(): ListDefinition {
+    return {
+      title: 'DWxPostMortems',
+      description: 'DWx Post Mortems - AI-powered deal retrospectives with issue tracking, lessons learned, and action items',
+      fields: [
+        { internalName: 'ServiceRequestId', displayName: 'Service Request ID', type: 'Number', required: true },
+        { internalName: 'ClientName', displayName: 'Client Name', type: 'Text', required: true },
+        { internalName: 'ServiceName', displayName: 'Service Name', type: 'Text', required: true },
+        {
+          internalName: 'FinalStage',
+          displayName: 'Final Stage',
+          type: 'Choice',
+          choices: ['Won', 'Lost'],
+          required: true,
+        },
+        { internalName: 'WinLossReason', displayName: 'Win/Loss Reason', type: 'Text' },
+        { internalName: 'DealValue', displayName: 'Deal Value (ZAR)', type: 'Currency' },
+        { internalName: 'AccountManagerName', displayName: 'Account Manager', type: 'Text', required: true },
+        { internalName: 'AccountManagerEmail', displayName: 'AM Email', type: 'Text', required: true },
+        { internalName: 'SpecialistName', displayName: 'Specialist', type: 'Text' },
+        { internalName: 'SpecialistEmail', displayName: 'Specialist Email', type: 'Text' },
+        {
+          internalName: 'Status',
+          displayName: 'Status',
+          type: 'Choice',
+          choices: ['Draft', 'Under Review', 'Review Complete', 'Actions In Progress', 'Closed'],
+          defaultValue: 'Draft',
+        },
+        { internalName: 'ReviewedDate', displayName: 'Reviewed Date', type: 'DateTime' },
+        { internalName: 'ReviewedBy', displayName: 'Reviewed By', type: 'Text' },
+        { internalName: 'ClosedDate', displayName: 'Closed Date', type: 'DateTime' },
+        // Core content (JSON)
+        { internalName: 'Issues_JSON', displayName: 'Issues (JSON)', type: 'Note' },
+        { internalName: 'Lessons_JSON', displayName: 'Lessons (JSON)', type: 'Note' },
+        { internalName: 'ActionItems_JSON', displayName: 'Action Items (JSON)', type: 'Note' },
+        // AI analysis (JSON)
+        { internalName: 'TimelineAnalysis_JSON', displayName: 'Timeline Analysis (JSON)', type: 'Note' },
+        { internalName: 'AccountabilityAssessment_JSON', displayName: 'Accountability Assessment (JSON)', type: 'Note' },
+        { internalName: 'RootCauseAnalysis_JSON', displayName: 'Root Cause Analysis (JSON)', type: 'Note' },
+        // Manual notes
+        { internalName: 'SpecialistNotes', displayName: 'Specialist Notes', type: 'Note' },
+        { internalName: 'ManagerNotes', displayName: 'Manager Notes', type: 'Note' },
+        // Metadata
+        { internalName: 'AIGeneratedAt', displayName: 'AI Generated At', type: 'DateTime' },
+      ],
+    };
+  }
+
   // ==================== PUBLIC METHODS ====================
 
   /**
    * Check which DWx lists exist
    */
   async checkListsStatus(): Promise<ListStatus[]> {
-    const listNames = ['DWxServices', 'DWxServiceRequests', 'DWxProductRequests', 'DWxClients', 'DWxSpecialists', 'DWxManagers', 'DWxTeamMembers', 'DWxAccountManagers', 'DWxAuditLog', 'DWxSessionPrep', 'DWxLandingPageContent', 'DWxKnowledgeBase', 'DWxProposals'];
+    const listNames = ['DWxServices', 'DWxServiceRequests', 'DWxProductRequests', 'DWxClients', 'DWxSpecialists', 'DWxManagers', 'DWxTeamMembers', 'DWxAccountManagers', 'DWxAuditLog', 'DWxSessionPrep', 'DWxLandingPageContent', 'DWxKnowledgeBase', 'DWxProposals', 'DWxPostMortems'];
     const results: ListStatus[] = [];
 
     for (const name of listNames) {
@@ -944,6 +992,13 @@ class DWxSharePointProvisioningService {
   }
 
   /**
+   * Provision the DWxPostMortems list
+   */
+  async provisionPostMortemsList(): Promise<ProvisionResult> {
+    return this.provisionList(this.postMortemsListDefinition);
+  }
+
+  /**
    * Create the DWxSupportingDocuments document library
    */
   async provisionDocumentLibrary(): Promise<ProvisionResult> {
@@ -986,6 +1041,7 @@ class DWxSharePointProvisioningService {
       { name: 'DWxLandingPageContent', provision: () => this.provisionLandingPageContentList() },
       { name: 'DWxKnowledgeBase', provision: () => this.provisionKnowledgeBaseList() },
       { name: 'DWxProposals', provision: () => this.provisionProposalsList() },
+      { name: 'DWxPostMortems', provision: () => this.provisionPostMortemsList() },
       { name: 'DWxSupportingDocuments', provision: () => this.provisionDocumentLibrary() },
     ];
 
@@ -1155,6 +1211,7 @@ class DWxSharePointProvisioningService {
       DWxLandingPageContent: this.landingPageContentListDefinition,
       DWxKnowledgeBase: this.knowledgeBaseListDefinition,
       DWxProposals: this.proposalsListDefinition,
+      DWxPostMortems: this.postMortemsListDefinition,
     };
     return map[title] || null;
   }
@@ -1171,7 +1228,7 @@ class DWxSharePointProvisioningService {
       'DWxServices', 'DWxServiceRequests', 'DWxProductRequests', 'DWxClients',
       'DWxSpecialists', 'DWxManagers', 'DWxTeamMembers', 'DWxAccountManagers',
       'DWxAuditLog', 'DWxSessionPrep', 'DWxLandingPageContent', 'DWxKnowledgeBase',
-      'DWxProposals',
+      'DWxProposals', 'DWxPostMortems',
     ];
 
     for (let i = 0; i < listNames.length; i++) {

@@ -847,6 +847,30 @@ class ServiceRequestService {
         }
         break;
     }
+
+    // Auto-create post-mortem for completed deals (Won or Lost)
+    if (newStage === 'Won' || newStage === 'Lost') {
+      try {
+        const { postMortemService } = await import('./PostMortemService');
+        const existingPM = await postMortemService.getPostMortemByRequestId(request.Id);
+        if (!existingPM) {
+          await postMortemService.createPostMortem({
+            ServiceRequestId: request.Id,
+            ClientName: request.ClientName || '',
+            ServiceName: request.ServiceName || '',
+            FinalStage: newStage,
+            WinLossReason: request.WinLossReason,
+            DealValue: request.DealValue,
+            AccountManagerName: request.AccountManagerName || '',
+            AccountManagerEmail: request.AccountManagerEmail || '',
+            SpecialistName: request.AssignedSpecialistName,
+            SpecialistEmail: request.AssignedSpecialistEmail,
+          });
+        }
+      } catch (pmError) {
+        console.error('Failed to auto-create post-mortem:', pmError);
+      }
+    }
   }
 
   /**

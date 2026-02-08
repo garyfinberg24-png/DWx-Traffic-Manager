@@ -17,6 +17,10 @@ export type EmailType =
   | 'proposal_sent'
   | 'follow_up_reminder'
   | 'sla_breach_alert'
+  | 'post_mortem_created'
+  | 'post_mortem_reviewed'
+  | 'action_item_assigned'
+  | 'am_accountability_alert'
   | 'other';
 
 export interface EmailRecord {
@@ -43,6 +47,10 @@ export const EMAIL_TYPE_LABELS: Record<EmailType, string> = {
   proposal_sent: 'Proposal Sent',
   follow_up_reminder: 'Follow-Up Reminder',
   sla_breach_alert: 'SLA Breach Alert',
+  post_mortem_created: 'Post-Mortem Created',
+  post_mortem_reviewed: 'Post-Mortem Reviewed',
+  action_item_assigned: 'Action Item Assigned',
+  am_accountability_alert: 'AM Accountability Alert',
   other: 'Other',
 };
 
@@ -61,5 +69,9 @@ export const EMAIL_TYPE_COLORS: Record<EmailType, { bg: string; text: string }> 
   proposal_sent: { bg: 'rgba(30, 107, 123, 0.1)', text: '#1e6b7b' },
   follow_up_reminder: { bg: 'rgba(247, 99, 12, 0.1)', text: '#f7630c' },
   sla_breach_alert: { bg: 'rgba(239, 68, 68, 0.1)', text: '#EF4444' },
+  post_mortem_created: { bg: 'rgba(139, 92, 246, 0.1)', text: '#8B5CF6' },
+  post_mortem_reviewed: { bg: 'rgba(16, 185, 129, 0.1)', text: '#10B981' },
+  action_item_assigned: { bg: 'rgba(98, 100, 167, 0.1)', text: '#6264a7' },
+  am_accountability_alert: { bg: 'rgba(239, 68, 68, 0.15)', text: '#DC2626' },
   other: { bg: 'rgba(107, 114, 128, 0.1)', text: '#6B7280' },
 };

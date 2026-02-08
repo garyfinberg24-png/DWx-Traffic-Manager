@@ -722,6 +722,117 @@ class DWxNotificationService {
       return { success: false, error: String(error) };
     }
   }
+
+  // ==========================================================================
+  // Post-Mortem Notifications
+  // ==========================================================================
+
+  /**
+   * Notify specialist that a post-mortem has been created for their closed deal
+   */
+  async notifyPostMortemCreated(
+    specialistEmail: string,
+    specialistName: string,
+    clientName: string,
+    serviceName: string,
+    finalStage: string,
+    dealValue?: number,
+    requestId?: number
+  ): Promise<void> {
+    try {
+      const htmlBody = EmailTemplates.postMortemCreated(
+        specialistName, clientName, serviceName, finalStage, dealValue
+      );
+      const subject = `[DWx] Post-Mortem Created: ${clientName} - ${serviceName}`;
+      await this.sendEmail([specialistEmail], subject, htmlBody, undefined,
+        requestId ? { requestId, emailType: 'post_mortem_created' as EmailType, sentBy: 'System' } : undefined
+      );
+    } catch (error) {
+      console.error('[DWxNotificationService] Failed to send post-mortem created notification:', error);
+    }
+  }
+
+  /**
+   * Notify AM + specialist that a post-mortem review is complete
+   */
+  async notifyPostMortemReviewed(
+    recipients: string[],
+    recipientName: string,
+    clientName: string,
+    serviceName: string,
+    reviewerName: string,
+    managerNotes: string,
+    actionItemCount: number,
+    requestId?: number
+  ): Promise<void> {
+    try {
+      const htmlBody = EmailTemplates.postMortemReviewed(
+        recipientName, clientName, serviceName, reviewerName, managerNotes, actionItemCount
+      );
+      const subject = `[DWx] Post-Mortem Review Complete: ${clientName} - ${serviceName}`;
+      await this.sendEmail(recipients, subject, htmlBody, undefined,
+        requestId ? { requestId, emailType: 'post_mortem_reviewed' as EmailType, sentBy: 'System' } : undefined
+      );
+    } catch (error) {
+      console.error('[DWxNotificationService] Failed to send post-mortem reviewed notification:', error);
+    }
+  }
+
+  /**
+   * Notify assignee that an improvement action item has been assigned
+   */
+  async notifyActionItemAssigned(
+    assigneeEmail: string,
+    assigneeName: string,
+    actionTitle: string,
+    actionDescription: string,
+    priority: string,
+    category: string,
+    clientName: string,
+    serviceName: string,
+    dueDate?: string,
+    requestId?: number
+  ): Promise<void> {
+    try {
+      const htmlBody = EmailTemplates.actionItemAssigned(
+        assigneeName, actionTitle, actionDescription, priority, category, clientName, serviceName, dueDate
+      );
+      const subject = `[DWx] Action Item Assigned: ${actionTitle}`;
+      await this.sendEmail([assigneeEmail], subject, htmlBody, undefined,
+        requestId ? { requestId, emailType: 'action_item_assigned' as EmailType, sentBy: 'System' } : undefined
+      );
+    } catch (error) {
+      console.error('[DWxNotificationService] Failed to send action item assigned notification:', error);
+    }
+  }
+
+  /**
+   * Notify all managers of AM accountability issues identified in a post-mortem
+   */
+  async notifyAMAccountabilityAlert(
+    amName: string,
+    amEmail: string,
+    clientName: string,
+    serviceName: string,
+    finalStage: string,
+    issueCount: number,
+    dealValue?: number,
+    requestId?: number
+  ): Promise<void> {
+    try {
+      const managerEmails = this.getManagerEmails();
+      if (managerEmails.length === 0) return;
+      const htmlBody = EmailTemplates.amAccountabilityAlert(
+        'Manager', amName, amEmail, clientName, serviceName, finalStage, issueCount, dealValue
+      );
+      const subject = `[DWx] AM Accountability Alert: ${clientName} - ${serviceName}`;
+      await this.sendEmail(managerEmails, subject, htmlBody, undefined,
+        requestId ? { requestId, emailType: 'am_accountability_alert' as EmailType, sentBy: 'System' } : undefined
+      );
+    } catch (error) {
+      console.error('[DWxNotificationService] Failed to send AM accountability alert:', error);
+    }
+  }
 }
 
 export const dwxNotificationService = new DWxNotificationService();

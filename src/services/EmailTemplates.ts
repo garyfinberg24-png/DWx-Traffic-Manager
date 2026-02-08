@@ -1181,6 +1181,121 @@ const slaBreachAlertManagers = (
 };
 
 // ============================================================================
+// POST-MORTEM EMAILS
+// ============================================================================
+
+/**
+ * 35. Post-mortem created — sent to specialist
+ */
+export const postMortemCreated = (
+  specialistName: string,
+  clientName: string,
+  serviceName: string,
+  finalStage: string,
+  dealValue?: number
+): string => {
+  const outcomeStyle = finalStage === 'Won'
+    ? 'color:#059669;font-weight:600;'
+    : 'color:#dc2626;font-weight:600;';
+
+  const content = `
+    <p>Hi <strong>${escapeHtml(specialistName)}</strong>,</p>
+    <p>A post-mortem has been created for your recently closed deal:</p>
+    ${row('Client', escapeHtml(clientName))}
+    ${row('Service', escapeHtml(serviceName))}
+    ${row('Outcome', `<span style="${outcomeStyle}">${escapeHtml(finalStage)}</span>`)}
+    ${dealValue ? row('Deal Value', dealValue ? formatCurrency(dealValue) : 'Not specified') : ''}
+    <p style="margin-top:20px;"><strong>Please take a few minutes to:</strong></p>
+    <ul>
+      <li>Review the AI-generated analysis</li>
+      <li>Add any issues or blockers encountered</li>
+      <li>Share lessons learned</li>
+      <li>Add your specialist notes</li>
+    </ul>
+    <p style="margin-top:15px;color:#616161;font-size:13px;">Your input helps us continuously improve our delivery quality.</p>
+  `;
+  return wrap(GRAD.ai, 'Post-Mortem Created', content);
+};
+
+/**
+ * 36. Post-mortem reviewed — sent to AM + specialist
+ */
+export const postMortemReviewed = (
+  recipientName: string,
+  clientName: string,
+  serviceName: string,
+  reviewerName: string,
+  managerNotes: string,
+  actionItemCount: number
+): string => {
+  const content = `
+    <p>Hi <strong>${escapeHtml(recipientName)}</strong>,</p>
+    <p><strong>${escapeHtml(reviewerName)}</strong> has completed the post-mortem review for:</p>
+    ${row('Client', escapeHtml(clientName))}
+    ${row('Service', escapeHtml(serviceName))}
+    ${managerNotes ? callout('#107c10', '#dff6dd', `<strong>Manager Notes:</strong><p style="margin:5px 0 0;">${escapeHtml(managerNotes)}</p>`) : ''}
+    ${actionItemCount > 0 ? `<p style="margin-top:15px;"><strong>${actionItemCount}</strong> action item${actionItemCount !== 1 ? 's have' : ' has'} been assigned. Please check your tasks.</p>` : ''}
+    <p style="margin-top:15px;color:#616161;font-size:13px;">Thank you for contributing to our continuous improvement process.</p>
+  `;
+  return wrap(GRAD.success, 'Post-Mortem Review Complete', content);
+};
+
+/**
+ * 37. Improvement action item assigned — sent to assignee
+ */
+export const actionItemAssigned = (
+  assigneeName: string,
+  actionTitle: string,
+  actionDescription: string,
+  priority: string,
+  category: string,
+  clientName: string,
+  serviceName: string,
+  dueDate?: string
+): string => {
+  const content = `
+    <p>Hi <strong>${escapeHtml(assigneeName)}</strong>,</p>
+    <p>You've been assigned an improvement action from a post-mortem:</p>
+    ${row('Action', `<strong>${escapeHtml(actionTitle)}</strong>`)}
+    ${row('Priority', escapeHtml(priority))}
+    ${row('Category', escapeHtml(category))}
+    ${dueDate ? row('Due Date', formatDateTime(dueDate)) : ''}
+    ${row('Related Deal', `${escapeHtml(clientName)} - ${escapeHtml(serviceName)}`)}
+    <div style="background:#f5f5f5;padding:15px;border-radius:4px;margin:15px 0;">
+      <p style="margin:0;color:#323130;">${escapeHtml(actionDescription)}</p>
+    </div>
+    <p style="margin-top:15px;color:#616161;font-size:13px;">Completing improvement actions helps the team deliver better outcomes.</p>
+  `;
+  return wrap(GRAD.purple, 'Improvement Action Assigned', content);
+};
+
+/**
+ * 38. AM accountability alert — sent to managers
+ */
+export const amAccountabilityAlert = (
+  managerName: string,
+  amName: string,
+  amEmail: string,
+  clientName: string,
+  serviceName: string,
+  finalStage: string,
+  issueCount: number,
+  dealValue?: number
+): string => {
+  const content = `
+    <p>Hi <strong>${escapeHtml(managerName)}</strong>,</p>
+    <p>The post-mortem for <strong>${escapeHtml(clientName)}</strong> has identified <strong>${issueCount}</strong> issue${issueCount !== 1 ? 's' : ''} attributed to the Account Manager:</p>
+    ${row('Account Manager', `${escapeHtml(amName)} (${escapeHtml(amEmail)})`)}
+    ${row('Service', escapeHtml(serviceName))}
+    ${row('Deal Outcome', `<span style="color:${finalStage === 'Won' ? '#059669' : '#dc2626'};font-weight:600;">${escapeHtml(finalStage)}</span>`)}
+    ${dealValue ? row('Deal Value', formatCurrency(dealValue)) : ''}
+    ${callout('#f7630c', '#fff8f0', `<strong>Coaching Opportunity:</strong><p style="margin:5px 0 0;">This may indicate a coaching opportunity. Please review the post-mortem and consider 1-on-1 feedback.</p>`)}
+    <p style="margin-top:15px;color:#616161;font-size:13px;">Proactive coaching helps Account Managers grow and improves overall team performance.</p>
+  `;
+  return wrap(GRAD.danger, 'AM Accountability Alert', content);
+};
+
+// ============================================================================
 // Export map
 // ============================================================================
 
@@ -1223,4 +1338,9 @@ export const EmailTemplates = {
   // SLA breach/at-risk templates
   slaBreachAlertAM,
   slaBreachAlertManagers,
+  // Post-mortem templates
+  postMortemCreated,
+  postMortemReviewed,
+  actionItemAssigned,
+  amAccountabilityAlert,
 };

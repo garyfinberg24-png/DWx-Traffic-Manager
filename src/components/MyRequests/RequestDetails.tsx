@@ -4,7 +4,7 @@
  * Tabs: Overview, People, Commercial, Schedule, Actions
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { Input, Textarea, Spinner, Button, Text } from '@fluentui/react-components';
 import {
   CalendarLtr24Regular,
@@ -23,6 +23,7 @@ import {
   BoxRegular,
   History24Regular,
   CheckboxChecked24Regular,
+  Notepad24Regular,
 } from '@fluentui/react-icons';
 import { makeStyles } from '@fluentui/react-components';
 import { useAuth } from '../../contexts/AuthContext';
@@ -41,6 +42,7 @@ import { format } from 'date-fns';
 import { DealActivityTimeline } from './DealActivityTimeline';
 import { EmailTimeline } from './EmailTimeline';
 import { DealChecklist } from './DealChecklist';
+import { PostMortemTab } from '../PostMortem';
 import type { DealChecklistItem } from '../../types/Checklist';
 import {
   DetailModalShell,
@@ -200,7 +202,7 @@ function buildSteps(currentStage: FunnelStage): StepperStep[] {
 // Tab definitions
 // ============================================================================
 
-const TABS: ModalTab[] = [
+const BASE_TABS: ModalTab[] = [
   { value: 'overview', label: 'Overview', icon: <BoxRegular style={{ width: '16px', height: '16px' }} /> },
   { value: 'people', label: 'People', icon: <PersonRegular style={{ width: '16px', height: '16px' }} /> },
   { value: 'commercial', label: 'Commercial', icon: <MoneyRegular style={{ width: '16px', height: '16px' }} /> },
@@ -209,6 +211,17 @@ const TABS: ModalTab[] = [
   { value: 'checklist', label: 'Checklist', icon: <CheckboxChecked24Regular style={{ width: '16px', height: '16px' }} /> },
   { value: 'activity', label: 'Activity', icon: <History24Regular style={{ width: '16px', height: '16px' }} /> },
 ];
+
+const POST_MORTEM_TAB: ModalTab = {
+  value: 'postmortem', label: 'Post Mortem', icon: <Notepad24Regular style={{ width: '16px', height: '16px' }} />,
+};
+
+function buildTabs(stage: FunnelStage): ModalTab[] {
+  if (stage === 'Won' || stage === 'Lost') {
+    return [...BASE_TABS, POST_MORTEM_TAB];
+  }
+  return BASE_TABS;
+}
 
 // ============================================================================
 // Helper: initials from name
@@ -257,6 +270,7 @@ export const RequestDetails: React.FC<RequestDetailsProps> = ({
 
   const availableTransitions = STAGE_TRANSITIONS[request.FunnelStage] || [];
   const isTerminal = request.FunnelStage === 'Won' || request.FunnelStage === 'Lost';
+  const tabs = useMemo(() => buildTabs(request.FunnelStage), [request.FunnelStage]);
 
   // When switching tabs, auto-cancel any in-progress edit
   const handleTabChange = useCallback(
@@ -1013,6 +1027,13 @@ export const RequestDetails: React.FC<RequestDetailsProps> = ({
         return renderChecklistTab();
       case 'activity':
         return renderActivityTab();
+      case 'postmortem':
+        return (
+          <PostMortemTab
+            request={request}
+            isManager={user?.isManager ?? false}
+          />
+        );
       default:
         return renderOverviewTab();
     }
@@ -1032,7 +1053,7 @@ export const RequestDetails: React.FC<RequestDetailsProps> = ({
         subtitle={request.ServiceName}
         statusBadge={request.FunnelStage}
         steps={buildSteps(request.FunnelStage)}
-        tabs={TABS}
+        tabs={tabs}
         activeTab={activeTab}
         onTabChange={handleTabChange}
         footerLeft={

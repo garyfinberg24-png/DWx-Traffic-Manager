@@ -30,6 +30,16 @@ import {
   ProposalRisk,
 } from '../types/Proposal';
 
+import {
+  PostMortemAIContext,
+  TimelineAnalysis,
+  AccountabilityAssessment,
+  RootCauseAnalysis,
+  PostMortemIssue,
+  LessonLearned,
+  ActionItem,
+} from '../types/PostMortem';
+
 /**
  * Generate a unique ID for items
  */
@@ -786,3 +796,392 @@ Requirements: ${context.requirements || 'Not specified'}`;
 
 // Export singleton instance
 export const aiPreparationService = new AIPreparationService();
+
+// ============================================================================
+// Post-Mortem AI Generation (standalone exported functions)
+// ============================================================================
+
+/**
+ * Format PostMortemAIContext into a readable summary for AI prompts
+ */
+function formatPostMortemContext(context: PostMortemAIContext): string {
+  const lines: string[] = [];
+  lines.push(`Client: ${context.clientName}`);
+  lines.push(`Service: ${context.serviceName}`);
+  if (context.serviceCategory) {
+    lines.push(`Service Category: ${context.serviceCategory}`);
+  }
+  lines.push(`Deal Outcome: ${context.finalStage}`);
+  if (context.winLossReason) {
+    lines.push(`Win/Loss Reason: ${context.winLossReason}`);
+  }
+  if (context.dealValue != null) {
+    lines.push(`Deal Value: R${context.dealValue.toLocaleString()} (ZAR)`);
+  }
+  lines.push(`Account Manager: ${context.accountManagerName}`);
+  if (context.specialistName) {
+    lines.push(`Specialist: ${context.specialistName}`);
+  }
+  if (context.totalDurationDays != null) {
+    lines.push(`Total Sales Cycle Duration: ${context.totalDurationDays} days`);
+  }
+
+  if (context.slaBreakdown.length > 0) {
+    lines.push('');
+    lines.push('SLA Breakdown by Stage:');
+    for (const entry of context.slaBreakdown) {
+      const target = entry.targetDays != null ? ` (target: ${entry.targetDays} days)` : '';
+      lines.push(`  - ${entry.stage}: ${entry.daysInStage} days${target} — ${entry.status}`);
+    }
+  }
+
+  if (context.auditLogSummary.length > 0) {
+    lines.push('');
+    lines.push('Audit Log Summary:');
+    for (const entry of context.auditLogSummary) {
+      lines.push(`  - ${entry}`);
+    }
+  }
+
+  if (context.checklistCompletion != null) {
+    lines.push(`Checklist Completion: ${context.checklistCompletion}%`);
+  }
+  if (context.emailCount != null) {
+    lines.push(`Emails Sent: ${context.emailCount}`);
+  }
+  if (context.sessionPrepStatus) {
+    lines.push(`Session Prep Status: ${context.sessionPrepStatus}`);
+  }
+  if (context.proposalStatus) {
+    lines.push(`Proposal Status: ${context.proposalStatus}`);
+  }
+
+  return lines.join('\n');
+}
+
+/**
+ * Generate a timeline analysis for a post-mortem
+ * Analyses stage durations, SLA compliance, bottlenecks, and overall efficiency
+ */
+export async function generatePostMortemTimelineAnalysis(
+  context: PostMortemAIContext
+): Promise<TimelineAnalysis | null> {
+  try {
+    const systemPrompt = `You are a senior business consultant at Digital Workplace (DW), a Microsoft consulting firm in South Africa. You analyse sales cycle timelines to identify bottlenecks, SLA breaches, and efficiency improvements.
+
+Return a JSON object with this exact structure:
+{
+  "totalDuration": 45,
+  "stageBreakdown": [
+    {
+      "stage": "Lead",
+      "daysInStage": 5,
+      "targetDays": 3,
+      "variance": 2,
+      "bottleneck": true
+    }
+  ],
+  "criticalPath": ["Lead", "Qualified", "Discovery"],
+  "delayFactors": ["Slow response from client during Discovery", "Specialist unavailable for 5 days"],
+  "slaBreachCount": 2,
+  "efficiency": "Good",
+  "summary": "Overall the deal progressed well with minor delays in the Discovery phase..."
+}
+
+Valid stages: Lead, Qualified, Discovery, Proposal, Negotiation, Won, Lost.
+Efficiency levels: "Excellent" (all within SLA), "Good" (minor delays), "Acceptable" (some breaches), "Poor" (multiple breaches).
+variance = daysInStage - targetDays (positive means over target).
+bottleneck = true if the stage took significantly longer than target.
+Only include stages the deal actually passed through.`;
+
+    const contextSummary = formatPostMortemContext(context);
+
+    const userPrompt = `Analyse the sales cycle timeline for this completed deal and identify bottlenecks and efficiency issues:
+
+${contextSummary}
+
+Provide a thorough timeline analysis based on the SLA breakdown and audit log data above.`;
+
+    const response = await callAzureOpenAI(systemPrompt, userPrompt, 0.3);
+    return parseAIJson<TimelineAnalysis>(response);
+  } catch (error) {
+    console.error('[AIPreparationService] Failed to generate post-mortem timeline analysis:', error);
+    return null;
+  }
+}
+
+/**
+ * Generate an accountability assessment for a post-mortem
+ * Evaluates AM, specialist, and client performance with balanced scoring
+ */
+export async function generateAccountabilityAssessment(
+  context: PostMortemAIContext
+): Promise<AccountabilityAssessment | null> {
+  try {
+    const systemPrompt = `You are a senior business consultant at Digital Workplace (DW), a Microsoft consulting firm in South Africa. You provide fair, balanced performance assessments and accountability attribution for completed deals.
+
+Return a JSON object with this exact structure:
+{
+  "amAccountability": {
+    "score": 75,
+    "strengths": ["Maintained regular client communication", "Quick response to qualification"],
+    "improvementAreas": ["Could have escalated pricing concerns earlier"],
+    "specificIssues": ["3-day gap between Discovery and Proposal follow-up"]
+  },
+  "specialistAccountability": {
+    "score": 85,
+    "strengths": ["Thorough session preparation", "Strong technical demo"],
+    "improvementAreas": ["Documentation could be more detailed"],
+    "specificIssues": []
+  },
+  "clientFactors": {
+    "score": 60,
+    "positiveFactors": ["Clear requirements", "Engaged decision maker"],
+    "challenges": ["Delayed feedback on proposal", "Budget approval process"]
+  },
+  "systemGaps": ["No automated follow-up reminders configured", "SLA alerts not triggered"],
+  "overallAssessment": "The deal was managed competently with some areas for improvement..."
+}
+
+Scores are 0-100 where 100 is perfect performance. Be fair and constructive.
+For Won deals, focus on what went well and what could be replicated.
+For Lost deals, focus on lessons without blame.`;
+
+    const contextSummary = formatPostMortemContext(context);
+
+    const userPrompt = `Provide a balanced accountability assessment for this ${context.finalStage === 'Won' ? 'won' : 'lost'} deal${context.winLossReason ? ` (reason: "${context.winLossReason}")` : ''}:
+
+${contextSummary}
+
+Assess each party's contribution fairly. Consider responsiveness, preparation quality, communication, and process adherence.`;
+
+    const response = await callAzureOpenAI(systemPrompt, userPrompt, 0.5);
+    return parseAIJson<AccountabilityAssessment>(response);
+  } catch (error) {
+    console.error('[AIPreparationService] Failed to generate accountability assessment:', error);
+    return null;
+  }
+}
+
+/**
+ * Generate a root cause analysis for a post-mortem
+ * Identifies the primary cause, contributing factors, and preventability
+ */
+export async function generateRootCauseAnalysis(
+  context: PostMortemAIContext
+): Promise<RootCauseAnalysis | null> {
+  try {
+    const systemPrompt = `You are a root cause analysis expert at Digital Workplace (DW), a Microsoft consulting firm in South Africa. You identify underlying causes behind deal outcomes, not just symptoms.
+
+Return a JSON object with this exact structure:
+{
+  "primaryCause": "The primary underlying reason this deal was won/lost",
+  "contributingFactors": [
+    "Contributing factor 1 - how it influenced the outcome",
+    "Contributing factor 2 - how it influenced the outcome",
+    "Contributing factor 3 - how it influenced the outcome"
+  ],
+  "preventability": "Somewhat Preventable",
+  "recommendations": [
+    "Specific, actionable recommendation 1",
+    "Specific, actionable recommendation 2",
+    "Specific, actionable recommendation 3"
+  ]
+}
+
+preventability must be one of: "Highly Preventable", "Somewhat Preventable", "Unavoidable".
+For Won deals, identify what drove the win and how to replicate it.
+For Lost deals, identify root causes and how to prevent recurrence.
+Include 3-5 contributing factors and 3-5 recommendations. Be specific, not generic.`;
+
+    const contextSummary = formatPostMortemContext(context);
+
+    const userPrompt = `Perform a root cause analysis for this ${context.finalStage === 'Won' ? 'won' : 'lost'} deal${context.winLossReason ? ` (stated reason: "${context.winLossReason}")` : ''}:
+
+${contextSummary}
+
+Go beyond the stated reason. Identify the underlying root cause and contributing factors based on the timeline, audit log, and process data above.`;
+
+    const response = await callAzureOpenAI(systemPrompt, userPrompt, 0.4);
+    return parseAIJson<RootCauseAnalysis>(response);
+  } catch (error) {
+    console.error('[AIPreparationService] Failed to generate root cause analysis:', error);
+    return null;
+  }
+}
+
+/**
+ * Suggest issues identified during a deal for the post-mortem
+ * Returns 3-8 categorised issues with severity and ownership attribution
+ */
+export async function suggestPostMortemIssues(
+  context: PostMortemAIContext
+): Promise<PostMortemIssue[]> {
+  try {
+    const systemPrompt = `You are a senior business consultant at Digital Workplace (DW), a Microsoft consulting firm in South Africa. You identify issues and blockers in completed deals to drive process improvement.
+
+Return a JSON array of 3-8 issues with this structure:
+[
+  {
+    "category": "Process",
+    "severity": "Major",
+    "owner": "Account Manager",
+    "description": "Clear description of the issue that occurred",
+    "impact": "How this issue affected the deal outcome"
+  }
+]
+
+Valid categories: "Communication", "Process", "Technical", "Commercial", "Client-Side", "Resource", "Documentation".
+Valid severities: "Minor", "Moderate", "Major", "Critical".
+Valid owners: "Account Manager", "Specialist", "Management", "Client", "System".
+
+For Won deals, include issues that occurred even though the deal was won — these represent risks that could cause future losses.
+For Lost deals, focus on the issues that contributed to the loss.
+Be specific and evidence-based, drawing from the audit log and SLA data.`;
+
+    const contextSummary = formatPostMortemContext(context);
+
+    const userPrompt = `Identify 3-8 issues from this ${context.finalStage === 'Won' ? 'won' : 'lost'} deal${context.winLossReason ? ` (reason: "${context.winLossReason}")` : ''}:
+
+${contextSummary}
+
+Identify issues across communication, process, technical, commercial, client-side, resource, and documentation areas. Each issue should be specific to this deal, not generic.`;
+
+    const response = await callAzureOpenAI(systemPrompt, userPrompt, 0.6);
+    const parsed = parseAIJson<Array<{
+      category: PostMortemIssue['category'];
+      severity: PostMortemIssue['severity'];
+      owner: PostMortemIssue['owner'];
+      description: string;
+      impact: string;
+    }>>(response);
+
+    return parsed.map((issue) => ({
+      id: generateId(),
+      category: issue.category,
+      severity: issue.severity,
+      owner: issue.owner,
+      description: issue.description,
+      impact: issue.impact,
+      aiGenerated: true,
+    }));
+  } catch (error) {
+    console.error('[AIPreparationService] Failed to suggest post-mortem issues:', error);
+    return [];
+  }
+}
+
+/**
+ * Suggest lessons learned from a completed deal
+ * Returns 3-6 typed lessons with context and applicability
+ */
+export async function suggestPostMortemLessons(
+  context: PostMortemAIContext
+): Promise<LessonLearned[]> {
+  try {
+    const systemPrompt = `You are a senior business consultant at Digital Workplace (DW), a Microsoft consulting firm in South Africa. You extract actionable lessons from completed deals.
+
+Return a JSON array of 3-6 lessons with this structure:
+[
+  {
+    "type": "Process Improvement",
+    "lesson": "The key insight or lesson learned",
+    "context": "What was happening in this deal that led to this lesson"
+  }
+]
+
+Valid types: "Process Improvement", "Best Practice", "Pitfall to Avoid", "Client Management", "Technical Learning".
+
+For Won deals, focus on best practices worth replicating and process improvements that could make future wins easier.
+For Lost deals, focus on pitfalls to avoid and process improvements that could prevent similar losses.
+Make lessons specific and actionable, not generic platitudes.`;
+
+    const contextSummary = formatPostMortemContext(context);
+
+    const userPrompt = `Extract 3-6 actionable lessons from this ${context.finalStage === 'Won' ? 'won' : 'lost'} deal${context.winLossReason ? ` (reason: "${context.winLossReason}")` : ''}:
+
+${contextSummary}
+
+Focus on lessons that would be valuable for future deals in similar situations. Each lesson should be specific enough to be actionable.`;
+
+    const response = await callAzureOpenAI(systemPrompt, userPrompt, 0.6);
+    const parsed = parseAIJson<Array<{
+      type: LessonLearned['type'];
+      lesson: string;
+      context: string;
+    }>>(response);
+
+    return parsed.map((lesson) => ({
+      id: generateId(),
+      type: lesson.type,
+      lesson: lesson.lesson,
+      context: lesson.context,
+      applicability: context.serviceCategory ? [context.serviceCategory] : [],
+      aiGenerated: true,
+    }));
+  } catch (error) {
+    console.error('[AIPreparationService] Failed to suggest post-mortem lessons:', error);
+    return [];
+  }
+}
+
+/**
+ * Suggest action items to prevent similar issues in future deals
+ * Returns 3-6 prioritised, categorised action items
+ */
+export async function suggestPostMortemActionItems(
+  context: PostMortemAIContext
+): Promise<ActionItem[]> {
+  try {
+    const systemPrompt = `You are a senior business consultant at Digital Workplace (DW), a Microsoft consulting firm in South Africa. You recommend concrete, actionable improvements from deal post-mortems.
+
+Return a JSON array of 3-6 action items with this structure:
+[
+  {
+    "title": "Short action item title",
+    "description": "Detailed description of what needs to be done and why",
+    "priority": "High",
+    "category": "Process"
+  }
+]
+
+Valid priorities: "Low", "Medium", "High", "Urgent".
+Valid categories: "Process", "System", "Training", "Documentation", "Template".
+
+Action items should be:
+- Specific and measurable (not vague)
+- Assigned to a clear category
+- Prioritised based on potential impact
+- Focused on preventing recurrence of identified issues
+For Won deals, focus on scaling what worked. For Lost deals, focus on fixing what broke.`;
+
+    const contextSummary = formatPostMortemContext(context);
+
+    const userPrompt = `Recommend 3-6 concrete action items based on this ${context.finalStage === 'Won' ? 'won' : 'lost'} deal${context.winLossReason ? ` (reason: "${context.winLossReason}")` : ''}:
+
+${contextSummary}
+
+Each action item should address a specific gap or opportunity identified in this deal. Prioritise items that would have the most impact on future deal outcomes.`;
+
+    const response = await callAzureOpenAI(systemPrompt, userPrompt, 0.6);
+    const parsed = parseAIJson<Array<{
+      title: string;
+      description: string;
+      priority: ActionItem['priority'];
+      category: ActionItem['category'];
+    }>>(response);
+
+    return parsed.map((item) => ({
+      id: generateId(),
+      title: item.title,
+      description: item.description,
+      priority: item.priority,
+      status: 'Open' as const,
+      category: item.category,
+      aiGenerated: true,
+    }));
+  } catch (error) {
+    console.error('[AIPreparationService] Failed to suggest post-mortem action items:', error);
+    return [];
+  }
+}
