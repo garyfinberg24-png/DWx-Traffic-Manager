@@ -27,6 +27,7 @@ import { serviceCatalogService } from '../../services/ServiceCatalogService';
 import { ServiceCard } from './ServiceCard';
 import { ServiceDetails } from './ServiceDetails';
 import { ServiceDetailModal } from './ServiceDetailModal';
+import QuickCreateDialog from '../SalesFunnel/QuickCreateDialog';
 import { DW_COLORS } from '../../utils/buttonStyles';
 import { useHeroCollapse } from '../../hooks/useHeroCollapse';
 import { HeroCollapseToggle } from '../Common/HeroCollapseToggle';
@@ -448,6 +449,8 @@ export const ServiceCatalog: React.FC<ServiceCatalogProps> = ({ onRequestService
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [fullDetailsService, setFullDetailsService] = useState<DWService | null>(null);
   const [isFullDetailsOpen, setIsFullDetailsOpen] = useState(false);
+  const [quickCreateService, setQuickCreateService] = useState<DWService | null>(null);
+  const [isQuickCreateOpen, setIsQuickCreateOpen] = useState(false);
 
   useEffect(() => {
     const loadServices = async () => {
@@ -530,6 +533,13 @@ export const ServiceCatalog: React.FC<ServiceCatalogProps> = ({ onRequestService
   const handleCloseFullDetails = () => {
     setIsFullDetailsOpen(false);
     setFullDetailsService(null);
+  };
+
+  const handleQuickCreate = (service: DWService) => {
+    setIsDetailsOpen(false);
+    setIsFullDetailsOpen(false);
+    setQuickCreateService(service);
+    setIsQuickCreateOpen(true);
   };
 
   const getTabCount = (tab: CatalogTab): number => {
@@ -760,6 +770,7 @@ export const ServiceCatalog: React.FC<ServiceCatalogProps> = ({ onRequestService
           onClose={handleCloseDetails}
           onRequestService={handleRequestService}
           onViewFullDetails={handleViewFullDetails}
+          onQuickRequest={handleQuickCreate}
         />
       )}
 
@@ -772,8 +783,17 @@ export const ServiceCatalog: React.FC<ServiceCatalogProps> = ({ onRequestService
           onRequestService={handleRequestService}
           allServices={services}
           onViewService={handleViewFullDetails}
+          onQuickRequest={handleQuickCreate}
         />
       )}
+
+      {/* Quick Create Dialog */}
+      <QuickCreateDialog
+        open={isQuickCreateOpen}
+        onClose={() => { setIsQuickCreateOpen(false); setQuickCreateService(null); }}
+        onDealCreated={() => { setIsQuickCreateOpen(false); setQuickCreateService(null); }}
+        preSelectedService={quickCreateService}
+      />
     </div>
   );
 };

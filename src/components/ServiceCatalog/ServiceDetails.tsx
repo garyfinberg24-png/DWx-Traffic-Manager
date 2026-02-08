@@ -32,7 +32,6 @@ const useStyles = makeStyles({
   dialogSurface: {
     maxWidth: '560px',
     width: '90vw',
-    padding: '0',
     borderRadius: '8px',
     boxShadow: '0 8px 32px rgba(0,0,0,0.25)',
     overflow: 'hidden',
@@ -44,10 +43,6 @@ const useStyles = makeStyles({
     gap: '16px',
     backgroundColor: DW_COLORS.primary,
     color: 'white',
-    borderRadius: '8px 8px 0 0',
-    marginTop: '-1px',
-    marginLeft: '-1px',
-    marginRight: '-1px',
   },
   iconContainer: {
     width: '48px',
@@ -62,6 +57,8 @@ const useStyles = makeStyles({
   headerContent: {
     flex: 1,
     minWidth: 0,
+    display: 'flex',
+    flexDirection: 'column',
   },
   title: {
     fontSize: '18px',
@@ -72,6 +69,27 @@ const useStyles = makeStyles({
   subtitle: {
     fontSize: '13px',
     color: 'rgba(255, 255, 255, 0.8)',
+  },
+  headerActions: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    flexShrink: 0,
+  },
+  quickRequestBtn: {
+    height: '32px',
+    padding: '0 12px',
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    border: '1px solid rgba(255, 255, 255, 0.3)',
+    borderRadius: '6px',
+    color: 'white',
+    cursor: 'pointer',
+    fontSize: '12px',
+    fontWeight: '600',
+    whiteSpace: 'nowrap',
+    ':hover': {
+      backgroundColor: 'rgba(255, 255, 255, 0.25)',
+    },
   },
   closeButton: {
     minWidth: '36px',
@@ -104,7 +122,7 @@ const useStyles = makeStyles({
   },
   sectionHeader: {
     fontSize: '11px',
-    fontWeight: '600',
+    fontWeight: '700',
     color: '#1a5a8a',
     textTransform: 'uppercase',
     letterSpacing: '0.5px',
@@ -230,6 +248,7 @@ interface ServiceDetailsProps {
   onClose: () => void;
   onRequestService: (service: DWService) => void;
   onViewFullDetails?: (service: DWService) => void;
+  onQuickRequest?: (service: DWService) => void;
 }
 
 const getComplexityStyle = (
@@ -266,6 +285,7 @@ export const ServiceDetails: React.FC<ServiceDetailsProps> = ({
   onClose,
   onRequestService,
   onViewFullDetails,
+  onQuickRequest,
 }) => {
   const styles = useStyles();
 
@@ -273,7 +293,7 @@ export const ServiceDetails: React.FC<ServiceDetailsProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={(_, data) => !data.open && onClose()}>
-      <DialogSurface className={styles.dialogSurface}>
+      <DialogSurface className={styles.dialogSurface} style={{ padding: 0 }}>
         {/* Header with colored background */}
         <div className={styles.header}>
             <div className={styles.iconContainer}>
@@ -281,15 +301,26 @@ export const ServiceDetails: React.FC<ServiceDetailsProps> = ({
             </div>
             <div className={styles.headerContent}>
               <Text className={styles.title}>{service.Title}</Text>
-              <Text className={styles.subtitle}>{service.Category}</Text>
+              <Text className={styles.subtitle}>{service.ShortDescription || service.Category}</Text>
             </div>
-            <button
-              className={styles.closeButton}
-              onClick={onClose}
-              title="Close"
-            >
-              <Dismiss24Regular />
-            </button>
+            <div className={styles.headerActions}>
+              {onQuickRequest && (
+                <button
+                  className={styles.quickRequestBtn}
+                  onClick={() => onQuickRequest(service)}
+                  title="Quick Create"
+                >
+                  Quick Create
+                </button>
+              )}
+              <button
+                className={styles.closeButton}
+                onClick={onClose}
+                title="Close"
+              >
+                <Dismiss24Regular />
+              </button>
+            </div>
           </div>
 
           {/* Content */}
@@ -374,7 +405,7 @@ export const ServiceDetails: React.FC<ServiceDetailsProps> = ({
             Cancel
           </Button>
           <Button
-            appearance="subtle"
+            appearance="secondary"
             onClick={() => {
               onClose();
               if (onViewFullDetails) {

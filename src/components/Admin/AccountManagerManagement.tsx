@@ -135,6 +135,7 @@ const useStyles = makeStyles({
   },
   table: {
     width: '100%',
+    tableLayout: 'fixed',
   },
   statusBadge: {
     marginLeft: '8px',
@@ -818,12 +819,12 @@ export const AccountManagerManagement: React.FC<AccountManagerManagementProps> =
           <Table className={styles.table}>
             <TableHeader>
               <TableRow>
-                <TableHeaderCell>Name</TableHeaderCell>
-                <TableHeaderCell>Email</TableHeaderCell>
-                <TableHeaderCell>Source</TableHeaderCell>
-                <TableHeaderCell>Status</TableHeaderCell>
-                <TableHeaderCell>Region</TableHeaderCell>
-                <TableHeaderCell>Company/Dept</TableHeaderCell>
+                <TableHeaderCell style={{ width: '200px' }}>Name</TableHeaderCell>
+                <TableHeaderCell style={{ width: '240px' }}>Email</TableHeaderCell>
+                <TableHeaderCell style={{ width: '80px' }}>Source</TableHeaderCell>
+                <TableHeaderCell style={{ width: '80px' }}>Status</TableHeaderCell>
+                <TableHeaderCell style={{ width: '120px' }}>Region</TableHeaderCell>
+                <TableHeaderCell>Business Unit</TableHeaderCell>
                 <TableHeaderCell style={{ width: '60px' }}>Actions</TableHeaderCell>
               </TableRow>
             </TableHeader>
@@ -846,8 +847,8 @@ export const AccountManagerManagement: React.FC<AccountManagerManagementProps> =
                       </div>
                     </div>
                   </TableCell>
-                  <TableCell>
-                    <Text size={200}>{am.Email}</Text>
+                  <TableCell style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    <Text size={200} style={{ whiteSpace: 'nowrap' }}>{am.Email}</Text>
                   </TableCell>
                   <TableCell>
                     <Badge

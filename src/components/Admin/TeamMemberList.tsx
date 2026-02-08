@@ -32,7 +32,6 @@ import {
   Person24Regular,
   Mail24Regular,
   Phone24Regular,
-  Briefcase24Regular,
 } from '@fluentui/react-icons';
 import { TeamMember, TeamMemberInput, TeamMemberRole, TEAM_MEMBER_ROLES } from '../../types/ReferenceData';
 import { referenceDataService } from '../../services/ReferenceDataService';
@@ -116,9 +115,6 @@ const useStyles = makeStyles({
   colRole: {
     width: '180px',
   },
-  colDepartment: {
-    width: '140px',
-  },
   colStatus: {
     width: '90px',
   },
@@ -129,16 +125,23 @@ const useStyles = makeStyles({
 
 const getRoleBadgeColor = (role: TeamMemberRole): 'brand' | 'success' | 'informative' | 'warning' | 'danger' => {
   switch (role) {
-    case 'Developer':
-      return 'success';
-    case 'Demo Specialist':
-      return 'informative';
-    case 'Implementer':
-      return 'danger';
-    case 'Support':
-      return 'warning';
-    case 'Project Manager':
+    case 'Solution Architect':
+    case 'Senior Developer':
       return 'brand';
+    case 'SPFx':
+    case 'Power Platform':
+    case 'SharePoint Engineer':
+      return 'success';
+    case 'Consultant':
+    case 'Business Analyst':
+      return 'informative';
+    case 'Trainer':
+    case 'Demo Specialist':
+    case 'Project Manager':
+      return 'warning';
+    case 'Implementer':
+    case 'Support':
+      return 'danger';
     default:
       return 'informative';
   }
@@ -185,8 +188,7 @@ export const TeamMemberList: React.FC = () => {
       result = result.filter(
         (m) =>
           m.Title.toLowerCase().includes(query) ||
-          m.Email.toLowerCase().includes(query) ||
-          (m.Department?.toLowerCase().includes(query) ?? false)
+          m.Email.toLowerCase().includes(query)
       );
     }
 
@@ -326,7 +328,6 @@ export const TeamMemberList: React.FC = () => {
                 <TableHeaderCell className={styles.colEmail}>Email</TableHeaderCell>
                 <TableHeaderCell className={styles.colPhone}>Mobile</TableHeaderCell>
                 <TableHeaderCell className={styles.colRole}>Role</TableHeaderCell>
-                <TableHeaderCell className={styles.colDepartment}>Department</TableHeaderCell>
                 <TableHeaderCell className={styles.colStatus}>Status</TableHeaderCell>
                 <TableHeaderCell className={styles.colActions}>Actions</TableHeaderCell>
               </TableRow>
@@ -376,16 +377,6 @@ export const TeamMemberList: React.FC = () => {
                       </Badge>
                     ))}
                   </div>
-                </TableCell>
-                <TableCell className={styles.colDepartment}>
-                  {member.Department ? (
-                    <div className={styles.contactItem}>
-                      <Briefcase24Regular style={{ fontSize: 14 }} />
-                      <Text>{member.Department}</Text>
-                    </div>
-                  ) : (
-                    <Text style={{ color: tokens.colorNeutralForeground3 }}>—</Text>
-                  )}
                 </TableCell>
                 <TableCell className={styles.colStatus}>
                   <Badge

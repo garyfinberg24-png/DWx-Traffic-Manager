@@ -735,7 +735,6 @@ class MockGraphService {
         Email: member.Email,
         Phone: member.Phone,
         Role: member.Role,
-        Department: member.Department,
         IsActive: member.IsActive,
         Created: member.Created,
       },

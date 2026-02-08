@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Dialog,
   DialogSurface,
@@ -17,7 +17,7 @@ import {
   Field,
   Badge,
 } from '@fluentui/react-components';
-import { Dismiss24Regular, Dismiss12Regular } from '@fluentui/react-icons';
+import { Dismiss24Regular, Dismiss12Regular, PersonSearch24Regular } from '@fluentui/react-icons';
 import { useForm, Controller } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
@@ -27,6 +27,8 @@ import {
   SpecialistRole,
   ServiceCategory,
 } from '../../types/ServiceRequest';
+import { EntraUserPicker } from './EntraUserPicker';
+import { EntraUser } from '../../types/ReferenceData';
 
 const SPECIALIST_ROLES: SpecialistRole[] = [
   'Solution Architect',
@@ -130,6 +132,7 @@ export const SpecialistForm: React.FC<SpecialistFormProps> = ({
 }) => {
   const styles = useStyles();
   const isEditMode = !!editingSpecialist;
+  const [showEntraPicker, setShowEntraPicker] = useState(false);
 
   const {
     control,
@@ -199,6 +202,10 @@ export const SpecialistForm: React.FC<SpecialistFormProps> = ({
   };
 
   const handleSpecializationSelect = (specialization: string) => {
+    if (specialization === '__ALL__') {
+      setValue('Specializations', [...SERVICE_CATEGORIES], { shouldValidate: true });
+      return;
+    }
     const current = selectedSpecializations || [];
     if (!current.includes(specialization)) {
       setValue('Specializations', [...current, specialization], { shouldValidate: true });
@@ -214,8 +221,20 @@ export const SpecialistForm: React.FC<SpecialistFormProps> = ({
     cat => !selectedSpecializations.includes(cat)
   );
 
+  const handleEntraUserSelect = (user: EntraUser | null) => {
+    if (user) {
+      const email = user.mail || user.userPrincipalName || '';
+      setValue('Title', user.displayName || '');
+      setValue('Email', email);
+      setValue('Phone', user.mobilePhone || (user.businessPhones?.[0]) || '');
+      setValue('CalendarEmail', email);
+    }
+    setShowEntraPicker(false);
+  };
+
   return (
-    <Dialog open={isOpen} onOpenChange={(_, data) => !data.open && onClose()}>
+    <>
+    <Dialog open={isOpen && !showEntraPicker} onOpenChange={(_, data) => !data.open && onClose()}>
       <DialogSurface className={styles.surface}>
         <DialogBody>
           <DialogTitle
@@ -228,6 +247,17 @@ export const SpecialistForm: React.FC<SpecialistFormProps> = ({
 
           <DialogContent>
             <form className={styles.form} onSubmit={handleSubmit(handleFormSubmit)}>
+              {!isEditMode && (
+                <Button
+                  appearance="secondary"
+                  icon={<PersonSearch24Regular />}
+                  onClick={() => setShowEntraPicker(true)}
+                  style={{ width: '100%' }}
+                >
+                  Browse Entra ID Directory
+                </Button>
+              )}
+
               <Field
                 label="Full Name"
                 required
@@ -307,6 +337,11 @@ export const SpecialistForm: React.FC<SpecialistFormProps> = ({
                   selectedOptions={[]}
                   disabled={availableSpecializations.length === 0}
                 >
+                  {availableSpecializations.length > 1 && (
+                    <Option key="__ALL__" value="__ALL__" text={`All (${SERVICE_CATEGORIES.length} categories)`}>
+                      All ({SERVICE_CATEGORIES.length} categories)
+                    </Option>
+                  )}
                   {availableSpecializations.map((cat) => (
                     <Option key={cat} value={cat}>
                       {cat}
@@ -400,5 +435,15 @@ export const SpecialistForm: React.FC<SpecialistFormProps> = ({
         </DialogBody>
       </DialogSurface>
     </Dialog>
+
+    <EntraUserPicker
+      open={showEntraPicker}
+      onClose={() => setShowEntraPicker(false)}
+      onSelect={handleEntraUserSelect}
+      title="Select Specialist from Directory"
+      allowManualEntry={false}
+      allowGuestUsers={false}
+    />
+    </>
   );
 };

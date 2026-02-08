@@ -108,27 +108,27 @@ const useStyles = makeStyles({
   roleBadge: {
     textTransform: 'capitalize',
   },
-  // Column width styles
+  // Column width styles — percentages so they adapt to available space
   colName: {
-    width: '170px',
+    width: '18%',
   },
   colEmail: {
-    width: '220px',
+    width: '22%',
   },
   colRole: {
-    width: '150px',
+    width: '14%',
   },
   colSpecializations: {
-    width: '240px',
+    width: '24%',
   },
   colWorkload: {
-    width: '110px',
+    width: '8%',
   },
   colStatus: {
-    width: '90px',
+    width: '8%',
   },
   colActions: {
-    width: '70px',
+    width: '6%',
   },
 });
 
@@ -419,14 +419,14 @@ export const SpecialistManagement: React.FC = () => {
                     <Text weight="semibold">{specialist.Title}</Text>
                   </TableCellLayout>
                 </TableCell>
-                <TableCell className={styles.colEmail}>
-                  <div className={styles.contactItem}>
-                    <Mail24Regular style={{ fontSize: 14 }} />
-                    <Text size={200}>{specialist.Email}</Text>
+                <TableCell className={styles.colEmail} style={{ overflow: 'hidden' }}>
+                  <div className={styles.contactItem} style={{ overflow: 'hidden' }}>
+                    <Mail24Regular style={{ fontSize: 14, flexShrink: 0 }} />
+                    <Text size={200} style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{specialist.Email}</Text>
                   </div>
                   {specialist.Phone && (
                     <div className={styles.contactItem}>
-                      <Phone24Regular style={{ fontSize: 14 }} />
+                      <Phone24Regular style={{ fontSize: 14, flexShrink: 0 }} />
                       <Text size={200}>{specialist.Phone}</Text>
                     </div>
                   )}

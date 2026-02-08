@@ -56,7 +56,7 @@ const useStyles = makeStyles({
     marginBottom: '16px',
   },
   userList: {
-    maxHeight: '400px',
+    maxHeight: '300px',
     overflowY: 'auto',
     display: 'flex',
     flexDirection: 'column',
@@ -258,13 +258,13 @@ export const EntraUserPicker: React.FC<EntraUserPickerProps> = ({
 
   const isManualEntryValid = manualName.trim().length >= 2 && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(manualEmail);
 
-  const renderUserCard = (user: EntraUser, isGuest = false) => {
+  const renderUserCard = (user: EntraUser, isGuest = false, index = 0) => {
     const isSelected = selectedUser?.id === user.id;
     const isGuestUser = isGuest || user.userPrincipalName.includes('#EXT#');
 
     return (
       <Card
-        key={user.id}
+        key={`${user.id}-${index}`}
         className={`${styles.userCard} ${isSelected ? styles.userCardSelected : ''}`}
         onClick={() => handleUserSelect(user)}
       >
@@ -352,7 +352,7 @@ export const EntraUserPicker: React.FC<EntraUserPickerProps> = ({
           </div>
         )}
 
-        {users.map((user) => renderUserCard(user))}
+        {users.map((user, index) => renderUserCard(user, false, index))}
       </div>
     </>
   );
@@ -374,7 +374,7 @@ export const EntraUserPicker: React.FC<EntraUserPickerProps> = ({
           <Text>No guest users found in directory</Text>
         </div>
       ) : (
-        guestUsers.map((user) => renderUserCard(user, true))
+        guestUsers.map((user, index) => renderUserCard(user, true, index))
       )}
     </div>
   );

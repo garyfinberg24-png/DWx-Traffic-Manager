@@ -93,7 +93,6 @@ class ReferenceDataService {
         Email: data.Email,
         Phone: data.Phone || null,
         Role: data.Role,
-        Department: data.Department || null,
         IsActive: data.IsActive,
       };
 
@@ -126,7 +125,6 @@ class ReferenceDataService {
       if (data.Email !== undefined) fields.Email = data.Email;
       if (data.Phone !== undefined) fields.Phone = data.Phone || null;
       if (data.Role !== undefined) fields.Role = data.Role;
-      if (data.Department !== undefined) fields.Department = data.Department || null;
       if (data.IsActive !== undefined) fields.IsActive = data.IsActive;
 
       await graphService.updateListItem(this.teamMembersListName, id, fields);
@@ -352,7 +350,6 @@ class ReferenceDataService {
       Email: (fields.Email as string) || '',
       Phone: fields.Phone as string | undefined,
       Role: (fields.Role as TeamMemberRole) || 'Team Member',
-      Department: fields.Department as string | undefined,
       IsActive: (fields.IsActive as boolean) ?? true,
       Created: fields.Created as string,
       Modified: fields.Modified as string,

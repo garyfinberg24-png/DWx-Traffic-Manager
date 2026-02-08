@@ -78,7 +78,6 @@ interface TeamMemberFormData {
   Email: string;
   Phone?: string;
   Roles: TeamMemberRole[];
-  Department?: string;
   IsActive: boolean;
 }
 
@@ -87,7 +86,6 @@ const schema = yup.object().shape({
   Email: yup.string().required('Email is required').email('Invalid email format'),
   Phone: yup.string().optional(),
   Roles: yup.array().of(yup.string().oneOf(TEAM_MEMBER_ROLES)).min(1, 'At least one role is required'),
-  Department: yup.string().optional(),
   IsActive: yup.boolean().required(),
 });
 
@@ -124,7 +122,6 @@ export const TeamMemberForm: React.FC<TeamMemberFormProps> = ({
       Email: '',
       Phone: '',
       Roles: [],
-      Department: '',
       IsActive: true,
     },
   });
@@ -140,7 +137,6 @@ export const TeamMemberForm: React.FC<TeamMemberFormProps> = ({
         Email: teamMember.Email,
         Phone: teamMember.Phone || '',
         Roles: roles.filter(r => TEAM_MEMBER_ROLES.includes(r as TeamMemberRole)) as TeamMemberRole[],
-        Department: teamMember.Department || '',
         IsActive: teamMember.IsActive,
       });
     } else {
@@ -149,7 +145,6 @@ export const TeamMemberForm: React.FC<TeamMemberFormProps> = ({
         Email: '',
         Phone: '',
         Roles: [],
-        Department: '',
         IsActive: true,
       });
     }
@@ -161,9 +156,8 @@ export const TeamMemberForm: React.FC<TeamMemberFormProps> = ({
       Title: data.Title,
       Email: data.Email,
       Phone: data.Phone,
-      Role: data.Roles[0] || 'Developer', // Primary role (first selected)
+      Role: data.Roles[0] || 'Consultant', // Primary role (first selected)
       Roles: data.Roles,
-      Department: data.Department,
       IsActive: data.IsActive,
     };
     await onSubmit(input);
@@ -189,7 +183,6 @@ export const TeamMemberForm: React.FC<TeamMemberFormProps> = ({
       setValue('Title', user.displayName || '');
       setValue('Email', user.mail || user.userPrincipalName || '');
       setValue('Phone', user.mobilePhone || (user.businessPhones?.[0]) || '');
-      setValue('Department', user.department || '');
     }
     setShowEntraPicker(false);
   };
@@ -300,16 +293,6 @@ export const TeamMemberForm: React.FC<TeamMemberFormProps> = ({
                     ))}
                   </div>
                 )}
-              </Field>
-
-              <Field label="Department" validationMessage={errors.Department?.message}>
-                <Controller
-                  name="Department"
-                  control={control}
-                  render={({ field }) => (
-                    <Input {...field} placeholder="Enter department" />
-                  )}
-                />
               </Field>
 
               <div className={styles.switchField}>

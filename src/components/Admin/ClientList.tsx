@@ -77,7 +77,14 @@ const useStyles = makeStyles({
   },
   table: {
     width: '100%',
+    tableLayout: 'fixed',
   },
+  colCompany: { width: '22%' },
+  colContact: { width: '24%' },
+  colIndustry: { width: '12%' },
+  colAM: { width: '18%' },
+  colStatus: { width: '10%' },
+  colActions: { width: '6%' },
   companyCell: {
     display: 'flex',
     alignItems: 'center',
@@ -99,6 +106,7 @@ const useStyles = makeStyles({
     fontSize: tokens.fontSizeBase200,
     color: tokens.colorNeutralForeground3,
     whiteSpace: 'nowrap',
+    overflow: 'hidden',
   },
   emptyState: {
     display: 'flex',
@@ -348,12 +356,12 @@ export const ClientList: React.FC = () => {
           <Table className={styles.table}>
             <TableHeader>
               <TableRow>
-                <TableHeaderCell>Company</TableHeaderCell>
-                <TableHeaderCell>Primary Contact</TableHeaderCell>
-                <TableHeaderCell>Industry</TableHeaderCell>
-                <TableHeaderCell>Account Manager</TableHeaderCell>
-                <TableHeaderCell>Status</TableHeaderCell>
-                <TableHeaderCell>Actions</TableHeaderCell>
+                <TableHeaderCell className={styles.colCompany}>Company</TableHeaderCell>
+                <TableHeaderCell className={styles.colContact}>Primary Contact</TableHeaderCell>
+                <TableHeaderCell className={styles.colIndustry}>Industry</TableHeaderCell>
+                <TableHeaderCell className={styles.colAM}>Account Manager</TableHeaderCell>
+                <TableHeaderCell className={styles.colStatus}>Status</TableHeaderCell>
+                <TableHeaderCell className={styles.colActions}>Actions</TableHeaderCell>
               </TableRow>
             </TableHeader>
             <TableBody>

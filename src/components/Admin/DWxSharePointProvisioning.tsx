@@ -584,14 +584,14 @@ export const DWxSharePointProvisioning: React.FC = () => {
 
   // Seed configs for individual seed cards
   const seedConfigs: SeedConfig[] = [
-    { key: 'clients', listName: 'DWxClients', label: 'SA Clients', description: '12 South African enterprise clients', icon: <Building24Regular />, count: clientsCount, seedCount: '12', seedFn: () => dwxSharePointProvisioningService.seedClientsData() },
+    { key: 'clients', listName: 'DWxClients', label: 'SA Clients', description: '20 South African enterprise clients', icon: <Building24Regular />, count: clientsCount, seedCount: '20', seedFn: () => dwxSharePointProvisioningService.seedClientsData() },
     { key: 'team', listName: 'DWxTeamMembers', label: 'Team Members', description: '6 team members', icon: <People24Regular />, count: teamMembersCount, seedCount: '6', seedFn: () => dwxSharePointProvisioningService.seedTeamMembersData() },
     { key: 'ams', listName: 'DWxAccountManagers', label: 'Account Managers', description: '5 AMs across SA regions', icon: <Briefcase24Regular />, count: accountManagersCount, seedCount: '5', seedFn: () => dwxSharePointProvisioningService.seedAccountManagersData() },
     { key: 'specialists', listName: 'DWxSpecialists', label: 'Specialists', description: '5 pre-sales specialists', icon: <People24Regular />, count: specialistsCount, seedCount: '5', seedFn: () => dwxSharePointProvisioningService.seedSpecialistsData() },
     { key: 'managers', listName: 'DWxManagers', label: 'Managers', description: '2 manager access entries', icon: <ShieldKeyhole24Regular />, count: managersCount, seedCount: '2', seedFn: () => dwxSharePointProvisioningService.seedManagersData() },
     { key: 'services', listName: 'DWxServices', label: 'Services', description: '7 core service offerings', icon: <Briefcase24Regular />, count: servicesCount, seedCount: '7', seedFn: () => dwxSharePointProvisioningService.seedServicesData() },
     { key: 'requests', listName: 'DWxServiceRequests', label: 'Service Requests', description: '14 requests across all funnel stages', icon: <DocumentBulletList24Regular />, count: serviceRequestsCount, seedCount: '14', seedFn: () => dwxSharePointProvisioningService.seedServiceRequestsData() },
-    { key: 'products', listName: 'DWxProductRequests', label: 'Product Requests', description: '8 requests across all statuses', icon: <Apps24Regular />, count: productRequestsCount, seedCount: '8', seedFn: () => dwxSharePointProvisioningService.seedProductRequestsData() },
+    { key: 'products', listName: 'DWxProductRequests', label: 'Product Requests', description: '13 requests across all statuses', icon: <Apps24Regular />, count: productRequestsCount, seedCount: '13', seedFn: () => dwxSharePointProvisioningService.seedProductRequestsData() },
     { key: 'sessionprep', listName: 'DWxSessionPrep', label: 'Session Preps', description: '3 AI-powered session prep records', icon: <Sparkle24Regular />, count: sessionPrepCount, seedCount: '3', seedFn: () => dwxSharePointProvisioningService.seedSessionPrepData(), dependsOn: 'DWxServiceRequests' },
     { key: 'kb', listName: 'DWxKnowledgeBase', label: 'Knowledge Base', description: '50 entries (FAQ, Glossary, Articles)', icon: <BookOpen24Regular />, count: knowledgeBaseCount, seedCount: '50', seedFn: () => dwxSharePointProvisioningService.seedKnowledgeBaseData() },
   ];
@@ -881,7 +881,6 @@ export const DWxSharePointProvisioning: React.FC = () => {
           const exists = getStatusForList(cfg.listName);
           const hasData = cfg.count > 0;
           const depMet = !cfg.dependsOn || (countMap[cfg.dependsOn] ?? 0) > 0;
-          const disabled = !exists || anySeeding || hasData || !depMet;
 
           return (
             <div key={cfg.key} className={styles.seedCard}>
@@ -892,19 +891,21 @@ export const DWxSharePointProvisioning: React.FC = () => {
                 {!exists && <Text className={styles.infoText} block>List not provisioned</Text>}
                 {exists && !depMet && cfg.dependsOn && <Text className={styles.infoText} block>Seed {cfg.dependsOn} first</Text>}
               </div>
-              {hasData ? (
-                <Badge appearance="tint" color="success" className={styles.seedBadge}>{cfg.count} items</Badge>
-              ) : (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                {hasData && (
+                  <Badge appearance="tint" color="success" className={styles.seedBadge}>{cfg.count} items</Badge>
+                )}
                 <Button
                   size="small"
                   appearance="outline"
                   icon={<Add24Regular />}
                   onClick={() => runSeed(cfg.seedFn, cfg.listName, setterMap[cfg.listName])}
-                  disabled={disabled}
+                  disabled={!exists || anySeeding || !depMet}
+                  title={hasData ? 'Add more seed data (existing data is kept)' : `Seed ${cfg.seedCount} items`}
                 >
-                  Seed {cfg.seedCount}
+                  {hasData ? 'Reseed' : `Seed ${cfg.seedCount}`}
                 </Button>
-              )}
+              </div>
             </div>
           );
         })}

@@ -1,19 +1,17 @@
 /**
  * QuickCreateDialog - Quick-create deal dialog for managers
  * Allows creating a new deal in 3 clicks without the full 5-step wizard.
- * v2.11.0
+ * v2.12.1 — Added preSelectedService prop + DWx branded header
  */
 
 import React, { useState, useEffect, useMemo } from 'react';
 import {
   Dialog,
   DialogSurface,
-  DialogTitle,
-  DialogBody,
   DialogActions,
-  DialogContent,
   Button,
   Input,
+  Text,
   Textarea,
   Combobox,
   Option,
@@ -25,12 +23,13 @@ import {
   makeStyles,
   tokens,
 } from '@fluentui/react-components';
-import { AddRegular, DismissRegular } from '@fluentui/react-icons';
+import { AddRegular, DismissRegular, FlashRegular } from '@fluentui/react-icons';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
 import { serviceRequestService } from '../../services/ServiceRequestService';
 import { serviceCatalogService } from '../../services/ServiceCatalogService';
 import { referenceDataService } from '../../services/ReferenceDataService';
+import { DW_COLORS } from '../../utils/buttonStyles';
 import type {
   ServiceRequest,
   CreateServiceRequestInput,
@@ -47,18 +46,67 @@ const useStyles = makeStyles({
   surface: {
     maxWidth: '480px',
     width: '100%',
+    overflow: 'hidden',
+    borderRadius: '10px',
+    boxShadow: '0 8px 32px rgba(0,0,0,0.25)',
   },
-  titleRow: {
+  header: {
+    padding: '16px 20px',
     display: 'flex',
-    justifyContent: 'space-between',
     alignItems: 'center',
+    gap: '14px',
+    backgroundColor: DW_COLORS.primary,
+    color: 'white',
+  },
+  headerIcon: {
+    width: '40px',
+    height: '40px',
+    borderRadius: '8px',
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
+  },
+  headerContent: {
+    flex: 1,
+    minWidth: 0,
+  },
+  headerTitle: {
+    fontSize: '13px',
+    fontWeight: '500',
+    color: 'rgba(255, 255, 255, 0.75)',
+    display: 'block',
+  },
+  headerSubtitle: {
+    fontSize: '15px',
+    fontWeight: '600',
+    color: 'white',
+    display: 'block',
+    lineHeight: '1.3',
+  },
+  closeButton: {
+    minWidth: '32px',
+    height: '32px',
+    padding: '0',
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    border: '1px solid rgba(255, 255, 255, 0.2)',
+    borderRadius: '6px',
+    color: 'white',
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
+    ':hover': {
+      backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    },
   },
   body: {
     display: 'flex',
     flexDirection: 'column',
     gap: '12px',
-    paddingTop: '8px',
-    paddingBottom: '8px',
+    padding: '16px 20px',
   },
   field: {
     display: 'flex',
@@ -73,16 +121,13 @@ const useStyles = makeStyles({
     color: tokens.colorPaletteRedForeground1,
     marginLeft: '2px',
   },
-  radioGroup: {
-    display: 'flex',
-    flexDirection: 'row',
-    gap: '12px',
-  },
   actions: {
     display: 'flex',
     justifyContent: 'flex-end',
     gap: '8px',
-    paddingTop: '4px',
+    padding: '12px 20px',
+    borderTop: '1px solid #e5e7eb',
+    backgroundColor: '#fafafa',
   },
   errorText: {
     color: tokens.colorPaletteRedForeground1,
@@ -95,6 +140,18 @@ const useStyles = makeStyles({
     alignItems: 'center',
     padding: '40px 0',
   },
+  servicePill: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '6px',
+    padding: '6px 12px',
+    backgroundColor: '#e8f4fc',
+    borderRadius: '6px',
+    fontSize: '13px',
+    fontWeight: '500',
+    color: '#1a5a8a',
+    border: '1px solid #cce4f0',
+  },
 });
 
 // ============================================================================
@@ -105,6 +162,8 @@ interface QuickCreateDialogProps {
   open: boolean;
   onClose: () => void;
   onDealCreated: (r: ServiceRequest) => void;
+  /** When provided, pre-selects this service and disables the service dropdown */
+  preSelectedService?: DWService | null;
 }
 
 // Default deal probability based on interest level
@@ -122,6 +181,7 @@ const QuickCreateDialog: React.FC<QuickCreateDialogProps> = ({
   open,
   onClose,
   onDealCreated,
+  preSelectedService,
 }) => {
   const styles = useStyles();
   const { user } = useAuth();
@@ -184,14 +244,14 @@ const QuickCreateDialog: React.FC<QuickCreateDialogProps> = ({
       setContactEmail('');
       setContactPhone('');
       setIndustry('');
-      setSelectedServiceId('');
+      setSelectedServiceId(preSelectedService ? String(preSelectedService.Id) : '');
       setDealValue('');
       setInterestLevel('Warm');
       setNotes('');
       setSubmitting(false);
-      setTouched({ client: false, service: false });
+      setTouched({ client: false, service: !!preSelectedService });
     }
-  }, [open]);
+  }, [open, preSelectedService]);
 
   // Filter clients as user types
   const filteredClients = useMemo(() => {
@@ -200,11 +260,13 @@ const QuickCreateDialog: React.FC<QuickCreateDialogProps> = ({
     return clients.filter((c) => c.Title.toLowerCase().includes(lower));
   }, [clients, clientName]);
 
-  // Find the selected service object
-  const selectedService = useMemo(
-    () => services.find((s) => String(s.Id) === selectedServiceId) ?? null,
-    [services, selectedServiceId]
-  );
+  // Find the selected service object — use preSelectedService as fallback
+  const selectedService = useMemo(() => {
+    if (preSelectedService && selectedServiceId === String(preSelectedService.Id)) {
+      return preSelectedService;
+    }
+    return services.find((s) => String(s.Id) === selectedServiceId) ?? null;
+  }, [services, selectedServiceId, preSelectedService]);
 
   // Validation
   const clientError = touched.client && !clientName.trim() ? 'Client name is required' : '';
@@ -298,111 +360,124 @@ const QuickCreateDialog: React.FC<QuickCreateDialogProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={(_ev, data) => { if (!data.open) onClose(); }}>
-      <DialogSurface className={styles.surface}>
-        <DialogTitle
-          action={
-            <Button
-              appearance="subtle"
-              aria-label="Close"
-              icon={<DismissRegular />}
-              onClick={onClose}
-            />
-          }
-        >
-          Quick Create Deal
-        </DialogTitle>
+      <DialogSurface className={styles.surface} style={{ padding: 0 }}>
+        {/* DWx branded header */}
+        <div className={styles.header}>
+          <div className={styles.headerIcon}>
+            <FlashRegular style={{ width: '20px', height: '20px', color: 'white' }} />
+          </div>
+          <div className={styles.headerContent}>
+            <Text className={styles.headerTitle}>Quick Create Deal</Text>
+            <Text className={styles.headerSubtitle}>
+              {preSelectedService
+                ? preSelectedService.Title
+                : 'New Pipeline Deal'}
+            </Text>
+          </div>
+          <button
+            className={styles.closeButton}
+            onClick={onClose}
+            title="Close"
+          >
+            <DismissRegular style={{ width: '16px', height: '16px' }} />
+          </button>
+        </div>
 
-        <DialogBody>
-          <DialogContent>
-            {loading ? (
-              <div className={styles.loadingContainer}>
-                <Spinner size="medium" label="Loading..." />
-              </div>
-            ) : (
-              <div className={styles.body}>
-                {/* Client */}
-                <div className={styles.field}>
-                  <Label className={styles.label}>
-                    Client<span className={styles.required}>*</span>
-                  </Label>
-                  <Combobox
-                    freeform
-                    placeholder="Search or type client name..."
-                    value={clientName}
-                    onInput={handleClientInput}
-                    onOptionSelect={handleClientSelect}
-                    onBlur={() => setTouched((t) => ({ ...t, client: true }))}
-                  >
-                    {filteredClients.map((c) => (
-                      <Option key={c.Id} value={String(c.Id)} text={c.Title}>
-                        {c.Title}
-                      </Option>
-                    ))}
-                  </Combobox>
-                  {clientError && <span className={styles.errorText}>{clientError}</span>}
-                </div>
+        {/* Body */}
+        {loading ? (
+          <div className={styles.loadingContainer}>
+            <Spinner size="medium" label="Loading..." />
+          </div>
+        ) : (
+          <div className={styles.body}>
+            {/* Client */}
+            <div className={styles.field}>
+              <Label className={styles.label}>
+                Client<span className={styles.required}>*</span>
+              </Label>
+              <Combobox
+                freeform
+                placeholder="Search or type client name..."
+                value={clientName}
+                onInput={handleClientInput}
+                onOptionSelect={handleClientSelect}
+                onBlur={() => setTouched((t) => ({ ...t, client: true }))}
+              >
+                {filteredClients.map((c) => (
+                  <Option key={c.Id} value={String(c.Id)} text={c.Title}>
+                    {c.Title}
+                  </Option>
+                ))}
+              </Combobox>
+              {clientError && <span className={styles.errorText}>{clientError}</span>}
+            </div>
 
-                {/* Service */}
-                <div className={styles.field}>
-                  <Label className={styles.label}>
-                    Service<span className={styles.required}>*</span>
-                  </Label>
-                  <Dropdown
-                    placeholder="Select a service..."
-                    selectedOptions={selectedServiceId ? [selectedServiceId] : []}
-                    value={selectedService?.Title || ''}
-                    onOptionSelect={handleServiceSelect}
-                    onBlur={() => setTouched((t) => ({ ...t, service: true }))}
-                  >
-                    {services.map((s) => (
-                      <Option key={s.Id} value={String(s.Id)} text={s.Title}>
-                        {s.Title}
-                      </Option>
-                    ))}
-                  </Dropdown>
-                  {serviceError && <span className={styles.errorText}>{serviceError}</span>}
+            {/* Service */}
+            <div className={styles.field}>
+              <Label className={styles.label}>
+                Service<span className={styles.required}>*</span>
+              </Label>
+              {preSelectedService ? (
+                <div className={styles.servicePill}>
+                  <FlashRegular style={{ width: '14px', height: '14px' }} />
+                  {preSelectedService.Title}
                 </div>
+              ) : (
+                <Dropdown
+                  placeholder="Select a service..."
+                  selectedOptions={selectedServiceId ? [selectedServiceId] : []}
+                  value={selectedService?.Title || ''}
+                  onOptionSelect={handleServiceSelect}
+                  onBlur={() => setTouched((t) => ({ ...t, service: true }))}
+                >
+                  {services.map((s) => (
+                    <Option key={s.Id} value={String(s.Id)} text={s.Title}>
+                      {s.Title}
+                    </Option>
+                  ))}
+                </Dropdown>
+              )}
+              {serviceError && <span className={styles.errorText}>{serviceError}</span>}
+            </div>
 
-                {/* Deal Value */}
-                <div className={styles.field}>
-                  <Label className={styles.label}>Estimated Value (ZAR)</Label>
-                  <Input
-                    type="number"
-                    placeholder="e.g. 150000"
-                    value={dealValue}
-                    onChange={(_ev, data) => setDealValue(data.value)}
-                    min={0}
-                  />
-                </div>
+            {/* Deal Value */}
+            <div className={styles.field}>
+              <Label className={styles.label}>Estimated Value (ZAR)</Label>
+              <Input
+                type="number"
+                placeholder="e.g. 150000"
+                value={dealValue}
+                onChange={(_ev, data) => setDealValue(data.value)}
+                min={0}
+              />
+            </div>
 
-                {/* Interest Level */}
-                <div className={styles.field}>
-                  <Label className={styles.label}>Interest Level</Label>
-                  <RadioGroup
-                    layout="horizontal"
-                    value={interestLevel}
-                    onChange={(_ev, data) => setInterestLevel(data.value as InterestLevel)}
-                  >
-                    <Radio value="Hot" label="Hot" />
-                    <Radio value="Warm" label="Warm" />
-                    <Radio value="Cold" label="Cold" />
-                  </RadioGroup>
-                </div>
+            {/* Interest Level */}
+            <div className={styles.field}>
+              <Label className={styles.label}>Interest Level</Label>
+              <RadioGroup
+                layout="horizontal"
+                value={interestLevel}
+                onChange={(_ev, data) => setInterestLevel(data.value as InterestLevel)}
+              >
+                <Radio value="Hot" label="Hot" />
+                <Radio value="Warm" label="Warm" />
+                <Radio value="Cold" label="Cold" />
+              </RadioGroup>
+            </div>
 
-                {/* Notes */}
-                <div className={styles.field}>
-                  <Label className={styles.label}>Notes</Label>
-                  <Textarea
-                    rows={2}
-                    placeholder="Optional notes..."
-                    value={notes}
-                    onChange={(_ev, data) => setNotes(data.value)}
-                  />
-                </div>
-              </div>
-            )}
-          </DialogContent>
-        </DialogBody>
+            {/* Notes */}
+            <div className={styles.field}>
+              <Label className={styles.label}>Notes</Label>
+              <Textarea
+                rows={2}
+                placeholder="Optional notes..."
+                value={notes}
+                onChange={(_ev, data) => setNotes(data.value)}
+              />
+            </div>
+          </div>
+        )}
 
         <DialogActions className={styles.actions}>
           <Button appearance="secondary" onClick={onClose} disabled={submitting}>

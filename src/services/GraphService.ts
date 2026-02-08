@@ -749,8 +749,15 @@ class GraphService {
         .get();
 
       const users: GraphUser[] = response.value || [];
+      // Deduplicate by user ID (OR filter can return same user via different field matches)
+      const seen = new Set<string>();
+      const uniqueUsers = users.filter(u => {
+        if (seen.has(u.id)) return false;
+        seen.add(u.id);
+        return true;
+      });
       // Sort client-side since we can't use orderby with 'or' filters
-      return users
+      return uniqueUsers
         .map(this.transformGraphUser)
         .sort((a, b) => a.displayName.localeCompare(b.displayName));
     } catch (error) {

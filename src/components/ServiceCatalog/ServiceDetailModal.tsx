@@ -44,7 +44,6 @@ const useStyles = makeStyles({
     maxWidth: '920px',
     width: '92vw',
     maxHeight: '90vh',
-    padding: '0',
     borderRadius: '12px',
     boxShadow: '0 12px 48px rgba(0,0,0,0.25)',
     overflow: 'hidden',
@@ -59,8 +58,6 @@ const useStyles = makeStyles({
     gap: '20px',
     color: 'white',
     flexShrink: 0,
-    margin: '-1px -1px 0 -1px',
-    borderRadius: '12px 12px 0 0',
   },
   heroIcon: {
     width: '56px',
@@ -98,6 +95,27 @@ const useStyles = makeStyles({
     fontSize: '14px',
     color: 'rgba(255, 255, 255, 0.85)',
     lineHeight: '1.4',
+  },
+  heroActions: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    flexShrink: 0,
+  },
+  quickCreateBtn: {
+    height: '32px',
+    padding: '0 12px',
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    border: '1px solid rgba(255, 255, 255, 0.3)',
+    borderRadius: '6px',
+    color: 'white',
+    cursor: 'pointer',
+    fontSize: '12px',
+    fontWeight: '600',
+    whiteSpace: 'nowrap',
+    ':hover': {
+      backgroundColor: 'rgba(255, 255, 255, 0.25)',
+    },
   },
   closeButton: {
     minWidth: '36px',
@@ -460,6 +478,8 @@ interface ServiceDetailModalProps {
   allServices?: DWService[];
   /** Called when user clicks a related service chip */
   onViewService?: (service: DWService) => void;
+  /** Called when user clicks Quick Create button in hero */
+  onQuickRequest?: (service: DWService) => void;
 }
 
 export const ServiceDetailModal: React.FC<ServiceDetailModalProps> = ({
@@ -469,6 +489,7 @@ export const ServiceDetailModal: React.FC<ServiceDetailModalProps> = ({
   onRequestService,
   allServices = [],
   onViewService,
+  onQuickRequest,
 }) => {
   const styles = useStyles();
 
@@ -490,7 +511,7 @@ export const ServiceDetailModal: React.FC<ServiceDetailModalProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={(_, data) => !data.open && onClose()}>
-      <DialogSurface className={styles.dialogSurface}>
+      <DialogSurface className={styles.dialogSurface} style={{ padding: 0 }}>
         {/* Hero Header */}
         <div className={styles.hero} style={{ backgroundColor: heroColor }}>
           <div className={styles.heroIcon}>
@@ -501,13 +522,24 @@ export const ServiceDetailModal: React.FC<ServiceDetailModalProps> = ({
             <Text className={styles.heroTitle} block>{service.Title}</Text>
             <Text className={styles.heroSubtitle}>{service.ShortDescription}</Text>
           </div>
-          <button
-            className={styles.closeButton}
-            onClick={onClose}
-            title="Close"
-          >
-            <Dismiss24Regular />
-          </button>
+          <div className={styles.heroActions}>
+            {onQuickRequest && (
+              <button
+                className={styles.quickCreateBtn}
+                onClick={() => onQuickRequest(service)}
+                title="Quick Create"
+              >
+                Quick Create
+              </button>
+            )}
+            <button
+              className={styles.closeButton}
+              onClick={onClose}
+              title="Close"
+            >
+              <Dismiss24Regular />
+            </button>
+          </div>
         </div>
 
         {/* Scrollable Content */}
