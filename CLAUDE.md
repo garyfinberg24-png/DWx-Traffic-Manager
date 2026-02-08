@@ -6,7 +6,7 @@
 
 **Project Origin**: Cloned from LP Booking App (v1.7.5) - a production Teams app for License Pulse demo scheduling.
 
-**Current Version**: v2.14.1 (February 2026) - Quick Create Service+Product + Dashboard Product Queue + Won UX
+**Current Version**: v2.15.0 (February 2026) - Reporting Module (Pipeline, AM Performance, Revenue reports with PDF/Excel export)
 
 > **IMPORTANT**: We are ONLY working on the DWx Traffic Manager project. We DO NOT make any changes to the LP Booking App. The LP Booking App is a separate production application and must not be modified.
 
@@ -436,7 +436,7 @@ DWx-Traffic-Manager/
 │   │   │   ├── QuickCreateDialog.tsx     # Quick create dialog — service + product requests (v2.14.1)
 │   │   │   └── index.ts
 │   │   ├── Dashboard/
-│   │   │   ├── ManagerDashboard.tsx      # Dashboard with sidebar nav (14 tabs incl. Service + Product Queue)
+│   │   │   ├── ManagerDashboard.tsx      # Dashboard with sidebar nav (15 tabs incl. Service + Product Queue)
 │   │   │   ├── KPICards.tsx              # KPI metric cards
 │   │   │   ├── StatusChart.tsx           # Status pie chart
 │   │   │   ├── TypeChart.tsx             # Type distribution
@@ -453,6 +453,7 @@ DWx-Traffic-Manager/
 │   │   │   ├── WinLossTab.tsx            # Win/loss analysis dashboard (v2.10.0)
 │   │   │   ├── SLADashboardTab.tsx      # SLA tracking dashboard (v2.12.0)
 │   │   │   ├── InsightsTab.tsx           # Cross-deal post-mortem analytics (v2.14.0)
+│   │   │   ├── ReportsTab.tsx            # Pipeline/AM/Revenue reports with Recharts + PDF/Excel export (v2.15.0)
 │   │   │   └── index.ts
 │   │   ├── Admin/
 │   │   │   ├── AdminPage.tsx             # Admin with grouped sidebar navigation (13 tabs)
@@ -553,6 +554,7 @@ DWx-Traffic-Manager/
 │   │   ├── DWxNotificationService.ts     # DW-branded notifications (38 methods)
 │   │   ├── FollowUpService.ts            # Stale deal detection + follow-up reminders (v2.10.0)
 │   │   ├── WinLossAnalysisService.ts     # Win/loss analysis computation (v2.10.0)
+│   │   ├── ReportingService.ts           # Report orchestration — Pipeline/AM/Revenue reports (v2.15.0)
 │   │   ├── EmailTrackingService.ts       # Email thread tracking per deal (v2.11.0)
 │   │   ├── SessionPrepService.ts         # Session preparation CRUD + checklist management
 │   │   ├── AIPreparationService.ts       # Azure OpenAI integration for AI content generation (session prep + proposals + post-mortems)
@@ -596,6 +598,7 @@ DWx-Traffic-Manager/
 │   │   ├── FollowUp.ts                   # Stale deal detection types (v2.10.0)
 │   │   ├── WinLossAnalysis.ts            # Win/loss analysis types (v2.10.0)
 │   │   ├── PostMortem.ts                # Post-mortem types, issue taxonomy, AI analysis, analytics (v2.14.0)
+│   │   ├── Report.ts                    # Report types — Pipeline/AM/Revenue data interfaces, date ranges (v2.15.0)
 │   │   ├── EmailTracking.ts             # Email tracking types (v2.11.0)
 │   │   ├── MeetingNotes.ts              # Meeting notes types (v2.11.0)
 │   │   ├── Product.ts                    # Product catalog types (52 products: 16 Apps, 20 HyperParts, 6 Cards, 10 Agents)
@@ -621,7 +624,8 @@ DWx-Traffic-Manager/
 │   ├── hooks/
 │   │   └── useHeroCollapse.ts            # Hero collapse/expand with localStorage persistence (v2.12.0)
 │   ├── utils/
-│   │   ├── excelExport.ts                # Excel export utility
+│   │   ├── excelExport.ts                # Excel export utility + multi-sheet report exports (v2.15.0)
+│   │   ├── reportPdfGenerator.ts         # DW-branded PDF report export via jsPDF (v2.15.0)
 │   │   ├── proposalPdfGenerator.ts       # PDF proposal export (jsPDF) (v2.11.0)
 │   │   ├── proposalWordGenerator.ts     # Word proposal export (v2.11.0)
 │   │   ├── buttonStyles.ts              # Shared button/color constants (DW_COLORS)
@@ -1174,6 +1178,28 @@ Draft → Under Review → Review Complete → Actions In Progress → Closed
 
 **AI Analysis:** 6 methods run in parallel via `Promise.allSettled()` with graceful degradation. Context assembled from deal data, SLA breakdown, audit log, checklist completion, email history.
 
+### Phase 16: Reporting Module (COMPLETE - v2.15.0)
+
+Comprehensive reporting with 3 report types, interactive Recharts visualizations, DW-branded PDF export, and multi-sheet Excel export. All client-side, no new SharePoint lists.
+
+#### Types & Service Layer - COMPLETE
+
+- [x] **Report.ts** — Type definitions: `ReportType` ('pipeline' | 'am-performance' | 'revenue'), `DateRangePreset` (7 presets incl. custom), `ReportDateRange`, `ReportConfig`, `PipelineReportData` (overview + stageBreakdown + conversionRates + dealAging + forecast + topDeals), `AMPerformanceReportData` (summary + leaderboard + winRateByAM + revenueByAM + activityTrend), `RevenueReportData` (overview + byService + byIndustry + monthlyTrends + dealSizeDistribution + forecast)
+- [x] **ReportingService.ts** — Orchestrates PipelineService + WinLossAnalysisService. Methods: `getDateRange()`, `filterByDateRange()`, `generatePipelineReport()`, `generateAMReport()`, `generateRevenueReport()`. Deal aging computed from StageTimestamps
+
+#### UI - COMPLETE
+
+- [x] **ReportsTab.tsx** — 1196-line component: 3 report type selector cards (DataFunnel/People/Money icons), 7 date range pills (6 presets + custom with date inputs), Generate/PDF/Excel action buttons, conditional report rendering
+- [x] **Pipeline report view** — 5 KPI cards + Stage Breakdown BarChart + Conversion Rates horizontal BarChart + Deal Aging BarChart + 3-Month Forecast LineChart + Top 10 Deals table
+- [x] **AM Performance report view** — 4 KPI cards + Win Rate by AM BarChart + Revenue by AM BarChart + Activity Trend LineChart + Leaderboard table
+- [x] **Revenue report view** — 5 KPI cards + Revenue by Service BarChart + Revenue by Industry PieChart + Monthly Trends LineChart + Deal Size Distribution stacked BarChart
+- [x] **ManagerDashboard.tsx** — "Reports" tab added to Analytics nav group with DocumentTable24Regular icon (15 sidebar tabs total)
+
+#### Export - COMPLETE
+
+- [x] **reportPdfGenerator.ts** — DW-branded A4 PDF via jsPDF + jspdf-autotable: cover page (DWx blue stripe), auto-generated TOC, data tables with teal headers, page numbers, color-coded win rates. 3 renderers dispatched by report type
+- [x] **excelExport.ts** — `generateMultiSheetWorkbook()` for SpreadsheetML XML with DW-branded styles. `downloadPipelineReportExcel()` (6 sheets), `downloadAMPerformanceReportExcel()` (3 sheets), `downloadRevenueReportExcel()` (5 sheets)
+
 ### Pending / Round 4
 
 - [ ] Round 4: Medium-priority enhancements (M1-M10)
@@ -1383,6 +1409,10 @@ The app supports Account Managers from an external partner tenant:
 | `src/services/PostMortemService.ts` | Post-mortem CRUD + AI orchestration + analytics aggregation (v2.14.0) |
 | `src/components/PostMortem/PostMortemTab.tsx` | Per-deal post-mortem view (8th tab in RequestDetails) (v2.14.0) |
 | `src/components/Dashboard/InsightsTab.tsx` | Cross-deal post-mortem analytics dashboard (v2.14.0) |
+| `src/types/Report.ts` | Report types — Pipeline, AM Performance, Revenue data interfaces + date range presets (v2.15.0) |
+| `src/services/ReportingService.ts` | Report orchestration — date range filtering, 3 report generators using PipelineService + WinLossAnalysisService (v2.15.0) |
+| `src/components/Dashboard/ReportsTab.tsx` | Interactive reports UI — Recharts charts, KPI cards, data tables, PDF/Excel export (v2.15.0) |
+| `src/utils/reportPdfGenerator.ts` | DW-branded PDF report export — cover page, TOC, autoTable data tables (v2.15.0) |
 | `src/services/SessionPrepService.ts` | Session prep CRUD + checklist management + completion tracking |
 | `src/services/AIPreparationService.ts` | Azure OpenAI integration for AI content generation (session prep + proposals + post-mortems) |
 | `src/types/SessionPreparation.ts` | Session prep types (status, checklist, talking points, resources, agenda) |
@@ -1436,6 +1466,7 @@ The app supports Account Managers from an external partner tenant:
 | **Quick Create Dual-Mode** | Service/Product toggle with cascading Category → Product dropdowns, dual submit routing to Service Queue or Product Queue, Client Context field for AM mail trail paste |
 | **Dashboard Product Queue** | ManagerDashboard sidebar shows both "Service Queue" and "Product Queue" badges; SalesFunnelDashboard passes `onProductCreated` to QuickCreateDialog |
 | **Won Deal UX** | Trophy24Regular icon on Won button/menu, branded green gradient confirmation dialog in RequestsQueue |
+| **Reporting Module** | 3 report types (Pipeline, AM Performance, Revenue) in ReportsTab. Recharts charts, DW-branded PDF + multi-sheet Excel export. Reuses PipelineService + WinLossAnalysisService (no new SP lists) |
 
 ## Product Catalog
 
@@ -1553,6 +1584,7 @@ DWxSupportingDocuments/
 ## Recent Commit History
 
 ```
+0519ded feat: Reporting module with Pipeline, AM Performance, Revenue reports (v2.15.0)
 55df8cd feat: Quick Create Service+Product + Dashboard Product Queue + Won UX (v2.14.1)
 b4d3993 feat: Post Mortem & Issues Tracking with AI-powered analysis + Insights dashboard (v2.14.0)
 724952b style: Admin table fixes + Quick Create from Service Details + UI refinements
