@@ -414,12 +414,15 @@ DWx-Traffic-Manager/
 │   │   ├── MyRequests/
 │   │   │   ├── MyRequests.tsx            # Request list with stage filtering + product request tab (search/filter/sort/card redesign v2.12.1)
 │   │   │   ├── RequestCard.tsx           # Request card with stage badge
-│   │   │   ├── RequestDetails.tsx        # Full service request details modal
+│   │   │   ├── RequestDetails.tsx        # Full service request details modal (8 tabs incl. Post Mortem)
 │   │   │   ├── ProductRequestDetails.tsx # Full product request details modal (NEW v2.2.0)
 │   │   │   ├── StageProgressBar.tsx      # Visual funnel stage progress
-│   │   │   ├── DealActivityTimeline.tsx  # Chronological audit log feed (v2.10.0)
+│   │   │   ├── DetailModalShell.tsx     # Reusable detail modal shell
 │   │   │   ├── DealChecklist.tsx        # Per-deal checklist with completion tracking (v2.13.0)
+│   │   │   ├── DealActivityTimeline.tsx  # Chronological audit log feed (v2.10.0)
 │   │   │   ├── EmailTimeline.tsx        # Email communication timeline (v2.11.0)
+│   │   │   ├── DraftsTabContent.tsx     # Draft requests tab content
+│   │   │   ├── DraftCard.tsx            # Draft request card
 │   │   │   └── index.ts
 │   │   ├── SalesFunnel/
 │   │   │   ├── SalesFunnelDashboard.tsx  # Dashboard container + Board tab + Quick Create
@@ -448,10 +451,11 @@ DWx-Traffic-Manager/
 │   │   │   ├── ResourcesTab.tsx          # Resource allocation
 │   │   │   ├── GamificationTab.tsx       # Gamification dashboard
 │   │   │   ├── WinLossTab.tsx            # Win/loss analysis dashboard (v2.10.0)
+│   │   │   ├── SLADashboardTab.tsx      # SLA tracking dashboard (v2.12.0)
 │   │   │   ├── InsightsTab.tsx           # Cross-deal post-mortem analytics (v2.14.0)
 │   │   │   └── index.ts
 │   │   ├── Admin/
-│   │   │   ├── AdminPage.tsx             # Admin with grouped sidebar navigation (12 tabs)
+│   │   │   ├── AdminPage.tsx             # Admin with grouped sidebar navigation (13 tabs)
 │   │   │   ├── TeamMemberList.tsx        # Team member CRUD
 │   │   │   ├── TeamMemberForm.tsx        # Team member form dialog
 │   │   │   ├── ClientList.tsx            # Client management
@@ -470,6 +474,7 @@ DWx-Traffic-Manager/
 │   │   │   ├── DocumentManagement.tsx    # Document management
 │   │   │   ├── LandingPageManagement.tsx # Landing page content CRUD (v2.8.0)
 │   │   │   ├── KnowledgeBaseManagement.tsx # KB/FAQ/Glossary CRUD (v2.8.0)
+│   │   │   ├── SLAManagement.tsx         # SLA configuration admin (v2.12.0)
 │   │   │   ├── DWxSharePointProvisioning.tsx  # Tabbed SP provisioning (Overview/Lists/Seed Data/Tools)
 │   │   │   └── index.ts
 │   │   ├── KnowledgeBase/
@@ -488,7 +493,7 @@ DWx-Traffic-Manager/
 │   │   │   └── index.ts
 │   │   ├── SessionPrep/
 │   │   │   ├── SessionPrepDialog.tsx     # Main session prep dialog with tabs
-│   │   │   ├── ClientProfileView.tsx     # AI-generated client profile display
+│   │   │   ├── ClientProfileCard.tsx     # AI-generated client profile display
 │   │   │   ├── TalkingPointsEditor.tsx   # Editable talking points by category
 │   │   │   ├── ResourcePicker.tsx        # Suggested resources selector
 │   │   │   ├── MeetingAgendaView.tsx     # AI-generated meeting agenda timeline
@@ -526,6 +531,10 @@ DWx-Traffic-Manager/
 │   │   │   ├── LoadingSpinner.tsx        # Loading indicator
 │   │   │   ├── NotificationCenter.tsx    # Notifications
 │   │   │   ├── UserGuide.tsx             # Onboarding guide
+│   │   │   ├── CardSkeleton.tsx          # Loading skeleton for cards
+│   │   │   ├── Pagination.tsx            # Reusable pagination component
+│   │   │   ├── AdvancedFilterPanel.tsx   # Reusable advanced filter panel
+│   │   │   ├── AIChatPanel.tsx           # AI chat assistant panel
 │   │   │   └── index.ts
 │   │   ├── LoginPage/
 │   │   │   ├── LoginPage.tsx             # Branded login
@@ -541,7 +550,7 @@ DWx-Traffic-Manager/
 │   │   ├── CommercialService.ts          # Commercial metrics
 │   │   ├── GamificationService.ts        # Gamification logic
 │   │   ├── PostMortemService.ts           # Post-mortem CRUD + AI orchestration + analytics (v2.14.0)
-│   │   ├── DWxNotificationService.ts     # DW-branded notifications (31 methods)
+│   │   ├── DWxNotificationService.ts     # DW-branded notifications (38 methods)
 │   │   ├── FollowUpService.ts            # Stale deal detection + follow-up reminders (v2.10.0)
 │   │   ├── WinLossAnalysisService.ts     # Win/loss analysis computation (v2.10.0)
 │   │   ├── EmailTrackingService.ts       # Email thread tracking per deal (v2.11.0)
@@ -552,7 +561,7 @@ DWx-Traffic-Manager/
 │   │   ├── KnowledgeBaseService.ts       # Knowledge base CRUD (v2.8.0)
 │   │   ├── AuthService.ts                # MSAL authentication + Teams SSO
 │   │   ├── GraphService.ts               # Microsoft Graph API
-│   │   ├── AuditService.ts               # Change tracking (14 entity types)
+│   │   ├── AuditService.ts               # Change tracking (15 entity types)
 │   │   ├── ProductRequestService.ts      # Product request CRUD + confirmProductDemo + specialist assignment
 │   │   ├── ManagerService.ts             # Manager access CRUD
 │   │   ├── AccountManagerService.ts      # AM CRUD operations
@@ -563,6 +572,8 @@ DWx-Traffic-Manager/
 │   │   ├── GuestInvitationService.ts     # Guest user management
 │   │   ├── DWxSharePointProvisioningService.ts # DWx list provisioning (Graph API)
 │   │   ├── SharePointService.ts          # SharePoint REST API
+│   │   ├── SLAService.ts                 # SLA tracking + business day calculations (v2.12.0)
+│   │   ├── AIChatService.ts              # AI chat assistant service
 │   │   ├── EmailTemplates.ts             # Email template strings (35 templates)
 │   │   ├── PowerAutomateService.ts       # Power Automate with retry/circuit breaker
 │   │   ├── MockAuthService.ts            # Mock auth for E2E testing
@@ -597,6 +608,7 @@ DWx-Traffic-Manager/
 │   │   ├── User.ts                       # User types + FALLBACK_MANAGER_EMAILS
 │   │   ├── ReferenceData.ts              # Team members, clients, AM types
 │   │   ├── Checklist.ts                  # Service checklist types + DEFAULT_SERVICE_CHECKLISTS (v2.13.0)
+│   │   ├── AIChat.ts                     # AI chat types
 │   │   ├── Notification.ts               # Notification types
 │   │   ├── Template.ts                   # Template types
 │   │   ├── ApiResponses.ts               # API response types
@@ -611,6 +623,8 @@ DWx-Traffic-Manager/
 │   ├── utils/
 │   │   ├── excelExport.ts                # Excel export utility
 │   │   ├── proposalPdfGenerator.ts       # PDF proposal export (jsPDF) (v2.11.0)
+│   │   ├── proposalWordGenerator.ts     # Word proposal export (v2.11.0)
+│   │   ├── buttonStyles.ts              # Shared button/color constants (DW_COLORS)
 │   │   └── timezone.ts                   # Timezone utilities
 │   ├── App.tsx                           # Main app with routes
 │   ├── main.tsx                          # React entry point
@@ -663,12 +677,12 @@ Services | Products | New Request | My Requests | Knowledge Base | [Dashboard | 
 
 The Knowledge Base link is visible to ALL authenticated users. Dashboard and Admin are manager-only.
 
-## Admin Panel (12 Tabs — Grouped Sidebar Navigation)
+## Admin Panel (13 Tabs — Grouped Sidebar Navigation)
 
 The admin panel uses a grouped sidebar navigation layout (redesigned v2.9.1) with the following groups:
 
 **People**: Team Members, Account Managers, Specialists
-**Data**: Clients, Services
+**Data**: Clients, Services, SLA Configuration
 **Content**: Landing Page, Knowledge Base
 **Operations**: Checklist, Documents
 **Access**: Manager Access, Guest Invitations
@@ -681,6 +695,7 @@ The admin panel uses a grouped sidebar navigation layout (redesigned v2.9.1) wit
 | Clients | ClientList | Client management with XLSX import + orphan protection |
 | Services | ServiceManagement | Service CRUD with rich content editing + XLSX import |
 | Specialists | SpecialistManagement | Specialist CRUD with workload tracking |
+| SLA Configuration | SLAManagement | SLA target thresholds per complexity + per-service overrides (v2.12.0) |
 | Manager Access | ManagerSettings | Manager access control |
 | Guest Invitations | GuestInvitations | Guest user management |
 | Checklist | ChecklistManagement | Per-service checklist template editor (v2.13.0) |
@@ -713,6 +728,7 @@ VITE_DOCUMENT_LIBRARY=DWxSupportingDocuments
 VITE_LANDING_PAGE_CONTENT_LIST=DWxLandingPageContent
 VITE_KNOWLEDGE_BASE_LIST=DWxKnowledgeBase
 VITE_PROPOSALS_LIST=DWxProposals
+VITE_SESSION_PREP_LIST=DWxSessionPrep
 VITE_POST_MORTEMS_LIST=DWxPostMortems
 
 # Calendar
@@ -1341,8 +1357,8 @@ The app supports Account Managers from an external partner tenant:
 | `src/types/Proposal.ts` | All proposal types, 11 section interfaces, status workflow, defaults, templates |
 | `src/services/ProposalService.ts` | Proposal CRUD + status transitions + section persistence |
 | `src/components/Proposal/ProposalBuilder.tsx` | Main proposal dialog (11 tabs + AI generation) |
-| `src/services/AuditService.ts` | Audit logging (14 entity types) |
-| `src/services/DWxNotificationService.ts` | 31 notification methods (service + product + session prep + proposal + follow-up + post-mortem events) |
+| `src/services/AuditService.ts` | Audit logging (15 entity types) |
+| `src/services/DWxNotificationService.ts` | 38 notification methods (service + product + session prep + proposal + follow-up + post-mortem events) |
 | `src/services/EmailTemplates.ts` | 35 DW-branded email templates |
 | `src/services/FollowUpService.ts` | Stale deal detection + follow-up reminders (v2.10.0) |
 | `src/services/WinLossAnalysisService.ts` | Win/loss analysis computation - 7 analysis methods (v2.10.0) |
