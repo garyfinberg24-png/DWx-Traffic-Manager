@@ -54,7 +54,7 @@ const escapeHtml = (s: string): string =>
 // ============================================================================
 
 const GRAD = {
-  standard: 'linear-gradient(135deg, #1a5a8a 0%, #2980b9 100%)',   // DWx blue
+  standard: 'linear-gradient(135deg, #1e6b7b 0%, #2d8a9c 100%)',   // DWx teal (matches hero banners)
   success:  'linear-gradient(135deg, #107c10 0%, #14a114 100%)',    // Green
   danger:   'linear-gradient(135deg, #d13438 0%, #e74c4c 100%)',    // Red
   warning:  'linear-gradient(135deg, #f7630c 0%, #ff8c00 100%)',    // Orange
@@ -114,9 +114,9 @@ const row = (label: string, value: string, style?: string): string =>
     <span style="flex:1;${style || ''}">${value}</span>
   </div>`;
 
-/** Stage / status badge. */
+/** Stage / status badge (pill style matching email mockup). */
 const badge = (text: string, styles: { bg: string; color: string }): string =>
-  `<span style="display:inline-block;padding:4px 10px;border-radius:4px;font-size:11px;font-weight:600;text-transform:uppercase;background:${styles.bg};color:${styles.color};">${text}</span>`;
+  `<span style="display:inline-block;padding:4px 12px;border-radius:16px;font-size:12px;font-weight:500;background:${styles.bg};color:${styles.color};">${text}</span>`;
 
 /** Shorthand: stage badge using STAGE_STYLES lookup. */
 const stageBadge = (stage: string): string =>
@@ -126,15 +126,15 @@ const stageBadge = (stage: string): string =>
 const callout = (borderColor: string, bgColor: string, inner: string): string =>
   `<div style="background:${bgColor};border-left:4px solid ${borderColor};padding:15px;margin:15px 0;border-radius:4px;">${inner}</div>`;
 
-/** White card section. */
+/** White card section (matches mockup's white card pattern). */
 const card = (titleColor: string, title: string, inner: string): string =>
   `<div style="background:white;padding:15px;border-radius:4px;margin-top:15px;">
     <h3 style="margin-top:0;color:${titleColor};">${title}</h3>${inner}
   </div>`;
 
-/** Time slot pill. */
-const slot = (label: string, value: string, confirmed?: boolean): string =>
-  `<div style="padding:12px 16px;background:${confirmed ? '#d1fae5' : '#f5f5f5'};border-radius:6px;margin-bottom:8px;border-left:3px solid ${confirmed ? '#107c10' : '#1a5a8a'};">
+/** Time slot row (flat style matching email mockup). */
+const slot = (label: string, value: string, isLast?: boolean): string =>
+  `<div style="padding:8px 0;${isLast ? '' : 'border-bottom:1px solid #e1e1e1;'}">
     <strong>${label}:</strong> ${value}
   </div>`;
 
@@ -164,11 +164,11 @@ const countdownBanner = (text: string, bgColor: string, textColor: string): stri
 // ============================================================================
 
 const buildSlots = (s1?: string, s2?: string, s3?: string): string => {
-  let html = '';
-  if (s1) html += slot('Option 1', formatDateTime(s1));
-  if (s2) html += slot('Option 2', formatDateTime(s2));
-  if (s3) html += slot('Option 3', formatDateTime(s3));
-  return html;
+  const slots: string[] = [];
+  if (s1) slots.push(formatDateTime(s1));
+  if (s2) slots.push(formatDateTime(s2));
+  if (s3) slots.push(formatDateTime(s3));
+  return slots.map((v, i) => slot(`Option ${i + 1}`, v, i === slots.length - 1)).join('');
 };
 
 // ============================================================================
@@ -189,7 +189,7 @@ export const requestCreatedAM = (request: ServiceRequest): { subject: string; bo
     ${row('Stage', badge(request.FunnelStage, STAGE_STYLES[request.FunnelStage] || STAGE_STYLES.Lead))}
     ${row('Interest Level', interestLabel(request.InterestLevel), `color:${interestColor(request.InterestLevel)}`)}
     ${request.DealValue ? row('Deal Value', dealValue(formatCurrency(request.DealValue))) : ''}
-    ${card('#1a5a8a', 'Proposed Discovery Meeting Times', buildSlots(request.ProposedSlot1, request.ProposedSlot2, request.ProposedSlot3))}
+    ${card('#1e6b7b', 'Proposed Discovery Meeting Times', buildSlots(request.ProposedSlot1, request.ProposedSlot2, request.ProposedSlot3))}
     <p style="margin-top:20px;">Our pre-sales team will review your request and a specialist will be assigned shortly.</p>
   `;
   return {
@@ -211,8 +211,8 @@ export const requestCreatedManager = (request: ServiceRequest): { subject: strin
     ${row('Interest Level', interestLabel(request.InterestLevel), `color:${interestColor(request.InterestLevel)}`)}
     ${request.DealValue ? row('Deal Value', dealValue(formatCurrency(request.DealValue))) : ''}
     ${request.DealProbability ? row('Win Probability', `${request.DealProbability}%`) : ''}
-    ${request.Requirements ? callout('#1a5a8a', '#e8f4fc', `<strong>Requirements:</strong><p style="margin:5px 0 0;">${escapeHtml(request.Requirements)}</p>`) : ''}
-    ${card('#1a5a8a', 'Proposed Discovery Meeting Times', buildSlots(request.ProposedSlot1, request.ProposedSlot2, request.ProposedSlot3))}
+    ${request.Requirements ? callout('#1e6b7b', '#e8f4fc', `<strong>Requirements:</strong><p style="margin:5px 0 0;">${escapeHtml(request.Requirements)}</p>`) : ''}
+    ${card('#1e6b7b', 'Proposed Discovery Meeting Times', buildSlots(request.ProposedSlot1, request.ProposedSlot2, request.ProposedSlot3))}
     <p style="margin-top:20px;"><strong>Actions Required:</strong></p>
     <ul><li>Review the request details</li><li>Assign a specialist</li><li>Confirm a meeting time slot</li></ul>
   `;
@@ -234,10 +234,10 @@ export const specialistAssignedAM = (
   const content = `
     <p>Hi <strong>${escapeHtml(request.AccountManagerName)}</strong>,</p>
     <p>Great news! A specialist has been assigned to your service request for <strong>${escapeHtml(request.ClientName)}</strong>.</p>
-    ${callout('#1a5a8a', '#e8f4fc',
+    ${callout('#1e6b7b', '#e8f4fc',
       row('Specialist', `<strong>${escapeHtml(specialistName)}</strong>`) +
       row('Role', specialistRole) +
-      row('Email', `<a href="mailto:${escapeHtml(specialistEmail)}" style="color:#1a5a8a;">${escapeHtml(specialistEmail)}</a>`)
+      row('Email', `<a href="mailto:${escapeHtml(specialistEmail)}" style="color:#1e6b7b;">${escapeHtml(specialistEmail)}</a>`)
     )}
     ${row('Service', escapeHtml(request.ServiceName))}
     ${row('Client', escapeHtml(request.ClientName))}
@@ -263,13 +263,13 @@ export const specialistAssignedSpecialist = (
     <p>You have been assigned to a new service request. Please review the details below and schedule a discovery meeting with the client.</p>
     ${row('Service', `<strong>${escapeHtml(request.ServiceName)}</strong>`)}
     ${row('Client', escapeHtml(request.ClientName) + (isPremium ? ' ' + premium() : ''))}
-    ${row('Contact', `${escapeHtml(request.ContactName)} (<a href="mailto:${escapeHtml(request.ContactEmail)}" style="color:#1a5a8a;">${escapeHtml(request.ContactEmail)}</a>)`)}
+    ${row('Contact', `${escapeHtml(request.ContactName)} (<a href="mailto:${escapeHtml(request.ContactEmail)}" style="color:#1e6b7b;">${escapeHtml(request.ContactEmail)}</a>)`)}
     ${request.ContactPhone ? row('Phone', escapeHtml(request.ContactPhone)) : ''}
     ${row('Interest Level', interestLabel(request.InterestLevel), `color:${interestColor(request.InterestLevel)}`)}
     ${request.DealValue ? row('Deal Value', dealValue(formatCurrency(request.DealValue))) : ''}
-    <p><strong>Account Manager:</strong> ${escapeHtml(request.AccountManagerName)} (<a href="mailto:${escapeHtml(request.AccountManagerEmail)}" style="color:#1a5a8a;">${escapeHtml(request.AccountManagerEmail)}</a>)</p>
+    <p><strong>Account Manager:</strong> ${escapeHtml(request.AccountManagerName)} (<a href="mailto:${escapeHtml(request.AccountManagerEmail)}" style="color:#1e6b7b;">${escapeHtml(request.AccountManagerEmail)}</a>)</p>
     ${request.Requirements ? callout('#616161', '#f5f5f5', `<strong>Client Requirements:</strong><p style="margin:5px 0 0;">${escapeHtml(request.Requirements)}</p>`) : ''}
-    ${card('#1a5a8a', 'Proposed Meeting Times (Client\'s Preference)', buildSlots(request.ProposedSlot1, request.ProposedSlot2, request.ProposedSlot3))}
+    ${card('#1e6b7b', 'Proposed Meeting Times (Client\'s Preference)', buildSlots(request.ProposedSlot1, request.ProposedSlot2, request.ProposedSlot3))}
     <p style="margin-top:20px;">Please confirm one of the proposed slots or coordinate with the Account Manager to find an alternative time.</p>
   `;
   return {
@@ -496,7 +496,7 @@ export const productRequestCreatedAM = (request: ProductRequest): { subject: str
     ${row('Status', badge(request.Status, STATUS_STYLES[request.Status] || STATUS_STYLES['Pending Review']))}
     ${request.LicenseCount ? row('Licenses', String(request.LicenseCount)) : ''}
     ${request.EstimatedValue ? row('Estimated Value', dealValue(formatCurrency(request.EstimatedValue))) : ''}
-    ${request.ProposedSlot1 ? card('#1a5a8a', 'Proposed Time Slots',
+    ${request.ProposedSlot1 ? card('#1e6b7b', 'Proposed Time Slots',
       buildSlots(request.ProposedSlot1, request.ProposedSlot2, request.ProposedSlot3)
     ) : ''}
     <p style="margin-top:20px;">You'll be notified when the request is reviewed and a specialist is assigned.</p>
@@ -520,7 +520,7 @@ export const productRequestCreatedManager = (request: ProductRequest): { subject
     ${row('Submitted By', `${escapeHtml(request.AccountManagerName)} (${escapeHtml(request.AccountManagerEmail)})`)}
     ${request.LicenseCount ? row('Licenses', String(request.LicenseCount)) : ''}
     ${request.EstimatedValue ? row('Estimated Value', dealValue(formatCurrency(request.EstimatedValue))) : ''}
-    ${request.ProposedSlot1 ? card('#1a5a8a', 'Proposed Time Slots',
+    ${request.ProposedSlot1 ? card('#1e6b7b', 'Proposed Time Slots',
       buildSlots(request.ProposedSlot1, request.ProposedSlot2, request.ProposedSlot3)
     ) : ''}
     ${request.Comments ? callout('#616161', '#f5f5f5', `<strong>Comments:</strong><p style="margin:5px 0 0;">${escapeHtml(request.Comments)}</p>`) : ''}
@@ -544,10 +544,10 @@ export const productSpecialistAssignedAM = (
   const content = `
     <p>Hi <strong>${escapeHtml(request.AccountManagerName)}</strong>,</p>
     <p>A specialist has been assigned to your ${request.RequestType.toLowerCase()} request for <strong>${escapeHtml(request.ProductName)}</strong>.</p>
-    ${callout('#1a5a8a', '#e8f4fc',
+    ${callout('#1e6b7b', '#e8f4fc',
       row('Specialist', `<strong>${escapeHtml(specialistName)}</strong>`) +
       row('Role', specialistRole) +
-      row('Email', `<a href="mailto:${escapeHtml(specialistEmail)}" style="color:#1a5a8a;">${escapeHtml(specialistEmail)}</a>`)
+      row('Email', `<a href="mailto:${escapeHtml(specialistEmail)}" style="color:#1e6b7b;">${escapeHtml(specialistEmail)}</a>`)
     )}
     ${row('Product', `${escapeHtml(request.ProductName)} (${request.ProductType})`)}
     ${row('Request Type', request.RequestType)}
@@ -573,12 +573,12 @@ export const productSpecialistAssignedSpecialist = (
     ${row('Product', `<strong>${escapeHtml(request.ProductName)}</strong> (${request.ProductType})`)}
     ${row('Request Type', request.RequestType)}
     ${row('Client', escapeHtml(request.ClientName) + (request.IsPremiumClient ? ' ' + premium() : ''))}
-    ${row('Contact', `${escapeHtml(request.ContactName)} (<a href="mailto:${escapeHtml(request.ContactEmail)}" style="color:#1a5a8a;">${escapeHtml(request.ContactEmail)}</a>)`)}
+    ${row('Contact', `${escapeHtml(request.ContactName)} (<a href="mailto:${escapeHtml(request.ContactEmail)}" style="color:#1e6b7b;">${escapeHtml(request.ContactEmail)}</a>)`)}
     ${request.ContactPhone ? row('Phone', escapeHtml(request.ContactPhone)) : ''}
     ${request.LicenseCount ? row('Licenses', String(request.LicenseCount)) : ''}
     ${request.EstimatedValue ? row('Estimated Value', dealValue(formatCurrency(request.EstimatedValue))) : ''}
-    <p><strong>Account Manager:</strong> ${escapeHtml(request.AccountManagerName)} (<a href="mailto:${escapeHtml(request.AccountManagerEmail)}" style="color:#1a5a8a;">${escapeHtml(request.AccountManagerEmail)}</a>)</p>
-    ${request.ProposedSlot1 ? card('#1a5a8a', 'Proposed Time Slots',
+    <p><strong>Account Manager:</strong> ${escapeHtml(request.AccountManagerName)} (<a href="mailto:${escapeHtml(request.AccountManagerEmail)}" style="color:#1e6b7b;">${escapeHtml(request.AccountManagerEmail)}</a>)</p>
+    ${request.ProposedSlot1 ? card('#1e6b7b', 'Proposed Time Slots',
       buildSlots(request.ProposedSlot1, request.ProposedSlot2, request.ProposedSlot3)
     ) : ''}
     <p style="margin-top:20px;">Please confirm one of the proposed slots or coordinate with the Account Manager.</p>
@@ -653,7 +653,7 @@ export const productDemoConfirmedSpecialist = (
     ${row('Request Type', request.RequestType)}
     ${row('Client', escapeHtml(request.ClientName))}
     ${row('Contact', `${escapeHtml(request.ContactName)} (${escapeHtml(request.ContactEmail)})`)}
-    ${row('Account Manager', `${escapeHtml(request.AccountManagerName)} (<a href="mailto:${escapeHtml(request.AccountManagerEmail)}" style="color:#1a5a8a;">${escapeHtml(request.AccountManagerEmail)}</a>)`)}
+    ${row('Account Manager', `${escapeHtml(request.AccountManagerName)} (<a href="mailto:${escapeHtml(request.AccountManagerEmail)}" style="color:#1e6b7b;">${escapeHtml(request.AccountManagerEmail)}</a>)`)}
     ${callout('#107c10', '#dff6dd',
       `<strong>Preparation Checklist:</strong>
       <ul style="margin:8px 0 0;padding-left:20px;">
@@ -705,7 +705,7 @@ export const sessionPrepCreated = (
       </ul>`
     )}
     ${request.Requirements ? callout('#616161', '#f5f5f5', `<strong>Client Requirements:</strong><p style="margin:5px 0 0;">${escapeHtml(request.Requirements)}</p>`) : ''}
-    <p style="margin-top:20px;"><strong>Account Manager:</strong> ${escapeHtml(request.AccountManagerName)} (<a href="mailto:${escapeHtml(request.AccountManagerEmail)}" style="color:#1a5a8a;">${escapeHtml(request.AccountManagerEmail)}</a>)</p>
+    <p style="margin-top:20px;"><strong>Account Manager:</strong> ${escapeHtml(request.AccountManagerName)} (<a href="mailto:${escapeHtml(request.AccountManagerEmail)}" style="color:#1e6b7b;">${escapeHtml(request.AccountManagerEmail)}</a>)</p>
   `;
   return {
     subject: `[DWx] Session Preparation Ready: ${escapeHtml(request.ServiceName)} - ${escapeHtml(request.ClientName)}`,
@@ -802,7 +802,7 @@ export const welcomeAccountManager = (
   const content = `
     <p>Hi <strong>${escapeHtml(name)}</strong>,</p>
     <p>You've been added as an Account Manager in the DWx Traffic Manager system. You can now submit service and product requests for your clients.</p>
-    ${card('#1a5a8a', 'What You Can Do',
+    ${card('#1e6b7b', 'What You Can Do',
       `<ul>
         <li><strong>Browse Services:</strong> Explore our 6 service categories &mdash; Power Platform, SPFx, Migrations, Assessments, Copilot Agents, and Viva</li>
         <li><strong>Browse Products:</strong> View 29 DWx products across Apps, Web Parts, and Adaptive Cards</li>
@@ -810,7 +810,7 @@ export const welcomeAccountManager = (
         <li><strong>Track Progress:</strong> Monitor your requests through the sales pipeline</li>
       </ul>`
     )}
-    ${callout('#1a5a8a', '#e8f4fc', row('Email', escapeHtml(email)) + row('Your Region', region) + row('Source', source))}
+    ${callout('#1e6b7b', '#e8f4fc', row('Email', escapeHtml(email)) + row('Your Region', region) + row('Source', source))}
     <p style="margin-top:20px;">If you have any questions, please reach out to your DWx manager. Happy selling!</p>
   `;
   return {
@@ -850,18 +850,18 @@ export const weeklyPipelineDigest = (
   const content = `
     <p>Here's your weekly summary of DWx Traffic Manager pipeline activity.</p>
     <div style="display:flex;gap:12px;margin:20px 0;">
-      ${kpiBox('Total Pipeline', formatCurrency(kpis.totalPipeline), '#e8f4fc', '#1a5a8a')}
+      ${kpiBox('Total Pipeline', formatCurrency(kpis.totalPipeline), '#e8f4fc', '#1e6b7b')}
       ${kpiBox('Weighted Pipeline', formatCurrency(kpis.weightedPipeline), '#dff6dd', '#107c10')}
       ${kpiBox('Win Rate', `${kpis.winRate}%`, '#f5eefa', '#8b5cf6')}
     </div>
-    ${card('#1a5a8a', "This Week's Activity",
+    ${card('#1e6b7b', "This Week's Activity",
       row('New Requests', String(activity.newRequests)) +
       row('Deals Won', `<span style="color:#107c10;font-weight:600;">${activity.dealsWon} (${formatCurrency(activity.wonRevenue)})</span>`) +
       row('Deals Lost', `<span style="color:#d13438;">${activity.dealsLost} (${formatCurrency(activity.lostRevenue)})</span>`) +
       row('Meetings Scheduled', String(activity.meetingsScheduled)) +
       row('Product Demos', String(activity.productDemos))
     )}
-    ${card('#1a5a8a', 'Pipeline by Stage', stageRows)}
+    ${card('#1e6b7b', 'Pipeline by Stage', stageRows)}
     ${hotDeals.length > 0 ? callout('#d13438', '#fde7e9', `<strong>Hot Leads Requiring Attention:</strong><ul style="margin:8px 0 0;padding-left:20px;">${hotDealItems}</ul>`) : ''}
   `;
   return {
@@ -1044,8 +1044,8 @@ const followUpReminderAM = (
 
   const content = `
     ${callout(
-      isOverdue ? '#fee2e2' : isCritical ? '#fee2e2' : '#fff4ce',
       isOverdue ? '#dc2626' : isCritical ? '#dc2626' : '#f7630c',
+      isOverdue ? '#fee2e2' : isCritical ? '#fee2e2' : '#fff4ce',
       `<strong>${urgencyLabel}:</strong> ${escapeHtml(urgency.reason)}${urgency.daysOverdue ? ` (${urgency.daysOverdue} days overdue)` : ''}`
     )}
     <p style="margin:0 0 16px;color:#323130;">Hi ${escapeHtml(request.AccountManagerName)},</p>
@@ -1081,8 +1081,8 @@ const followUpReminderManager = (
 
   const content = `
     ${callout(
-      isOverdue ? '#fee2e2' : isCritical ? '#fee2e2' : '#fff4ce',
       isOverdue ? '#dc2626' : isCritical ? '#dc2626' : '#f7630c',
+      isOverdue ? '#fee2e2' : isCritical ? '#fee2e2' : '#fff4ce',
       `<strong>${urgencyLabel}:</strong> ${escapeHtml(urgency.reason)}`
     )}
     <p style="margin:0 0 16px;color:#323130;">A deal in the pipeline requires management attention:</p>
