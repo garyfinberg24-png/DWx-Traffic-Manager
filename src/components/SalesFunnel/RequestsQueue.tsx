@@ -13,6 +13,9 @@ import {
   Option,
   Checkbox,
   Tooltip,
+  Dialog,
+  DialogSurface,
+  DialogActions,
 } from '@fluentui/react-components';
 import {
   PersonRegular,
@@ -22,6 +25,7 @@ import {
   DismissRegular,
   ArrowForwardRegular,
   DismissCircleRegular,
+  Trophy24Regular,
 } from '@fluentui/react-icons';
 import { DW_COLORS } from '../../utils/buttonStyles';
 import { useAuth } from '../../contexts/AuthContext';
@@ -224,6 +228,60 @@ const useStyles = makeStyles({
   },
   bulkDropdown: {
     minWidth: '160px',
+  },
+  // Won dialog styles
+  wonSurface: {
+    maxWidth: '440px',
+    width: '100%',
+    overflow: 'hidden',
+    borderRadius: '10px',
+    boxShadow: '0 8px 32px rgba(0,0,0,0.25)',
+  },
+  wonHeader: {
+    padding: '16px 20px',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '14px',
+    backgroundImage: 'linear-gradient(135deg, #107c10 0%, #14a114 100%)',
+    color: 'white',
+  },
+  wonHeaderIcon: {
+    width: '40px',
+    height: '40px',
+    borderRadius: '8px',
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
+  },
+  wonHeaderContent: {
+    flex: 1,
+    minWidth: 0,
+  },
+  wonHeaderTitle: {
+    fontSize: '13px',
+    fontWeight: '500',
+    color: 'rgba(255, 255, 255, 0.75)',
+    display: 'block',
+  },
+  wonHeaderSubtitle: {
+    fontSize: '15px',
+    fontWeight: '600',
+    color: 'white',
+    display: 'block',
+    lineHeight: '1.3',
+  },
+  wonBody: {
+    padding: '16px 20px',
+  },
+  wonActions: {
+    display: 'flex',
+    justifyContent: 'flex-end',
+    gap: '8px',
+    padding: '12px 20px',
+    borderTop: '1px solid #e5e7eb',
+    backgroundColor: '#fafafa',
   },
 });
 
@@ -583,7 +641,7 @@ export const RequestsQueue: React.FC<RequestsQueueProps> = ({
               />
             </Tooltip>
           )}
-          <Text className={styles.title}>Action Queue</Text>
+          <Text className={styles.title}>Service Queue</Text>
           {actionableRequests.length > 0 && (
             <span className={styles.badge}>{actionableRequests.length}</span>
           )}
@@ -808,8 +866,8 @@ export const RequestsQueue: React.FC<RequestsQueueProps> = ({
                           </Button>
                         )}
 
-                        {/* Confirm Meeting (for Discovery stage) */}
-                        {request.FunnelStage === 'Discovery' && !request.ConfirmedDateTime && (
+                        {/* Confirm Meeting (for Discovery stage — only if valid proposed slots exist) */}
+                        {request.FunnelStage === 'Discovery' && !request.ConfirmedDateTime && request.ProposedSlot1 && !isNaN(new Date(request.ProposedSlot1).getTime()) && (
                           <Dropdown
                             className={styles.slotDropdown}
                             placeholder="Confirm slot..."
@@ -823,12 +881,12 @@ export const RequestsQueue: React.FC<RequestsQueueProps> = ({
                             <Option value={request.ProposedSlot1} text={format(new Date(request.ProposedSlot1), 'MMM d @ h:mm a')}>
                               {format(new Date(request.ProposedSlot1), 'MMM d @ h:mm a')}
                             </Option>
-                            {request.ProposedSlot2 && (
+                            {request.ProposedSlot2 && !isNaN(new Date(request.ProposedSlot2).getTime()) && (
                               <Option value={request.ProposedSlot2} text={format(new Date(request.ProposedSlot2), 'MMM d @ h:mm a')}>
                                 {format(new Date(request.ProposedSlot2), 'MMM d @ h:mm a')}
                               </Option>
                             )}
-                            {request.ProposedSlot3 && (
+                            {request.ProposedSlot3 && !isNaN(new Date(request.ProposedSlot3).getTime()) && (
                               <Option value={request.ProposedSlot3} text={format(new Date(request.ProposedSlot3), 'MMM d @ h:mm a')}>
                                 {format(new Date(request.ProposedSlot3), 'MMM d @ h:mm a')}
                               </Option>
@@ -866,19 +924,40 @@ export const RequestsQueue: React.FC<RequestsQueueProps> = ({
       </div>
 
       {/* Won Confirmation */}
-      <ConfirmDialog
-        open={!!confirmWon}
-        title="Mark as Won"
-        message={
-          confirmWon
-            ? `Are you sure you want to mark "${confirmWon.ClientName} — ${confirmWon.ServiceName}" as Won? This will update the client lifetime value and close the deal.`
-            : ''
-        }
-        confirmLabel="Mark as Won"
-        onConfirm={handleConfirmWon}
-        onCancel={() => setConfirmWon(null)}
-        isLoading={confirmLoading}
-      />
+      <Dialog open={!!confirmWon} onOpenChange={(_, data) => { if (!data.open) setConfirmWon(null); }}>
+        <DialogSurface className={styles.wonSurface} style={{ padding: 0 }}>
+          <div className={styles.wonHeader}>
+            <div className={styles.wonHeaderIcon}>
+              <Trophy24Regular style={{ width: '20px', height: '20px', color: 'white' }} />
+            </div>
+            <div className={styles.wonHeaderContent}>
+              <Text className={styles.wonHeaderTitle}>Close Deal</Text>
+              <Text className={styles.wonHeaderSubtitle}>Mark as Won</Text>
+            </div>
+          </div>
+          <div className={styles.wonBody}>
+            <Text style={{ fontSize: '13px', color: '#323130', lineHeight: '1.5' }}>
+              {confirmWon
+                ? `Are you sure you want to mark "${confirmWon.ClientName} \u2014 ${confirmWon.ServiceName}" as Won? This will update the client lifetime value and close the deal.`
+                : ''}
+            </Text>
+          </div>
+          <DialogActions className={styles.wonActions}>
+            <Button appearance="secondary" onClick={() => setConfirmWon(null)} disabled={confirmLoading}>
+              Cancel
+            </Button>
+            <Button
+              appearance="primary"
+              icon={<Trophy24Regular />}
+              onClick={handleConfirmWon}
+              disabled={confirmLoading}
+              style={{ backgroundColor: '#107c10', whiteSpace: 'nowrap' }}
+            >
+              {confirmLoading ? 'Processing...' : 'Mark as Won'}
+            </Button>
+          </DialogActions>
+        </DialogSurface>
+      </Dialog>
 
       {/* Bulk Won Confirmation */}
       <ConfirmDialog

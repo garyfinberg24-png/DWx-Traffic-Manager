@@ -24,6 +24,7 @@ import {
   People24Regular,
   Building24Regular,
   CheckboxChecked24Regular,
+  BoxRegular,
   ChevronDownRegular,
   ChevronRightRegular,
   Lightbulb24Regular,
@@ -59,13 +60,16 @@ import { HeroCollapseToggle } from '../Common/HeroCollapseToggle';
 // DWx Traffic Manager - Pipeline & Service Request Components
 import { SalesFunnelDashboard } from '../SalesFunnel/SalesFunnelDashboard';
 import { RequestsQueue } from '../SalesFunnel/RequestsQueue';
+import { ProductRequestsQueue } from '../SalesFunnel/ProductRequestsQueue';
 import { serviceRequestService } from '../../services/ServiceRequestService';
+import { productRequestService } from '../../services/ProductRequestService';
+import { ProductRequest } from '../../types/ProductRequest';
 
 // ============================================================================
 // Types
 // ============================================================================
 
-type DashboardTab = 'overview' | 'pipeline' | 'approvals' | 'calendar' | 'timeline' | 'performance' | 'clients' | 'commercial' | 'gamification' | 'resources' | 'winloss' | 'sla' | 'insights';
+type DashboardTab = 'overview' | 'pipeline' | 'approvals' | 'productQueue' | 'calendar' | 'timeline' | 'performance' | 'clients' | 'commercial' | 'gamification' | 'resources' | 'winloss' | 'sla' | 'insights';
 
 interface NavItem {
   value: DashboardTab;
@@ -91,7 +95,8 @@ const NAV_GROUPS: NavGroup[] = [
     items: [
       { value: 'overview', label: 'Overview', icon: Board24Regular },
       { value: 'pipeline', label: 'Sales Pipeline', icon: TargetRegular },
-      { value: 'approvals', label: 'Action Queue', icon: CheckboxChecked24Regular, badge: 'count' },
+      { value: 'approvals', label: 'Service Queue', icon: CheckboxChecked24Regular, badge: 'count' },
+      { value: 'productQueue', label: 'Product Queue', icon: BoxRegular, badge: 'count' },
     ],
   },
   {
@@ -448,6 +453,7 @@ export const ManagerDashboard: React.FC = () => {
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [serviceRequests, setServiceRequests] = useState<ServiceRequest[]>([]);
+  const [productRequests, setProductRequests] = useState<ProductRequest[]>([]);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
   // Read tab from URL params, default to 'overview'
@@ -497,14 +503,19 @@ export const ManagerDashboard: React.FC = () => {
       setIsLoading(true);
       setError(null);
 
-      // Load service requests (primary data for DWx Traffic Manager)
+      // Load service requests + product requests (primary data for DWx Traffic Manager)
       let allRequests: ServiceRequest[] = [];
+      let allProductRequests: ProductRequest[] = [];
       try {
-        allRequests = await serviceRequestService.getRequests();
+        [allRequests, allProductRequests] = await Promise.all([
+          serviceRequestService.getRequests(),
+          productRequestService.getRequests(),
+        ]);
       } catch (requestErr) {
-        console.warn('Could not load service requests:', requestErr);
+        console.warn('Could not load requests:', requestErr);
       }
       setServiceRequests(allRequests);
+      setProductRequests(allProductRequests);
 
       // Load legacy bookings (optional - for backward compatibility during migration)
       let allBookings: Booking[] = [];
@@ -555,11 +566,24 @@ export const ManagerDashboard: React.FC = () => {
     showToast('Request updated successfully', 'success');
   };
 
+  // Handle product request updates from ProductRequestsQueue
+  const handleProductRequestUpdated = (updatedRequest: ProductRequest) => {
+    setProductRequests((prev) =>
+      prev.map((r) => (r.Id === updatedRequest.Id ? updatedRequest : r))
+    );
+    showToast('Product request updated successfully', 'success');
+  };
+
   const accountManagers = dashboardService.getUniqueAccountManagers(bookings);
 
   // Count actionable service requests (not Won/Lost)
   const pendingRequestsCount = serviceRequests.filter(
     (r) => r.FunnelStage !== 'Won' && r.FunnelStage !== 'Lost'
+  ).length;
+
+  // Count actionable product requests
+  const actionableProductCount = productRequests.filter(
+    (r) => r.Status !== 'Completed' && r.Status !== 'Cancelled'
   ).length;
 
   const heroStats = useMemo(() => {
@@ -581,7 +605,8 @@ export const ManagerDashboard: React.FC = () => {
 
   // Helper to get badge for nav item
   const renderNavBadge = (item: NavItem) => {
-    if (item.badge === 'count' && pendingRequestsCount > 0) {
+    const badgeCount = item.value === 'productQueue' ? actionableProductCount : pendingRequestsCount;
+    if (item.badge === 'count' && badgeCount > 0) {
       return (
         <Badge
           size="small"
@@ -589,7 +614,7 @@ export const ManagerDashboard: React.FC = () => {
           color="danger"
           className={styles.navBadge}
         >
-          {pendingRequestsCount}
+          {badgeCount}
         </Badge>
       );
     }
@@ -766,14 +791,22 @@ export const ManagerDashboard: React.FC = () => {
 
               {/* Pipeline Tab */}
               {selectedTab === 'pipeline' && (
-                <SalesFunnelDashboard />
+                <SalesFunnelDashboard onDataChanged={fetchDashboardData} />
               )}
 
-              {/* Action Queue Tab */}
+              {/* Service Queue Tab */}
               {selectedTab === 'approvals' && (
                 <RequestsQueue
                   requests={serviceRequests}
                   onRequestUpdated={handleRequestUpdated}
+                />
+              )}
+
+              {/* Product Queue Tab */}
+              {selectedTab === 'productQueue' && (
+                <ProductRequestsQueue
+                  requests={productRequests}
+                  onRequestUpdated={handleProductRequestUpdated}
                 />
               )}
 

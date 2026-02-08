@@ -24,6 +24,7 @@ import {
   History24Regular,
   CheckboxChecked24Regular,
   Notepad24Regular,
+  Trophy24Regular,
 } from '@fluentui/react-icons';
 import { makeStyles } from '@fluentui/react-components';
 import { useAuth } from '../../contexts/AuthContext';
@@ -455,9 +456,10 @@ export const RequestDetails: React.FC<RequestDetailsProps> = ({
           key={stage}
           className={styles.wonButton}
           appearance="primary"
-          icon={<CheckmarkRegular />}
+          icon={<Trophy24Regular />}
           onClick={() => handleStageChange(stage)}
           disabled={updating}
+          style={{ whiteSpace: 'nowrap' }}
         >
           Mark as Won
         </Button>

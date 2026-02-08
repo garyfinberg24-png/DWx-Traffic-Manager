@@ -243,10 +243,13 @@ type DashboardTab = 'overview' | 'pipeline' | 'queue' | 'productQueue' | 'board'
 
 interface SalesFunnelDashboardProps {
   onStageClick?: (stage: FunnelStage) => void;
+  /** Called when deals are created or updated (e.g. Quick Create) so parent can refresh its own state */
+  onDataChanged?: () => void;
 }
 
 export const SalesFunnelDashboard: React.FC<SalesFunnelDashboardProps> = ({
   onStageClick,
+  onDataChanged,
 }) => {
   const styles = useStyles();
   const { isCollapsed, toggle } = useHeroCollapse('pipeline');
@@ -328,6 +331,7 @@ export const SalesFunnelDashboard: React.FC<SalesFunnelDashboardProps> = ({
     setRequests((prev) =>
       prev.map((r) => (r.Id === updatedRequest.Id ? updatedRequest : r))
     );
+    onDataChanged?.();
   };
 
   const handleProductRequestUpdated = (updatedRequest: ProductRequest) => {
@@ -338,6 +342,13 @@ export const SalesFunnelDashboard: React.FC<SalesFunnelDashboardProps> = ({
 
   const handleDealCreated = (newRequest: ServiceRequest) => {
     setRequests((prev) => [newRequest, ...prev]);
+    // Notify parent (ManagerDashboard) so it can refresh sidebar counts
+    onDataChanged?.();
+  };
+
+  const handleProductCreated = (newRequest: ProductRequest) => {
+    setProductRequests((prev) => [newRequest, ...prev]);
+    onDataChanged?.();
   };
 
   // Count actionable product requests for badge
@@ -477,7 +488,7 @@ export const SalesFunnelDashboard: React.FC<SalesFunnelDashboardProps> = ({
         </Tab>
         {isManager && (
           <Tab value="queue" icon={<PeopleQueueRegular />}>
-            Action Queue
+            Service Queue
           </Tab>
         )}
         {isManager && (
@@ -692,6 +703,7 @@ export const SalesFunnelDashboard: React.FC<SalesFunnelDashboardProps> = ({
         open={showQuickCreate}
         onClose={() => setShowQuickCreate(false)}
         onDealCreated={handleDealCreated}
+        onProductCreated={handleProductCreated}
       />
 
       {/* Request Details Modal (from Board card click) */}

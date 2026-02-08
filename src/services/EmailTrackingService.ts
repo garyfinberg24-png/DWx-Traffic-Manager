@@ -43,10 +43,20 @@ class EmailTrackingService {
       };
       existingThread.push(newRecord);
 
-      // Write back
-      await graphService.updateListItem(listName, requestId, {
-        EmailThread_JSON: JSON.stringify(existingThread),
-      });
+      // Write back (retry without EmailThread_JSON if column not provisioned)
+      try {
+        await graphService.updateListItem(listName, requestId, {
+          EmailThread_JSON: JSON.stringify(existingThread),
+        });
+      } catch (writeErr: unknown) {
+        const errMsg = writeErr instanceof Error ? writeErr.message : String(writeErr);
+        if (errMsg.includes('EmailThread_JSON') && (errMsg.includes('is not recognized') || errMsg.includes('invalid field'))) {
+          // Column not provisioned yet — silently skip
+          console.warn('[EmailTrackingService] EmailThread_JSON column not provisioned, skipping email log');
+        } else {
+          throw writeErr; // Re-throw to be caught by outer catch
+        }
+      }
     } catch (error) {
       // Silent failure -- email tracking should never break notification flow
       console.error('[EmailTrackingService] logEmail failed:', error);

@@ -49,6 +49,12 @@ class ServiceCatalogService {
    * Get a single service by ID
    */
   async getServiceById(id: number): Promise<DWService | null> {
+    // Negative IDs are default/fallback services — look up from defaults, not SP
+    if (id < 0) {
+      const defaults = this.getDefaultServices(false);
+      return defaults.find(s => s.Id === id) ?? null;
+    }
+
     try {
       const graphService = getGraphService();
       const item = await graphService.getListItemById(this.listName, id) as Record<string, unknown> | null;

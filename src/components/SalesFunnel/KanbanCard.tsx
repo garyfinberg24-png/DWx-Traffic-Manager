@@ -20,7 +20,7 @@ import {
 } from '@fluentui/react-components';
 import {
   MoreHorizontalRegular,
-  CheckmarkRegular,
+  Trophy24Regular,
   DismissRegular,
   OpenRegular,
 } from '@fluentui/react-icons';
@@ -226,7 +226,7 @@ const KanbanCard: React.FC<KanbanCardProps> = ({
                 <MenuPopover>
                   <MenuList>
                     <MenuItem
-                      icon={<CheckmarkRegular />}
+                      icon={<Trophy24Regular />}
                       onClick={(e) => {
                         e.stopPropagation();
                         onMarkWon(request);
