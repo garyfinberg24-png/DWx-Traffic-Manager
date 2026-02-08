@@ -601,7 +601,7 @@ DWx-Traffic-Manager/
 │   │   ├── Report.ts                    # Report types — Pipeline/AM/Revenue data interfaces, date ranges (v2.15.0)
 │   │   ├── EmailTracking.ts             # Email tracking types (v2.11.0)
 │   │   ├── MeetingNotes.ts              # Meeting notes types (v2.11.0)
-│   │   ├── Product.ts                    # Product catalog types (52 products: 16 Apps, 20 HyperParts, 6 Cards, 10 Agents)
+│   │   ├── Product.ts                    # Product catalog types (49 products: 16 Apps, 17 HyperParts, 6 Cards, 10 Agents)
 │   │   ├── ProductRequirements.ts        # Product requirements form types
 │   │   ├── ServiceRequirements.ts        # Service requirements types
 │   │   ├── Commercial.ts                 # Commercial metrics types
@@ -1493,34 +1493,31 @@ The Product Catalog displays DWx offerings in four categories with tabbed naviga
 | Survey Management | Learning & Engagement | Employee Feedback Platform |
 | Training & Skills | Learning & Engagement | Learning Management System |
 
-### HyperParts Suite (20 SPFx Web Parts)
+### HyperParts Suite (17 SPFx Web Parts)
 
 The HyperParts Suite is a DWx-branded ecosystem of SPFx web parts. The tab features a purple gradient hero banner with sales copy and a scrollable pills filter with search.
 
 | Product | Category | Description |
 |---------|----------|-------------|
-| HyperHero | Visuals & Branding | Dynamic Hero Layouts & Animations |
-| HyperNav | Navigation | Multi-level Personalized Navigation |
-| HyperNews Feed | Communication | Interactive Media Hub with Social Metrics |
-| HyperRollup | Content Discovery | Visual Query Builder & Content Rollup |
-| HyperProfile | People & Culture | Live Directory Cards with Teams Status |
-| HyperExplorer | Media & Files | Advanced File Previewer & ZIP Export |
-| HyperLocal | Utility | Weather, Clocks & Currency Converter |
-| HyperAction | Action & Workflow | Intelligent Multi-step Call-to-Action |
-| HyperTabs | Layout & Structure | Containerized Tabbed/Accordion Layout |
-| HyperPoll | Engagement | Real-time In-page Voting & Charts |
-| HyperTicker | Communication | Breaking News Marquee & Alerts |
-| HyperRecognition | People & Culture | Peer Kudos & Wall of Fame |
-| HyperFAQ | Knowledge | Searchable Knowledge Base with Voting |
-| HyperEvents Pro | Events | Unified Calendar with Outlook Sync |
-| HyperBreadcrumb | Navigation | Dynamic Hub-Site Path Detection |
-| HyperFeedback | Utility | Floating Screenshot & Ticket Widget |
 | HyperBirthdays | People & Culture | Automated Celebration Carousel |
-| HyperExternal | Integration | Secure SSO IFrame Wrapper |
-| HyperMetrics | Data & Analytics | Real-time KPI & Power BI Display |
-| HyperTimeline | Project Management | Interactive Project Roadmap Visualizer |
+| HyperCharts | Data & Analytics | Real-time KPI & Power BI Display |
+| HyperDirectory | People & Culture | Organisation Directory & Org Chart |
+| HyperEvents | Events | Unified Calendar with Outlook Sync |
+| HyperFAQ | Knowledge | Searchable Knowledge Base with Voting |
+| HyperHero | Visuals & Branding | Dynamic Hero Layouts & Animations |
+| HyperLert | Communication | Priority Alerts & Emergency Banners |
+| HyperLinks | Navigation | Quick Links & Resource Collections |
+| HyperNav | Navigation | Multi-level Personalised Navigation |
+| HyperNews | Communication | Interactive News Hub with Social Metrics |
+| HyperPoll | Engagement | Real-time In-page Voting & Charts |
+| HyperProfile | People & Culture | Live Profile Cards with Teams Status |
+| HyperRollup | Content Discovery | Visual Query Builder & Content Rollup |
+| HyperSearch | Content Discovery | Unified Enterprise Search Experience |
+| HyperSpotlight | Visuals & Branding | Featured Content & Announcements |
+| HyperTabs | Layout & Structure | Containerised Tabbed/Accordion Layout |
+| HyperTicker | Communication | Breaking News Marquee & Alerts |
 
-**HyperParts Categories (15):** Visuals & Branding, Navigation, Communication, Content Discovery, People & Culture, Media & Files, Utility, Action & Workflow, Layout & Structure, Engagement, Knowledge, Events, Integration, Data & Analytics, Project Management
+**HyperParts Categories (9):** Visuals & Branding, Navigation, Communication, Content Discovery, People & Culture, Layout & Structure, Engagement, Knowledge, Events, Data & Analytics
 
 ### Adaptive Cards (6 Products)
 

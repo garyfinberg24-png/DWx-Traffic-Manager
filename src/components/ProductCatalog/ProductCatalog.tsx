@@ -39,27 +39,22 @@ import {
   DocumentEdit24Regular,
   Shield24Regular,
   Pulse24Regular,
-  // HyperParts icons
+  // HyperParts icons (17) — LinkMultiple24Regular and PeopleTeam24Regular already imported above
+  Gift24Regular,
+  DataTrending24Regular,
+  CalendarLtr24Regular,
+  BookOpen24Regular,
   Image24Regular,
+  AlertUrgent24Regular,
   CompassNorthwest24Regular,
   News24Regular,
-  Search24Regular,
-  Person24Regular,
-  DocumentFolder24Regular,
-  Globe24Regular,
-  Flash24Regular,
-  TabDesktop24Regular,
   Poll24Regular,
+  Person24Regular,
+  Search24Regular,
+  SearchInfo24Regular,
+  Sparkle24Regular,
+  TabDesktop24Regular,
   Megaphone24Regular,
-  Star24Regular,
-  BookOpen24Regular,
-  CalendarLtr24Regular,
-  Navigation24Regular,
-  ChatBubblesQuestion24Regular,
-  Gift24Regular,
-  WindowShield24Regular,
-  DataTrending24Regular,
-  Timeline24Regular,
   // HyperCards icons
   CalendarPerson24Regular,
   CheckmarkCircle24Regular,
@@ -112,27 +107,24 @@ const PRODUCT_ICONS: Record<string, React.ReactElement> = {
   'contract-manager': <DocumentEdit24Regular />,
   'policy-manager': <Shield24Regular />,
   'license-pulse': <Pulse24Regular />,
-  // HyperParts (20)
+  // HyperParts (17)
+  'hyper-birthdays': <Gift24Regular />,
+  'hyper-charts': <DataTrending24Regular />,
+  'hyper-directory': <PeopleTeam24Regular />,
+  'hyper-events': <CalendarLtr24Regular />,
+  'hyper-faq': <BookOpen24Regular />,
   'hyper-hero': <Image24Regular />,
+  'hyper-lert': <AlertUrgent24Regular />,
+  'hyper-links': <LinkMultiple24Regular />,
   'hyper-nav': <CompassNorthwest24Regular />,
   'hyper-news': <News24Regular />,
-  'hyper-rollup': <Search24Regular />,
-  'hyper-profile': <Person24Regular />,
-  'hyper-explorer': <DocumentFolder24Regular />,
-  'hyper-local': <Globe24Regular />,
-  'hyper-action': <Flash24Regular />,
-  'hyper-tabs': <TabDesktop24Regular />,
   'hyper-poll': <Poll24Regular />,
+  'hyper-profile': <Person24Regular />,
+  'hyper-rollup': <Search24Regular />,
+  'hyper-search': <SearchInfo24Regular />,
+  'hyper-spotlight': <Sparkle24Regular />,
+  'hyper-tabs': <TabDesktop24Regular />,
   'hyper-ticker': <Megaphone24Regular />,
-  'hyper-recognition': <Star24Regular />,
-  'hyper-faq': <BookOpen24Regular />,
-  'hyper-events': <CalendarLtr24Regular />,
-  'hyper-breadcrumb': <Navigation24Regular />,
-  'hyper-feedback': <ChatBubblesQuestion24Regular />,
-  'hyper-birthdays': <Gift24Regular />,
-  'hyper-external': <WindowShield24Regular />,
-  'hyper-metrics': <DataTrending24Regular />,
-  'hyper-timeline': <Timeline24Regular />,
   // HyperCards (6)
   'leave-request-card': <CalendarPerson24Regular />,
   'approval-card': <CheckmarkCircle24Regular />,
@@ -203,7 +195,7 @@ const TAB_CONFIG: Record<TabValue, TabData> = {
     heroTitle: 'The HyperParts',
     heroAccent: 'Suite',
     heroDescription:
-      '20 next-gen SPFx web parts engineered for Hyper-Performance, Hyper-Flexibility, and Hyper-Integration — transforming your intranet into an interactive command center.',
+      '17 next-gen SPFx web parts engineered for Hyper-Performance, Hyper-Flexibility, and Hyper-Integration — transforming your intranet into an interactive command center.',
     features: [
       'SPFx 1.18+ with React 18 support',
       'Fluent UI v9 design system',
@@ -584,13 +576,23 @@ const useStyles = makeStyles({
     opacity: 0.8,
     marginBottom: '2px',
   },
-  productDwx: {
-    fontSize: '16px',
+  productDwxCorner: {
+    position: 'absolute',
+    top: '8px',
+    left: '8px',
+    fontSize: '10px',
     fontWeight: '800',
-    marginBottom: '4px',
+    color: 'rgba(255,255,255,0.6)',
+    letterSpacing: '0.5px',
   },
-  productDwxSpan: {
-    color: 'rgba(255,255,255,0.7)',
+  productDwxCornerSpan: {
+    color: 'rgba(255,255,255,0.4)',
+  },
+  productNameHero: {
+    fontSize: '14px',
+    fontWeight: '700',
+    marginBottom: '4px',
+    lineHeight: '1.2',
   },
   productSplashIcon: {
     fontSize: '28px',
@@ -1167,12 +1169,13 @@ export const ProductCatalog: React.FC = () => {
             onClick={() => handleCardClick(product)}
           >
             <div className={`${styles.productImage} ${getGradientClass(product.gradient)}`}>
+              <div className={styles.productDwxCorner}>
+                DW<span className={styles.productDwxCornerSpan}>x</span>
+              </div>
               <span className={styles.productVersion}>{product.version}</span>
               <div className={styles.productSplash}>
                 <div className={styles.productBrand}>{product.brand}</div>
-                <div className={styles.productDwx}>
-                  DW<span className={styles.productDwxSpan}>x</span>
-                </div>
+                <div className={styles.productNameHero}>{product.name}</div>
                 <div className={styles.productSplashIcon}>{PRODUCT_ICONS[product.id] || product.icon}</div>
               </div>
             </div>
