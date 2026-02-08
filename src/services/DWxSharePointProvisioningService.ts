@@ -112,6 +112,51 @@ class DWxSharePointProvisioningService {
   }
 
   /**
+   * Get the set of column internal names that actually exist on a SharePoint list.
+   * Used to filter seed data so we only send fields the list recognises.
+   */
+  private async getListColumnNames(listTitle: string): Promise<Set<string>> {
+    try {
+      const client = this.getClient();
+      const siteId = await this.getSiteId();
+      const encodedName = encodeURIComponent(listTitle);
+
+      const response = await client
+        .api(`/sites/${siteId}/lists/${encodedName}/columns`)
+        .select('name')
+        .top(200)
+        .get();
+
+      const names = new Set<string>();
+      for (const col of (response.value || [])) {
+        if (col.name) names.add(col.name);
+      }
+      return names;
+    } catch {
+      // If we can't read columns, return empty set — caller will send all fields
+      return new Set<string>();
+    }
+  }
+
+  /**
+   * Filter a seed data record to only include fields that exist on the SP list.
+   * Always keeps 'Title' (built-in). If validColumns is empty, returns all fields (fallback).
+   */
+  private filterFieldsForList(
+    fields: Record<string, unknown>,
+    validColumns: Set<string>
+  ): Record<string, unknown> {
+    if (validColumns.size === 0) return fields; // fallback: send everything
+    const filtered: Record<string, unknown> = {};
+    for (const [key, value] of Object.entries(fields)) {
+      if (key === 'Title' || validColumns.has(key)) {
+        filtered[key] = value;
+      }
+    }
+    return filtered;
+  }
+
+  /**
    * Create a list via Graph API
    */
   private async createList(title: string, description: string, template: 'genericList' | 'documentLibrary' = 'genericList'): Promise<string> {
@@ -1148,13 +1193,14 @@ class DWxSharePointProvisioningService {
 
     try {
       const graphService = getGraphService();
+      const validColumns = await this.getListColumnNames('DWxServices');
 
       for (const service of DW_SERVICES_SEED_DATA) {
         try {
           // Find matching DEFAULT_SERVICES entry for rich content
           const richContent = DEFAULT_SERVICES.find(s => s.Title === service.Title);
 
-          await graphService.createListItem('DWxServices', {
+          const fields = {
             Title: service.Title,
             Description: service.Description,
             ShortDescription: service.ShortDescription,
@@ -1176,7 +1222,9 @@ class DWxSharePointProvisioningService {
             RelatedCategories_JSON: richContent?.RelatedCategories ? JSON.stringify(richContent.RelatedCategories) : null,
             // SLA targets based on complexity level
             SLATargets_JSON: JSON.stringify(DEFAULT_SLA_TARGETS[service.ComplexityLevel as ServiceComplexity] || DEFAULT_SLA_TARGETS.Medium),
-          });
+          };
+
+          await graphService.createListItem('DWxServices', this.filterFieldsForList(fields, validColumns));
 
           results.push({ service: service.Title, success: true, message: 'Created successfully' });
         } catch (err) {
@@ -1215,9 +1263,11 @@ class DWxSharePointProvisioningService {
 
     try {
       const graphService = getGraphService();
+      const validColumns = await this.getListColumnNames('DWxTeamMembers');
       for (const member of seedData) {
         try {
-          await graphService.createListItem('DWxTeamMembers', member);
+          const filtered = this.filterFieldsForList(member, validColumns);
+          await graphService.createListItem('DWxTeamMembers', filtered);
           results.push({ name: member.Title, success: true, message: 'Created successfully' });
         } catch (err) {
           results.push({ name: member.Title, success: false, message: err instanceof Error ? err.message : 'Unknown error' });
@@ -1261,9 +1311,11 @@ class DWxSharePointProvisioningService {
 
     try {
       const graphService = getGraphService();
+      const validColumns = await this.getListColumnNames('DWxClients');
       for (const client of seedData) {
         try {
-          await graphService.createListItem('DWxClients', client);
+          const filtered = this.filterFieldsForList(client, validColumns);
+          await graphService.createListItem('DWxClients', filtered);
           results.push({ name: client.Title, success: true, message: 'Created successfully' });
         } catch (err) {
           results.push({ name: client.Title, success: false, message: err instanceof Error ? err.message : 'Unknown error' });
@@ -1292,9 +1344,11 @@ class DWxSharePointProvisioningService {
 
     try {
       const graphService = getGraphService();
+      const validColumns = await this.getListColumnNames('DWxAccountManagers');
       for (const am of seedData) {
         try {
-          await graphService.createListItem('DWxAccountManagers', am);
+          const filtered = this.filterFieldsForList(am, validColumns);
+          await graphService.createListItem('DWxAccountManagers', filtered);
           results.push({ name: am.Title, success: true, message: 'Created successfully' });
         } catch (err) {
           results.push({ name: am.Title, success: false, message: err instanceof Error ? err.message : 'Unknown error' });
@@ -1323,9 +1377,11 @@ class DWxSharePointProvisioningService {
 
     try {
       const graphService = getGraphService();
+      const validColumns = await this.getListColumnNames('DWxSpecialists');
       for (const specialist of seedData) {
         try {
-          await graphService.createListItem('DWxSpecialists', specialist);
+          const filtered = this.filterFieldsForList(specialist, validColumns);
+          await graphService.createListItem('DWxSpecialists', filtered);
           results.push({ name: specialist.Title, success: true, message: 'Created successfully' });
         } catch (err) {
           results.push({ name: specialist.Title, success: false, message: err instanceof Error ? err.message : 'Unknown error' });
@@ -1351,9 +1407,11 @@ class DWxSharePointProvisioningService {
 
     try {
       const graphService = getGraphService();
+      const validColumns = await this.getListColumnNames('DWxManagers');
       for (const manager of seedData) {
         try {
-          await graphService.createListItem('DWxManagers', manager);
+          const filtered = this.filterFieldsForList(manager, validColumns);
+          await graphService.createListItem('DWxManagers', filtered);
           results.push({ name: manager.Title, success: true, message: 'Created successfully' });
         } catch (err) {
           results.push({ name: manager.Title, success: false, message: err instanceof Error ? err.message : 'Unknown error' });
@@ -1596,9 +1654,11 @@ class DWxSharePointProvisioningService {
 
     try {
       const graphService = getGraphService();
+      const validColumns = await this.getListColumnNames('DWxServiceRequests');
       for (const request of seedData) {
         try {
-          await graphService.createListItem('DWxServiceRequests', request);
+          const filtered = this.filterFieldsForList(request, validColumns);
+          await graphService.createListItem('DWxServiceRequests', filtered);
           results.push({ name: request.Title, success: true, message: 'Created successfully' });
         } catch (err) {
           results.push({ name: request.Title, success: false, message: err instanceof Error ? err.message : 'Unknown error' });
@@ -1788,9 +1848,11 @@ class DWxSharePointProvisioningService {
 
     try {
       const graphService = getGraphService();
+      const validColumns = await this.getListColumnNames('DWxProductRequests');
       for (const request of seedData) {
         try {
-          await graphService.createListItem('DWxProductRequests', request);
+          const filtered = this.filterFieldsForList(request, validColumns);
+          await graphService.createListItem('DWxProductRequests', filtered);
           results.push({ name: request.Title, success: true, message: 'Created successfully' });
         } catch (err) {
           results.push({ name: request.Title, success: false, message: err instanceof Error ? err.message : 'Unknown error' });
@@ -1811,6 +1873,7 @@ class DWxSharePointProvisioningService {
 
     try {
       const graphService = getGraphService();
+      const validColumns = await this.getListColumnNames('DWxSessionPrep');
 
       // Find Discovery-stage service requests to link session prep records
       const serviceRequests = await graphService.getListItems('DWxServiceRequests') as Array<{ id: string; fields?: { FunnelStage?: string; ClientName?: string } }>;
@@ -1824,7 +1887,7 @@ class DWxSharePointProvisioningService {
       );
       if (nedbankReq) {
         try {
-          await graphService.createListItem('DWxSessionPrep', {
+          await graphService.createListItem('DWxSessionPrep', this.filterFieldsForList({
             Title: 'Prep - Nedbank - 2026-03-15',
             ServiceRequestId: parseInt(nedbankReq.id),
             SpecialistEmail: 'gary@firsttech.digital',
@@ -1890,7 +1953,7 @@ class DWxSharePointProvisioningService {
             AIGeneratedAt: '2026-02-01T10:00:00Z',
             CompletedAt: '2026-02-04T12:00:00Z',
             ReminderSent: true,
-          });
+          }, validColumns));
           results.push({ name: 'Nedbank - Ready', success: true, message: 'Created successfully' });
         } catch (err) {
           results.push({ name: 'Nedbank - Ready', success: false, message: err instanceof Error ? err.message : 'Unknown error' });
@@ -1905,7 +1968,7 @@ class DWxSharePointProvisioningService {
       );
       if (discoveryHealthReq) {
         try {
-          await graphService.createListItem('DWxSessionPrep', {
+          await graphService.createListItem('DWxSessionPrep', this.filterFieldsForList({
             Title: 'Prep - Discovery Health - 2026-03-18',
             ServiceRequestId: parseInt(discoveryHealthReq.id),
             SpecialistEmail: 'wimpie.baard@firsttech.digital',
@@ -1961,7 +2024,7 @@ class DWxSharePointProvisioningService {
             ]),
             AIGeneratedAt: '2026-02-05T14:00:00Z',
             ReminderSent: false,
-          });
+          }, validColumns));
           results.push({ name: 'Discovery Health - In Progress', success: true, message: 'Created successfully' });
         } catch (err) {
           results.push({ name: 'Discovery Health - In Progress', success: false, message: err instanceof Error ? err.message : 'Unknown error' });
@@ -1980,7 +2043,7 @@ class DWxSharePointProvisioningService {
       );
       if (mtnReq) {
         try {
-          await graphService.createListItem('DWxSessionPrep', {
+          await graphService.createListItem('DWxSessionPrep', this.filterFieldsForList({
             Title: 'Prep - MTN South Africa - Pending',
             ServiceRequestId: parseInt(mtnReq.id),
             SpecialistEmail: 'gary@firsttech.digital',
@@ -2002,7 +2065,7 @@ class DWxSharePointProvisioningService {
               { id: 'ck-13', category: 'logistics', label: 'Prepare recording consent if needed', completed: false },
             ]),
             ReminderSent: false,
-          });
+          }, validColumns));
           results.push({ name: 'MTN South Africa - Not Started', success: true, message: 'Created successfully' });
         } catch (err) {
           results.push({ name: 'MTN South Africa - Not Started', success: false, message: err instanceof Error ? err.message : 'Unknown error' });
@@ -2023,6 +2086,7 @@ class DWxSharePointProvisioningService {
   async seedKnowledgeBaseData(): Promise<{ results: Array<{ name: string; success: boolean; message: string }> }> {
     const results: Array<{ name: string; success: boolean; message: string }> = [];
     const graphService = getGraphService();
+    const validColumns = await this.getListColumnNames('DWxKnowledgeBase');
 
     const entries: Array<{
       Title: string;
@@ -2411,7 +2475,7 @@ class DWxSharePointProvisioningService {
     // Create all entries
     for (const entry of entries) {
       try {
-        await graphService.createListItem('DWxKnowledgeBase', entry);
+        await graphService.createListItem('DWxKnowledgeBase', this.filterFieldsForList(entry, validColumns));
         results.push({ name: entry.Title, success: true, message: `Created ${entry.Type}: ${entry.Title}` });
       } catch (error) {
         results.push({ name: entry.Title, success: false, message: error instanceof Error ? error.message : 'Failed to create KB entry' });
