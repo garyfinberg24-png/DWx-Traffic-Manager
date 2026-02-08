@@ -12,7 +12,6 @@ import {
   Dropdown,
   Option,
   Button,
-  Badge,
   makeStyles,
   shorthands,
   MessageBar,
@@ -37,6 +36,12 @@ import {
   MoneyRegular,
   FlashRegular,
   ArrowTrendingRegular,
+  CheckmarkCircleRegular,
+  ClockRegular,
+  PersonRegular,
+  BoxRegular,
+  CalendarRegular,
+  StarRegular,
 } from '@fluentui/react-icons';
 import { DW_COLORS } from '../../utils/buttonStyles';
 import { slaService } from '../../services/SLAService';
@@ -51,7 +56,7 @@ import {
 } from '../../types/ServiceRequest';
 import { serviceRequestService } from '../../services/ServiceRequestService';
 import { productRequestService } from '../../services/ProductRequestService';
-import { ProductRequest } from '../../types/ProductRequest';
+import { ProductRequest, ProductRequestStatus } from '../../types/ProductRequest';
 import { RequestCard } from './RequestCard';
 import { RequestDetails } from './RequestDetails';
 import { ProductRequestDetails } from './ProductRequestDetails';
@@ -385,40 +390,87 @@ const useStyles = makeStyles({
     gap: '16px',
   },
   productCard: {
-    ...shorthands.padding('18px'),
+    ...shorthands.padding('16px', '20px'),
     backgroundColor: '#ffffff',
     borderRadius: '10px',
     boxShadow: '0 1px 3px rgba(0,0,0,0.06)',
     border: '1px solid #e5e7eb',
+    borderLeft: '4px solid transparent',
     display: 'flex',
     flexDirection: 'column',
-    gap: '10px',
+    gap: '12px',
     cursor: 'pointer',
-    transition: 'all 0.2s ease',
+    transition: 'all 0.15s ease',
     ':hover': {
-      boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-      transform: 'translateY(-2px)',
+      boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
       border: '1px solid #d1d5db',
+      borderLeft: '4px solid transparent',
     },
   },
   productCardHeader: {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
+    gap: '12px',
+  },
+  productCardInfo: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '2px',
+    minWidth: 0,
   },
   productCardTitle: {
-    fontSize: '16px',
+    fontSize: '14px',
+    fontWeight: '700',
+    color: '#111827',
+  },
+  productCardSubtitle: {
+    fontSize: '12px',
+    color: '#6b7280',
     fontWeight: '600',
-    color: '#242424',
+  },
+  productCardStatusBadge: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    ...shorthands.padding('3px', '10px'),
+    borderRadius: '6px',
+    fontSize: '11px',
+    fontWeight: '600',
+    flexShrink: 0,
+    letterSpacing: '0.1px',
   },
   productCardMeta: {
     display: 'flex',
-    gap: '8px',
+    gap: '6px',
     flexWrap: 'wrap',
+    alignItems: 'flex-start',
+    alignContent: 'flex-start',
+    flex: 1,
   },
-  productCardDetail: {
-    fontSize: '13px',
-    color: '#616161',
+  productMetaPill: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '4px',
+    fontSize: '11px',
+    fontWeight: '500',
+    color: '#6b7280',
+    ...shorthands.padding('2px', '8px'),
+    borderRadius: '6px',
+    backgroundColor: '#f3f4f6',
+  },
+  productMetaPillPremium: {
+    backgroundColor: '#fef3c7',
+    color: '#92400e',
+    fontWeight: '600',
+  },
+  productCardFooter: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    fontSize: '11px',
+    color: '#9ca3af',
+    paddingTop: '4px',
+    borderTop: '1px solid #f3f4f6',
   },
   viewToggleGroup: {
     display: 'flex',
@@ -532,6 +584,79 @@ const ADVANCED_FILTER_CONFIG: FilterConfig[] = [
   {
     key: 'maxValue',
     label: 'Max Deal Value',
+    type: 'number',
+    placeholder: '0',
+  },
+  {
+    key: 'dateRange',
+    label: 'Created Date',
+    type: 'daterange',
+  },
+  {
+    key: 'hasSpecialist',
+    label: 'Has Assigned Specialist',
+    type: 'checkbox',
+  },
+];
+
+const PRODUCT_STATUS_OPTIONS: (ProductRequestStatus | 'All')[] = [
+  'All',
+  'Pending Review',
+  'Awaiting Approval',
+  'Confirmed',
+  'Completed',
+  'Cancelled',
+];
+
+const PRODUCT_STATUS_METADATA: Record<ProductRequestStatus, { color: string }> = {
+  'Pending Review': { color: '#6b7280' },
+  'Awaiting Approval': { color: '#f59e0b' },
+  'Confirmed': { color: '#10b981' },
+  'Completed': { color: '#3b82f6' },
+  'Cancelled': { color: '#ef4444' },
+};
+
+// Status colors for product cards (accent border + badge background/text)
+const PRODUCT_STATUS_COLORS: Record<ProductRequestStatus, { bg: string; text: string; accent: string }> = {
+  'Pending Review': { bg: '#f3f4f6', text: '#4B5563', accent: '#9ca3af' },
+  'Awaiting Approval': { bg: '#fef3c7', text: '#92400e', accent: '#f59e0b' },
+  'Confirmed': { bg: '#d1fae5', text: '#065f46', accent: '#10b981' },
+  'Completed': { bg: '#dbeafe', text: '#1e40af', accent: '#3b82f6' },
+  'Cancelled': { bg: '#fee2e2', text: '#991b1b', accent: '#ef4444' },
+};
+
+const PRODUCT_TYPE_OPTIONS = ['All', 'Demo', 'Trial Deployment'] as const;
+
+const PRODUCT_SORT_OPTIONS = [
+  { value: 'created-desc', label: 'Newest First' },
+  { value: 'created-asc', label: 'Oldest First' },
+  { value: 'value-desc', label: 'Highest Value' },
+  { value: 'value-asc', label: 'Lowest Value' },
+  { value: 'product-asc', label: 'Product Name A-Z' },
+];
+
+const PRODUCT_ADVANCED_FILTER_CONFIG: FilterConfig[] = [
+  {
+    key: 'productName',
+    label: 'Product Name',
+    type: 'text',
+    placeholder: 'Filter by product name...',
+  },
+  {
+    key: 'clientName',
+    label: 'Client Name',
+    type: 'text',
+    placeholder: 'Filter by client name...',
+  },
+  {
+    key: 'minValue',
+    label: 'Min Est. Value',
+    type: 'number',
+    placeholder: '0',
+  },
+  {
+    key: 'maxValue',
+    label: 'Max Est. Value',
     type: 'number',
     placeholder: '0',
   },
@@ -674,6 +799,144 @@ export const MyRequests: React.FC = () => {
     return { activeCount: activeRequests.length, pipelineValue, winRate };
   }, [requests]);
 
+  // Product request filter state
+  const [selectedProductStatus, setSelectedProductStatus] = useState<ProductRequestStatus | 'All'>('All');
+  const [productSearchText, setProductSearchText] = useState('');
+  const debouncedProductSearch = useDeferredValue(productSearchText);
+  const [selectedProductType, setSelectedProductType] = useState<string>('All');
+  const [productSortBy, setProductSortBy] = useState('created-desc');
+  const [productViewMode, setProductViewMode] = useState<'grid' | 'list'>('grid');
+
+  // Product advanced filters
+  const {
+    filters: productAdvancedFilters,
+    setFilter: setProductAdvancedFilter,
+    clearFilters: clearProductAdvancedFilters,
+  } = useAdvancedFilters<AdvancedFilterValues>({
+    productName: null,
+    clientName: null,
+    minValue: null,
+    maxValue: null,
+    dateRange: [null, null],
+    hasSpecialist: false,
+  });
+
+  // Product request status counts
+  const productStatusCounts = useMemo(() => {
+    const counts: Record<string, number> = { All: productRequests.length };
+    PRODUCT_STATUS_OPTIONS.forEach((status) => {
+      if (status !== 'All') {
+        counts[status] = productRequests.filter((r) => r.Status === status).length;
+      }
+    });
+    return counts;
+  }, [productRequests]);
+
+  // Product request summary stats
+  const productStats = useMemo(() => {
+    const openRequests = productRequests.filter(
+      (r) => r.Status !== 'Completed' && r.Status !== 'Cancelled'
+    );
+    const totalValue = openRequests.reduce((sum, r) => sum + (r.EstimatedValue || 0), 0);
+    const pendingCount = productRequests.filter((r) => r.Status === 'Pending Review' || r.Status === 'Awaiting Approval').length;
+    const confirmedCount = productRequests.filter((r) => r.Status === 'Confirmed').length;
+    const completedCount = productRequests.filter((r) => r.Status === 'Completed').length;
+    return {
+      open: openRequests.length,
+      totalValue,
+      pending: pendingCount,
+      confirmed: confirmedCount,
+      completed: completedCount,
+    };
+  }, [productRequests]);
+
+  // Filtered product requests (by status, search, type, advanced filters, sort)
+  const filteredProductRequests = useMemo(() => {
+    let filtered = [...productRequests];
+
+    // Status filter
+    if (selectedProductStatus !== 'All') {
+      filtered = filtered.filter((r) => r.Status === selectedProductStatus);
+    }
+
+    // Request type filter
+    if (selectedProductType !== 'All') {
+      filtered = filtered.filter((r) => r.RequestType === selectedProductType);
+    }
+
+    // Search filter
+    if (debouncedProductSearch) {
+      const searchLower = debouncedProductSearch.toLowerCase();
+      filtered = filtered.filter(
+        (r) =>
+          r.ProductName.toLowerCase().includes(searchLower) ||
+          r.ClientName.toLowerCase().includes(searchLower) ||
+          r.ContactName.toLowerCase().includes(searchLower) ||
+          r.ContactEmail.toLowerCase().includes(searchLower)
+      );
+    }
+
+    // Advanced filters
+    const productNameFilter = productAdvancedFilters.productName as string | null;
+    const clientNameFilter = productAdvancedFilters.clientName as string | null;
+    const minValue = productAdvancedFilters.minValue as number | null;
+    const maxValue = productAdvancedFilters.maxValue as number | null;
+    const dateRange = (productAdvancedFilters.dateRange as [string | null, string | null]) || [null, null];
+    const hasSpecialist = productAdvancedFilters.hasSpecialist as boolean;
+
+    if (productNameFilter) {
+      const search = productNameFilter.toLowerCase();
+      filtered = filtered.filter((r) => r.ProductName.toLowerCase().includes(search));
+    }
+
+    if (clientNameFilter) {
+      const search = clientNameFilter.toLowerCase();
+      filtered = filtered.filter((r) => r.ClientName.toLowerCase().includes(search));
+    }
+
+    if (minValue !== null && minValue > 0) {
+      filtered = filtered.filter((r) => (r.EstimatedValue || 0) >= minValue);
+    }
+
+    if (maxValue !== null && maxValue > 0) {
+      filtered = filtered.filter((r) => (r.EstimatedValue || 0) <= maxValue);
+    }
+
+    if (dateRange[0]) {
+      const fromDate = new Date(dateRange[0]);
+      filtered = filtered.filter((r) => new Date(r.Created) >= fromDate);
+    }
+
+    if (dateRange[1]) {
+      const toDate = new Date(dateRange[1]);
+      toDate.setHours(23, 59, 59, 999);
+      filtered = filtered.filter((r) => new Date(r.Created) <= toDate);
+    }
+
+    if (hasSpecialist) {
+      filtered = filtered.filter((r) => r.AssignedSpecialistEmail);
+    }
+
+    // Sort
+    filtered.sort((a, b) => {
+      switch (productSortBy) {
+        case 'created-asc':
+          return new Date(a.Created).getTime() - new Date(b.Created).getTime();
+        case 'value-desc':
+          return (b.EstimatedValue || 0) - (a.EstimatedValue || 0);
+        case 'value-asc':
+          return (a.EstimatedValue || 0) - (b.EstimatedValue || 0);
+        case 'product-asc':
+          return a.ProductName.localeCompare(b.ProductName);
+        case 'created-desc':
+        default:
+          return new Date(b.Created).getTime() - new Date(a.Created).getTime();
+      }
+    });
+
+    return filtered;
+  }, [productRequests, selectedProductStatus, selectedProductType, debouncedProductSearch, productSortBy, productAdvancedFilters]);
+
   // Filter and sort requests
   const filteredRequests = useMemo(() => {
     let filtered = [...requests];
@@ -773,7 +1036,7 @@ export const MyRequests: React.FC = () => {
     totalItems: productTotalItems,
     setCurrentPage: setProductCurrentPage,
     setPageSize: setProductPageSize,
-  } = usePagination(productRequests, 20);
+  } = usePagination(filteredProductRequests, 20);
 
   const handleRequestClick = (request: ServiceRequest) => {
     setSelectedRequest(request);
@@ -965,73 +1228,315 @@ export const MyRequests: React.FC = () => {
       {/* Product Requests Tab */}
       {activeTab === 'product' && (
         <>
+          {/* Product Summary Stats */}
+          <div className={styles.statsRow}>
+            <div className={styles.statCard} style={{ borderLeftColor: '#2563eb' }}>
+              <div className={styles.statIconBox} style={{ backgroundColor: '#eff6ff' }}>
+                <Apps24Regular style={{ width: '20px', height: '20px', color: '#2563eb' }} />
+              </div>
+              <div className={styles.statContent}>
+                <Text className={styles.statLabel}>Open Requests</Text>
+                <Text className={styles.statValue}>{productStats.open}</Text>
+                <Text className={styles.statSubtext} style={{ color: '#6b7280' }}>
+                  of {productRequests.length} total
+                </Text>
+              </div>
+            </div>
+            <div className={styles.statCard} style={{ borderLeftColor: '#16a34a' }}>
+              <div className={styles.statIconBox} style={{ backgroundColor: '#f0fdf4' }}>
+                <MoneyRegular style={{ width: '20px', height: '20px', color: '#16a34a' }} />
+              </div>
+              <div className={styles.statContent}>
+                <Text className={styles.statLabel}>Est. Value</Text>
+                <Text className={styles.statValue}>{formatCurrency(productStats.totalValue)}</Text>
+                <Text className={styles.statSubtext}>
+                  {productStats.open > 0 ? `Avg: ${formatCurrency(Math.round(productStats.totalValue / productStats.open))}` : 'No open deals'}
+                </Text>
+              </div>
+            </div>
+            <div className={styles.statCard} style={{ borderLeftColor: '#f59e0b' }}>
+              <div className={styles.statIconBox} style={{ backgroundColor: '#fffbeb' }}>
+                <ClockRegular style={{ width: '20px', height: '20px', color: '#f59e0b' }} />
+              </div>
+              <div className={styles.statContent}>
+                <Text className={styles.statLabel}>Pending</Text>
+                <Text className={styles.statValue} style={{ color: '#f59e0b' }}>
+                  {productStats.pending}
+                </Text>
+                <Text className={styles.statSubtext} style={{ color: '#f59e0b' }}>
+                  Awaiting action
+                </Text>
+              </div>
+            </div>
+            <div className={styles.statCard} style={{ borderLeftColor: '#10b981' }}>
+              <div className={styles.statIconBox} style={{ backgroundColor: '#ecfdf5' }}>
+                <CheckmarkCircleRegular style={{ width: '20px', height: '20px', color: '#10b981' }} />
+              </div>
+              <div className={styles.statContent}>
+                <Text className={styles.statLabel}>Confirmed</Text>
+                <Text className={styles.statValue} style={{ color: '#10b981' }}>
+                  {productStats.confirmed}
+                </Text>
+                <Text className={styles.statSubtext} style={{ color: '#6b7280' }}>
+                  Completed: {productStats.completed}
+                </Text>
+              </div>
+            </div>
+          </div>
+
+          {/* Product Status Filters */}
+          <div className={styles.filterSection}>
+            <div className={styles.stageFilters} role="group" aria-label="Filter by status">
+              {PRODUCT_STATUS_OPTIONS.map((status) => {
+                const isActive = selectedProductStatus === status;
+                const statusColor = status !== 'All' ? PRODUCT_STATUS_METADATA[status as ProductRequestStatus]?.color : undefined;
+                return (
+                  <span
+                    key={status}
+                    className={`${styles.stageChip} ${isActive ? styles.stageChipActive : ''}`}
+                    onClick={() => setSelectedProductStatus(status)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        setSelectedProductStatus(status);
+                      }
+                    }}
+                    role="button"
+                    tabIndex={0}
+                    aria-pressed={isActive}
+                    aria-label={`${status}: ${productStatusCounts[status] || 0} requests`}
+                  >
+                    {statusColor && (
+                      <span className={styles.stageDot} style={{ backgroundColor: statusColor }} />
+                    )}
+                    {status}
+                    <span className={`${styles.stageCount} ${isActive ? styles.stageCountActive : ''}`} aria-hidden="true">
+                      {productStatusCounts[status] || 0}
+                    </span>
+                  </span>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Product Toolbar */}
+          <div className={styles.toolbar}>
+            <SearchBox
+              className={styles.searchBox}
+              placeholder="Search by product, client, or contact..."
+              value={productSearchText}
+              onChange={(_, data) => setProductSearchText(data.value)}
+              contentBefore={<SearchRegular />}
+            />
+
+            <Dropdown
+              className={styles.dropdownFilter}
+              placeholder="Request Type"
+              selectedOptions={selectedProductType !== 'All' ? [selectedProductType] : []}
+              onOptionSelect={(_, data) =>
+                setSelectedProductType(data.optionValue as string || 'All')
+              }
+            >
+              {PRODUCT_TYPE_OPTIONS.map((type) => (
+                <Option key={type} value={type} text={type === 'All' ? 'All Request Types' : type}>
+                  {type === 'All' ? 'All Request Types' : type}
+                </Option>
+              ))}
+            </Dropdown>
+
+            <Dropdown
+              className={styles.dropdownFilter}
+              placeholder="Sort by"
+              selectedOptions={[productSortBy]}
+              onOptionSelect={(_, data) => setProductSortBy(data.optionValue as string)}
+            >
+              {PRODUCT_SORT_OPTIONS.map((option) => (
+                <Option key={option.value} value={option.value} text={option.label}>
+                  {option.label}
+                </Option>
+              ))}
+            </Dropdown>
+
+            <span className={styles.resultsInfo}>
+              <div className={styles.viewToggleGroup}>
+                <button
+                  className={`${styles.viewToggleBtn} ${productViewMode === 'grid' ? styles.viewToggleBtnActive : ''}`}
+                  onClick={() => setProductViewMode('grid')}
+                  title="Grid view"
+                  aria-label="Grid view"
+                  aria-pressed={productViewMode === 'grid'}
+                >
+                  <GridRegular style={{ width: '16px', height: '16px' }} />
+                </button>
+                <button
+                  className={`${styles.viewToggleBtn} ${productViewMode === 'list' ? styles.viewToggleBtnActive : ''}`}
+                  onClick={() => setProductViewMode('list')}
+                  title="List view"
+                  aria-label="List view"
+                  aria-pressed={productViewMode === 'list'}
+                >
+                  <TextBulletListLtr24Regular style={{ width: '16px', height: '16px' }} />
+                </button>
+              </div>
+              {filteredProductRequests.length} {filteredProductRequests.length === 1 ? 'request' : 'requests'}
+            </span>
+          </div>
+
+          {/* Product Advanced Filter Panel */}
+          <AdvancedFilterPanel
+            filters={PRODUCT_ADVANCED_FILTER_CONFIG}
+            values={productAdvancedFilters}
+            onChange={(key, value) => setProductAdvancedFilter(key as keyof AdvancedFilterValues, value)}
+            onClear={clearProductAdvancedFilters}
+          />
+
           {productLoading ? (
             <div className={styles.loadingContainer}>
               <Spinner size="large" />
               <Text>Loading product requests...</Text>
             </div>
-          ) : productRequests.length > 0 ? (
+          ) : filteredProductRequests.length > 0 ? (
             <>
-              <div className={styles.productGrid}>
-                {paginatedProductRequests.map((pr) => (
-                  <div key={pr.Id} className={styles.productCard} onClick={() => handleProductRequestClick(pr)}>
-                    <div className={styles.productCardHeader}>
-                      <Text className={styles.productCardTitle}>{pr.ProductName}</Text>
-                      <Badge
-                        appearance="filled"
-                        color={
-                          pr.Status === 'Confirmed' ? 'success' :
-                          pr.Status === 'Completed' ? 'success' :
-                          pr.Status === 'Cancelled' ? 'danger' :
-                          pr.Status === 'Awaiting Approval' ? 'warning' :
-                          'informative'
-                        }
+              {productViewMode === 'grid' ? (
+                <div className={styles.productGrid}>
+                  {paginatedProductRequests.map((pr) => {
+                    const sc = PRODUCT_STATUS_COLORS[pr.Status];
+                    return (
+                      <div
+                        key={pr.Id}
+                        className={styles.productCard}
+                        style={{ borderLeftColor: sc.accent }}
+                        onClick={() => handleProductRequestClick(pr)}
                       >
-                        {pr.Status}
-                      </Badge>
-                    </div>
-                    <div className={styles.productCardMeta}>
-                      <Badge appearance="outline" size="small">{pr.RequestType}</Badge>
-                      <Badge appearance="outline" size="small">{pr.ProductType}</Badge>
-                      {pr.IsPremiumClient && (
-                        <Badge appearance="outline" size="small" color="warning">Premium</Badge>
-                      )}
-                    </div>
-                    <Text className={styles.productCardDetail}>
-                      Client: {pr.ClientName} &middot; Contact: {pr.ContactName}
-                    </Text>
-                    {pr.AssignedSpecialistName && (
-                      <Text className={styles.productCardDetail}>
-                        Specialist: {pr.AssignedSpecialistName}
-                      </Text>
-                    )}
-                    {pr.ConfirmedDateTime ? (
-                      <Text className={styles.productCardDetail} style={{ color: '#107c10' }}>
-                        Confirmed: {new Date(pr.ConfirmedDateTime).toLocaleDateString('en-ZA', {
-                          weekday: 'short',
-                          year: 'numeric',
-                          month: 'short',
-                          day: 'numeric',
-                          hour: 'numeric',
-                          minute: '2-digit',
-                        })}
-                      </Text>
-                    ) : pr.ProposedSlot1 ? (
-                      <Text className={styles.productCardDetail}>
-                        Proposed: {new Date(pr.ProposedSlot1).toLocaleDateString('en-ZA', {
-                          weekday: 'short',
-                          year: 'numeric',
-                          month: 'short',
-                          day: 'numeric',
-                        })}
-                      </Text>
-                    ) : null}
-                    <Text className={styles.productCardDetail} style={{ fontSize: '11px', color: '#8a8886' }}>
-                      Created: {new Date(pr.Created).toLocaleDateString('en-ZA')}
-                    </Text>
-                  </div>
-                ))}
-              </div>
+                        {/* Header: Client name + status badge */}
+                        <div className={styles.productCardHeader}>
+                          <div className={styles.productCardInfo}>
+                            <Text className={styles.productCardTitle}>{pr.ClientName}</Text>
+                            <Text className={styles.productCardSubtitle}>
+                              {pr.ProductName} ({pr.ProductType})
+                            </Text>
+                          </div>
+                          <span
+                            className={styles.productCardStatusBadge}
+                            style={{ backgroundColor: sc.bg, color: sc.text }}
+                          >
+                            {pr.Status}
+                          </span>
+                        </div>
+
+                        {/* Meta pills row */}
+                        <div className={styles.productCardMeta}>
+                          <span className={styles.productMetaPill}>
+                            <PersonRegular style={{ width: '12px', height: '12px' }} />
+                            {pr.AccountManagerName || pr.ContactName}
+                          </span>
+                          <span className={styles.productMetaPill}>
+                            <BoxRegular style={{ width: '12px', height: '12px' }} />
+                            {pr.RequestType}
+                          </span>
+                          {pr.EstimatedValue ? (
+                            <span className={styles.productMetaPill}>
+                              {formatCurrency(pr.EstimatedValue)}
+                            </span>
+                          ) : null}
+                          {pr.IsPremiumClient && (
+                            <span className={`${styles.productMetaPill} ${styles.productMetaPillPremium}`}>
+                              <StarRegular style={{ width: '12px', height: '12px' }} />
+                              Premium
+                            </span>
+                          )}
+                          {pr.AssignedSpecialistName && (
+                            <span className={styles.productMetaPill}>
+                              <PersonRegular style={{ width: '12px', height: '12px' }} />
+                              {pr.AssignedSpecialistName}
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Footer: schedule + created date */}
+                        <div className={styles.productCardFooter}>
+                          <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                            <CalendarRegular style={{ width: '12px', height: '12px' }} />
+                            {pr.ConfirmedDateTime
+                              ? new Date(pr.ConfirmedDateTime).toLocaleDateString('en-ZA', {
+                                  weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit',
+                                })
+                              : pr.ProposedSlot1
+                                ? `Proposed: ${new Date(pr.ProposedSlot1).toLocaleDateString('en-ZA', {
+                                    weekday: 'short', month: 'short', day: 'numeric',
+                                  })}`
+                                : 'Not scheduled'}
+                          </span>
+                          <span>
+                            Created {new Date(pr.Created).toLocaleDateString('en-ZA', {
+                              year: 'numeric', month: 'short', day: 'numeric',
+                            })}
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <table className={styles.listTable}>
+                  <thead>
+                    <tr>
+                      <th className={styles.listTh}>Product</th>
+                      <th className={styles.listTh}>Type</th>
+                      <th className={styles.listTh}>Client</th>
+                      <th className={styles.listTh}>Status</th>
+                      <th className={styles.listTh}>Request Type</th>
+                      <th className={styles.listTh}>Specialist</th>
+                      <th className={styles.listTh} style={{ textAlign: 'right' }}>Est. Value</th>
+                      <th className={styles.listTh}>Scheduled</th>
+                      <th className={styles.listTh}>Created</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {paginatedProductRequests.map((pr) => (
+                      <tr
+                        key={pr.Id}
+                        className={styles.listRow}
+                        onClick={() => handleProductRequestClick(pr)}
+                      >
+                        <td className={styles.listTd} style={{ fontWeight: '600' }}>{pr.ProductName}</td>
+                        <td className={styles.listTd}>{pr.ProductType}</td>
+                        <td className={styles.listTd}>
+                          <div style={{ lineHeight: '1.3' }}>
+                            <div style={{ fontWeight: 500 }}>{pr.ClientName}</div>
+                            <div style={{ fontSize: '11px', color: '#616161' }}>{pr.ContactName}</div>
+                          </div>
+                        </td>
+                        <td className={styles.listTd}>
+                          <span
+                            className={styles.stageBadge}
+                            style={{ backgroundColor: PRODUCT_STATUS_METADATA[pr.Status]?.color || '#616161' }}
+                          >
+                            {pr.Status}
+                          </span>
+                        </td>
+                        <td className={styles.listTd}>{pr.RequestType}</td>
+                        <td className={styles.listTd} style={{ color: pr.AssignedSpecialistName ? '#242424' : '#a0a0a0' }}>
+                          {pr.AssignedSpecialistName || 'Unassigned'}
+                        </td>
+                        <td className={styles.listTd} style={{ textAlign: 'right', fontWeight: '500' }}>
+                          {pr.EstimatedValue ? formatCurrency(pr.EstimatedValue) : '\u2014'}
+                        </td>
+                        <td className={styles.listTd}>
+                          {pr.ConfirmedDateTime
+                            ? new Date(pr.ConfirmedDateTime).toLocaleDateString('en-ZA', { year: 'numeric', month: 'short', day: 'numeric' })
+                            : pr.ProposedSlot1
+                              ? new Date(pr.ProposedSlot1).toLocaleDateString('en-ZA', { year: 'numeric', month: 'short', day: 'numeric' })
+                              : 'Not set'}
+                        </td>
+                        <td className={styles.listTd} style={{ color: '#616161', fontSize: '12px' }}>
+                          {new Date(pr.Created).toLocaleDateString('en-ZA', { year: 'numeric', month: 'short', day: 'numeric' })}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
               <Pagination
                 currentPage={productCurrentPage}
                 totalItems={productTotalItems}
@@ -1043,21 +1548,31 @@ export const MyRequests: React.FC = () => {
           ) : (
             <div className={styles.emptyState}>
               <div className={styles.emptyIconWrapper}>
-                <Apps24Regular className={styles.emptyIcon} />
+                {productRequests.length === 0 ? (
+                  <Apps24Regular className={styles.emptyIcon} />
+                ) : (
+                  <FilterRegular className={styles.emptyIcon} />
+                )}
               </div>
-              <Text className={styles.emptyTitle}>No product requests yet</Text>
-              <Text className={styles.emptyText}>
-                Browse the product catalog to request demos or trial deployments for your clients.
+              <Text className={styles.emptyTitle}>
+                {productRequests.length === 0 ? 'No product requests yet' : 'No matching requests'}
               </Text>
-              <Button
-                appearance="primary"
-                icon={<Apps24Regular />}
-                onClick={() => navigate('/products')}
-                size="medium"
-                style={{ backgroundColor: DW_COLORS.teal }}
-              >
-                Browse Products
-              </Button>
+              <Text className={styles.emptyText}>
+                {productRequests.length === 0
+                  ? 'Browse the product catalog to request demos or trial deployments for your clients.'
+                  : 'Try adjusting your filters or search criteria to find what you\'re looking for.'}
+              </Text>
+              {productRequests.length === 0 && (
+                <Button
+                  appearance="primary"
+                  icon={<Apps24Regular />}
+                  onClick={() => navigate('/products')}
+                  size="medium"
+                  style={{ backgroundColor: DW_COLORS.teal }}
+                >
+                  Browse Products
+                </Button>
+              )}
             </div>
           )}
         </>
