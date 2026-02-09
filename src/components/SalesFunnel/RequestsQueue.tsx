@@ -299,11 +299,14 @@ const stageColors: Record<FunnelStage, { bg: string; text: string }> = {
 interface RequestsQueueProps {
   requests: ServiceRequest[];
   onRequestUpdated: (request: ServiceRequest) => void;
+  /** Open the full details modal for a request */
+  onRequestClick?: (request: ServiceRequest) => void;
 }
 
 export const RequestsQueue: React.FC<RequestsQueueProps> = ({
   requests,
   onRequestUpdated,
+  onRequestClick,
 }) => {
   const styles = useStyles();
   const { user } = useAuth();
@@ -769,7 +772,14 @@ export const RequestsQueue: React.FC<RequestsQueueProps> = ({
                     onChange={(_, data) => handleSelectOne(request.Id, data.checked === true)}
                     aria-label={`Select ${request.ClientName} - ${request.ServiceName}`}
                   />
-                  <div className={styles.requestContent}>
+                  <div
+                    className={styles.requestContent}
+                    onClick={() => onRequestClick?.(request)}
+                    style={onRequestClick ? { cursor: 'pointer' } : undefined}
+                    role={onRequestClick ? 'button' : undefined}
+                    tabIndex={onRequestClick ? 0 : undefined}
+                    onKeyDown={onRequestClick ? (e) => { if (e.key === 'Enter') onRequestClick(request); } : undefined}
+                  >
                     <div className={styles.requestHeader}>
                       <div className={styles.requestInfo}>
                         <Text className={styles.clientName}>{request.ClientName}</Text>

@@ -968,7 +968,12 @@ export const ServiceRequestForm: React.FC<ServiceRequestFormProps> = ({
       if (result.success) {
         localStorage.removeItem(DRAFT_KEY);
         showToast('Service request created successfully!', 'success');
-        onSuccess?.();
+        if (onSuccess) {
+          onSuccess();
+        } else {
+          // Default: navigate to My Requests so user can see their new request
+          navigate('/requests');
+        }
       } else {
         throw new Error(result.error || 'Failed to create service request');
       }

@@ -66,6 +66,7 @@ import { ProductRequestsQueue } from '../SalesFunnel/ProductRequestsQueue';
 import { serviceRequestService } from '../../services/ServiceRequestService';
 import { productRequestService } from '../../services/ProductRequestService';
 import { ProductRequest } from '../../types/ProductRequest';
+import { RequestDetails } from '../MyRequests/RequestDetails';
 
 // ============================================================================
 // Types
@@ -500,6 +501,7 @@ export const ManagerDashboard: React.FC = () => {
   });
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
+  const [selectedServiceRequest, setSelectedServiceRequest] = useState<ServiceRequest | null>(null);
 
   const fetchDashboardData = useCallback(async () => {
     try {
@@ -794,7 +796,11 @@ export const ManagerDashboard: React.FC = () => {
 
               {/* Pipeline Tab */}
               {selectedTab === 'pipeline' && (
-                <SalesFunnelDashboard onDataChanged={fetchDashboardData} />
+                <SalesFunnelDashboard
+                  externalServiceRequests={serviceRequests}
+                  externalProductRequests={productRequests}
+                  onDataChanged={fetchDashboardData}
+                />
               )}
 
               {/* Service Queue Tab */}
@@ -802,6 +808,7 @@ export const ManagerDashboard: React.FC = () => {
                 <RequestsQueue
                   requests={serviceRequests}
                   onRequestUpdated={handleRequestUpdated}
+                  onRequestClick={setSelectedServiceRequest}
                 />
               )}
 
@@ -888,6 +895,19 @@ export const ManagerDashboard: React.FC = () => {
         open={detailsOpen}
         onClose={handleDetailsClose}
       />
+
+      {/* Service Request Details Modal (from Queue/Pipeline click) */}
+      {selectedServiceRequest && (
+        <RequestDetails
+          request={selectedServiceRequest}
+          isOpen={true}
+          onClose={() => setSelectedServiceRequest(null)}
+          onRequestUpdated={(updated) => {
+            handleRequestUpdated(updated);
+            setSelectedServiceRequest(updated);
+          }}
+        />
+      )}
     </div>
   );
 };

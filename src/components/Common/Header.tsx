@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   makeStyles,
   Text,
@@ -11,6 +11,7 @@ import {
   Button,
   Divider,
   Tooltip,
+  Badge,
   shorthands,
 } from '@fluentui/react-components';
 import {
@@ -33,6 +34,8 @@ import { NotificationCenter } from './NotificationCenter';
 import { RecentActivity } from './RecentActivity';
 import { AIChatPanel } from './AIChatPanel';
 import { ChatContext } from '../../types/AIChat';
+import { serviceRequestService } from '../../services/ServiceRequestService';
+import { productRequestService } from '../../services/ProductRequestService';
 
 const useStyles = makeStyles({
   header: {
@@ -114,6 +117,16 @@ const useStyles = makeStyles({
       color: 'white',
     },
   },
+  dashboardBtnWrapper: {
+    position: 'relative',
+    display: 'inline-flex',
+  },
+  pendingBadge: {
+    position: 'absolute',
+    top: '-4px',
+    right: '-6px',
+    zIndex: 1,
+  },
 });
 
 export const Header: React.FC = () => {
@@ -122,6 +135,33 @@ export const Header: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [isChatOpen, setIsChatOpen] = useState(false);
+  const [pendingCount, setPendingCount] = useState(0);
+
+  // Fetch pending request counts for manager badge
+  const fetchPendingCounts = useCallback(async () => {
+    if (!isManager) return;
+    try {
+      const [serviceReqs, productReqs] = await Promise.all([
+        serviceRequestService.getRequests(),
+        productRequestService.getRequests(),
+      ]);
+      const activeService = serviceReqs.filter(
+        (r) => r.FunnelStage !== 'Won' && r.FunnelStage !== 'Lost'
+      ).length;
+      const activeProduct = productReqs.filter(
+        (r) => r.Status !== 'Completed' && r.Status !== 'Cancelled'
+      ).length;
+      setPendingCount(activeService + activeProduct);
+    } catch {
+      // Silent — badge is non-critical
+    }
+  }, [isManager]);
+
+  useEffect(() => {
+    if (user && isManager) {
+      fetchPendingCounts();
+    }
+  }, [user, isManager, fetchPendingCounts, location.pathname]);
 
   const handleLogout = async () => {
     await logout();
@@ -193,15 +233,27 @@ export const Header: React.FC = () => {
         </Button>
         {isManager && (
           <>
-            <Button
-              appearance="subtle"
-              className={`${styles.navButton} ${isActive('/dashboard') ? styles.navButtonActive : ''}`}
-              onClick={() => navigate('/dashboard')}
-              icon={<DataUsage24Regular />}
-              size="small"
-            >
-              Dashboard
-            </Button>
+            <span className={styles.dashboardBtnWrapper}>
+              <Button
+                appearance="subtle"
+                className={`${styles.navButton} ${isActive('/dashboard') ? styles.navButtonActive : ''}`}
+                onClick={() => navigate('/dashboard')}
+                icon={<DataUsage24Regular />}
+                size="small"
+              >
+                Dashboard
+              </Button>
+              {pendingCount > 0 && (
+                <Badge
+                  size="small"
+                  appearance="filled"
+                  color="danger"
+                  className={styles.pendingBadge}
+                >
+                  {pendingCount}
+                </Badge>
+              )}
+            </span>
             <Button
               appearance="subtle"
               className={`${styles.navButton} ${isActive('/admin') ? styles.navButtonActive : ''}`}

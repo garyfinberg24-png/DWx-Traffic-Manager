@@ -245,26 +245,80 @@ interface SalesFunnelDashboardProps {
   onStageClick?: (stage: FunnelStage) => void;
   /** Called when deals are created or updated (e.g. Quick Create) so parent can refresh its own state */
   onDataChanged?: () => void;
+  /** When provided, use these instead of loading independently (eliminates dual data source) */
+  externalServiceRequests?: ServiceRequest[];
+  /** When provided, use these instead of loading independently */
+  externalProductRequests?: ProductRequest[];
 }
 
 export const SalesFunnelDashboard: React.FC<SalesFunnelDashboardProps> = ({
   onStageClick,
   onDataChanged,
+  externalServiceRequests,
+  externalProductRequests,
 }) => {
   const styles = useStyles();
   const { isCollapsed, toggle } = useHeroCollapse('pipeline');
   const { user, isManager } = useAuth();
 
-  const [requests, setRequests] = useState<ServiceRequest[]>([]);
-  const [productRequests, setProductRequests] = useState<ProductRequest[]>([]);
-  const [loading, setLoading] = useState(true);
+  // When external data is provided (e.g. from ManagerDashboard), use it directly
+  // Otherwise, load independently (standalone /pipeline route)
+  const hasExternalData = externalServiceRequests !== undefined;
+
+  const [internalRequests, setInternalRequests] = useState<ServiceRequest[]>([]);
+  const [internalProductRequests, setInternalProductRequests] = useState<ProductRequest[]>([]);
+  // Optimistic additions: requests created via Quick Create before parent re-fetches
+  const [optimisticRequests, setOptimisticRequests] = useState<ServiceRequest[]>([]);
+  const [optimisticProducts, setOptimisticProducts] = useState<ProductRequest[]>([]);
+  const [loading, setLoading] = useState(!hasExternalData);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<DashboardTab>('overview');
   const [showQuickCreate, setShowQuickCreate] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState<ServiceRequest | null>(null);
 
-  // Load all requests on mount
+  // Use external data when available, otherwise use internal state
+  // Merge in optimistic additions (deduped by Id) for immediate visibility
+  const requests = useMemo(() => {
+    const base = hasExternalData ? externalServiceRequests : internalRequests;
+    if (optimisticRequests.length === 0) return base;
+    const existingIds = new Set(base.map(r => r.Id));
+    const newOnes = optimisticRequests.filter(r => !existingIds.has(r.Id));
+    return newOnes.length > 0 ? [...newOnes, ...base] : base;
+  }, [hasExternalData, externalServiceRequests, internalRequests, optimisticRequests]);
+
+  const productRequests = useMemo(() => {
+    const base = hasExternalData ? (externalProductRequests ?? []) : internalProductRequests;
+    if (optimisticProducts.length === 0) return base;
+    const existingIds = new Set(base.map(r => r.Id));
+    const newOnes = optimisticProducts.filter(r => !existingIds.has(r.Id));
+    return newOnes.length > 0 ? [...newOnes, ...base] : base;
+  }, [hasExternalData, externalProductRequests, internalProductRequests, optimisticProducts]);
+
+  // Clear optimistic additions once external data includes them
   useEffect(() => {
+    if (hasExternalData && externalServiceRequests.length > 0 && optimisticRequests.length > 0) {
+      const externalIds = new Set(externalServiceRequests.map(r => r.Id));
+      const remaining = optimisticRequests.filter(r => !externalIds.has(r.Id));
+      if (remaining.length !== optimisticRequests.length) {
+        setOptimisticRequests(remaining);
+      }
+    }
+  }, [externalServiceRequests, hasExternalData, optimisticRequests]);
+
+  useEffect(() => {
+    if (hasExternalData && (externalProductRequests ?? []).length > 0 && optimisticProducts.length > 0) {
+      const externalIds = new Set((externalProductRequests ?? []).map(r => r.Id));
+      const remaining = optimisticProducts.filter(r => !externalIds.has(r.Id));
+      if (remaining.length !== optimisticProducts.length) {
+        setOptimisticProducts(remaining);
+      }
+    }
+  }, [externalProductRequests, hasExternalData, optimisticProducts]);
+
+  // Only load independently when NOT receiving external data (standalone mode)
+  useEffect(() => {
+    if (hasExternalData) return; // Skip — parent provides data
+
     const loadRequests = async () => {
       try {
         setLoading(true);
@@ -277,8 +331,8 @@ export const SalesFunnelDashboard: React.FC<SalesFunnelDashboardProps> = ({
             isManager ? undefined : { accountManagerEmail: user?.email }
           ),
         ]);
-        setRequests(serviceData);
-        setProductRequests(productData);
+        setInternalRequests(serviceData);
+        setInternalProductRequests(productData);
       } catch (err) {
         console.error('Error loading requests:', err);
         setError('Failed to load pipeline data');
@@ -290,7 +344,7 @@ export const SalesFunnelDashboard: React.FC<SalesFunnelDashboardProps> = ({
     if (user) {
       loadRequests();
     }
-  }, [user, isManager]);
+  }, [user, isManager, hasExternalData]);
 
   // Calculate metrics
   const metrics: PipelineMetrics = useMemo(() => {
@@ -328,30 +382,58 @@ export const SalesFunnelDashboard: React.FC<SalesFunnelDashboardProps> = ({
   }, [requests]);
 
   const handleRequestUpdated = (updatedRequest: ServiceRequest) => {
-    setRequests((prev) =>
-      prev.map((r) => (r.Id === updatedRequest.Id ? updatedRequest : r))
-    );
+    if (hasExternalData) {
+      // Update optimistic list if the request was optimistically added
+      setOptimisticRequests((prev) =>
+        prev.map((r) => (r.Id === updatedRequest.Id ? updatedRequest : r))
+      );
+    } else {
+      setInternalRequests((prev) =>
+        prev.map((r) => (r.Id === updatedRequest.Id ? updatedRequest : r))
+      );
+    }
+    // Always notify parent so it refreshes its data (covers both modes)
     onDataChanged?.();
   };
 
   const handleProductRequestUpdated = (updatedRequest: ProductRequest) => {
-    setProductRequests((prev) =>
-      prev.map((r) => (r.Id === updatedRequest.Id ? updatedRequest : r))
-    );
+    if (hasExternalData) {
+      setOptimisticProducts((prev) =>
+        prev.map((r) => (r.Id === updatedRequest.Id ? updatedRequest : r))
+      );
+    } else {
+      setInternalProductRequests((prev) =>
+        prev.map((r) => (r.Id === updatedRequest.Id ? updatedRequest : r))
+      );
+    }
+    onDataChanged?.();
   };
 
   const handleDealCreated = (newRequest: ServiceRequest) => {
-    setRequests((prev) => [newRequest, ...prev]);
-    // Notify parent (ManagerDashboard) so it can refresh sidebar counts
+    if (hasExternalData) {
+      // Add optimistically for immediate visibility; parent will re-fetch and include it
+      setOptimisticRequests((prev) => [newRequest, ...prev]);
+    } else {
+      setInternalRequests((prev) => [newRequest, ...prev]);
+    }
+    // Notify parent (ManagerDashboard) so it can refresh its data + sidebar counts
     onDataChanged?.();
   };
 
   const handleProductCreated = (newRequest: ProductRequest) => {
-    setProductRequests((prev) => [newRequest, ...prev]);
+    if (hasExternalData) {
+      setOptimisticProducts((prev) => [newRequest, ...prev]);
+    } else {
+      setInternalProductRequests((prev) => [newRequest, ...prev]);
+    }
     onDataChanged?.();
   };
 
-  // Count actionable product requests for badge
+  // Count actionable requests for tab badges
+  const actionableServiceCount = requests.filter(
+    (r) => r.FunnelStage !== 'Won' && r.FunnelStage !== 'Lost'
+  ).length;
+
   const actionableProductCount = productRequests.filter(
     (r) => r.Status !== 'Completed' && r.Status !== 'Cancelled'
   ).length;
@@ -488,7 +570,7 @@ export const SalesFunnelDashboard: React.FC<SalesFunnelDashboardProps> = ({
         </Tab>
         {isManager && (
           <Tab value="queue" icon={<PeopleQueueRegular />}>
-            Service Queue
+            Service Queue{actionableServiceCount > 0 ? ` (${actionableServiceCount})` : ''}
           </Tab>
         )}
         {isManager && (
@@ -683,7 +765,7 @@ export const SalesFunnelDashboard: React.FC<SalesFunnelDashboardProps> = ({
         )}
 
         {activeTab === 'queue' && isManager && (
-          <RequestsQueue requests={requests} onRequestUpdated={handleRequestUpdated} />
+          <RequestsQueue requests={requests} onRequestUpdated={handleRequestUpdated} onRequestClick={setSelectedRequest} />
         )}
 
         {activeTab === 'productQueue' && isManager && (
