@@ -5,6 +5,7 @@
 
 import React from 'react';
 import { Text, makeStyles, Tooltip } from '@fluentui/react-components';
+import { DataFunnel24Regular } from '@fluentui/react-icons';
 import { FunnelStage, StageBreakdown } from '../../types/ServiceRequest';
 
 const useStyles = makeStyles({
@@ -87,6 +88,20 @@ const useStyles = makeStyles({
     height: '10px',
     borderRadius: '2px',
   },
+  emptyState: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: '48px 20px',
+    color: '#9ca3af',
+    gap: '8px',
+  },
+  emptyIcon: {
+    width: '40px',
+    height: '40px',
+    color: '#d1d5db',
+  },
 });
 
 // Stage colors for funnel
@@ -135,6 +150,21 @@ export const FunnelChart: React.FC<FunnelChartProps> = ({
   // Get Won/Lost data
   const wonData = getStageData('Won');
   const lostData = getStageData('Lost');
+
+  // Check if all stages have zero counts
+  const totalCount = breakdown.reduce((sum, b) => sum + b.count, 0);
+
+  if (totalCount === 0) {
+    return (
+      <div className={styles.container}>
+        <div className={styles.emptyState}>
+          <DataFunnel24Regular className={styles.emptyIcon} />
+          <Text style={{ fontSize: '14px', fontWeight: '600', color: '#6b7280' }}>No pipeline data</Text>
+          <Text style={{ fontSize: '12px', color: '#9ca3af' }}>Create deals to see your funnel breakdown</Text>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={styles.container}>

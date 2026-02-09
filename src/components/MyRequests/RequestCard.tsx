@@ -68,10 +68,18 @@ const useStyles = makeStyles({
     fontSize: '16px',
     fontWeight: '600',
     color: '#242424',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+    maxWidth: '260px',
   },
   serviceName: {
     fontSize: '13px',
     color: '#616161',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+    maxWidth: '260px',
   },
   stageBadge: {
     display: 'inline-flex',

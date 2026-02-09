@@ -11,3 +11,4 @@ export { AdvancedFilterPanel, useAdvancedFilters } from './AdvancedFilterPanel';
 export type { FilterConfig, FilterValue } from './AdvancedFilterPanel';
 export { AIChatPanel } from './AIChatPanel';
 export { HeroCollapseToggle } from './HeroCollapseToggle';
+export { EmptyState } from './EmptyState';

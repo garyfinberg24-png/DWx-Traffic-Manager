@@ -12,6 +12,7 @@ import {
   makeStyles,
   Text,
   Button,
+  Tooltip,
 } from '@fluentui/react-components';
 import { Dismiss24Regular, EditRegular, SaveRegular } from '@fluentui/react-icons';
 import { DW_COLORS } from '../../utils/buttonStyles';
@@ -436,14 +437,16 @@ export const EditButton: React.FC<{
 }> = ({ onClick, title = 'Edit' }) => {
   const s = useSectionStyles();
   return (
-    <Button
-      className={s.editButton}
-      appearance="subtle"
-      icon={<EditRegular />}
-      size="small"
-      onClick={onClick}
-      title={title}
-    />
+    <Tooltip content={title} relationship="label">
+      <Button
+        className={s.editButton}
+        appearance="subtle"
+        icon={<EditRegular />}
+        size="small"
+        onClick={onClick}
+        aria-label={title}
+      />
+    </Tooltip>
   );
 };
 

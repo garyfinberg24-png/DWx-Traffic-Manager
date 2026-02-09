@@ -17,6 +17,7 @@ import {
   MenuPopover,
   MenuList,
   MenuItem,
+  Tooltip,
 } from '@fluentui/react-components';
 import {
   AddRegular,
@@ -336,8 +337,8 @@ export const TalkingPointsEditor: React.FC<TalkingPointsEditorProps> = ({
                         )}
                       </div>
                       <div className={styles.pointActions} data-actions>
-                        <Button className={styles.actionBtn} appearance="subtle" icon={<EditRegular />} onClick={() => handleStartEdit(point)} size="small" aria-label="Edit" />
-                        <Button className={styles.actionBtn} appearance="subtle" icon={<DeleteRegular />} onClick={() => handleDelete(point.id)} size="small" aria-label="Delete" />
+                        <Tooltip content="Edit" relationship="label"><Button className={styles.actionBtn} appearance="subtle" icon={<EditRegular />} onClick={() => handleStartEdit(point)} size="small" aria-label="Edit" /></Tooltip>
+                        <Tooltip content="Delete" relationship="label"><Button className={styles.actionBtn} appearance="subtle" icon={<DeleteRegular />} onClick={() => handleDelete(point.id)} size="small" aria-label="Delete" /></Tooltip>
                       </div>
                     </>
                   )}
@@ -359,8 +360,8 @@ export const TalkingPointsEditor: React.FC<TalkingPointsEditorProps> = ({
                   onChange={(_, data) => setNewContent(data.value)}
                   style={{ flex: 1 }}
                 />
-                <Button appearance="subtle" icon={<DismissRegular />} onClick={() => { setAddingCategory(null); setNewContent(''); }} size="small" />
-                <Button appearance="primary" icon={<CheckmarkRegular />} onClick={handleAddPoint} size="small" disabled={!newContent.trim()} />
+                <Tooltip content="Cancel" relationship="label"><Button appearance="subtle" icon={<DismissRegular />} onClick={() => { setAddingCategory(null); setNewContent(''); }} size="small" /></Tooltip>
+                <Tooltip content="Add" relationship="label"><Button appearance="primary" icon={<CheckmarkRegular />} onClick={handleAddPoint} size="small" disabled={!newContent.trim()} /></Tooltip>
               </div>
             )}
           </div>

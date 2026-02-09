@@ -1952,7 +1952,7 @@ export const ServiceRequestForm: React.FC<ServiceRequestFormProps> = ({
               <Button
                 className={styles.primaryButton}
                 appearance="primary"
-                icon={<SendRegular />}
+                icon={submitting ? <Spinner size="tiny" /> : <SendRegular />}
                 iconPosition="after"
                 onClick={handleSubmit(onSubmit)}
                 disabled={submitting || !canProceed()}

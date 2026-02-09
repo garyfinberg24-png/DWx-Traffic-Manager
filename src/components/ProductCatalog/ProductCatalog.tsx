@@ -1204,6 +1204,22 @@ export const ProductCatalog: React.FC = () => {
             </div>
           </Card>
         ))}
+        {filteredProducts.length === 0 && (
+          <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '48px 24px', color: '#6b7280' }}>
+            <Text size={400} weight="semibold" style={{ display: 'block', marginBottom: '8px', color: '#374151' }}>
+              No products found
+            </Text>
+            <Text size={300} style={{ color: '#6b7280' }}>
+              Try adjusting your search or category filter.{' '}
+              <span
+                style={{ color: '#0d6efd', cursor: 'pointer', textDecoration: 'underline' }}
+                onClick={() => { setSearchQuery(''); setSelectedCategory('all'); }}
+              >
+                Clear filters
+              </span>
+            </Text>
+          </div>
+        )}
       </div>
 
       {/* Product Detail Modal */}

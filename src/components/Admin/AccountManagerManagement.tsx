@@ -36,6 +36,7 @@ import {
   Tab,
   SelectTabEvent,
   SelectTabData,
+  Tooltip,
 } from '@fluentui/react-components';
 import {
   Add24Regular,
@@ -467,18 +468,21 @@ export const AccountManagerManagement: React.FC<AccountManagerManagementProps> =
         <div className={`${styles.entraUserCard} ${styles.fullWidth}`}>
           <div className={styles.entraUserHeader}>
             <Text weight="semibold">Selected from Directory</Text>
-            <Button
-              appearance="subtle"
-              size="small"
-              icon={<Dismiss24Regular />}
-              onClick={() => {
-                setSelectedEntraUser(null);
-                setFormData((prev) => ({
-                  ...prev,
-                  EntraUserId: undefined,
-                }));
-              }}
-            />
+            <Tooltip content="Clear selection" relationship="label">
+              <Button
+                appearance="subtle"
+                size="small"
+                icon={<Dismiss24Regular />}
+                aria-label="Clear selection"
+                onClick={() => {
+                  setSelectedEntraUser(null);
+                  setFormData((prev) => ({
+                    ...prev,
+                    EntraUserId: undefined,
+                  }));
+                }}
+              />
+            </Tooltip>
           </div>
           <Card>
             <CardHeader

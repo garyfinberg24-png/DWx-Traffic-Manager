@@ -50,17 +50,18 @@ const escapeHtml = (s: string): string =>
   s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
 // ============================================================================
-// Gradient presets
+// Header colour presets (solid colours for maximum email client compatibility)
+// CSS linear-gradient is NOT supported by Outlook desktop — use solid bg-color.
 // ============================================================================
 
 const GRAD = {
-  standard: 'linear-gradient(135deg, #1e6b7b 0%, #2d8a9c 100%)',   // DWx teal (matches hero banners)
-  success:  'linear-gradient(135deg, #107c10 0%, #14a114 100%)',    // Green
-  danger:   'linear-gradient(135deg, #d13438 0%, #e74c4c 100%)',    // Red
-  warning:  'linear-gradient(135deg, #f7630c 0%, #ff8c00 100%)',    // Orange
-  purple:   'linear-gradient(135deg, #6264a7 0%, #7a7cbf 100%)',    // Purple (assignments)
-  ai:       'linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%)',    // AI / session prep
-  neutral:  'linear-gradient(135deg, #605e5c 0%, #8a8886 100%)',    // Grey
+  standard: '#1e6b7b',   // DWx teal
+  success:  '#107c10',   // Green
+  danger:   '#d13438',   // Red
+  warning:  '#f7630c',   // Orange
+  purple:   '#6264a7',   // Purple (assignments)
+  ai:       '#8b5cf6',   // AI / session prep
+  neutral:  '#605e5c',   // Grey
 };
 
 // ============================================================================
@@ -89,30 +90,60 @@ const STATUS_STYLES: Record<string, { bg: string; color: string }> = {
 // Inline building blocks
 // ============================================================================
 
-/** Wrap a complete email with header, content, and footer. */
-const wrap = (gradient: string, title: string, content: string): string => `
+/**
+ * Wrap a complete email with header, content, and footer.
+ * Uses table-based layout + solid background-color for maximum email client
+ * compatibility (Outlook desktop does NOT support CSS linear-gradient).
+ */
+const wrap = (bgColor: string, title: string, content: string): string => `
 <!DOCTYPE html>
 <html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
-<body style="font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;margin:0;padding:0;background:#e5e5e5;">
-<div style="max-width:600px;margin:0 auto;padding:20px;">
-  <div style="background:${gradient};color:white;padding:20px;border-radius:8px 8px 0 0;">
-    <h1 style="margin:0;font-size:20px;">${title}</h1>
-  </div>
-  <div style="background:#f9f9f9;padding:20px;border:1px solid #e1e1e1;">
-    ${content}
-  </div>
-  <div style="padding:15px 20px;background:#f0f0f0;border-radius:0 0 8px 8px;font-size:12px;color:#616161;">
-    <p style="margin:0;">This is an automated message from DWx Traffic Manager. Please do not reply directly to this email.</p>
-  </div>
-</div>
+<body style="margin:0;padding:0;background-color:#f0f2f5;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;">
+<table cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color:#f0f2f5;">
+<tr><td align="center" style="padding:20px 0;">
+<table cellpadding="0" cellspacing="0" border="0" width="600" style="max-width:600px;border-radius:12px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08);">
+  <!-- Header -->
+  <tr>
+    <td style="background-color:${bgColor};padding:24px 28px;">
+      <table cellpadding="0" cellspacing="0" border="0" width="100%"><tr>
+        <td width="56" valign="middle" style="padding-right:16px;">
+          <div style="width:44px;height:44px;background-color:rgba(255,255,255,0.2);border-radius:50%;text-align:center;line-height:44px;">
+            <span style="font-size:20px;color:white;">&#9670;</span>
+          </div>
+        </td>
+        <td valign="middle">
+          <h1 style="margin:0;color:#ffffff;font-size:20px;font-weight:700;letter-spacing:-0.3px;">${title}</h1>
+          <p style="margin:4px 0 0;color:rgba(255,255,255,0.8);font-size:12px;">DWx Traffic Manager</p>
+        </td>
+      </tr></table>
+    </td>
+  </tr>
+  <!-- Content -->
+  <tr>
+    <td style="background-color:#ffffff;padding:28px 28px;">
+      ${content}
+    </td>
+  </tr>
+  <!-- Footer -->
+  <tr>
+    <td style="background-color:#1a1a1a;padding:16px 28px;text-align:center;">
+      <p style="margin:0;color:rgba(255,255,255,0.6);font-size:12px;">DWx Traffic Manager &bull; Automated Notification</p>
+      <p style="margin:4px 0 0;color:rgba(255,255,255,0.4);font-size:11px;">This is an automated message. Please do not reply directly.</p>
+    </td>
+  </tr>
+</table>
+</td></tr>
+</table>
 </body></html>`;
 
-/** Key-value row. */
+/** Key-value row (table-based for Outlook compatibility). */
 const row = (label: string, value: string, style?: string): string =>
-  `<div style="display:flex;margin-bottom:12px;">
-    <span style="font-weight:600;width:140px;color:#616161;flex-shrink:0;">${label}:</span>
-    <span style="flex:1;${style || ''}">${value}</span>
-  </div>`;
+  `<table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-bottom:10px;">
+    <tr>
+      <td width="140" valign="top" style="font-weight:600;color:#616161;padding-right:8px;font-size:14px;">${label}:</td>
+      <td valign="top" style="font-size:14px;${style || ''}">${value}</td>
+    </tr>
+  </table>`;
 
 /** Stage / status badge (pill style matching email mockup). */
 const badge = (text: string, styles: { bg: string; color: string }): string =>

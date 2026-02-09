@@ -31,6 +31,7 @@ import { ProductRequest, ProductRequestStatus } from '../../types/ProductRequest
 import { Specialist } from '../../types/ServiceRequest';
 import { productRequestService } from '../../services/ProductRequestService';
 import { specialistService } from '../../services/SpecialistService';
+import { Pagination, usePagination } from '../Common/Pagination';
 import { format } from 'date-fns';
 
 const useStyles = makeStyles({
@@ -105,11 +106,17 @@ const useStyles = makeStyles({
     fontSize: '14px',
     fontWeight: '700',
     color: '#111827',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
   },
   productName: {
     fontSize: '12px',
     color: '#6b7280',
     fontWeight: '500',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
   },
   statusBadge: {
     display: 'inline-flex',
@@ -275,6 +282,16 @@ export const ProductRequestsQueue: React.FC<ProductRequestsQueueProps> = ({
   const actionableRequests = requests.filter(
     (r) => r.Status !== 'Completed' && r.Status !== 'Cancelled'
   );
+
+  // Pagination
+  const {
+    currentPage,
+    pageSize,
+    paginatedItems: paginatedRequests,
+    totalItems,
+    setCurrentPage,
+    setPageSize,
+  } = usePagination(actionableRequests, 20);
 
   // Selection helpers
   const isAllSelected = actionableRequests.length > 0 && selectedIds.size === actionableRequests.length;
@@ -634,7 +651,7 @@ export const ProductRequestsQueue: React.FC<ProductRequestsQueueProps> = ({
             <Text>No product requests requiring action</Text>
           </div>
         ) : (
-          actionableRequests.map((request) => {
+          paginatedRequests.map((request) => {
             const statusColor = statusColors[request.Status];
             const isProcessing = processingId === request.Id;
             const needsSpecialist = !request.AssignedSpecialistEmail;
@@ -868,6 +885,19 @@ export const ProductRequestsQueue: React.FC<ProductRequestsQueueProps> = ({
           })
         )}
       </div>
+
+      {/* Pagination */}
+      {totalItems > 20 && (
+        <div style={{ padding: '0 16px 12px' }}>
+          <Pagination
+            currentPage={currentPage}
+            totalItems={totalItems}
+            pageSize={pageSize}
+            onPageChange={setCurrentPage}
+            onPageSizeChange={setPageSize}
+          />
+        </div>
+      )}
     </div>
   );
 };

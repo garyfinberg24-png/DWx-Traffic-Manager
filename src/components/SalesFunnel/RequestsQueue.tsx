@@ -38,6 +38,7 @@ import {
 import { serviceRequestService } from '../../services/ServiceRequestService';
 import { specialistService } from '../../services/SpecialistService';
 import { ConfirmDialog } from '../Common/ConfirmDialog';
+import { Pagination, usePagination } from '../Common/Pagination';
 import { format } from 'date-fns';
 
 const useStyles = makeStyles({
@@ -114,11 +115,17 @@ const useStyles = makeStyles({
     fontSize: '14px',
     fontWeight: '700',
     color: '#111827',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
   },
   serviceName: {
     fontSize: '12px',
     color: '#6b7280',
     fontWeight: '500',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
   },
   stageBadge: {
     display: 'inline-flex',
@@ -330,6 +337,16 @@ export const RequestsQueue: React.FC<RequestsQueueProps> = ({
   const actionableRequests = requests.filter(
     (r) => r.FunnelStage !== 'Won' && r.FunnelStage !== 'Lost'
   );
+
+  // Pagination
+  const {
+    currentPage,
+    pageSize,
+    paginatedItems: paginatedRequests,
+    totalItems,
+    setCurrentPage,
+    setPageSize,
+  } = usePagination(actionableRequests, 20);
 
   // Selection helpers
   const isAllSelected = actionableRequests.length > 0 && selectedIds.size === actionableRequests.length;
@@ -749,7 +766,7 @@ export const RequestsQueue: React.FC<RequestsQueueProps> = ({
             <Text>No requests requiring action</Text>
           </div>
         ) : (
-          actionableRequests.map((request) => {
+          paginatedRequests.map((request) => {
             const stageColor = stageColors[request.FunnelStage];
             const isProcessing = processingId === request.Id;
             const nextStage = getNextStage(request.FunnelStage);
@@ -932,6 +949,19 @@ export const RequestsQueue: React.FC<RequestsQueueProps> = ({
           })
         )}
       </div>
+
+      {/* Pagination */}
+      {totalItems > 20 && (
+        <div style={{ padding: '0 16px 12px' }}>
+          <Pagination
+            currentPage={currentPage}
+            totalItems={totalItems}
+            pageSize={pageSize}
+            onPageChange={setCurrentPage}
+            onPageSizeChange={setPageSize}
+          />
+        </div>
+      )}
 
       {/* Won Confirmation */}
       <Dialog open={!!confirmWon} onOpenChange={(_, data) => { if (!data.open) setConfirmWon(null); }}>

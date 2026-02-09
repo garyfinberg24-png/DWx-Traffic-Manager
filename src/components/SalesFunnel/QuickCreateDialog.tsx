@@ -861,7 +861,7 @@ const QuickCreateDialog: React.FC<QuickCreateDialogProps> = ({
           </Button>
           <Button
             appearance="primary"
-            icon={<AddRegular />}
+            icon={submitting ? <Spinner size="tiny" /> : <AddRegular />}
             onClick={handleSubmit}
             disabled={loading || submitting || !isValid}
           >

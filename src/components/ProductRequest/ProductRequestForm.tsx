@@ -22,6 +22,7 @@ import {
   MessageBarBody,
   MessageBarTitle,
   Badge,
+  Spinner,
 } from '@fluentui/react-components';
 import { DatePicker } from '@fluentui/react-datepicker-compat';
 import {
@@ -1282,7 +1283,7 @@ export const ProductRequestForm: React.FC = () => {
             ) : (
               <Button
                 appearance="primary"
-                icon={<SendRegular />}
+                icon={submitting ? <Spinner size="tiny" /> : <SendRegular />}
                 iconPosition="after"
                 onClick={handleSubmit(onSubmit)}
                 disabled={submitting || !canProceed()}
