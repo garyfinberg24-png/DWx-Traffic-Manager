@@ -688,7 +688,7 @@ class ServiceRequestService {
       // Fetch all items and filter client-side (avoids non-indexed column and missing fields/ prefix issues)
       const items = await graphService.getListItems(this.listName) as Record<string, unknown>[];
 
-      let requests = items.map(this.mapToServiceRequest);
+      let requests = items.map((item) => this.mapToServiceRequest(item));
 
       // Apply filters client-side
       if (filters?.stages && filters.stages.length > 0) {
@@ -1023,14 +1023,14 @@ class ServiceRequestService {
       WinLossReason: fields.WinLossReason as string,
       NextSteps: fields.NextSteps as string,
       Comments: fields.Comments as string,
-      StageTimestamps: this.parseStageTimestamps(fields.StageTimestamps_JSON as string),
+      StageTimestamps: ServiceRequestService.parseStageTimestamps(fields.StageTimestamps_JSON as string),
       DealChecklist: deserializeDealChecklist(fields.DealChecklist_JSON as string) || undefined,
       Created: fields.Created as string || '',
       Modified: fields.Modified as string,
     };
   }
 
-  private parseStageTimestamps(json: string | undefined | null): StageTimestamps | undefined {
+  private static parseStageTimestamps(json: string | undefined | null): StageTimestamps | undefined {
     if (!json) return undefined;
     try {
       return JSON.parse(json) as StageTimestamps;

@@ -588,15 +588,17 @@ const QuickCreateDialog: React.FC<QuickCreateDialogProps> = ({
           </div>
         ) : (
           <div className={styles.body}>
-            {/* Request Type Toggle — uses <div> not <button> to avoid Fluent UI DialogSurface button resets */}
+            {/* Request Type Toggle — uses <span> to avoid Fluent UI DialogSurface CSS resets on div/button */}
             {!preSelectedService && (
-              <div style={{
+              <span style={{
                 display: 'flex',
                 borderRadius: '8px',
                 overflow: 'hidden',
                 border: '1px solid #d1d5db',
+                minHeight: '40px',
+                flexShrink: 0,
               }}>
-                <div
+                <span
                   role="button"
                   tabIndex={0}
                   style={{
@@ -614,13 +616,15 @@ const QuickCreateDialog: React.FC<QuickCreateDialogProps> = ({
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
+                    minHeight: '40px',
+                    boxSizing: 'border-box' as const,
                   }}
                   onClick={() => handleModeChange('service')}
                   onKeyDown={(e) => e.key === 'Enter' && handleModeChange('service')}
                 >
                   Service Request
-                </div>
-                <div
+                </span>
+                <span
                   role="button"
                   tabIndex={0}
                   style={{
@@ -638,13 +642,15 @@ const QuickCreateDialog: React.FC<QuickCreateDialogProps> = ({
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
+                    minHeight: '40px',
+                    boxSizing: 'border-box' as const,
                   }}
                   onClick={() => handleModeChange('product')}
                   onKeyDown={(e) => e.key === 'Enter' && handleModeChange('product')}
                 >
                   Product Request
-                </div>
-              </div>
+                </span>
+              </span>
             )}
 
             {/* Client */}

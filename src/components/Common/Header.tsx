@@ -77,12 +77,21 @@ const useStyles = makeStyles({
     minWidth: 'auto',
     ...shorthands.padding('6px', '14px'),
     ...shorthands.borderRadius('6px'),
+    '& svg': {
+      color: 'inherit',
+    },
     ':hover': {
       backgroundColor: 'rgba(255, 255, 255, 0.1)',
       color: 'white',
     },
+    ':hover svg': {
+      color: 'white',
+    },
     ':hover:active': {
       backgroundColor: 'rgba(255, 255, 255, 0.15)',
+      color: 'white',
+    },
+    ':hover:active svg': {
       color: 'white',
     },
   },
@@ -90,6 +99,9 @@ const useStyles = makeStyles({
     backgroundColor: 'rgba(255, 255, 255, 0.15)',
     color: 'white',
     fontWeight: '600',
+    '& svg': {
+      color: 'white',
+    },
   },
   userSection: {
     display: 'flex',
