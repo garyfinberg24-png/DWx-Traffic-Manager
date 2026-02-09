@@ -6,7 +6,7 @@
 
 **Project Origin**: Cloned from LP Booking App (v1.7.5) - a production Teams app for License Pulse demo scheduling.
 
-**Current Version**: v2.15.0 (February 2026) - Reporting Module (Pipeline, AM Performance, Revenue reports with PDF/Excel export)
+**Current Version**: v2.15.1 (February 2026) - UX Polish + Sales Pipeline Demo Readiness Fixes
 
 > **IMPORTANT**: We are ONLY working on the DWx Traffic Manager project. We DO NOT make any changes to the LP Booking App. The LP Booking App is a separate production application and must not be modified.
 
@@ -528,6 +528,7 @@ DWx-Traffic-Manager/
 │   │   │   ├── Header.tsx                # Navigation header
 │   │   │   ├── ConfirmDialog.tsx         # Reusable confirm dialog
 │   │   │   ├── ErrorBoundary.tsx         # Error boundary
+│   │   │   ├── EmptyState.tsx            # Reusable empty state with icon, title, subtitle, action (v2.15.1)
 │   │   │   ├── HeroCollapseToggle.tsx    # Shared hero collapse/expand toggle button (v2.12.0)
 │   │   │   ├── LoadingSpinner.tsx        # Loading indicator
 │   │   │   ├── NotificationCenter.tsx    # Notifications
@@ -601,7 +602,7 @@ DWx-Traffic-Manager/
 │   │   ├── Report.ts                    # Report types — Pipeline/AM/Revenue data interfaces, date ranges (v2.15.0)
 │   │   ├── EmailTracking.ts             # Email tracking types (v2.11.0)
 │   │   ├── MeetingNotes.ts              # Meeting notes types (v2.11.0)
-│   │   ├── Product.ts                    # Product catalog types (49 products: 16 Apps, 17 HyperParts, 6 Cards, 10 Agents)
+│   │   ├── Product.ts                    # Product catalog types (52 products: 16 Apps, 20 HyperParts, 6 Cards, 10 Agents)
 │   │   ├── ProductRequirements.ts        # Product requirements form types
 │   │   ├── ServiceRequirements.ts        # Service requirements types
 │   │   ├── Commercial.ts                 # Commercial metrics types
@@ -629,6 +630,7 @@ DWx-Traffic-Manager/
 │   │   ├── proposalPdfGenerator.ts       # PDF proposal export (jsPDF) (v2.11.0)
 │   │   ├── proposalWordGenerator.ts     # Word proposal export (v2.11.0)
 │   │   ├── buttonStyles.ts              # Shared button/color constants (DW_COLORS)
+│   │   ├── formatters.ts               # Shared formatting: formatCurrency, formatDate, truncateText (v2.15.1)
 │   │   └── timezone.ts                   # Timezone utilities
 │   ├── App.tsx                           # Main app with routes
 │   ├── main.tsx                          # React entry point
@@ -1200,6 +1202,32 @@ Comprehensive reporting with 3 report types, interactive Recharts visualizations
 - [x] **reportPdfGenerator.ts** — DW-branded A4 PDF via jsPDF + jspdf-autotable: cover page (DWx blue stripe), auto-generated TOC, data tables with teal headers, page numbers, color-coded win rates. 3 renderers dispatched by report type
 - [x] **excelExport.ts** — `generateMultiSheetWorkbook()` for SpreadsheetML XML with DW-branded styles. `downloadPipelineReportExcel()` (6 sheets), `downloadAMPerformanceReportExcel()` (3 sheets), `downloadRevenueReportExcel()` (5 sheets)
 
+### Phase 17: UX Polish + Sales Pipeline Demo Readiness (COMPLETE - v2.15.1)
+
+Two rounds of fixes preparing the app for management demo: UX polish across 13 items and deep sales funnel pipeline audit with 10 critical fixes.
+
+#### UX Polish (U1-U13) - COMPLETE
+
+- [x] **Empty states** — FunnelChart.tsx empty funnel message, ProductCatalog.tsx "No products found" with clear filters link
+- [x] **Loading spinners on submit** — ServiceRequestForm.tsx, ProductRequestForm.tsx, QuickCreateDialog.tsx all show `<Spinner size="tiny" />` during submission
+- [x] **Tooltips on icon-only buttons** — TalkingPointsEditor.tsx (4 buttons), DetailModalShell.tsx (EditButton), AccountManagerManagement.tsx (clear selection)
+- [x] **Reusable EmptyState component** — `src/components/Common/EmptyState.tsx` with icon, title, subtitle, optional action button
+- [x] **Shared formatters utility** — `src/utils/formatters.ts` with `formatCurrency()`, `formatDate()`, `truncateText()`
+- [x] **Text truncation** — RequestCard.tsx client/service names with `overflow: hidden; textOverflow: ellipsis`
+- [x] **Email templates rewrite** — Table-based layout with solid background colors for Outlook compatibility
+
+#### Sales Pipeline Critical Fixes - COMPLETE
+
+- [x] **KanbanCard days-in-stage** — Fixed to use `StageTimestamps[currentStage]` instead of `Created` date for accurate stage duration
+- [x] **PipelineService conversion rates** — Lost deals now check `StageTimestamps` for actual stage progression (not assumed Lead-only)
+- [x] **RequestsQueue bulk advance** — Added per-request `STAGE_TRANSITIONS` validation (skip invalid transitions, report failures)
+- [x] **ProductRequestService status validation** — Added `PRODUCT_STATUS_TRANSITIONS` import + transition guard in `updateStatus()`
+- [x] **ServiceRequestService WeightedPipeline** — Null-safe: `(currentRequest.DealValue ?? 0)` prevents NaN on undefined DealValue
+- [x] **PipelineKPIs win rate empty state** — Shows neutral "No closed deals yet" instead of red "Below target" when 0%
+- [x] **SalesFunnelDashboard hero stats** — Changed from hardcoded stage list to exclusion filter (`!== 'Won' && !== 'Lost'`)
+- [x] **Selection state cleanup** — RequestsQueue.tsx and ProductRequestsQueue.tsx clear stale selectedIds via `useEffect` when actionable list changes
+- [x] **Shared PRODUCT_STATUS_TRANSITIONS** — Moved from local constant to exported from `ProductRequest.ts`, imported by ProductRequestService + ProductRequestsQueue
+
 ### Pending / Round 4
 
 - [ ] Round 4: Medium-priority enhancements (M1-M10)
@@ -1285,7 +1313,8 @@ type AuditEntity =
 ```typescript
 type ProductRequestStatus = 'Pending Review' | 'Awaiting Approval' | 'Confirmed' | 'Completed' | 'Cancelled';
 
-const STATUS_TRANSITIONS = {
+// Exported from src/types/ProductRequest.ts — shared by ProductRequestService + ProductRequestsQueue
+export const PRODUCT_STATUS_TRANSITIONS: Record<ProductRequestStatus, ProductRequestStatus[]> = {
   'Pending Review': ['Awaiting Approval', 'Cancelled'],
   'Awaiting Approval': ['Confirmed', 'Cancelled'],
   'Confirmed': ['Completed', 'Cancelled'],
@@ -1409,6 +1438,8 @@ The app supports Account Managers from an external partner tenant:
 | `src/services/PostMortemService.ts` | Post-mortem CRUD + AI orchestration + analytics aggregation (v2.14.0) |
 | `src/components/PostMortem/PostMortemTab.tsx` | Per-deal post-mortem view (8th tab in RequestDetails) (v2.14.0) |
 | `src/components/Dashboard/InsightsTab.tsx` | Cross-deal post-mortem analytics dashboard (v2.14.0) |
+| `src/components/Common/EmptyState.tsx` | Reusable empty state component with icon, title, subtitle, action button (v2.15.1) |
+| `src/utils/formatters.ts` | Shared formatting utilities: formatCurrency, formatDate, truncateText (v2.15.1) |
 | `src/types/Report.ts` | Report types — Pipeline, AM Performance, Revenue data interfaces + date range presets (v2.15.0) |
 | `src/services/ReportingService.ts` | Report orchestration — date range filtering, 3 report generators using PipelineService + WinLossAnalysisService (v2.15.0) |
 | `src/components/Dashboard/ReportsTab.tsx` | Interactive reports UI — Recharts charts, KPI cards, data tables, PDF/Excel export (v2.15.0) |
@@ -1467,6 +1498,10 @@ The app supports Account Managers from an external partner tenant:
 | **Dashboard Product Queue** | ManagerDashboard sidebar shows both "Service Queue" and "Product Queue" badges; SalesFunnelDashboard passes `onProductCreated` to QuickCreateDialog |
 | **Won Deal UX** | Trophy24Regular icon on Won button/menu, branded green gradient confirmation dialog in RequestsQueue |
 | **Reporting Module** | 3 report types (Pipeline, AM Performance, Revenue) in ReportsTab. Recharts charts, DW-branded PDF + multi-sheet Excel export. Reuses PipelineService + WinLossAnalysisService (no new SP lists) |
+| **Product Status Transitions** | Shared `PRODUCT_STATUS_TRANSITIONS` exported from `ProductRequest.ts`, imported by `ProductRequestService` + `ProductRequestsQueue` (single source of truth) |
+| **Bulk Operation Validation** | Bulk advance in RequestsQueue validates per-request STAGE_TRANSITIONS before attempting API call. Invalid transitions are skipped with failure count report |
+| **StageTimestamps Usage** | Use `request.StageTimestamps?.[stage]` for accurate days-in-stage and conversion rate calculations. Fallback to `Created`/`Modified` dates only when StageTimestamps unavailable |
+| **Selection State Cleanup** | Both queue components (RequestsQueue, ProductRequestsQueue) use `useEffect` to clean stale selectedIds when actionable request list changes |
 
 ## Product Catalog
 
@@ -1581,19 +1616,19 @@ DWxSupportingDocuments/
 ## Recent Commit History
 
 ```
+d885526 fix: Sales funnel pipeline critical fixes for demo readiness (v2.15.1)
+1e1bb0c fix: UX polish - empty states, loading spinners, tooltips, pagination, truncation (v2.15.1)
+57e68bb style: Unify Products hero to single DWx blue/teal gradient + remove stats
+29120a0 style: Replace emoji product icons with Fluent UI SVG line icons
 0519ded feat: Reporting module with Pipeline, AM Performance, Revenue reports (v2.15.0)
 55df8cd feat: Quick Create Service+Product + Dashboard Product Queue + Won UX (v2.14.1)
 b4d3993 feat: Post Mortem & Issues Tracking with AI-powered analysis + Insights dashboard (v2.14.0)
 724952b style: Admin table fixes + Quick Create from Service Details + UI refinements
 41d78bd feat: Service Checklists + Client seed Energy fix (v2.13.0)
-e7c81cf [docs] Update CLAUDE.md to v2.12.1 with Product Requests tab enhancements
 2a476fd feat: Product Requests tab — search/filter/sort + card redesign (v2.12.1)
-57e68bb style: Unify Products hero to single DWx blue/teal gradient + remove stats
 81abd20 feat: Compact heroes + KB redesign + stepper refinements + service card polish (v2.12.0)
 c0ace5b feat: Hero banners on all pages + collapse/expand toggle (v2.12.0)
-e424f16 fix: Remove all legacy LP Booking references + fix Kanban card click (v2.11.1)
 9869c24 feat: Kanban Board + Quick-Create Deal + Email Tracking + PDF Export + Meeting Notes (v2.11.0)
 16a7997 feat: Deal Activity Timeline + Follow-Up Reminders + Win/Loss Analysis (v2.10.0)
-b085667 feat: V1 hero banner Services page + client auto-populate + KB tab reorder (v2.9.1)
 5e69c0e feat: Proposal Management System with AI generation + internal approval workflow (v2.9.0)
 ```
