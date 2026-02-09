@@ -51,7 +51,9 @@ const formatCurrency = (value: number): string =>
   }).format(value);
 
 const getDaysInStage = (request: ServiceRequest): number => {
-  const dateStr = request.Created || request.Modified || '';
+  // Use StageTimestamps if available (v2.12.0+ SLA tracking), fallback to Created for Lead
+  const stageTimestamp = request.StageTimestamps?.[request.FunnelStage];
+  const dateStr = stageTimestamp || (request.FunnelStage === 'Lead' ? request.Created : request.Modified) || request.Created || '';
   if (!dateStr) return 0;
   return Math.floor((Date.now() - new Date(dateStr).getTime()) / 86400000);
 };

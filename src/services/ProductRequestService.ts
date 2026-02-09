@@ -15,6 +15,7 @@ import {
   ProductRequestResult,
   ProductRequestStatus,
   ProductRequestFilters,
+  PRODUCT_STATUS_TRANSITIONS,
 } from '../types/ProductRequest';
 
 class ProductRequestService {
@@ -165,6 +166,16 @@ class ProductRequestService {
       }
 
       const previousStatus = current.Status;
+
+      // Validate status transition
+      const allowedTransitions = PRODUCT_STATUS_TRANSITIONS[previousStatus] || [];
+      if (!allowedTransitions.includes(status)) {
+        return {
+          success: false,
+          error: `Cannot transition from ${previousStatus} to ${status}. Allowed: ${allowedTransitions.join(', ')}`,
+        };
+      }
+
       await graphService.updateListItem(this.listName, id, { Status: status });
 
       // Decrement specialist deal count when request is completed or cancelled

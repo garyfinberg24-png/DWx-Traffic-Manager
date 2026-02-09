@@ -374,8 +374,7 @@ export const SalesFunnelDashboard: React.FC<SalesFunnelDashboardProps> = ({
   }, [requests]);
 
   const heroStats = useMemo(() => {
-    const activeStages = ['Lead', 'Qualified', 'Discovery', 'Proposal', 'Negotiation'];
-    const activeRequests = requests.filter(r => activeStages.includes(r.FunnelStage));
+    const activeRequests = requests.filter(r => r.FunnelStage !== 'Won' && r.FunnelStage !== 'Lost');
     const totalPipeline = activeRequests.reduce((sum, r) => sum + (r.DealValue || 0), 0);
     const weightedPipeline = activeRequests.reduce((sum, r) => sum + (r.WeightedPipeline || 0), 0);
     return { activeCount: activeRequests.length, totalPipeline, weightedPipeline };

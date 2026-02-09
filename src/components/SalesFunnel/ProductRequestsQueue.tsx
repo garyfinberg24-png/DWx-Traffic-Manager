@@ -3,7 +3,7 @@
  * Manager view for approving/managing product demo and trial requests with bulk operations
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import {
   Text,
   Button,
@@ -27,7 +27,7 @@ import {
 import { DW_COLORS } from '../../utils/buttonStyles';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
-import { ProductRequest, ProductRequestStatus } from '../../types/ProductRequest';
+import { ProductRequest, ProductRequestStatus, PRODUCT_STATUS_TRANSITIONS } from '../../types/ProductRequest';
 import { Specialist } from '../../types/ServiceRequest';
 import { productRequestService } from '../../services/ProductRequestService';
 import { specialistService } from '../../services/SpecialistService';
@@ -246,14 +246,8 @@ const statusColors: Record<ProductRequestStatus, { bg: string; text: string; acc
   'Cancelled': { bg: '#fee2e2', text: '#991b1b', accent: '#ef4444' },
 };
 
-// Allowed status transitions from the queue
-const STATUS_TRANSITIONS: Record<ProductRequestStatus, ProductRequestStatus[]> = {
-  'Pending Review': ['Awaiting Approval', 'Cancelled'],
-  'Awaiting Approval': ['Confirmed', 'Cancelled'],
-  'Confirmed': ['Completed', 'Cancelled'],
-  'Completed': [],
-  'Cancelled': [],
-};
+// Use shared status transitions from types
+const STATUS_TRANSITIONS = PRODUCT_STATUS_TRANSITIONS;
 
 interface ProductRequestsQueueProps {
   requests: ProductRequest[];
@@ -282,6 +276,17 @@ export const ProductRequestsQueue: React.FC<ProductRequestsQueueProps> = ({
   const actionableRequests = requests.filter(
     (r) => r.Status !== 'Completed' && r.Status !== 'Cancelled'
   );
+
+  // Clean up stale selections when actionable list changes
+  useEffect(() => {
+    if (selectedIds.size === 0) return;
+    const actionableIds = new Set(actionableRequests.map(r => r.Id));
+    setSelectedIds(prev => {
+      const cleaned = new Set(Array.from(prev).filter(id => actionableIds.has(id)));
+      return cleaned.size === prev.size ? prev : cleaned;
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [actionableRequests.length]);
 
   // Pagination
   const {

@@ -370,7 +370,7 @@ class ServiceRequestService {
         }
         // Update deal probability
         updateData.DealProbability = newStage === 'Won' ? 100 : 0;
-        updateData.WeightedPipeline = newStage === 'Won' ? currentRequest.DealValue : 0;
+        updateData.WeightedPipeline = newStage === 'Won' ? (currentRequest.DealValue ?? 0) : 0;
       }
 
       if (nextSteps) {

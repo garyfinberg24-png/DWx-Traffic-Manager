@@ -179,11 +179,11 @@ export const PipelineKPIs: React.FC<PipelineKPIsProps> = ({ metrics, winRates, p
     {
       label: 'Win Rate',
       value: `${winRates.overall.toFixed(0)}%`,
-      subtext: winRates.overall >= 30 ? 'Above target' : 'Below target',
-      subtextType: winRates.overall >= 30 ? 'positive' : 'negative',
+      subtext: winRates.overall === 0 ? 'No closed deals yet' : winRates.overall >= 30 ? 'Above target' : 'Below target',
+      subtextType: winRates.overall === 0 ? undefined : winRates.overall >= 30 ? 'positive' : 'negative',
       icon: TargetRegular,
-      iconBg: winRates.overall >= 30 ? '#dff6dd' : '#fde7e9',
-      iconColor: winRates.overall >= 30 ? '#107c10' : '#d13438',
+      iconBg: winRates.overall === 0 ? '#f3f3f3' : winRates.overall >= 30 ? '#dff6dd' : '#fde7e9',
+      iconColor: winRates.overall === 0 ? '#616161' : winRates.overall >= 30 ? '#107c10' : '#d13438',
     },
     {
       label: 'Avg Deal Size',

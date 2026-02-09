@@ -51,7 +51,7 @@ class PipelineService {
       ? dealsWithProbability.reduce((sum, r) => sum + (r.DealProbability || 0), 0) / dealsWithProbability.length
       : 50;
 
-    // Forecasted revenue (weighted pipeline for deals expected to close this month)
+    // Forecasted revenue (weighted pipeline for deals expected to close by end of this month, including overdue)
     const now = new Date();
     const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
     const forecastedRevenue = openDeals
@@ -185,15 +185,19 @@ class PipelineService {
     // Count deals that have reached or passed each stage
     const reachedStage = (request: ServiceRequest, targetStage: FunnelStage): boolean => {
       const stageOrder: FunnelStage[] = ['Lead', 'Qualified', 'Discovery', 'Proposal', 'Negotiation', 'Won'];
-      const currentIndex = stageOrder.indexOf(request.FunnelStage);
       const targetIndex = stageOrder.indexOf(targetStage);
 
-      // Lost deals are counted based on where they were lost from
+      // Lost deals: use StageTimestamps to determine how far they progressed
       if (request.FunnelStage === 'Lost') {
-        // We don't have historical data, so assume Lost reached at least Lead
+        if (request.StageTimestamps) {
+          // Check if the deal ever entered the target stage
+          return !!request.StageTimestamps[targetStage];
+        }
+        // No timestamps — only count as reaching Lead
         return targetStage === 'Lead';
       }
 
+      const currentIndex = stageOrder.indexOf(request.FunnelStage);
       return currentIndex >= targetIndex;
     };
 

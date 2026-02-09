@@ -6,6 +6,15 @@
 export type ProductRequestStatus = 'Pending Review' | 'Awaiting Approval' | 'Confirmed' | 'Completed' | 'Cancelled';
 export type ProductRequestType = 'Demo' | 'Trial Deployment';
 
+/** Valid product request status transitions */
+export const PRODUCT_STATUS_TRANSITIONS: Record<ProductRequestStatus, ProductRequestStatus[]> = {
+  'Pending Review': ['Awaiting Approval', 'Cancelled'],
+  'Awaiting Approval': ['Confirmed', 'Cancelled'],
+  'Confirmed': ['Completed', 'Cancelled'],
+  'Completed': [],
+  'Cancelled': [],
+};
+
 export interface ProductRequest {
   Id: number;
   Title: string;

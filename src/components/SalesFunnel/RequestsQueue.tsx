@@ -3,7 +3,7 @@
  * Manager view for approving/managing service requests with bulk operations
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import {
   Text,
   Button,
@@ -34,6 +34,7 @@ import {
   ServiceRequest,
   FunnelStage,
   Specialist,
+  STAGE_TRANSITIONS,
 } from '../../types/ServiceRequest';
 import { serviceRequestService } from '../../services/ServiceRequestService';
 import { specialistService } from '../../services/SpecialistService';
@@ -338,6 +339,17 @@ export const RequestsQueue: React.FC<RequestsQueueProps> = ({
     (r) => r.FunnelStage !== 'Won' && r.FunnelStage !== 'Lost'
   );
 
+  // Clean up stale selections when actionable list changes
+  useEffect(() => {
+    if (selectedIds.size === 0) return;
+    const actionableIds = new Set(actionableRequests.map(r => r.Id));
+    setSelectedIds(prev => {
+      const cleaned = new Set(Array.from(prev).filter(id => actionableIds.has(id)));
+      return cleaned.size === prev.size ? prev : cleaned;
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [actionableRequests.length]);
+
   // Pagination
   const {
     currentPage,
@@ -546,6 +558,13 @@ export const RequestsQueue: React.FC<RequestsQueueProps> = ({
     let failCount = 0;
 
     for (const request of selectedRequests) {
+      // Validate transition is allowed per STAGE_TRANSITIONS
+      const allowedTransitions = STAGE_TRANSITIONS[request.FunnelStage] || [];
+      if (!allowedTransitions.includes(targetStage)) {
+        failCount++;
+        continue;
+      }
+
       try {
         const result = await serviceRequestService.updateStage(
           request.Id,
