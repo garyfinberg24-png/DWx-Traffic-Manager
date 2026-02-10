@@ -496,17 +496,50 @@ Instruction: ${refinementInstruction}`;
         | { assumptions: string[]; risks: ProposalRisk[] }
         | undefined;
 
+      const executiveSummary = getValue(results[0]) as ExecutiveSummary | undefined;
+      const solutionOverview = getValue(results[1]) as SolutionOverview | undefined;
+      const technologyStack = getValue(results[2]) as TechnologyStack | undefined;
+      const scopeOfWork = getValue(results[3]) as ScopeOfWork | undefined;
+      const pricingBreakdown = getValue(results[4]) as PricingBreakdown | undefined;
+      const timeline = getValue(results[5]) as ProposalTimeline | undefined;
+      const teamComposition = getValue(results[6]) as TeamComposition | undefined;
+      const assumptions = assumptionsAndRisks?.assumptions;
+      const risks = assumptionsAndRisks?.risks;
+
+      // Check if at least one section was generated successfully
+      const hasAnyContent = executiveSummary || solutionOverview || technologyStack ||
+        scopeOfWork || pricingBreakdown || timeline || teamComposition || assumptions || risks;
+
+      if (!hasAnyContent) {
+        // Collect error messages from rejected promises
+        const errors = results
+          .filter((r): r is PromiseRejectedResult => r.status === 'rejected')
+          .map(r => r.reason?.message || String(r.reason));
+        const errorSample = errors.length > 0 ? errors[0] : 'Unknown error';
+        console.error('[AIPreparationService] All proposal sections failed:', errors);
+        return {
+          success: false,
+          error: `AI generation failed: ${errorSample}`,
+        };
+      }
+
+      // Log partial failures
+      const failedCount = results.filter(r => r.status === 'rejected').length;
+      if (failedCount > 0) {
+        console.warn(`[AIPreparationService] ${failedCount}/8 proposal sections failed`);
+      }
+
       return {
         success: true,
-        executiveSummary: getValue(results[0]) as ExecutiveSummary | undefined,
-        solutionOverview: getValue(results[1]) as SolutionOverview | undefined,
-        technologyStack: getValue(results[2]) as TechnologyStack | undefined,
-        scopeOfWork: getValue(results[3]) as ScopeOfWork | undefined,
-        pricingBreakdown: getValue(results[4]) as PricingBreakdown | undefined,
-        timeline: getValue(results[5]) as ProposalTimeline | undefined,
-        teamComposition: getValue(results[6]) as TeamComposition | undefined,
-        assumptions: assumptionsAndRisks?.assumptions,
-        risks: assumptionsAndRisks?.risks,
+        executiveSummary,
+        solutionOverview,
+        technologyStack,
+        scopeOfWork,
+        pricingBreakdown,
+        timeline,
+        teamComposition,
+        assumptions,
+        risks,
       };
     } catch (error) {
       console.error('[AIPreparationService] Failed to generate proposal content:', error);

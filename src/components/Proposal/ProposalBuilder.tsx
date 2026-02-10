@@ -284,14 +284,20 @@ export const ProposalBuilder: React.FC<ProposalBuilderProps> = ({
         if (result.assumptions) updates.assumptions = result.assumptions;
         if (result.risks) updates.risks = result.risks;
 
+        if (Object.keys(updates).length === 0) {
+          showToast('AI returned no content. Please check Azure OpenAI configuration.', 'error');
+          return;
+        }
+
+        const sectionCount = Object.keys(updates).length;
         const updateResult = await proposalService.updateProposal(proposal.Id, updates);
         if (updateResult.success && updateResult.proposal) {
           setProposal(updateResult.proposal);
           onProposalUpdated?.(updateResult.proposal);
-          showToast('AI content generated successfully', 'success');
+          showToast(`AI generated ${sectionCount} proposal sections successfully`, 'success');
         }
       } else {
-        showToast(result.error || 'AI generation failed', 'error');
+        showToast(result.error || 'AI generation failed. Check Azure OpenAI configuration.', 'error');
       }
     } catch (error) {
       console.error('[ProposalBuilder] AI generation failed:', error);

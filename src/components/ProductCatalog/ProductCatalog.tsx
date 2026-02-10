@@ -85,6 +85,8 @@ import {
 import { DW_COLORS } from '../../utils/buttonStyles';
 import { useHeroCollapse } from '../../hooks/useHeroCollapse';
 import { HeroCollapseToggle } from '../Common/HeroCollapseToggle';
+import ProductQuickCreate from './ProductQuickCreate';
+import { AddRegular } from '@fluentui/react-icons';
 
 // ============================================================
 // Product Icon Mapping — Professional SVG line icons per product
@@ -863,6 +865,7 @@ export const ProductCatalog: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [quickCreateProduct, setQuickCreateProduct] = useState<Product | null>(null);
   const pillsRef = useRef<HTMLDivElement>(null);
 
   const currentConfig = TAB_CONFIG[activeTab];
@@ -1189,6 +1192,18 @@ export const ProductCatalog: React.FC = () => {
               </Text>
               <div className={styles.productFooter}>
                 <Button
+                  size="small"
+                  appearance="outline"
+                  icon={<AddRegular />}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setQuickCreateProduct(product);
+                  }}
+                  style={{ color: currentConfig.color, borderColor: currentConfig.color }}
+                >
+                  Quick Request
+                </Button>
+                <Button
                   appearance="primary"
                   size="small"
                   className={styles.requestBtn}
@@ -1198,7 +1213,7 @@ export const ProductCatalog: React.FC = () => {
                   }}
                   style={{ backgroundColor: currentConfig.color }}
                 >
-                  Request Demo
+                  Full Form
                 </Button>
               </div>
             </div>
@@ -1221,6 +1236,14 @@ export const ProductCatalog: React.FC = () => {
           </div>
         )}
       </div>
+
+      {/* Quick Create Dialog */}
+      <ProductQuickCreate
+        open={!!quickCreateProduct}
+        onClose={() => setQuickCreateProduct(null)}
+        product={quickCreateProduct}
+        accentColor={currentConfig.color}
+      />
 
       {/* Product Detail Modal */}
       <Dialog
@@ -1301,6 +1324,19 @@ export const ProductCatalog: React.FC = () => {
                   </Button>
                   <Button
                     size="small"
+                    appearance="outline"
+                    icon={<AddRegular />}
+                    onClick={() => {
+                      const p = selectedProduct;
+                      setSelectedProduct(null);
+                      setQuickCreateProduct(p);
+                    }}
+                    style={{ color: currentConfig.color, borderColor: currentConfig.color }}
+                  >
+                    Quick Request
+                  </Button>
+                  <Button
+                    size="small"
                     appearance="primary"
                     onClick={() => {
                       handleRequestDemo(selectedProduct);
@@ -1308,7 +1344,7 @@ export const ProductCatalog: React.FC = () => {
                     }}
                     style={{ backgroundColor: currentConfig.color }}
                   >
-                    Request Demo
+                    Full Form
                   </Button>
                 </div>
               </div>
