@@ -512,11 +512,19 @@ export const ProductRequestForm: React.FC = () => {
       // Map form RequestType to SharePoint ProductRequestType
       const requestType: ProductRequestType = data.requestType === 'Trial' ? 'Trial Deployment' : 'Demo';
 
+      // Map lowercase product type to SP Choice column values
+      const productTypeMap: Record<string, 'App' | 'Web Part' | 'Adaptive Card' | 'Agent'> = {
+        'app': 'App',
+        'webpart': 'Web Part',
+        'adaptive-card': 'Adaptive Card',
+        'agent': 'Agent',
+      };
+
       const result = await productRequestService.createRequest(
         {
           ProductId: selectedProduct.id || selectedProduct.name,
           ProductName: selectedProduct.name,
-          ProductType: selectedProduct.type as 'App' | 'Web Part' | 'Adaptive Card' | 'Agent',
+          ProductType: productTypeMap[selectedProduct.type] || 'App',
           ProductCategory: selectedProduct.category || '',
           RequestType: requestType,
           ClientName: data.clientName,
