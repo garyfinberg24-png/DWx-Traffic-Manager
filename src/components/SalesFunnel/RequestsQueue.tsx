@@ -868,7 +868,7 @@ export const RequestsQueue: React.FC<RequestsQueueProps> = ({
 
                     {/* Row 3: Dropdowns (left) + action buttons (right) */}
                     {!isProcessing ? (
-                      <div className={styles.actionsRow}>
+                      <div className={styles.actionsRow} onClick={(e) => e.stopPropagation()}>
                         {needsSpecialist && (
                           <Dropdown
                             className={styles.specialistDropdown}
