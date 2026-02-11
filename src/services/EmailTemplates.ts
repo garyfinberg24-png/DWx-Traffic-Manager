@@ -1327,6 +1327,240 @@ export const amAccountabilityAlert = (
 };
 
 // ============================================================================
+// DELIVERY HANDOVER EMAILS
+// ============================================================================
+
+/**
+ * 39. Handover created — sent to AM + specialist when deal moves to Won
+ */
+export const handoverCreated = (
+  recipientName: string,
+  clientName: string,
+  serviceName: string,
+  dealValue?: number,
+  specialistName?: string
+): { subject: string; body: string } => {
+  const content = `
+    <p>Hi <strong>${escapeHtml(recipientName)}</strong>,</p>
+    <p>Congratulations on closing the deal with <strong>${escapeHtml(clientName)}</strong>! A delivery handover has been created to transition from pre-sales to delivery.</p>
+    ${callout('#107c10', '#dff6dd',
+      `<strong>Deal Closed Successfully!</strong><p style="margin:5px 0 0;">It's time to prepare for a smooth handover to the delivery team.</p>`
+    )}
+    ${row('Client', escapeHtml(clientName))}
+    ${row('Service', escapeHtml(serviceName))}
+    ${dealValue ? row('Deal Value', dealValue ? formatCurrency(dealValue) : 'Not specified') : ''}
+    ${specialistName ? row('Specialist', escapeHtml(specialistName)) : ''}
+    <p style="margin-top:20px;"><strong>Next Steps:</strong></p>
+    <ul>
+      <li>Delivery team members will be assigned to the project</li>
+      <li>Scope of work and requirements will be reviewed</li>
+      <li>A kickoff meeting will be scheduled with the client</li>
+    </ul>
+    <p style="margin-top:15px;color:#616161;font-size:13px;">You will be notified as the handover progresses through each stage.</p>
+  `;
+  return {
+    subject: `[DWx] Delivery Handover Created: ${escapeHtml(serviceName)} for ${escapeHtml(clientName)}`,
+    body: wrap(GRAD.success, 'Delivery Handover Created', content),
+  };
+};
+
+/**
+ * 40. Delivery team assigned — sent to each delivery team member
+ */
+export const deliveryTeamAssigned = (
+  recipientName: string,
+  roleName: string,
+  clientName: string,
+  serviceName: string,
+  projectManagerName?: string,
+  kickoffDate?: string,
+  dealValue?: number
+): { subject: string; body: string } => {
+  const content = `
+    <p>Hi <strong>${escapeHtml(recipientName)}</strong>,</p>
+    <p>You have been assigned to the delivery team for <strong>${escapeHtml(clientName)}</strong>. Please review the details below and prepare for the engagement.</p>
+    ${callout('#6264a7', '#ede9fe',
+      row('Your Role', `<strong>${escapeHtml(roleName)}</strong>`) +
+      row('Client', escapeHtml(clientName)) +
+      row('Service', escapeHtml(serviceName))
+    )}
+    ${projectManagerName ? row('Project Manager', escapeHtml(projectManagerName)) : ''}
+    ${kickoffDate ? row('Kickoff Date', formatDateTime(kickoffDate)) : ''}
+    ${dealValue ? row('Deal Value', dealValue ? formatCurrency(dealValue) : 'Not specified') : ''}
+    ${card('#6264a7', 'Onboarding Checklist',
+      `<ul>
+        <li>Review the scope of work and deliverables</li>
+        <li>Check the client brief and requirements documentation</li>
+        <li>Attend the kickoff meeting when scheduled</li>
+      </ul>`
+    )}
+    <p style="margin-top:15px;color:#616161;font-size:13px;">Contact the Project Manager if you have any questions about your assignment.</p>
+  `;
+  return {
+    subject: `[DWx] Delivery Assignment: ${escapeHtml(roleName)} for ${escapeHtml(clientName)} - ${escapeHtml(serviceName)}`,
+    body: wrap(GRAD.purple, 'Delivery Team Assignment', content),
+  };
+};
+
+/**
+ * 41. Handover meeting scheduled — sent to all stakeholders
+ */
+export const handoverMeetingScheduled = (
+  recipientName: string,
+  clientName: string,
+  serviceName: string,
+  meetingDate: string,
+  meetingLink?: string,
+  attendeeNames: string[] = []
+): { subject: string; body: string } => {
+  const attendeeList = attendeeNames.length > 0
+    ? `<ul style="margin:8px 0 0;padding-left:20px;">${attendeeNames.map(n => `<li>${escapeHtml(n)}</li>`).join('')}</ul>`
+    : '';
+
+  const meetingButton = meetingLink
+    ? `<div style="text-align:center;margin:20px 0;">
+        <a href="${escapeHtml(meetingLink)}" style="display:inline-block;padding:12px 28px;background-color:#1e6b7b;color:#ffffff;text-decoration:none;border-radius:6px;font-weight:600;font-size:14px;">Join Meeting</a>
+      </div>`
+    : '';
+
+  const content = `
+    <p>Hi <strong>${escapeHtml(recipientName)}</strong>,</p>
+    <p>A kickoff meeting has been scheduled for the <strong>${escapeHtml(serviceName)}</strong> delivery for <strong>${escapeHtml(clientName)}</strong>.</p>
+    ${row('Client', escapeHtml(clientName))}
+    ${row('Service', escapeHtml(serviceName))}
+    ${row('Date & Time', `<strong>${formatDateTime(meetingDate)}</strong>`)}
+    ${meetingButton}
+    ${attendeeNames.length > 0 ? card('#1e6b7b', 'Attendees', attendeeList) : ''}
+    ${callout('#1e6b7b', '#e8f4fc',
+      `<strong>Preparation Items:</strong>
+      <ul style="margin:8px 0 0;padding-left:20px;">
+        <li>Review the scope of work and deliverables</li>
+        <li>Prepare any questions for the client</li>
+        <li>Test your audio/video setup before the meeting</li>
+      </ul>`
+    )}
+  `;
+  return {
+    subject: `[DWx] Kickoff Meeting Scheduled: ${escapeHtml(serviceName)} for ${escapeHtml(clientName)}`,
+    body: wrap(GRAD.standard, 'Kickoff Meeting Scheduled', content),
+  };
+};
+
+/**
+ * 42. Handover complete — sent when handover is marked as Delivered
+ */
+export const handoverComplete = (
+  recipientName: string,
+  clientName: string,
+  serviceName: string,
+  deliveryManagerName?: string,
+  handoverDays: number = 0
+): { subject: string; body: string } => {
+  const content = `
+    <p>Hi <strong>${escapeHtml(recipientName)}</strong>,</p>
+    <p>The delivery handover for <strong>${escapeHtml(clientName)}</strong> has been completed successfully.</p>
+    ${callout('#107c10', '#dff6dd',
+      `<strong>Handover Complete!</strong><p style="margin:5px 0 0;">The project is now fully transitioned to the delivery team and ready for kickoff.</p>`
+    )}
+    ${row('Client', escapeHtml(clientName))}
+    ${row('Service', escapeHtml(serviceName))}
+    ${deliveryManagerName ? row('Delivery Manager', escapeHtml(deliveryManagerName)) : ''}
+    ${row('Handover Duration', `${handoverDays} day${handoverDays !== 1 ? 's' : ''}`)}
+    <p style="margin-top:20px;"><strong>Next Steps for Delivery:</strong></p>
+    <ul>
+      <li>Confirm the project kickoff date with the client</li>
+      <li>Finalise resource allocation and project plan</li>
+      <li>Set up project communication channels</li>
+    </ul>
+    <p style="margin-top:15px;color:#616161;font-size:13px;">Thank you for ensuring a smooth transition from pre-sales to delivery.</p>
+  `;
+  return {
+    subject: `[DWx] Handover Complete: ${escapeHtml(serviceName)} for ${escapeHtml(clientName)}`,
+    body: wrap(GRAD.success, 'Handover Complete', content),
+  };
+};
+
+/**
+ * 43. Handover at risk — sent to managers when handover exceeds 14 days without progressing
+ */
+export const handoverAtRisk = (
+  managerName: string,
+  clientName: string,
+  serviceName: string,
+  amName: string,
+  daysSinceWon: number,
+  currentStatus: string,
+  dealValue?: number
+): { subject: string; body: string } => {
+  const content = `
+    <p>Hi <strong>${escapeHtml(managerName)}</strong>,</p>
+    <p>A delivery handover is at risk of stalling and requires your attention.</p>
+    ${callout('#d13438', '#fde7e9',
+      `<strong>Handover At Risk:</strong> This handover has been pending for <strong>${daysSinceWon}</strong> day${daysSinceWon !== 1 ? 's' : ''} since the deal was won without progressing past the current status.`
+    )}
+    ${row('Client', escapeHtml(clientName))}
+    ${row('Service', escapeHtml(serviceName))}
+    ${row('Account Manager', escapeHtml(amName))}
+    ${row('Days Since Won', `<strong style="color:#d13438;">${daysSinceWon}</strong>`)}
+    ${row('Current Status', escapeHtml(currentStatus))}
+    ${dealValue ? row('Deal Value', dealValue ? formatCurrency(dealValue) : 'Not specified') : ''}
+    <p style="margin-top:20px;"><strong>Recommended Actions:</strong></p>
+    <ul>
+      <li>Contact the Account Manager to understand the delay</li>
+      <li>Assign delivery team members if not yet done</li>
+      <li>Schedule the kickoff meeting with the client</li>
+      <li>Escalate if resources are unavailable</li>
+    </ul>
+  `;
+  return {
+    subject: `[DWx] HANDOVER AT RISK: ${escapeHtml(clientName)} - ${escapeHtml(serviceName)} (${daysSinceWon} days)`,
+    body: wrap(GRAD.danger, 'Handover At Risk', content),
+  };
+};
+
+/**
+ * 44. Delivery kickoff reminder — sent 24h before scheduled kickoff meeting
+ */
+export const deliveryKickoffReminder = (
+  recipientName: string,
+  clientName: string,
+  serviceName: string,
+  kickoffDate: string,
+  meetingLink?: string
+): { subject: string; body: string } => {
+  const meetingButton = meetingLink
+    ? `<div style="text-align:center;margin:20px 0;">
+        <a href="${escapeHtml(meetingLink)}" style="display:inline-block;padding:12px 28px;background-color:#1e6b7b;color:#ffffff;text-decoration:none;border-radius:6px;font-weight:600;font-size:14px;">Join Meeting</a>
+      </div>`
+    : '';
+
+  const content = `
+    <p>Hi <strong>${escapeHtml(recipientName)}</strong>,</p>
+    <p>This is a reminder that the delivery kickoff meeting for <strong>${escapeHtml(clientName)}</strong> is scheduled for tomorrow.</p>
+    ${callout('#f7630c', '#fff8f0',
+      `<strong>Meeting Tomorrow:</strong> ${formatDateTime(kickoffDate)}`
+    )}
+    ${row('Client', escapeHtml(clientName))}
+    ${row('Service', escapeHtml(serviceName))}
+    ${row('Date & Time', `<strong>${formatDateTime(kickoffDate)}</strong>`)}
+    ${meetingButton}
+    ${card('#f7630c', 'Preparation Checklist',
+      `<ul>
+        <li>Review the scope of work and client requirements</li>
+        <li>Prepare your introduction and role overview</li>
+        <li>Have the project timeline and milestones ready</li>
+        <li>Test your audio/video setup</li>
+        <li>Prepare any client-facing materials or demos</li>
+      </ul>`
+    )}
+  `;
+  return {
+    subject: `[DWx] Kickoff Meeting Tomorrow: ${escapeHtml(serviceName)} for ${escapeHtml(clientName)}`,
+    body: wrap(GRAD.warning, 'Kickoff Meeting Reminder', content),
+  };
+};
+
+// ============================================================================
 // Export map
 // ============================================================================
 
@@ -1374,4 +1608,11 @@ export const EmailTemplates = {
   postMortemReviewed,
   actionItemAssigned,
   amAccountabilityAlert,
+  // Delivery handover templates
+  handoverCreated,
+  deliveryTeamAssigned,
+  handoverMeetingScheduled,
+  handoverComplete,
+  handoverAtRisk,
+  deliveryKickoffReminder,
 };

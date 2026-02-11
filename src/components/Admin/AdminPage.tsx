@@ -23,6 +23,7 @@ import {
   ChevronDownRegular,
   ChevronRightRegular,
   Clock24Regular,
+  Rocket24Regular,
 } from '@fluentui/react-icons';
 import { TeamMemberList } from './TeamMemberList';
 import { ClientList } from './ClientList';
@@ -37,6 +38,7 @@ import { SpecialistManagement } from './SpecialistManagement';
 import { LandingPageManagement } from './LandingPageManagement';
 import { KnowledgeBaseManagement } from './KnowledgeBaseManagement';
 import { SLAManagement } from './SLAManagement';
+import { DeliveryResourceManagement } from './DeliveryResourceManagement';
 import { useHeroCollapse } from '../../hooks/useHeroCollapse';
 import { HeroCollapseToggle } from '../Common/HeroCollapseToggle';
 
@@ -44,7 +46,7 @@ import { HeroCollapseToggle } from '../Common/HeroCollapseToggle';
 // Types
 // ============================================================================
 
-type TabValue = 'team' | 'clients' | 'account-managers' | 'services' | 'specialists' | 'managers' | 'guests' | 'checklist' | 'documents' | 'landing-page' | 'knowledge-base' | 'sla-config' | 'provisioning';
+type TabValue = 'team' | 'clients' | 'account-managers' | 'services' | 'specialists' | 'managers' | 'guests' | 'checklist' | 'documents' | 'landing-page' | 'knowledge-base' | 'sla-config' | 'delivery-resources' | 'provisioning';
 
 interface NavItem {
   value: TabValue;
@@ -70,6 +72,7 @@ const NAV_GROUPS: NavGroup[] = [
       { value: 'team', label: 'Team Members', icon: People24Regular },
       { value: 'account-managers', label: 'Account Managers', icon: PersonAccounts24Regular },
       { value: 'specialists', label: 'Specialists', icon: PersonBoard24Regular },
+      { value: 'delivery-resources', label: 'Delivery Resources', icon: Rocket24Regular },
       { value: 'managers', label: 'Manager Access', icon: Shield24Regular },
       { value: 'guests', label: 'Guest Invitations', icon: PersonAdd24Regular },
     ],
@@ -444,6 +447,7 @@ export const AdminPage: React.FC = () => {
             {selectedTab === 'landing-page' && <LandingPageManagement />}
             {selectedTab === 'knowledge-base' && <KnowledgeBaseManagement />}
             {selectedTab === 'sla-config' && <SLAManagement />}
+            {selectedTab === 'delivery-resources' && <DeliveryResourceManagement />}
             {selectedTab === 'provisioning' && <DWxSharePointProvisioning />}
           </div>
         </div>

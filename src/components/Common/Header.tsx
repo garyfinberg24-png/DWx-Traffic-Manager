@@ -27,6 +27,7 @@ import {
   BookOpen24Regular,
   ChatBubblesQuestion24Regular,
   ChatBubblesQuestion24Filled,
+  Rocket24Regular,
 } from '@fluentui/react-icons';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -266,6 +267,15 @@ export const Header: React.FC = () => {
                 </Badge>
               )}
             </span>
+            <Button
+              appearance="subtle"
+              className={`${styles.navButton} ${isActive('/delivery') ? styles.navButtonActive : ''}`}
+              onClick={() => navigate('/delivery')}
+              icon={<Rocket24Regular />}
+              size="small"
+            >
+              Delivery
+            </Button>
             <Button
               appearance="subtle"
               className={`${styles.navButton} ${isActive('/admin') ? styles.navButtonActive : ''}`}

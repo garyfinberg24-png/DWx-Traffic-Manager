@@ -6,7 +6,7 @@
 
 **Project Origin**: Cloned from LP Booking App (v1.7.5) - a production Teams app for License Pulse demo scheduling.
 
-**Current Version**: v2.15.1 (February 2026) - UX Polish + Sales Pipeline Demo Readiness Fixes
+**Current Version**: v2.16.0 (February 2026) - Pre-Sales to Delivery Handover + Command Centre
 
 > **IMPORTANT**: We are ONLY working on the DWx Traffic Manager project. We DO NOT make any changes to the LP Booking App. The LP Booking App is a separate production application and must not be modified.
 
@@ -42,6 +42,8 @@
 | **Knowledge Base List** | `DWxKnowledgeBase` |
 | **Proposals List** | `DWxProposals` |
 | **Post Mortems List** | `DWxPostMortems` |
+| **Delivery Handovers List** | `DWxDeliveryHandovers` |
+| **Delivery Resources List** | `DWxDeliveryResources` |
 | **Document Library** | `DWxSupportingDocuments` |
 | **Pre-Sales Calendar Email** | `lpbookings@firsttech.digital` |
 
@@ -414,7 +416,7 @@ DWx-Traffic-Manager/
 │   │   ├── MyRequests/
 │   │   │   ├── MyRequests.tsx            # Request list with stage filtering + product request tab (search/filter/sort/card redesign v2.12.1)
 │   │   │   ├── RequestCard.tsx           # Request card with stage badge
-│   │   │   ├── RequestDetails.tsx        # Full service request details modal (8 tabs incl. Post Mortem)
+│   │   │   ├── RequestDetails.tsx        # Full service request details modal (9 tabs incl. Post Mortem + Delivery)
 │   │   │   ├── ProductRequestDetails.tsx # Full product request details modal (NEW v2.2.0)
 │   │   │   ├── StageProgressBar.tsx      # Visual funnel stage progress
 │   │   │   ├── DetailModalShell.tsx     # Reusable detail modal shell
@@ -454,9 +456,10 @@ DWx-Traffic-Manager/
 │   │   │   ├── SLADashboardTab.tsx      # SLA tracking dashboard (v2.12.0)
 │   │   │   ├── InsightsTab.tsx           # Cross-deal post-mortem analytics (v2.14.0)
 │   │   │   ├── ReportsTab.tsx            # Pipeline/AM/Revenue reports with Recharts + PDF/Excel export (v2.15.0)
+│   │   │   ├── HandoverQueue.tsx         # Active handover queue for delivery tracking (v2.16.0)
 │   │   │   └── index.ts
 │   │   ├── Admin/
-│   │   │   ├── AdminPage.tsx             # Admin with grouped sidebar navigation (13 tabs)
+│   │   │   ├── AdminPage.tsx             # Admin with grouped sidebar navigation (14 tabs)
 │   │   │   ├── TeamMemberList.tsx        # Team member CRUD
 │   │   │   ├── TeamMemberForm.tsx        # Team member form dialog
 │   │   │   ├── ClientList.tsx            # Client management
@@ -476,6 +479,7 @@ DWx-Traffic-Manager/
 │   │   │   ├── LandingPageManagement.tsx # Landing page content CRUD (v2.8.0)
 │   │   │   ├── KnowledgeBaseManagement.tsx # KB/FAQ/Glossary CRUD (v2.8.0)
 │   │   │   ├── SLAManagement.tsx         # SLA configuration admin (v2.12.0)
+│   │   │   ├── DeliveryResourceManagement.tsx # Delivery team resource CRUD (v2.16.0)
 │   │   │   ├── DWxSharePointProvisioning.tsx  # Tabbed SP provisioning (Overview/Lists/Seed Data/Tools)
 │   │   │   └── index.ts
 │   │   ├── KnowledgeBase/
@@ -508,6 +512,10 @@ DWx-Traffic-Manager/
 │   │   │   ├── ActionItemsSection.tsx    # Action items with status workflow (v2.14.0)
 │   │   │   ├── TimelineReview.tsx        # SLA timeline + root cause display (v2.14.0)
 │   │   │   ├── AccountabilityCard.tsx    # AI accountability scores (v2.14.0)
+│   │   │   └── index.ts
+│   │   ├── DeliveryHandover/
+│   │   │   ├── DeliveryHandoverTab.tsx  # Per-deal delivery handover view (9th tab for Won deals) (v2.16.0)
+│   │   │   ├── DeliveryCommandCentre.tsx # Standalone delivery project overview page (v2.16.0)
 │   │   │   └── index.ts
 │   │   ├── Proposal/
 │   │   │   ├── ProposalBuilder.tsx       # Main proposal dialog (11 tabs + AI generation) (v2.9.0)
@@ -552,19 +560,21 @@ DWx-Traffic-Manager/
 │   │   ├── CommercialService.ts          # Commercial metrics
 │   │   ├── GamificationService.ts        # Gamification logic
 │   │   ├── PostMortemService.ts           # Post-mortem CRUD + AI orchestration + analytics (v2.14.0)
-│   │   ├── DWxNotificationService.ts     # DW-branded notifications (38 methods)
+│   │   ├── DWxNotificationService.ts     # DW-branded notifications (44 methods)
 │   │   ├── FollowUpService.ts            # Stale deal detection + follow-up reminders (v2.10.0)
 │   │   ├── WinLossAnalysisService.ts     # Win/loss analysis computation (v2.10.0)
 │   │   ├── ReportingService.ts           # Report orchestration — Pipeline/AM/Revenue reports (v2.15.0)
 │   │   ├── EmailTrackingService.ts       # Email thread tracking per deal (v2.11.0)
 │   │   ├── SessionPrepService.ts         # Session preparation CRUD + checklist management
-│   │   ├── AIPreparationService.ts       # Azure OpenAI integration for AI content generation (session prep + proposals + post-mortems)
+│   │   ├── AIPreparationService.ts       # Azure OpenAI integration for AI content generation (session prep + proposals + post-mortems + delivery handover)
 │   │   ├── ProposalService.ts            # Proposal CRUD + status workflow + section persistence (v2.9.0)
 │   │   ├── LandingPageContentService.ts  # Landing page content CRUD (v2.8.0)
 │   │   ├── KnowledgeBaseService.ts       # Knowledge base CRUD (v2.8.0)
 │   │   ├── AuthService.ts                # MSAL authentication + Teams SSO
 │   │   ├── GraphService.ts               # Microsoft Graph API
-│   │   ├── AuditService.ts               # Change tracking (15 entity types)
+│   │   ├── DeliveryHandoverService.ts     # Delivery handover CRUD + team assignment + proposal population (v2.16.0)
+│   │   ├── DeliveryResourceService.ts    # Delivery resource CRUD + capacity management (v2.16.0)
+│   │   ├── AuditService.ts               # Change tracking (16 entity types)
 │   │   ├── ProductRequestService.ts      # Product request CRUD + confirmProductDemo + specialist assignment
 │   │   ├── ManagerService.ts             # Manager access CRUD
 │   │   ├── AccountManagerService.ts      # AM CRUD operations
@@ -577,7 +587,7 @@ DWx-Traffic-Manager/
 │   │   ├── SharePointService.ts          # SharePoint REST API
 │   │   ├── SLAService.ts                 # SLA tracking + business day calculations (v2.12.0)
 │   │   ├── AIChatService.ts              # AI chat assistant service
-│   │   ├── EmailTemplates.ts             # Email template strings (35 templates)
+│   │   ├── EmailTemplates.ts             # Email template strings (41 templates)
 │   │   ├── PowerAutomateService.ts       # Power Automate with retry/circuit breaker
 │   │   ├── MockAuthService.ts            # Mock auth for E2E testing
 │   │   ├── MockGraphService.ts           # Mock Graph for E2E testing
@@ -599,6 +609,7 @@ DWx-Traffic-Manager/
 │   │   ├── FollowUp.ts                   # Stale deal detection types (v2.10.0)
 │   │   ├── WinLossAnalysis.ts            # Win/loss analysis types (v2.10.0)
 │   │   ├── PostMortem.ts                # Post-mortem types, issue taxonomy, AI analysis, analytics (v2.14.0)
+│   │   ├── DeliveryHandover.ts          # Delivery handover types, roles, checklist, client brief, environment (v2.16.0)
 │   │   ├── Report.ts                    # Report types — Pipeline/AM/Revenue data interfaces, date ranges (v2.15.0)
 │   │   ├── EmailTracking.ts             # Email tracking types (v2.11.0)
 │   │   ├── MeetingNotes.ts              # Meeting notes types (v2.11.0)
@@ -672,22 +683,23 @@ DWx-Traffic-Manager/
 | `/knowledge-base` | KnowledgeBase | All users |
 | `/pipeline` | SalesFunnelDashboard | Managers only |
 | `/dashboard` | ManagerDashboard | Managers only |
+| `/delivery` | DeliveryCommandCentre | Managers only |
 | `/admin` | AdminPage | Managers only |
 | `/admin/account-managers` | AccountManagerManagement | Managers only |
 
 ### Header Navigation Order
 
 ```
-Services | Products | New Request | My Requests | Knowledge Base | [Dashboard | Admin] (manager-only)
+Services | Products | New Request | My Requests | Knowledge Base | [Dashboard | Delivery | Admin] (manager-only)
 ```
 
-The Knowledge Base link is visible to ALL authenticated users. Dashboard and Admin are manager-only.
+The Knowledge Base link is visible to ALL authenticated users. Dashboard, Delivery, and Admin are manager-only.
 
-## Admin Panel (13 Tabs — Grouped Sidebar Navigation)
+## Admin Panel (14 Tabs — Grouped Sidebar Navigation)
 
 The admin panel uses a grouped sidebar navigation layout (redesigned v2.9.1) with the following groups:
 
-**People**: Team Members, Account Managers, Specialists
+**People**: Team Members, Account Managers, Specialists, Delivery Resources
 **Data**: Clients, Services, SLA Configuration
 **Content**: Landing Page, Knowledge Base
 **Operations**: Checklist, Documents
@@ -701,6 +713,7 @@ The admin panel uses a grouped sidebar navigation layout (redesigned v2.9.1) wit
 | Clients | ClientList | Client management with XLSX import + orphan protection |
 | Services | ServiceManagement | Service CRUD with rich content editing + XLSX import |
 | Specialists | SpecialistManagement | Specialist CRUD with workload tracking |
+| Delivery Resources | DeliveryResourceManagement | Delivery team resource CRUD with capacity management (v2.16.0) |
 | SLA Configuration | SLAManagement | SLA target thresholds per complexity + per-service overrides (v2.12.0) |
 | Manager Access | ManagerSettings | Manager access control |
 | Guest Invitations | GuestInvitations | Guest user management |
@@ -736,6 +749,8 @@ VITE_KNOWLEDGE_BASE_LIST=DWxKnowledgeBase
 VITE_PROPOSALS_LIST=DWxProposals
 VITE_SESSION_PREP_LIST=DWxSessionPrep
 VITE_POST_MORTEMS_LIST=DWxPostMortems
+VITE_DELIVERY_HANDOVERS_LIST=DWxDeliveryHandovers
+VITE_DELIVERY_RESOURCES_LIST=DWxDeliveryResources
 
 # Calendar
 VITE_PRESALES_CALENDAR_EMAIL=lpbookings@firsttech.digital
@@ -1228,6 +1243,59 @@ Two rounds of fixes preparing the app for management demo: UX polish across 13 i
 - [x] **Selection state cleanup** — RequestsQueue.tsx and ProductRequestsQueue.tsx clear stale selectedIds via `useEffect` when actionable list changes
 - [x] **Shared PRODUCT_STATUS_TRANSITIONS** — Moved from local constant to exported from `ProductRequest.ts`, imported by ProductRequestService + ProductRequestsQueue
 
+### Phase 18: Pre-Sales to Delivery Handover (COMPLETE - v2.16.0)
+
+Bridges the gap between Deal Won and project delivery with structured handover from pre-sales to delivery teams. Includes resource allocation, proposal data transfer, AI-powered client briefs, and a Delivery Command Centre.
+
+#### Types & Infrastructure - COMPLETE
+
+- [x] **DeliveryHandover.ts** — Full type definitions: `HandoverStatus` (6 states), `DeliveryRole` (8 roles), `TeamAssignment`, `ScopeSnapshot`, `ClientBrief`, `EnvironmentSetup`, `HandoverChecklistItem`, `RiskAssumption`, `DeliveryResource`, `DeliveryHandover` entity, status transitions, color maps, DEFAULT_HANDOVER_CHECKLIST, DEFAULT_CATEGORY_HANDOVER_CHECKLISTS
+- [x] **environmentConfig.ts** — Added `deliveryHandoversListName`, `deliveryResourcesListName`
+- [x] **AuditService.ts** — Added `'DeliveryHandover' | 'DeliveryResource'` to AuditEntity union (16 total)
+- [x] **EmailTracking.ts** — Added 6 new email types: handover_created, delivery_team_assigned, handover_meeting_scheduled, handover_complete, handover_at_risk, delivery_kickoff_reminder
+
+#### Service Layer - COMPLETE
+
+- [x] **DeliveryHandoverService.ts** — Full CRUD + `populateFromProposal()` (auto-populates scope, risks, timeline from accepted Proposal) + `assignTeamMember()` / `removeTeamMember()` + `updateChecklist()` + `getHandoverStats()` + `getActiveHandovers()`
+- [x] **DeliveryResourceService.ts** — Full CRUD + capacity management (`incrementProjectCount` / `decrementProjectCount`) + `getAvailableResources()` by role
+- [x] **AIPreparationService.ts** — 3 new methods: `generateClientBrief` (temp 0.5), `generateHandoverRisks` (temp 0.4), `suggestDeliveryTeam` (temp 0.6)
+- [x] **EmailTemplates.ts** — 6 new DW-branded templates (41 total)
+- [x] **DWxNotificationService.ts** — 6 new methods: `notifyHandoverCreated`, `notifyDeliveryTeamAssigned`, `notifyHandoverMeetingScheduled`, `notifyHandoverComplete`, `notifyHandoverAtRisk`, `notifyDeliveryKickoffReminder`
+- [x] **Auto-creation on Won** — `ServiceRequestService.handleStageTransitionActions()` auto-creates handover via dynamic import (non-blocking, follows PostMortem pattern)
+
+#### SharePoint Lists (2 new) - COMPLETE
+
+- [x] **DWxDeliveryHandovers** — ~40 columns including 6 JSON Note columns (ScopeSnapshot_JSON, DeliveryTeam_JSON, HandoverChecklist_JSON, RisksAndAssumptions_JSON, ClientBrief_JSON, EnvironmentSetup_JSON)
+- [x] **DWxDeliveryResources** — ~10 columns (Title, Email, Phone, Role, Specializations, MaxConcurrentProjects, CurrentProjectCount, HourlyRate, Skills, IsActive)
+
+#### UI Components - COMPLETE
+
+- [x] **DeliveryHandoverTab.tsx** — 9th tab in RequestDetails for Won deals. Collapsible sections: Scope Snapshot, Delivery Team, Handover Checklist, Client Brief (AI-generated), Risks & Assumptions, Environment Setup, Notes. Status management + proposal data import
+- [x] **DeliveryCommandCentre.tsx** — Standalone page at `/delivery` (manager-only). Hero banner with teal gradient + collapse toggle, project cards grid, status filtering, aggregate stats
+- [x] **HandoverQueue.tsx** — Dashboard tab showing active handovers with status badges, urgency indicators, team allocation summary
+- [x] **DeliveryResourceManagement.tsx** — Admin CRUD for delivery resources with capacity tracking, role filtering, skills management
+
+#### Integration - COMPLETE
+
+- [x] **RequestDetails.tsx** — Delivery Handover as conditional 9th tab (Won only, after PostMortem) via `buildTabs()` + `DELIVERY_HANDOVER_TAB` constant
+- [x] **ManagerDashboard.tsx** — Delivery nav group with Handover Queue tab (Rocket24Regular icon)
+- [x] **AdminPage.tsx** — Delivery Resources tab under People & Roles group (14 tabs total)
+- [x] **App.tsx** — `/delivery` route with lazy-loaded DeliveryCommandCentre + ManagerRoute + ErrorBoundary
+- [x] **Header.tsx** — "Delivery" nav button between Dashboard and Admin (manager-only)
+- [x] **DWxSharePointProvisioning.tsx** — Stat cards + provisioning buttons for 2 new lists
+
+**Handover Status Workflow:**
+
+```
+Pending → In Progress → Kickoff Scheduled → Delivered → Closed
+                                    ↕
+                                 On Hold
+```
+
+**Delivery Roles (8):** Project Manager, Delivery Manager, Developer, Senior Developer, Business Analyst, UX Designer, QA Engineer, DevOps Engineer
+
+**AI-Powered Features:** Client brief generation (executive summary, stakeholders, risks, success criteria), handover risk identification, delivery team suggestions based on skills/availability
+
 ### Pending / Round 4
 
 - [ ] Round 4: Medium-priority enhancements (M1-M10)
@@ -1306,7 +1374,9 @@ type AuditEntity =
   | 'LandingPageContent'
   | 'KnowledgeBase'
   | 'Proposal'
-  | 'PostMortem';
+  | 'PostMortem'
+  | 'DeliveryHandover'
+  | 'DeliveryResource';
 ```
 
 ### Product Request Status Workflow
@@ -1462,6 +1532,13 @@ The app supports Account Managers from an external partner tenant:
 | `mockups/services-page-variations.html` | 5 services page design mockups (V1 Hero approved) |
 | `mockups/hero-banners-all-pages.html` | 5-tab hero banner mockups for all pages (v2.12.0) |
 | `mockups/team-profile-modal.html` | 3 team profile modal variations (V2 Side-by-Side chosen) |
+| `src/types/DeliveryHandover.ts` | Delivery handover types, roles, checklist, client brief, environment setup (v2.16.0) |
+| `src/services/DeliveryHandoverService.ts` | Delivery handover CRUD + proposal population + team assignment + stats (v2.16.0) |
+| `src/services/DeliveryResourceService.ts` | Delivery resource CRUD + capacity management (v2.16.0) |
+| `src/components/DeliveryHandover/DeliveryHandoverTab.tsx` | Per-deal delivery handover view (9th tab for Won deals) (v2.16.0) |
+| `src/components/DeliveryHandover/DeliveryCommandCentre.tsx` | Standalone delivery project overview page at /delivery (v2.16.0) |
+| `src/components/Dashboard/HandoverQueue.tsx` | Active handover queue in Manager Dashboard (v2.16.0) |
+| `src/components/Admin/DeliveryResourceManagement.tsx` | Delivery team resource CRUD admin (v2.16.0) |
 
 ## Confirmed Design Decisions
 
@@ -1502,6 +1579,12 @@ The app supports Account Managers from an external partner tenant:
 | **Bulk Operation Validation** | Bulk advance in RequestsQueue validates per-request STAGE_TRANSITIONS before attempting API call. Invalid transitions are skipped with failure count report |
 | **StageTimestamps Usage** | Use `request.StageTimestamps?.[stage]` for accurate days-in-stage and conversion rate calculations. Fallback to `Created`/`Modified` dates only when StageTimestamps unavailable |
 | **Selection State Cleanup** | Both queue components (RequestsQueue, ProductRequestsQueue) use `useEffect` to clean stale selectedIds when actionable request list changes |
+| **Delivery Handover as Separate Entity** | DeliveryHandover is a separate entity (not a new funnel stage) — Won stays terminal for sales pipeline metrics. Auto-created on Won transition via dynamic import in ServiceRequestService |
+| **Delivery Tab Conditional** | 9th tab in RequestDetails, only visible for Won deals (not Lost) via `buildTabs()` + `DELIVERY_HANDOVER_TAB` constant. Lost gets PostMortem only |
+| **Delivery Command Centre** | Standalone page at `/delivery` (manager-only) with hero banner, project cards grid, status filtering. User chose "Command Centre" name |
+| **Handover Proposal Import** | `populateFromProposal()` auto-copies scope, timeline, technologies, pricing, risks from accepted Proposal. Manager triggers import from DeliveryHandoverTab |
+| **Delivery Resources** | Separate from Specialists (pre-sales). 8 delivery roles: PM, DM, Dev, Senior Dev, BA, UX, QA, DevOps. Managed via Admin > Delivery Resources tab |
+| **Handover Status Workflow** | Pending -> In Progress -> Kickoff Scheduled -> Delivered -> Closed (+ On Hold side-state). Separate from funnel stages |
 
 ## Product Catalog
 
@@ -1616,6 +1699,8 @@ DWxSupportingDocuments/
 ## Recent Commit History
 
 ```
+xxxxxxx feat: Pre-Sales to Delivery Handover + Command Centre (v2.16.0)
+808c05f Add Azure DevOps pipeline configuration
 d885526 fix: Sales funnel pipeline critical fixes for demo readiness (v2.15.1)
 1e1bb0c fix: UX polish - empty states, loading spinners, tooltips, pagination, truncation (v2.15.1)
 57e68bb style: Unify Products hero to single DWx blue/teal gradient + remove stats

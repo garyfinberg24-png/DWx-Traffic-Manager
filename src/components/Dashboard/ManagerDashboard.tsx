@@ -29,6 +29,7 @@ import {
   ChevronRightRegular,
   Lightbulb24Regular,
   DocumentTable24Regular,
+  Rocket24Regular,
 } from '@fluentui/react-icons';
 import { useAuth } from '../../contexts/AuthContext';
 import { dashboardService } from '../../services/DashboardService';
@@ -55,6 +56,7 @@ import { WinLossTab } from './WinLossTab';
 import { SLADashboardTab } from './SLADashboardTab';
 import { InsightsTab } from './InsightsTab';
 import { ReportsTab } from './ReportsTab';
+import { HandoverQueue } from './HandoverQueue';
 import { useToast } from '../../contexts/ToastContext';
 import { DW_COLORS } from '../../utils/buttonStyles';
 import { useHeroCollapse } from '../../hooks/useHeroCollapse';
@@ -72,7 +74,7 @@ import { RequestDetails } from '../MyRequests/RequestDetails';
 // Types
 // ============================================================================
 
-type DashboardTab = 'overview' | 'pipeline' | 'approvals' | 'productQueue' | 'calendar' | 'timeline' | 'performance' | 'clients' | 'commercial' | 'gamification' | 'resources' | 'winloss' | 'sla' | 'insights' | 'reports';
+type DashboardTab = 'overview' | 'pipeline' | 'approvals' | 'productQueue' | 'calendar' | 'timeline' | 'performance' | 'clients' | 'commercial' | 'gamification' | 'resources' | 'winloss' | 'sla' | 'insights' | 'reports' | 'handovers';
 
 interface NavItem {
   value: DashboardTab;
@@ -119,6 +121,13 @@ const NAV_GROUPS: NavGroup[] = [
       { value: 'winloss', label: 'Win/Loss', icon: ChartMultipleRegular },
       { value: 'insights', label: 'Insights', icon: Lightbulb24Regular },
       { value: 'reports', label: 'Reports', icon: DocumentTable24Regular },
+    ],
+  },
+  {
+    id: 'delivery',
+    label: 'Delivery',
+    items: [
+      { value: 'handovers', label: 'Handover Queue', icon: Rocket24Regular },
     ],
   },
   {
@@ -883,6 +892,11 @@ export const ManagerDashboard: React.FC = () => {
               {/* Reports Tab */}
               {selectedTab === 'reports' && (
                 <ReportsTab requests={serviceRequests} />
+              )}
+
+              {/* Handover Queue Tab */}
+              {selectedTab === 'handovers' && (
+                <HandoverQueue serviceRequests={serviceRequests} />
               )}
             </div>
           )}

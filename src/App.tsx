@@ -24,6 +24,7 @@ const ProductRequestForm = React.lazy(() => import('./components/ProductRequest'
 const MyRequests = React.lazy(() => import('./components/MyRequests').then(m => ({ default: m.MyRequests })));
 const SalesFunnelDashboard = React.lazy(() => import('./components/SalesFunnel').then(m => ({ default: m.SalesFunnelDashboard })));
 const KnowledgeBase = React.lazy(() => import('./components/KnowledgeBase').then(m => ({ default: m.KnowledgeBase })));
+const DeliveryCommandCentre = React.lazy(() => import('./components/DeliveryHandover').then(m => ({ default: m.DeliveryCommandCentre })));
 import { getAuthService } from './services/serviceFactory';
 import { validateConfig } from './config/environmentConfig';
 import { isTestMode } from './config/testModeConfig';
@@ -130,6 +131,15 @@ const AppRoutes: React.FC = () => {
             element={
               <ManagerRoute>
                 <ErrorBoundary><AdminPage /></ErrorBoundary>
+              </ManagerRoute>
+            }
+          />
+          {/* Delivery Command Centre */}
+          <Route
+            path="/delivery"
+            element={
+              <ManagerRoute>
+                <ErrorBoundary><DeliveryCommandCentre /></ErrorBoundary>
               </ManagerRoute>
             }
           />

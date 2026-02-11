@@ -31,7 +31,9 @@ export type AuditEntity =
   | 'LandingPageContent'
   | 'KnowledgeBase'
   | 'Proposal'
-  | 'PostMortem';
+  | 'PostMortem'
+  | 'DeliveryHandover'
+  | 'DeliveryResource';
 
 export interface AuditLogEntry {
   Id?: number;

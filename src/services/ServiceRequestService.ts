@@ -883,6 +883,33 @@ class ServiceRequestService {
         console.error('Failed to auto-create post-mortem:', pmError);
       }
     }
+
+    // Auto-create delivery handover for Won deals (v2.16.0)
+    if (newStage === 'Won') {
+      try {
+        const { deliveryHandoverService } = await import('./DeliveryHandoverService');
+        const existingHandover = await deliveryHandoverService.getHandoverByRequestId(request.Id);
+        if (!existingHandover) {
+          await deliveryHandoverService.createHandover({
+            ServiceRequestId: request.Id,
+            ClientName: request.ClientName || '',
+            ProjectName: `${request.ClientName} - ${request.ServiceName}`,
+            ServiceName: request.ServiceName || '',
+            ServiceCategory: (request as any).ServiceCategory || 'Ad-Hoc Support',
+            ContractValue: request.DealValue || 0,
+            WonDate: new Date().toISOString(),
+            AccountManagerName: request.AccountManagerName || '',
+            AccountManagerEmail: request.AccountManagerEmail || '',
+            PreSalesSpecialistName: request.AssignedSpecialistName,
+            PreSalesSpecialistEmail: request.AssignedSpecialistEmail,
+            ClientExpectations: request.Requirements,
+          });
+          console.log(`[ServiceRequestService] Auto-created delivery handover for request ${request.Id}`);
+        }
+      } catch (handoverError) {
+        console.error('Failed to auto-create delivery handover:', handoverError);
+      }
+    }
   }
 
   /**

@@ -33,6 +33,10 @@ export const config = {
     proposalsListName: import.meta.env.VITE_PROPOSALS_LIST || 'DWxProposals',
     // Post Mortems list
     postMortemsListName: import.meta.env.VITE_POST_MORTEMS_LIST || 'DWxPostMortems',
+    // Delivery Handovers list
+    deliveryHandoversListName: import.meta.env.VITE_DELIVERY_HANDOVERS_LIST || 'DWxDeliveryHandovers',
+    // Delivery Resources list
+    deliveryResourcesListName: import.meta.env.VITE_DELIVERY_RESOURCES_LIST || 'DWxDeliveryResources',
     // Document library for uploads
     documentLibrary: import.meta.env.VITE_DOCUMENT_LIBRARY || 'DWxSupportingDocuments',
   },

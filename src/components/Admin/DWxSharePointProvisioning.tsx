@@ -133,6 +133,14 @@ const LIST_INFO: Record<string, { description: string; icon: React.ReactElement 
     description: 'Post-mortem analysis',
     icon: <Sparkle24Regular />,
   },
+  DWxDeliveryHandovers: {
+    description: 'Delivery handover tracking',
+    icon: <Rocket24Regular />,
+  },
+  DWxDeliveryResources: {
+    description: 'Delivery team resources',
+    icon: <People24Regular />,
+  },
   DWxSupportingDocuments: {
     description: 'Document library',
     icon: <FolderOpen24Regular />,
@@ -407,6 +415,8 @@ export const DWxSharePointProvisioning: React.FC = () => {
   const [knowledgeBaseCount, setKnowledgeBaseCount] = useState(0);
   const [proposalsCount, setProposalsCount] = useState(0);
   const [postMortemsCount, setPostMortemsCount] = useState(0);
+  const [deliveryHandoversCount, setDeliveryHandoversCount] = useState(0);
+  const [deliveryResourcesCount, setDeliveryResourcesCount] = useState(0);
 
   // Seed confirmation dialog
   const [seedConfirmOpen, setSeedConfirmOpen] = useState(false);
@@ -445,6 +455,8 @@ export const DWxSharePointProvisioning: React.FC = () => {
         { listName: 'DWxKnowledgeBase', setter: setKnowledgeBaseCount },
         { listName: 'DWxProposals', setter: setProposalsCount },
         { listName: 'DWxPostMortems', setter: setPostMortemsCount },
+        { listName: 'DWxDeliveryHandovers', setter: setDeliveryHandoversCount },
+        { listName: 'DWxDeliveryResources', setter: setDeliveryResourcesCount },
       ];
 
       await Promise.all(
@@ -502,6 +514,8 @@ export const DWxSharePointProvisioning: React.FC = () => {
         case 'DWxKnowledgeBase': result = await dwxSharePointProvisioningService.provisionKnowledgeBaseList(); break;
         case 'DWxProposals': result = await dwxSharePointProvisioningService.provisionProposalsList(); break;
         case 'DWxPostMortems': result = await dwxSharePointProvisioningService.provisionPostMortemsList(); break;
+        case 'DWxDeliveryHandovers': result = await dwxSharePointProvisioningService.provisionDeliveryHandoversList(); break;
+        case 'DWxDeliveryResources': result = await dwxSharePointProvisioningService.provisionDeliveryResourcesList(); break;
         case 'DWxSupportingDocuments': result = await dwxSharePointProvisioningService.provisionDocumentLibrary(); break;
         default: throw new Error(`Unknown list: ${listName}`);
       }
@@ -677,6 +691,8 @@ export const DWxSharePointProvisioning: React.FC = () => {
     DWxKnowledgeBase: knowledgeBaseCount,
     DWxProposals: proposalsCount,
     DWxPostMortems: postMortemsCount,
+    DWxDeliveryHandovers: deliveryHandoversCount,
+    DWxDeliveryResources: deliveryResourcesCount,
   };
 
   const setterMap: Record<string, (n: number) => void> = {
@@ -693,6 +709,8 @@ export const DWxSharePointProvisioning: React.FC = () => {
     DWxKnowledgeBase: setKnowledgeBaseCount,
     DWxProposals: setProposalsCount,
     DWxPostMortems: setPostMortemsCount,
+    DWxDeliveryHandovers: setDeliveryHandoversCount,
+    DWxDeliveryResources: setDeliveryResourcesCount,
   };
 
   // ── Results renderer ───────────────────────────────────────────────────
@@ -1094,6 +1112,8 @@ export const DWxSharePointProvisioning: React.FC = () => {
             <li><strong>DWxKnowledgeBase</strong> - FAQ, Glossary, Articles</li>
             <li><strong>DWxProposals</strong> - Proposal management</li>
             <li><strong>DWxPostMortems</strong> - Post-mortem analysis</li>
+            <li><strong>DWxDeliveryHandovers</strong> - Delivery handover tracking</li>
+            <li><strong>DWxDeliveryResources</strong> - Delivery team resources</li>
             <li><strong>DWxAuditLog</strong> - Audit trail</li>
             <li><strong>DWxSupportingDocuments</strong> - Document library</li>
           </ul>

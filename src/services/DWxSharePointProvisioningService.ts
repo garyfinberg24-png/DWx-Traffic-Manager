@@ -877,13 +877,96 @@ class DWxSharePointProvisioningService {
     };
   }
 
+  private get deliveryHandoversListDefinition(): ListDefinition {
+    return {
+      title: 'DWxDeliveryHandovers',
+      description: 'DWx Delivery Handovers - Pre-sales to delivery transition records with resource allocation and project kickoff tracking',
+      fields: [
+        // Links to sales data
+        { internalName: 'ServiceRequestId', displayName: 'Service Request ID', type: 'Number', required: true },
+        { internalName: 'ProposalId', displayName: 'Proposal ID', type: 'Number' },
+        { internalName: 'PostMortemId', displayName: 'Post Mortem ID', type: 'Number' },
+        // Project info
+        { internalName: 'ClientName', displayName: 'Client Name', type: 'Text', required: true },
+        { internalName: 'ProjectName', displayName: 'Project Name', type: 'Text', required: true },
+        { internalName: 'ServiceName', displayName: 'Service Name', type: 'Text', required: true },
+        { internalName: 'ServiceCategory', displayName: 'Service Category', type: 'Text' },
+        { internalName: 'ContractValue', displayName: 'Contract Value (ZAR)', type: 'Currency' },
+        // Status workflow
+        {
+          internalName: 'HandoverStatus',
+          displayName: 'Handover Status',
+          type: 'Choice',
+          choices: ['Pending', 'In Progress', 'Kickoff Scheduled', 'Delivered', 'Closed', 'On Hold'],
+          defaultValue: 'Pending',
+        },
+        // Key dates
+        { internalName: 'WonDate', displayName: 'Won Date', type: 'DateTime' },
+        { internalName: 'HandoverMeetingDate', displayName: 'Handover Meeting Date', type: 'DateTime' },
+        { internalName: 'PlannedKickoffDate', displayName: 'Planned Kickoff Date', type: 'DateTime' },
+        { internalName: 'ActualKickoffDate', displayName: 'Actual Kickoff Date', type: 'DateTime' },
+        { internalName: 'PlannedGoLive', displayName: 'Planned Go-Live', type: 'DateTime' },
+        { internalName: 'HandoverCompletedDate', displayName: 'Handover Completed Date', type: 'DateTime' },
+        // Pre-sales team
+        { internalName: 'AccountManagerName', displayName: 'Account Manager', type: 'Text' },
+        { internalName: 'AccountManagerEmail', displayName: 'AM Email', type: 'Text' },
+        { internalName: 'PreSalesSpecialistName', displayName: 'Pre-Sales Specialist', type: 'Text' },
+        { internalName: 'PreSalesSpecialistEmail', displayName: 'Pre-Sales Specialist Email', type: 'Text' },
+        // Delivery team leads
+        { internalName: 'DeliveryManagerName', displayName: 'Delivery Manager', type: 'Text' },
+        { internalName: 'DeliveryManagerEmail', displayName: 'Delivery Manager Email', type: 'Text' },
+        { internalName: 'ProjectManagerName', displayName: 'Project Manager', type: 'Text' },
+        { internalName: 'ProjectManagerEmail', displayName: 'Project Manager Email', type: 'Text' },
+        // JSON content columns
+        { internalName: 'ScopeSnapshot_JSON', displayName: 'Scope Snapshot (JSON)', type: 'Note' },
+        { internalName: 'DeliveryTeam_JSON', displayName: 'Delivery Team (JSON)', type: 'Note' },
+        { internalName: 'HandoverChecklist_JSON', displayName: 'Handover Checklist (JSON)', type: 'Note' },
+        { internalName: 'RisksAndAssumptions_JSON', displayName: 'Risks & Assumptions (JSON)', type: 'Note' },
+        { internalName: 'ClientBrief_JSON', displayName: 'Client Brief (JSON)', type: 'Note' },
+        { internalName: 'EnvironmentSetup_JSON', displayName: 'Environment Setup (JSON)', type: 'Note' },
+        // Notes
+        { internalName: 'PreSalesNotes', displayName: 'Pre-Sales Notes', type: 'Note' },
+        { internalName: 'DeliveryNotes', displayName: 'Delivery Notes', type: 'Note' },
+        { internalName: 'ClientExpectations', displayName: 'Client Expectations', type: 'Note' },
+        { internalName: 'HandoverMeetingNotes', displayName: 'Handover Meeting Notes', type: 'Note' },
+        // Metadata
+        { internalName: 'AIGeneratedAt', displayName: 'AI Generated At', type: 'DateTime' },
+      ],
+    };
+  }
+
+  private get deliveryResourcesListDefinition(): ListDefinition {
+    return {
+      title: 'DWxDeliveryResources',
+      description: 'DWx Delivery Resources - Delivery team members (PMs, developers, designers, QA) with capacity tracking',
+      fields: [
+        { internalName: 'Email', displayName: 'Email', type: 'Text', required: true },
+        { internalName: 'Phone', displayName: 'Phone', type: 'Text' },
+        {
+          internalName: 'Role',
+          displayName: 'Role',
+          type: 'Choice',
+          choices: ['Project Manager', 'Delivery Manager', 'Developer', 'Senior Developer', 'Business Analyst', 'UX Designer', 'QA Engineer', 'DevOps Engineer'],
+          required: true,
+        },
+        { internalName: 'Specializations_JSON', displayName: 'Specializations (JSON)', type: 'Note' },
+        { internalName: 'MaxConcurrentProjects', displayName: 'Max Concurrent Projects', type: 'Number' },
+        { internalName: 'CurrentProjectCount', displayName: 'Current Project Count', type: 'Number' },
+        { internalName: 'HourlyRate', displayName: 'Hourly Rate (ZAR)', type: 'Currency' },
+        { internalName: 'AvailableFrom', displayName: 'Available From', type: 'DateTime' },
+        { internalName: 'Skills_JSON', displayName: 'Skills (JSON)', type: 'Note' },
+        { internalName: 'IsActive', displayName: 'Is Active', type: 'Boolean' },
+      ],
+    };
+  }
+
   // ==================== PUBLIC METHODS ====================
 
   /**
    * Check which DWx lists exist
    */
   async checkListsStatus(): Promise<ListStatus[]> {
-    const listNames = ['DWxServices', 'DWxServiceRequests', 'DWxProductRequests', 'DWxClients', 'DWxSpecialists', 'DWxManagers', 'DWxTeamMembers', 'DWxAccountManagers', 'DWxAuditLog', 'DWxSessionPrep', 'DWxLandingPageContent', 'DWxKnowledgeBase', 'DWxProposals', 'DWxPostMortems'];
+    const listNames = ['DWxServices', 'DWxServiceRequests', 'DWxProductRequests', 'DWxClients', 'DWxSpecialists', 'DWxManagers', 'DWxTeamMembers', 'DWxAccountManagers', 'DWxAuditLog', 'DWxSessionPrep', 'DWxLandingPageContent', 'DWxKnowledgeBase', 'DWxProposals', 'DWxPostMortems', 'DWxDeliveryHandovers', 'DWxDeliveryResources'];
     const results: ListStatus[] = [];
 
     for (const name of listNames) {
@@ -1001,6 +1084,20 @@ class DWxSharePointProvisioningService {
   }
 
   /**
+   * Provision the DWxDeliveryHandovers list
+   */
+  async provisionDeliveryHandoversList(): Promise<ProvisionResult> {
+    return this.provisionList(this.deliveryHandoversListDefinition);
+  }
+
+  /**
+   * Provision the DWxDeliveryResources list
+   */
+  async provisionDeliveryResourcesList(): Promise<ProvisionResult> {
+    return this.provisionList(this.deliveryResourcesListDefinition);
+  }
+
+  /**
    * Create the DWxSupportingDocuments document library
    */
   async provisionDocumentLibrary(): Promise<ProvisionResult> {
@@ -1044,6 +1141,8 @@ class DWxSharePointProvisioningService {
       { name: 'DWxKnowledgeBase', provision: () => this.provisionKnowledgeBaseList() },
       { name: 'DWxProposals', provision: () => this.provisionProposalsList() },
       { name: 'DWxPostMortems', provision: () => this.provisionPostMortemsList() },
+      { name: 'DWxDeliveryHandovers', provision: () => this.provisionDeliveryHandoversList() },
+      { name: 'DWxDeliveryResources', provision: () => this.provisionDeliveryResourcesList() },
       { name: 'DWxSupportingDocuments', provision: () => this.provisionDocumentLibrary() },
     ];
 

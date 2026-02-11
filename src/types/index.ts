@@ -10,3 +10,4 @@ export * from './WinLossAnalysis';
 export * from './EmailTracking';
 export * from './MeetingNotes';
 export * from './PostMortem';
+export * from './DeliveryHandover';

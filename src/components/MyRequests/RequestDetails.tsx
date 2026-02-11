@@ -25,6 +25,7 @@ import {
   CheckboxChecked24Regular,
   Notepad24Regular,
   Trophy24Regular,
+  Rocket24Regular,
 } from '@fluentui/react-icons';
 import { makeStyles } from '@fluentui/react-components';
 import { useAuth } from '../../contexts/AuthContext';
@@ -44,6 +45,7 @@ import { DealActivityTimeline } from './DealActivityTimeline';
 import { EmailTimeline } from './EmailTimeline';
 import { DealChecklist } from './DealChecklist';
 import { PostMortemTab } from '../PostMortem';
+import { DeliveryHandoverTab } from '../DeliveryHandover';
 import type { DealChecklistItem } from '../../types/Checklist';
 import {
   DetailModalShell,
@@ -217,8 +219,15 @@ const POST_MORTEM_TAB: ModalTab = {
   value: 'postmortem', label: 'Post Mortem', icon: <Notepad24Regular style={{ width: '16px', height: '16px' }} />,
 };
 
+const DELIVERY_HANDOVER_TAB: ModalTab = {
+  value: 'delivery', label: 'Delivery', icon: <Rocket24Regular style={{ width: '16px', height: '16px' }} />,
+};
+
 function buildTabs(stage: FunnelStage): ModalTab[] {
-  if (stage === 'Won' || stage === 'Lost') {
+  if (stage === 'Won') {
+    return [...BASE_TABS, POST_MORTEM_TAB, DELIVERY_HANDOVER_TAB];
+  }
+  if (stage === 'Lost') {
     return [...BASE_TABS, POST_MORTEM_TAB];
   }
   return BASE_TABS;
@@ -1032,6 +1041,13 @@ export const RequestDetails: React.FC<RequestDetailsProps> = ({
       case 'postmortem':
         return (
           <PostMortemTab
+            request={request}
+            isManager={user?.isManager ?? false}
+          />
+        );
+      case 'delivery':
+        return (
+          <DeliveryHandoverTab
             request={request}
             isManager={user?.isManager ?? false}
           />

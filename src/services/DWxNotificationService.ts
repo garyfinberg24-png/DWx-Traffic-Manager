@@ -833,6 +833,202 @@ class DWxNotificationService {
       console.error('[DWxNotificationService] Failed to send AM accountability alert:', error);
     }
   }
+  // ==========================================================================
+  // Delivery Handover Notifications
+  // ==========================================================================
+
+  /**
+   * Notify AM + specialist that a delivery handover has been created (on Won)
+   */
+  async notifyHandoverCreated(request: ServiceRequest): Promise<void> {
+    try {
+      // Notify AM
+      const amTemplate = EmailTemplates.handoverCreated(
+        request.AccountManagerName,
+        request.ClientName,
+        request.ServiceName,
+        request.DealValue,
+        request.AssignedSpecialistName
+      );
+      await this.sendEmail([request.AccountManagerEmail], amTemplate.subject, amTemplate.body, undefined, {
+        requestId: request.Id,
+        emailType: 'handover_created',
+        sentBy: 'System',
+      });
+
+      // Notify specialist if assigned
+      if (request.AssignedSpecialistEmail && request.AssignedSpecialistName) {
+        const specTemplate = EmailTemplates.handoverCreated(
+          request.AssignedSpecialistName,
+          request.ClientName,
+          request.ServiceName,
+          request.DealValue,
+          request.AssignedSpecialistName
+        );
+        await this.sendEmail([request.AssignedSpecialistEmail], specTemplate.subject, specTemplate.body);
+      }
+    } catch (error) {
+      console.error('[DWxNotificationService] Failed to send handover created notification:', error);
+    }
+  }
+
+  /**
+   * Notify delivery team members when assigned to a handover
+   */
+  async notifyDeliveryTeamAssigned(
+    members: Array<{ email: string; name: string; role: string }>,
+    clientName: string,
+    serviceName: string,
+    projectManagerName?: string,
+    kickoffDate?: string,
+    dealValue?: number,
+    requestId?: number
+  ): Promise<void> {
+    try {
+      for (const member of members) {
+        const { subject, body } = EmailTemplates.deliveryTeamAssigned(
+          member.name,
+          member.role,
+          clientName,
+          serviceName,
+          projectManagerName,
+          kickoffDate,
+          dealValue
+        );
+        await this.sendEmail([member.email], subject, body, undefined,
+          requestId ? { requestId, emailType: 'delivery_team_assigned' as EmailType, sentBy: 'System' } : undefined
+        );
+      }
+    } catch (error) {
+      console.error('[DWxNotificationService] Failed to send delivery team assigned notifications:', error);
+    }
+  }
+
+  /**
+   * Notify all stakeholders when kickoff meeting is scheduled
+   */
+  async notifyHandoverMeetingScheduled(
+    recipients: string[],
+    recipientNames: string[],
+    clientName: string,
+    serviceName: string,
+    meetingDate: string,
+    meetingLink?: string,
+    attendeeNames: string[] = [],
+    requestId?: number
+  ): Promise<void> {
+    try {
+      for (let i = 0; i < recipients.length; i++) {
+        const recipientName = recipientNames[i] || recipients[i];
+        const { subject, body } = EmailTemplates.handoverMeetingScheduled(
+          recipientName,
+          clientName,
+          serviceName,
+          meetingDate,
+          meetingLink,
+          attendeeNames
+        );
+        await this.sendEmail([recipients[i]], subject, body, undefined,
+          requestId ? { requestId, emailType: 'handover_meeting_scheduled' as EmailType, sentBy: 'System' } : undefined
+        );
+      }
+    } catch (error) {
+      console.error('[DWxNotificationService] Failed to send handover meeting scheduled notifications:', error);
+    }
+  }
+
+  /**
+   * Notify stakeholders when handover is marked as Delivered
+   */
+  async notifyHandoverComplete(
+    recipients: string[],
+    clientName: string,
+    serviceName: string,
+    deliveryManagerName?: string,
+    handoverDays: number = 0,
+    requestId?: number
+  ): Promise<void> {
+    try {
+      for (const email of recipients) {
+        const { subject, body } = EmailTemplates.handoverComplete(
+          email, // Use email as fallback recipient name (individual personalised emails not needed here)
+          clientName,
+          serviceName,
+          deliveryManagerName,
+          handoverDays
+        );
+        await this.sendEmail([email], subject, body, undefined,
+          requestId ? { requestId, emailType: 'handover_complete' as EmailType, sentBy: 'System' } : undefined
+        );
+      }
+    } catch (error) {
+      console.error('[DWxNotificationService] Failed to send handover complete notifications:', error);
+    }
+  }
+
+  /**
+   * Notify managers when a handover exceeds 14 days without progressing
+   */
+  async notifyHandoverAtRisk(
+    clientName: string,
+    serviceName: string,
+    amName: string,
+    daysSinceWon: number,
+    currentStatus: string,
+    dealValue?: number,
+    requestId?: number
+  ): Promise<void> {
+    try {
+      const managerEmails = this.getManagerEmails();
+      if (managerEmails.length === 0) return;
+
+      for (const managerEmail of managerEmails) {
+        const { subject, body } = EmailTemplates.handoverAtRisk(
+          'Manager',
+          clientName,
+          serviceName,
+          amName,
+          daysSinceWon,
+          currentStatus,
+          dealValue
+        );
+        await this.sendEmail([managerEmail], subject, body, undefined,
+          requestId ? { requestId, emailType: 'handover_at_risk' as EmailType, sentBy: 'System' } : undefined
+        );
+      }
+    } catch (error) {
+      console.error('[DWxNotificationService] Failed to send handover at risk notifications:', error);
+    }
+  }
+
+  /**
+   * Send delivery kickoff reminder 24h before scheduled meeting
+   */
+  async notifyDeliveryKickoffReminder(
+    recipients: string[],
+    clientName: string,
+    serviceName: string,
+    kickoffDate: string,
+    meetingLink?: string,
+    requestId?: number
+  ): Promise<void> {
+    try {
+      for (const email of recipients) {
+        const { subject, body } = EmailTemplates.deliveryKickoffReminder(
+          email, // Use email as fallback name
+          clientName,
+          serviceName,
+          kickoffDate,
+          meetingLink
+        );
+        await this.sendEmail([email], subject, body, undefined,
+          requestId ? { requestId, emailType: 'delivery_kickoff_reminder' as EmailType, sentBy: 'System' } : undefined
+        );
+      }
+    } catch (error) {
+      console.error('[DWxNotificationService] Failed to send delivery kickoff reminder notifications:', error);
+    }
+  }
 }
 
 export const dwxNotificationService = new DWxNotificationService();

@@ -40,6 +40,12 @@ import {
   ActionItem,
 } from '../types/PostMortem';
 
+import type {
+  ClientBrief,
+  RiskAssumption,
+  DeliveryRole,
+} from '../types/DeliveryHandover';
+
 /**
  * Generate a unique ID for items
  */
@@ -1237,6 +1243,295 @@ Each action item should address a specific gap or opportunity identified in this
     }));
   } catch (error) {
     console.error('[AIPreparationService] Failed to suggest post-mortem action items:', error);
+    return [];
+  }
+}
+
+// ============================================================================
+// Delivery Handover AI Methods (v2.16.0)
+// ============================================================================
+
+export interface HandoverAIContext {
+  clientName: string;
+  serviceName: string;
+  serviceCategory: string;
+  dealValue?: number;
+  industry?: string;
+  companySize?: string;
+  winReason?: string;
+  requirements?: string;
+  discoveryNotes?: string;
+  proposalScope?: string;
+  proposalTimeline?: string;
+  proposalTechStack?: string;
+  contactName?: string;
+  contactEmail?: string;
+  contactPhone?: string;
+  amName?: string;
+  specialistName?: string;
+}
+
+/**
+ * Format HandoverAIContext into a readable string for AI prompts
+ */
+function formatHandoverContext(context: HandoverAIContext): string {
+  const lines: string[] = [];
+  lines.push(`Client: ${context.clientName}`);
+  lines.push(`Service: ${context.serviceName}`);
+  lines.push(`Service Category: ${context.serviceCategory}`);
+  if (context.dealValue != null) {
+    lines.push(`Contract Value: R${context.dealValue.toLocaleString()} (ZAR)`);
+  }
+  if (context.industry) {
+    lines.push(`Industry: ${context.industry}`);
+  }
+  if (context.companySize) {
+    lines.push(`Company Size: ${context.companySize}`);
+  }
+  if (context.winReason) {
+    lines.push(`Win Reason: ${context.winReason}`);
+  }
+
+  lines.push('');
+  lines.push('Key People:');
+  if (context.contactName) {
+    lines.push(`  - Client Contact: ${context.contactName}${context.contactEmail ? ` (${context.contactEmail})` : ''}${context.contactPhone ? ` / ${context.contactPhone}` : ''}`);
+  }
+  if (context.amName) {
+    lines.push(`  - Account Manager: ${context.amName}`);
+  }
+  if (context.specialistName) {
+    lines.push(`  - Pre-Sales Specialist: ${context.specialistName}`);
+  }
+
+  if (context.requirements) {
+    lines.push('');
+    lines.push('Requirements:');
+    lines.push(context.requirements);
+  }
+  if (context.discoveryNotes) {
+    lines.push('');
+    lines.push('Discovery Notes:');
+    lines.push(context.discoveryNotes);
+  }
+  if (context.proposalScope) {
+    lines.push('');
+    lines.push('Proposal Scope:');
+    lines.push(context.proposalScope);
+  }
+  if (context.proposalTimeline) {
+    lines.push('');
+    lines.push('Proposal Timeline:');
+    lines.push(context.proposalTimeline);
+  }
+  if (context.proposalTechStack) {
+    lines.push('');
+    lines.push('Technology Stack:');
+    lines.push(context.proposalTechStack);
+  }
+
+  return lines.join('\n');
+}
+
+/**
+ * Generate an AI-powered client brief for the delivery team taking over a won deal.
+ * Produces an executive overview, stakeholder analysis, communication preferences,
+ * critical success factors, and potential challenges.
+ */
+export async function generateClientBrief(
+  context: HandoverAIContext
+): Promise<ClientBrief> {
+  try {
+    const systemPrompt = `You are a senior project manager at Digital Workplace (DW), a Microsoft consulting firm in South Africa. You generate concise, actionable client briefs for delivery teams taking over won deals from pre-sales.
+
+Return a JSON object with this structure:
+{
+  "executiveSummary": "3-5 sentence executive overview for the delivery team covering what was sold, the client's primary objectives, and why they chose DW",
+  "clientContext": "Background on the client organisation, their current M365 maturity, and relevant industry context",
+  "keyStakeholders": [
+    {
+      "name": "Stakeholder name",
+      "role": "Their role/title",
+      "relationship": "Their relationship to this project (decision maker, sponsor, end user champion, etc.)",
+      "notes": "Key notes about working with this person (communication style, concerns, priorities)"
+    }
+  ],
+  "communicationPreferences": "How the client prefers to communicate (Teams/email/formal meetings), expected cadence, cultural considerations",
+  "criticalSuccessFactors": ["3-5 factors that will make this project successful"],
+  "potentialRisks": ["2-4 potential challenges the delivery team should watch for during implementation"],
+  "winReason": "Why the client chose DW and what they value most about the proposal",
+  "relationshipDynamics": "Summary of the relationship built during pre-sales — what worked well, any sensitivities",
+  "lessonsFromSales": ["2-3 lessons from the sales process that the delivery team should know about"]
+}
+
+Be specific and practical. The delivery team needs actionable intelligence, not generic advice. Reference the actual client, service, and industry context provided.`;
+
+    const contextSummary = formatHandoverContext(context);
+
+    const userPrompt = `Generate a comprehensive client brief for the delivery team based on this won deal:
+
+${contextSummary}
+
+The delivery team needs to understand who the client is, what was promised, who the key people are, and what to watch out for. Be specific to this client and service — avoid generic statements.`;
+
+    const response = await callAzureOpenAI(systemPrompt, userPrompt, 0.5);
+    return parseAIJson<ClientBrief>(response);
+  } catch (error) {
+    console.error('[AIPreparationService] Failed to generate client brief:', error);
+    return {
+      executiveSummary: '',
+      clientContext: '',
+      keyStakeholders: [],
+      communicationPreferences: '',
+      criticalSuccessFactors: [],
+      potentialRisks: [],
+      winReason: '',
+      relationshipDynamics: '',
+      lessonsFromSales: [],
+    };
+  }
+}
+
+/**
+ * Generate handover-specific risks and assumptions for the delivery team.
+ * Analyses the deal context, proposal scope, timeline, and technology stack
+ * to identify 4-8 risks and assumptions that could affect delivery.
+ */
+export async function generateHandoverRisks(
+  context: HandoverAIContext
+): Promise<RiskAssumption[]> {
+  try {
+    const systemPrompt = `You are a senior risk analyst at Digital Workplace (DW), a Microsoft consulting firm in South Africa. You identify handover-specific risks and assumptions for delivery teams taking over won deals.
+
+Return a JSON array of 4-8 items with this structure:
+[
+  {
+    "type": "Risk" or "Assumption",
+    "description": "Clear description of the risk or assumption",
+    "impact": "High" or "Medium" or "Low",
+    "mitigation": "Specific mitigation strategy or validation action",
+    "owner": "Who should own this (e.g., Project Manager, Delivery Manager, Client, Account Manager)"
+  }
+]
+
+Guidelines:
+- Include both risks (things that could go wrong) and assumptions (things we are assuming to be true that need validation)
+- Consider: scope clarity, client readiness, resource availability, technology complexity, timeline feasibility, change management, integration dependencies
+- Tailor to the specific service category (e.g., SPFx projects have different risks than migrations)
+- Focus on delivery-phase risks, not pre-sales risks
+- Be specific to the context provided — avoid generic project management risks`;
+
+    const contextSummary = formatHandoverContext(context);
+
+    const userPrompt = `Identify 4-8 delivery risks and assumptions for this project handover:
+
+${contextSummary}
+
+Focus on risks specific to ${context.serviceCategory} projects and this client's context. Include assumptions that the delivery team should validate early in the engagement.`;
+
+    const response = await callAzureOpenAI(systemPrompt, userPrompt, 0.4);
+    const parsed = parseAIJson<Array<{
+      type: 'Risk' | 'Assumption';
+      description: string;
+      impact: 'High' | 'Medium' | 'Low';
+      mitigation: string;
+      owner: string;
+    }>>(response);
+
+    return parsed.map((item) => ({
+      id: generateId(),
+      type: item.type,
+      description: item.description,
+      impact: item.impact,
+      mitigation: item.mitigation,
+      owner: item.owner,
+      source: 'Delivery' as const,
+    }));
+  } catch (error) {
+    console.error('[AIPreparationService] Failed to generate handover risks:', error);
+    return [];
+  }
+}
+
+/**
+ * Suggest optimal delivery team composition based on project requirements.
+ * Considers the service category, scope, timeline, and available resources
+ * to recommend roles, justifications, required skills, and allocation estimates.
+ */
+export async function suggestDeliveryTeam(
+  context: HandoverAIContext & {
+    availableResources?: Array<{
+      name: string;
+      role: DeliveryRole;
+      specializations: string[];
+      currentProjects: number;
+      maxProjects: number;
+    }>;
+  }
+): Promise<Array<{
+  role: DeliveryRole;
+  justification: string;
+  skillsNeeded: string[];
+  estimatedAllocation: string;
+}>> {
+  try {
+    const availableRoles = `"Project Manager", "Delivery Manager", "Developer", "Senior Developer", "Business Analyst", "UX Designer", "QA Engineer", "DevOps Engineer"`;
+
+    let resourceSection = '';
+    if (context.availableResources && context.availableResources.length > 0) {
+      resourceSection = '\n\nAvailable Resources:\n';
+      for (const res of context.availableResources) {
+        const capacity = res.maxProjects - res.currentProjects;
+        resourceSection += `  - ${res.name} (${res.role}) — Specialisations: ${res.specializations.join(', ')} — Capacity: ${capacity > 0 ? `${capacity} project slot(s) available` : 'FULLY ALLOCATED'}\n`;
+      }
+      resourceSection += '\nWhere a specific available resource is a good fit, mention them by name in the justification.';
+    }
+
+    const systemPrompt = `You are a senior resource manager at Digital Workplace (DW), a Microsoft consulting firm in South Africa. You suggest optimal delivery team composition based on project requirements.
+
+Return a JSON array of recommended team roles with this structure:
+[
+  {
+    "role": "Developer",
+    "justification": "Why this role is needed for this specific project",
+    "skillsNeeded": ["SharePoint Framework", "React", "TypeScript"],
+    "estimatedAllocation": "80% for 3 months"
+  }
+]
+
+Valid roles: ${availableRoles}.
+
+Guidelines:
+- Tailor team composition to the service category:
+  * Power Platform → Power Platform developers, Business Analyst
+  * SPFx Development → SPFx/React developers, QA Engineer
+  * SharePoint Migration → Migration specialist (Developer), Project Manager
+  * M365 Assessment → Business Analyst, Senior Developer for technical review
+  * Copilot Agents → Senior Developer with AI/Copilot expertise, DevOps Engineer
+  * Training → Business Analyst for content, no heavy dev team
+- Every project should have a Project Manager
+- Larger deals (>R500,000) should have a Delivery Manager
+- Include QA for development projects but not for assessments or training
+- Be realistic with allocation percentages (part-time resources are common at DW)
+- Consider the contract value and timeline when sizing the team`;
+
+    const contextSummary = formatHandoverContext(context);
+
+    const userPrompt = `Recommend the optimal delivery team for this project:
+
+${contextSummary}${resourceSection}
+
+Suggest the right mix of roles for a ${context.serviceCategory} project${context.dealValue ? ` worth R${context.dealValue.toLocaleString()} (ZAR)` : ''}. Be specific about required skills and realistic about allocation estimates.`;
+
+    const response = await callAzureOpenAI(systemPrompt, userPrompt, 0.6);
+    return parseAIJson<Array<{
+      role: DeliveryRole;
+      justification: string;
+      skillsNeeded: string[];
+      estimatedAllocation: string;
+    }>>(response);
+  } catch (error) {
+    console.error('[AIPreparationService] Failed to suggest delivery team:', error);
     return [];
   }
 }

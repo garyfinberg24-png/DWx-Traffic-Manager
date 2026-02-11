@@ -21,6 +21,12 @@ export type EmailType =
   | 'post_mortem_reviewed'
   | 'action_item_assigned'
   | 'am_accountability_alert'
+  | 'handover_created'
+  | 'delivery_team_assigned'
+  | 'handover_meeting_scheduled'
+  | 'handover_complete'
+  | 'handover_at_risk'
+  | 'delivery_kickoff_reminder'
   | 'other';
 
 export interface EmailRecord {
@@ -51,6 +57,12 @@ export const EMAIL_TYPE_LABELS: Record<EmailType, string> = {
   post_mortem_reviewed: 'Post-Mortem Reviewed',
   action_item_assigned: 'Action Item Assigned',
   am_accountability_alert: 'AM Accountability Alert',
+  handover_created: 'Handover Created',
+  delivery_team_assigned: 'Delivery Team Assigned',
+  handover_meeting_scheduled: 'Handover Meeting Scheduled',
+  handover_complete: 'Handover Complete',
+  handover_at_risk: 'Handover At Risk',
+  delivery_kickoff_reminder: 'Kickoff Reminder',
   other: 'Other',
 };
 
@@ -73,5 +85,11 @@ export const EMAIL_TYPE_COLORS: Record<EmailType, { bg: string; text: string }> 
   post_mortem_reviewed: { bg: 'rgba(16, 185, 129, 0.1)', text: '#10B981' },
   action_item_assigned: { bg: 'rgba(98, 100, 167, 0.1)', text: '#6264a7' },
   am_accountability_alert: { bg: 'rgba(239, 68, 68, 0.15)', text: '#DC2626' },
+  handover_created: { bg: 'rgba(30, 107, 123, 0.1)', text: '#1e6b7b' },
+  delivery_team_assigned: { bg: 'rgba(139, 92, 246, 0.1)', text: '#8B5CF6' },
+  handover_meeting_scheduled: { bg: 'rgba(59, 130, 246, 0.1)', text: '#3B82F6' },
+  handover_complete: { bg: 'rgba(16, 185, 129, 0.15)', text: '#059669' },
+  handover_at_risk: { bg: 'rgba(247, 99, 12, 0.1)', text: '#f7630c' },
+  delivery_kickoff_reminder: { bg: 'rgba(245, 158, 11, 0.1)', text: '#D97706' },
   other: { bg: 'rgba(107, 114, 128, 0.1)', text: '#6B7280' },
 };
