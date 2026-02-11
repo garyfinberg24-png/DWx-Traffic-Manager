@@ -11,6 +11,7 @@ import {
   Text,
   Dropdown,
   Option,
+  ProgressBar,
   makeStyles,
   tokens,
 } from '@fluentui/react-components';
@@ -190,6 +191,7 @@ export const ProposalBuilder: React.FC<ProposalBuilderProps> = ({
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [generating, setGenerating] = useState(false);
+  const [aiProgress, setAiProgress] = useState<{ completed: number; total: number; sections: string[] }>({ completed: 0, total: 8, sections: [] });
   const [activeTab, setActiveTab] = useState<TabValue>('overview');
 
   // ------ Load or create proposal ------
@@ -247,7 +249,7 @@ export const ProposalBuilder: React.FC<ProposalBuilderProps> = ({
     }
   }, [proposal, onProposalUpdated, showToast]);
 
-  // ------ AI Generation ------
+  // ------ AI Generation with progress tracking ------
   const handleGenerateAI = useCallback(async () => {
     if (!proposal || !isAIConfigured()) {
       console.warn('[ProposalBuilder] AI guard failed — proposal:', !!proposal, 'configured:', isAIConfigured());
@@ -257,6 +259,8 @@ export const ProposalBuilder: React.FC<ProposalBuilderProps> = ({
       return;
     }
     setGenerating(true);
+    setAiProgress({ completed: 0, total: 8, sections: [] });
+
     try {
       const context: ProposalAIContext = {
         clientName: serviceRequest.ClientName,
@@ -277,55 +281,71 @@ export const ProposalBuilder: React.FC<ProposalBuilderProps> = ({
       };
 
       console.log('[ProposalBuilder] Starting AI generation for:', serviceRequest.ClientName, '-', serviceRequest.ServiceName);
-      const result = await aiPreparationService.generateProposalContent(context);
-      console.log('[ProposalBuilder] AI result:', {
-        success: result.success,
-        error: result.error,
-        sections: {
-          executiveSummary: !!result.executiveSummary,
-          solutionOverview: !!result.solutionOverview,
-          technologyStack: !!result.technologyStack,
-          scopeOfWork: !!result.scopeOfWork,
-          pricingBreakdown: !!result.pricingBreakdown,
-          timeline: !!result.timeline,
-          teamComposition: !!result.teamComposition,
-          assumptions: !!result.assumptions,
-          risks: !!result.risks,
-        },
-      });
 
-      if (result.success) {
-        const updates: Record<string, unknown> = {};
-        if (result.executiveSummary) updates.executiveSummary = result.executiveSummary;
-        if (result.solutionOverview) updates.solutionOverview = result.solutionOverview;
-        if (result.technologyStack) updates.technologyStack = result.technologyStack;
-        if (result.scopeOfWork) updates.scopeOfWork = result.scopeOfWork;
-        if (result.pricingBreakdown) updates.pricingBreakdown = result.pricingBreakdown;
-        if (result.timeline) updates.timeline = result.timeline;
-        if (result.teamComposition) updates.teamComposition = result.teamComposition;
-        if (result.assumptions) updates.assumptions = result.assumptions;
-        if (result.risks) updates.risks = result.risks;
+      // Track progress per section via wrapper that updates state on completion
+      const updates: Record<string, unknown> = {};
+      let completedCount = 0;
 
-        console.log('[ProposalBuilder] Updates to save:', Object.keys(updates));
-
-        if (Object.keys(updates).length === 0) {
-          showToast('AI returned no content. Please check Azure OpenAI configuration.', 'error');
-          return;
+      const trackSection = async <T,>(
+        label: string,
+        key: string,
+        generator: () => Promise<T>,
+      ): Promise<void> => {
+        try {
+          const result = await generator();
+          if (result) updates[key] = result;
+          console.log(`[ProposalBuilder] ${label} OK`);
+        } catch (err) {
+          console.error(`[ProposalBuilder] ${label} FAILED:`, (err as Error).message);
+        } finally {
+          completedCount++;
+          setAiProgress(prev => ({
+            ...prev,
+            completed: completedCount,
+            sections: [...prev.sections, label],
+          }));
         }
+      };
 
-        const sectionCount = Object.keys(updates).length;
-        const updateResult = await proposalService.updateProposal(proposal.Id, updates);
-        console.log('[ProposalBuilder] Save result:', { success: updateResult.success, error: updateResult.error, hasProposal: !!updateResult.proposal });
+      // Run all 8 sections in parallel with per-section progress tracking
+      await Promise.all([
+        trackSection('Executive Summary', 'executiveSummary', () => aiPreparationService.generateExecutiveSummary(context)),
+        trackSection('Solution Overview', 'solutionOverview', () => aiPreparationService.generateSolutionOverview(context)),
+        trackSection('Technology Stack', 'technologyStack', () => aiPreparationService.generateTechStack(context)),
+        trackSection('Scope of Work', 'scopeOfWork', () => aiPreparationService.generateScopeOfWork(context)),
+        trackSection('Pricing', 'pricingBreakdown', () => aiPreparationService.generatePricingEstimate(context)),
+        trackSection('Timeline', 'timeline', () => aiPreparationService.generateTimeline(context)),
+        trackSection('Team Composition', 'teamComposition', () => aiPreparationService.generateTeamComposition(context)),
+        trackSection('Assumptions & Risks', '_assumptionsAndRisks', () => aiPreparationService.generateAssumptionsAndRisks(context)),
+      ]);
 
-        if (updateResult.success && updateResult.proposal) {
-          setProposal(updateResult.proposal);
-          onProposalUpdated?.(updateResult.proposal);
-          showToast(`AI generated ${sectionCount} proposal sections successfully`, 'success');
-        } else {
-          showToast(updateResult.error || 'Failed to save AI-generated content to SharePoint.', 'error');
-        }
+      // Unpack assumptions & risks (they come as a combined object)
+      if (updates._assumptionsAndRisks) {
+        const ar = updates._assumptionsAndRisks as { assumptions?: string[]; risks?: unknown[] };
+        if (ar.assumptions) updates.assumptions = ar.assumptions;
+        if (ar.risks) updates.risks = ar.risks;
+        delete updates._assumptionsAndRisks;
+      }
+
+      console.log('[ProposalBuilder] Updates to save:', Object.keys(updates));
+
+      if (Object.keys(updates).length === 0) {
+        showToast('AI returned no content. Please check Azure OpenAI configuration.', 'error');
+        return;
+      }
+
+      // Save to SharePoint
+      setAiProgress(prev => ({ ...prev, sections: [...prev.sections, 'Saving to SharePoint...'] }));
+      const sectionCount = Object.keys(updates).length;
+      const updateResult = await proposalService.updateProposal(proposal.Id, updates);
+      console.log('[ProposalBuilder] Save result:', { success: updateResult.success, error: updateResult.error, hasProposal: !!updateResult.proposal });
+
+      if (updateResult.success && updateResult.proposal) {
+        setProposal(updateResult.proposal);
+        onProposalUpdated?.(updateResult.proposal);
+        showToast(`AI generated ${sectionCount} proposal sections successfully`, 'success');
       } else {
-        showToast(result.error || 'AI generation failed. Check Azure OpenAI configuration.', 'error');
+        showToast(updateResult.error || 'Failed to save AI-generated content to SharePoint.', 'error');
       }
     } catch (error) {
       console.error('[ProposalBuilder] AI generation failed:', error);
@@ -657,11 +677,22 @@ export const ProposalBuilder: React.FC<ProposalBuilderProps> = ({
     if (!proposal) return null;
 
     if (generating) {
+      const pct = aiProgress.total > 0 ? aiProgress.completed / aiProgress.total : 0;
+      const lastSection = aiProgress.sections.length > 0
+        ? aiProgress.sections[aiProgress.sections.length - 1]
+        : 'Starting...';
       return (
         <div className={styles.generatingOverlay}>
           <Spinner size="large" />
           <Text size={400} weight="semibold">Generating AI Content...</Text>
-          <Text size={300}>This may take 30-60 seconds as we generate all proposal sections.</Text>
+          <div style={{ width: '100%', maxWidth: '360px' }}>
+            <ProgressBar value={pct} thickness="large" color="brand" />
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '6px' }}>
+              <Text size={200} style={{ color: '#64748b' }}>{aiProgress.completed} of {aiProgress.total} sections</Text>
+              <Text size={200} weight="semibold" style={{ color: '#475569' }}>{Math.round(pct * 100)}%</Text>
+            </div>
+          </div>
+          <Text size={200} style={{ color: '#94a3b8', marginTop: '4px' }}>{lastSection}</Text>
         </div>
       );
     }
