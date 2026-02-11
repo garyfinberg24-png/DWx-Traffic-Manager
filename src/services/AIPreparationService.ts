@@ -91,7 +91,11 @@ async function callAzureOpenAI(
     throw new Error('Azure OpenAI is not configured. Please set VITE_AZURE_OPENAI_ENDPOINT and VITE_AZURE_OPENAI_API_KEY.');
   }
 
-  const url = `${cfg.endpoint}/openai/deployments/${cfg.deploymentName}/chat/completions?api-version=${cfg.apiVersion}`;
+  // Normalize endpoint — remove trailing slash to prevent double-slash in URL
+  const baseEndpoint = cfg.endpoint.replace(/\/+$/, '');
+  const url = `${baseEndpoint}/openai/deployments/${cfg.deploymentName}/chat/completions?api-version=${cfg.apiVersion}`;
+
+  console.log('[AIPreparationService] Calling Azure OpenAI:', url.split('?')[0]);
 
   const response = await fetch(url, {
     method: 'POST',
@@ -111,11 +115,14 @@ async function callAzureOpenAI(
 
   if (!response.ok) {
     const errorText = await response.text();
+    console.error('[AIPreparationService] API error:', response.status, errorText);
     throw new Error(`Azure OpenAI API error: ${response.status} - ${errorText}`);
   }
 
   const data = await response.json();
-  return data.choices[0]?.message?.content || '';
+  const content = data.choices[0]?.message?.content || '';
+  console.log('[AIPreparationService] Response length:', content.length, 'chars');
+  return content;
 }
 
 /**
@@ -134,7 +141,12 @@ function parseAIJson<T>(response: string): T {
   }
   cleaned = cleaned.trim();
 
-  return JSON.parse(cleaned);
+  try {
+    return JSON.parse(cleaned);
+  } catch (err) {
+    console.error('[AIPreparationService] JSON parse failed. First 200 chars:', cleaned.slice(0, 200));
+    throw new Error(`Failed to parse AI response as JSON: ${(err as Error).message}`);
+  }
 }
 
 class AIPreparationService {
@@ -478,6 +490,7 @@ Instruction: ${refinementInstruction}`;
    */
   async generateProposalContent(context: ProposalAIContext): Promise<ProposalAIResult> {
     try {
+      console.log('[AIPreparationService] Starting 8 parallel proposal generation calls...');
       const results = await Promise.allSettled([
         this.generateExecutiveSummary(context),
         this.generateSolutionOverview(context),
@@ -488,6 +501,15 @@ Instruction: ${refinementInstruction}`;
         this.generateTeamComposition(context),
         this.generateAssumptionsAndRisks(context),
       ]);
+
+      const sectionNames = ['ExecutiveSummary', 'SolutionOverview', 'TechStack', 'ScopeOfWork', 'Pricing', 'Timeline', 'TeamComposition', 'AssumptionsAndRisks'];
+      results.forEach((r, i) => {
+        if (r.status === 'rejected') {
+          console.error(`[AIPreparationService] ${sectionNames[i]} FAILED:`, r.reason?.message || r.reason);
+        } else {
+          console.log(`[AIPreparationService] ${sectionNames[i]} OK`);
+        }
+      });
 
       const getValue = <T>(result: PromiseSettledResult<T>): T | undefined =>
         result.status === 'fulfilled' ? result.value : undefined;

@@ -249,7 +249,13 @@ export const ProposalBuilder: React.FC<ProposalBuilderProps> = ({
 
   // ------ AI Generation ------
   const handleGenerateAI = useCallback(async () => {
-    if (!proposal || !isAIConfigured()) return;
+    if (!proposal || !isAIConfigured()) {
+      console.warn('[ProposalBuilder] AI guard failed — proposal:', !!proposal, 'configured:', isAIConfigured());
+      if (!isAIConfigured()) {
+        showToast('Azure OpenAI is not configured. Set VITE_AZURE_OPENAI_ENDPOINT and VITE_AZURE_OPENAI_API_KEY.', 'error');
+      }
+      return;
+    }
     setGenerating(true);
     try {
       const context: ProposalAIContext = {
@@ -270,7 +276,23 @@ export const ProposalBuilder: React.FC<ProposalBuilderProps> = ({
         accountManagerName: serviceRequest.AccountManagerName || '',
       };
 
+      console.log('[ProposalBuilder] Starting AI generation for:', serviceRequest.ClientName, '-', serviceRequest.ServiceName);
       const result = await aiPreparationService.generateProposalContent(context);
+      console.log('[ProposalBuilder] AI result:', {
+        success: result.success,
+        error: result.error,
+        sections: {
+          executiveSummary: !!result.executiveSummary,
+          solutionOverview: !!result.solutionOverview,
+          technologyStack: !!result.technologyStack,
+          scopeOfWork: !!result.scopeOfWork,
+          pricingBreakdown: !!result.pricingBreakdown,
+          timeline: !!result.timeline,
+          teamComposition: !!result.teamComposition,
+          assumptions: !!result.assumptions,
+          risks: !!result.risks,
+        },
+      });
 
       if (result.success) {
         const updates: Record<string, unknown> = {};
@@ -284,6 +306,8 @@ export const ProposalBuilder: React.FC<ProposalBuilderProps> = ({
         if (result.assumptions) updates.assumptions = result.assumptions;
         if (result.risks) updates.risks = result.risks;
 
+        console.log('[ProposalBuilder] Updates to save:', Object.keys(updates));
+
         if (Object.keys(updates).length === 0) {
           showToast('AI returned no content. Please check Azure OpenAI configuration.', 'error');
           return;
@@ -291,17 +315,21 @@ export const ProposalBuilder: React.FC<ProposalBuilderProps> = ({
 
         const sectionCount = Object.keys(updates).length;
         const updateResult = await proposalService.updateProposal(proposal.Id, updates);
+        console.log('[ProposalBuilder] Save result:', { success: updateResult.success, error: updateResult.error, hasProposal: !!updateResult.proposal });
+
         if (updateResult.success && updateResult.proposal) {
           setProposal(updateResult.proposal);
           onProposalUpdated?.(updateResult.proposal);
           showToast(`AI generated ${sectionCount} proposal sections successfully`, 'success');
+        } else {
+          showToast(updateResult.error || 'Failed to save AI-generated content to SharePoint.', 'error');
         }
       } else {
         showToast(result.error || 'AI generation failed. Check Azure OpenAI configuration.', 'error');
       }
     } catch (error) {
       console.error('[ProposalBuilder] AI generation failed:', error);
-      showToast('AI generation failed', 'error');
+      showToast(`AI generation failed: ${error instanceof Error ? error.message : 'Unknown error'}`, 'error');
     } finally {
       setGenerating(false);
     }
