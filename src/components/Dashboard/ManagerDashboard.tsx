@@ -30,6 +30,7 @@ import {
   Lightbulb24Regular,
   DocumentTable24Regular,
   Rocket24Regular,
+  Star24Regular,
 } from '@fluentui/react-icons';
 import { useAuth } from '../../contexts/AuthContext';
 import { dashboardService } from '../../services/DashboardService';
@@ -57,6 +58,9 @@ import { SLADashboardTab } from './SLADashboardTab';
 import { InsightsTab } from './InsightsTab';
 import { ReportsTab } from './ReportsTab';
 import { HandoverQueue } from './HandoverQueue';
+import { ResourceCapacityDashboard } from '../DeliveryHandover/ResourceCapacityDashboard';
+import { DeliveryAnalyticsTab } from './DeliveryAnalyticsTab';
+import { deliveryHandoverService } from '../../services/DeliveryHandoverService';
 import { useToast } from '../../contexts/ToastContext';
 import { DW_COLORS } from '../../utils/buttonStyles';
 import { useHeroCollapse } from '../../hooks/useHeroCollapse';
@@ -74,7 +78,7 @@ import { RequestDetails } from '../MyRequests/RequestDetails';
 // Types
 // ============================================================================
 
-type DashboardTab = 'overview' | 'pipeline' | 'approvals' | 'productQueue' | 'calendar' | 'timeline' | 'performance' | 'clients' | 'commercial' | 'gamification' | 'resources' | 'winloss' | 'sla' | 'insights' | 'reports' | 'handovers';
+type DashboardTab = 'overview' | 'pipeline' | 'approvals' | 'productQueue' | 'calendar' | 'timeline' | 'performance' | 'clients' | 'commercial' | 'gamification' | 'resources' | 'winloss' | 'sla' | 'insights' | 'reports' | 'handovers' | 'capacity' | 'deliveryAnalytics';
 
 interface NavItem {
   value: DashboardTab;
@@ -127,7 +131,9 @@ const NAV_GROUPS: NavGroup[] = [
     id: 'delivery',
     label: 'Delivery',
     items: [
-      { value: 'handovers', label: 'Handover Queue', icon: Rocket24Regular },
+      { value: 'handovers', label: 'Handover Queue', icon: Rocket24Regular, badge: 'count' },
+      { value: 'capacity', label: 'Capacity', icon: People24Regular },
+      { value: 'deliveryAnalytics', label: 'Delivery KPIs', icon: Star24Regular },
     ],
   },
   {
@@ -468,6 +474,7 @@ export const ManagerDashboard: React.FC = () => {
   const [serviceRequests, setServiceRequests] = useState<ServiceRequest[]>([]);
   const [productRequests, setProductRequests] = useState<ProductRequest[]>([]);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const [activeHandoverCount, setActiveHandoverCount] = useState(0);
 
   // Read tab from URL params, default to 'overview'
   const tabFromUrl = searchParams.get('tab') as DashboardTab | null;
@@ -530,6 +537,15 @@ export const ManagerDashboard: React.FC = () => {
       }
       setServiceRequests(allRequests);
       setProductRequests(allProductRequests);
+
+      // Load delivery handover count (non-blocking)
+      try {
+        const handovers = await deliveryHandoverService.getAllHandovers();
+        const active = handovers.filter(h => h.HandoverStatus !== 'Delivered' && h.HandoverStatus !== 'Closed');
+        setActiveHandoverCount(active.length);
+      } catch (handoverErr) {
+        console.warn('Could not load handover count:', handoverErr);
+      }
 
       // Load legacy bookings (optional - for backward compatibility during migration)
       let allBookings: Booking[] = [];
@@ -619,7 +635,9 @@ export const ManagerDashboard: React.FC = () => {
 
   // Helper to get badge for nav item
   const renderNavBadge = (item: NavItem) => {
-    const badgeCount = item.value === 'productQueue' ? actionableProductCount : pendingRequestsCount;
+    const badgeCount = item.value === 'productQueue' ? actionableProductCount
+      : item.value === 'handovers' ? activeHandoverCount
+      : pendingRequestsCount;
     if (item.badge === 'count' && badgeCount > 0) {
       return (
         <Badge
@@ -896,7 +914,23 @@ export const ManagerDashboard: React.FC = () => {
 
               {/* Handover Queue Tab */}
               {selectedTab === 'handovers' && (
-                <HandoverQueue serviceRequests={serviceRequests} />
+                <HandoverQueue
+                  serviceRequests={serviceRequests}
+                  onHandoverClick={(handover) => {
+                    const sr = serviceRequests.find(r => Number(r.Id) === Number(handover.ServiceRequestId));
+                    if (sr) setSelectedServiceRequest(sr);
+                  }}
+                />
+              )}
+
+              {/* Resource Capacity Tab */}
+              {selectedTab === 'capacity' && (
+                <ResourceCapacityDashboard />
+              )}
+
+              {/* Delivery Analytics Tab */}
+              {selectedTab === 'deliveryAnalytics' && (
+                <DeliveryAnalyticsTab />
               )}
             </div>
           )}

@@ -1560,6 +1560,232 @@ export const deliveryKickoffReminder = (
   };
 };
 
+/**
+ * 45. Milestone overdue — sent to PM + DM when milestone passes planned date
+ */
+export const milestoneOverdue = (
+  recipientName: string,
+  clientName: string,
+  serviceName: string,
+  milestoneName: string,
+  plannedWeek: number,
+  daysOverdue: number,
+  totalMilestones: number,
+  completedMilestones: number,
+  dealValue?: number
+): { subject: string; body: string } => {
+  const content = `
+    <p>Hi <strong>${escapeHtml(recipientName)}</strong>,</p>
+    <p>A milestone in the <strong>${escapeHtml(serviceName)}</strong> delivery for <strong>${escapeHtml(clientName)}</strong> is now overdue and requires attention.</p>
+    ${callout('#d13438', '#fde7e9',
+      `<strong>Milestone Overdue:</strong> "${escapeHtml(milestoneName)}" was planned for Week ${plannedWeek} and is now <strong>${daysOverdue}</strong> day${daysOverdue !== 1 ? 's' : ''} overdue.`
+    )}
+    ${row('Client', escapeHtml(clientName))}
+    ${row('Service', escapeHtml(serviceName))}
+    ${row('Milestone', `<strong>${escapeHtml(milestoneName)}</strong>`)}
+    ${row('Planned Week', `Week ${plannedWeek}`)}
+    ${row('Days Overdue', `<strong style="color:#d13438;">${daysOverdue}</strong>`)}
+    ${row('Progress', `${completedMilestones} of ${totalMilestones} milestones completed`)}
+    ${dealValue ? row('Contract Value', formatCurrency(dealValue)) : ''}
+    <p style="margin-top:20px;"><strong>Recommended Actions:</strong></p>
+    <ul>
+      <li>Review the milestone requirements and identify blockers</li>
+      <li>Update the project plan if timelines have shifted</li>
+      <li>Communicate revised expectations to the client</li>
+      <li>Escalate resource constraints to management</li>
+    </ul>
+  `;
+  return {
+    subject: `[DWx] MILESTONE OVERDUE: ${escapeHtml(milestoneName)} - ${escapeHtml(clientName)} (${daysOverdue} days)`,
+    body: wrap(GRAD.danger, 'Milestone Overdue', content),
+  };
+};
+
+// ============================================================================
+// Client sign-off templates (v2.17.0)
+// ============================================================================
+
+/**
+ * 46. Deliverable submitted for review — sent to DM when a deliverable is submitted
+ */
+export const deliverableSubmitted = (
+  dmName: string,
+  clientName: string,
+  serviceName: string,
+  deliverableTitle: string,
+  submittedBy: string,
+  approvedCount: number,
+  totalCount: number,
+  dealValue?: number
+): { subject: string; body: string } => {
+  const content = `
+    <p>Hi <strong>${escapeHtml(dmName)}</strong>,</p>
+    <p>A deliverable from the <strong>${escapeHtml(serviceName)}</strong> engagement for <strong>${escapeHtml(clientName)}</strong> has been submitted for your review.</p>
+    ${callout('#6264a7', '#edebe9',
+      `<strong>A deliverable has been submitted for your review and approval.</strong>`
+    )}
+    ${row('Client', escapeHtml(clientName))}
+    ${row('Service', escapeHtml(serviceName))}
+    ${row('Deliverable', `<strong>${escapeHtml(deliverableTitle)}</strong>`)}
+    ${row('Submitted By', escapeHtml(submittedBy))}
+    ${row('Progress', `${approvedCount} of ${totalCount} approved`)}
+    ${dealValue ? row('Deal Value', formatCurrency(dealValue)) : ''}
+    <p style="margin-top:20px;"><strong>Recommended Actions:</strong></p>
+    <ul>
+      <li>Review deliverable against acceptance criteria</li>
+      <li>Approve or request changes</li>
+      <li>Provide feedback if rejecting</li>
+    </ul>
+  `;
+  return {
+    subject: `[DWx] Deliverable Submitted for Review: ${escapeHtml(deliverableTitle)} - ${escapeHtml(clientName)}`,
+    body: wrap(GRAD.purple, 'Deliverable Submitted for Review', content),
+  };
+};
+
+/**
+ * 47. Deliverable approved — sent to PM when deliverable is approved
+ */
+export const deliverableApproved = (
+  pmName: string,
+  clientName: string,
+  serviceName: string,
+  deliverableTitle: string,
+  approvedBy: string,
+  approvedCount: number,
+  totalCount: number,
+  notes?: string,
+  dealValue?: number
+): { subject: string; body: string } => {
+  const notesText = notes ? `<br/><strong>Notes:</strong> ${escapeHtml(notes)}` : '';
+  const allApproved = approvedCount === totalCount;
+  const content = `
+    <p>Hi <strong>${escapeHtml(pmName)}</strong>,</p>
+    <p>A deliverable for the <strong>${escapeHtml(serviceName)}</strong> engagement with <strong>${escapeHtml(clientName)}</strong> has been approved.</p>
+    ${callout('#107c10', '#dff6dd',
+      `<strong>${escapeHtml(deliverableTitle)}</strong> has been approved.${notesText}`
+    )}
+    ${row('Client', escapeHtml(clientName))}
+    ${row('Service', escapeHtml(serviceName))}
+    ${row('Deliverable', `<strong>${escapeHtml(deliverableTitle)}</strong>`)}
+    ${row('Approved By', escapeHtml(approvedBy))}
+    ${row('Progress', `${approvedCount} of ${totalCount} approved`)}
+    ${dealValue ? row('Deal Value', formatCurrency(dealValue)) : ''}
+    ${allApproved ? callout('#107c10', '#dff6dd',
+      `<strong>All deliverables have been approved!</strong> The handover is ready for final sign-off.`
+    ) : ''}
+  `;
+  return {
+    subject: `[DWx] Deliverable Approved: ${escapeHtml(deliverableTitle)} - ${escapeHtml(clientName)}`,
+    body: wrap(GRAD.success, 'Deliverable Approved', content),
+  };
+};
+
+/**
+ * 48. Deliverable rejected — sent to PM when deliverable is rejected
+ */
+export const deliverableRejected = (
+  pmName: string,
+  clientName: string,
+  serviceName: string,
+  deliverableTitle: string,
+  rejectedBy: string,
+  rejectionReason: string,
+  approvedCount: number,
+  totalCount: number,
+  dealValue?: number
+): { subject: string; body: string } => {
+  const content = `
+    <p>Hi <strong>${escapeHtml(pmName)}</strong>,</p>
+    <p>A deliverable for the <strong>${escapeHtml(serviceName)}</strong> engagement with <strong>${escapeHtml(clientName)}</strong> has been rejected and requires rework.</p>
+    ${callout('#d13438', '#fde7e9',
+      `<strong>A deliverable has been rejected and requires rework.</strong>`
+    )}
+    ${row('Client', escapeHtml(clientName))}
+    ${row('Service', escapeHtml(serviceName))}
+    ${row('Deliverable', `<strong>${escapeHtml(deliverableTitle)}</strong>`)}
+    ${row('Rejected By', escapeHtml(rejectedBy))}
+    ${row('Rejection Reason', `<strong style="color:#d13438;">${escapeHtml(rejectionReason)}</strong>`)}
+    ${row('Progress', `${approvedCount} of ${totalCount} approved`)}
+    ${dealValue ? row('Deal Value', formatCurrency(dealValue)) : ''}
+    <p style="margin-top:20px;"><strong>Recommended Actions:</strong></p>
+    <ul>
+      <li>Review the rejection feedback</li>
+      <li>Make the required changes</li>
+      <li>Resubmit the deliverable for review</li>
+    </ul>
+  `;
+  return {
+    subject: `[DWx] Deliverable Rejected: ${escapeHtml(deliverableTitle)} - ${escapeHtml(clientName)}`,
+    body: wrap(GRAD.danger, 'Deliverable Rejected', content),
+  };
+};
+
+/**
+ * 49. Final sign-off recorded — sent to all stakeholders when handover sign-off is complete
+ */
+export const finalSignOffRecorded = (
+  recipientName: string,
+  clientName: string,
+  serviceName: string,
+  clientSignatory: string,
+  dwSignatory: string,
+  overallRating: number,
+  clientFeedback: string,
+  approvedDeliverables: number,
+  dealValue?: number
+): { subject: string; body: string } => {
+  const stars = '\u2605'.repeat(overallRating) + '\u2606'.repeat(5 - overallRating);
+  const content = `
+    <p>Hi <strong>${escapeHtml(recipientName)}</strong>,</p>
+    <p>The delivery handover for <strong>${escapeHtml(serviceName)}</strong> with <strong>${escapeHtml(clientName)}</strong> has been formally signed off.</p>
+    ${callout('#107c10', '#dff6dd',
+      `<strong>The delivery handover has been formally signed off by the client.</strong>`
+    )}
+    ${row('Client', escapeHtml(clientName))}
+    ${row('Service', escapeHtml(serviceName))}
+    ${row('Client Signatory', escapeHtml(clientSignatory))}
+    ${row('DW Signatory', escapeHtml(dwSignatory))}
+    ${row('Deliverables Approved', `${approvedDeliverables}`)}
+    ${row('Overall Rating', `<strong>${stars}</strong> (${overallRating}/5)`)}
+    ${dealValue ? row('Deal Value', formatCurrency(dealValue)) : ''}
+    ${clientFeedback ? card(GRAD.standard, 'Client Feedback',
+      `<p style="margin:0;font-style:italic;color:#323130;">${escapeHtml(clientFeedback)}</p>`
+    ) : ''}
+  `;
+  return {
+    subject: `[DWx] HANDOVER COMPLETE: Final Sign-Off Recorded - ${escapeHtml(clientName)} - ${escapeHtml(serviceName)}`,
+    body: wrap(GRAD.success, 'Final Handover Sign-Off Complete', content),
+  };
+};
+
+/**
+ * 50. CSAT rating recorded — sent to PM, DM, and managers when a CSAT rating is submitted
+ */
+export const csatRecorded = (
+  clientName: string,
+  serviceName: string,
+  overallScore: number,
+  feedback: string,
+  submittedBy: string,
+): { subject: string; body: string } => {
+  const stars = '\u2605'.repeat(overallScore) + '\u2606'.repeat(5 - overallScore);
+  const content = `
+    <p>A customer satisfaction (CSAT) rating has been recorded for the following engagement:</p>
+    ${row('Client', escapeHtml(clientName))}
+    ${row('Service', escapeHtml(serviceName))}
+    ${row('CSAT Score', `<strong>${stars}</strong> (${overallScore}/5)`)}
+    ${row('Submitted By', escapeHtml(submittedBy))}
+    ${feedback ? card(GRAD.standard, 'Client Feedback',
+      `<p style="margin:0;font-style:italic;color:#323130;">${escapeHtml(feedback)}</p>`
+    ) : ''}
+  `;
+  return {
+    subject: `[DWx] CSAT Rating Recorded: ${escapeHtml(clientName)} - ${escapeHtml(serviceName)} (${overallScore}/5)`,
+    body: wrap(GRAD.success, 'CSAT Rating Recorded', content),
+  };
+};
+
 // ============================================================================
 // Export map
 // ============================================================================
@@ -1615,4 +1841,13 @@ export const EmailTemplates = {
   handoverComplete,
   handoverAtRisk,
   deliveryKickoffReminder,
+  // Milestone tracking templates (v2.17.0)
+  milestoneOverdue,
+  // Client sign-off templates (v2.17.0)
+  deliverableSubmitted,
+  deliverableApproved,
+  deliverableRejected,
+  finalSignOffRecorded,
+  // CSAT templates (v2.17.0)
+  csatRecorded,
 };

@@ -1015,7 +1015,7 @@ class ServiceRequestService {
     const fields = (item.fields as Record<string, unknown>) || item;
 
     return {
-      Id: item.id as number || fields.Id as number,
+      Id: Number(item.id || fields.Id || 0),
       Title: fields.Title as string || '',
       ServiceId: fields.ServiceId as number,
       ServiceName: fields.ServiceName as string || '',

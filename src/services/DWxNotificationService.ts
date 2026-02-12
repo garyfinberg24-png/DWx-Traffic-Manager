@@ -1029,6 +1029,269 @@ class DWxNotificationService {
       console.error('[DWxNotificationService] Failed to send delivery kickoff reminder notifications:', error);
     }
   }
+  // ─── Milestone Tracking Notifications (v2.17.0) ────────────────
+
+  /**
+   * Notify PM + DM + managers when a milestone is overdue
+   */
+  async notifyMilestoneOverdue(
+    pmName: string,
+    pmEmail: string,
+    dmName: string,
+    dmEmail: string | undefined,
+    clientName: string,
+    serviceName: string,
+    milestoneName: string,
+    plannedWeek: number,
+    daysOverdue: number,
+    totalMilestones: number,
+    completedMilestones: number,
+    dealValue?: number,
+    requestId?: number
+  ): Promise<void> {
+    try {
+      const recipients: { name: string; email: string }[] = [
+        { name: pmName, email: pmEmail },
+      ];
+
+      if (dmEmail && dmName) {
+        recipients.push({ name: dmName, email: dmEmail });
+      }
+
+      // Also notify managers
+      const managerEmails = this.getManagerEmails();
+      for (const email of managerEmails) {
+        if (!recipients.find((r) => r.email === email)) {
+          recipients.push({ name: 'Manager', email });
+        }
+      }
+
+      for (const recipient of recipients) {
+        const { subject, body } = EmailTemplates.milestoneOverdue(
+          recipient.name,
+          clientName,
+          serviceName,
+          milestoneName,
+          plannedWeek,
+          daysOverdue,
+          totalMilestones,
+          completedMilestones,
+          dealValue
+        );
+        await this.sendEmail([recipient.email], subject, body, undefined,
+          requestId ? { requestId, emailType: 'milestone_overdue' as EmailType, sentBy: 'System' } : undefined
+        );
+      }
+    } catch (error) {
+      console.error('[DWxNotificationService] Failed to send milestone overdue notifications:', error);
+    }
+  }
+
+  // ─── Deliverable Sign-Off Notifications (v2.17.0) ─────────────
+
+  /**
+   * Notify DM when a deliverable is submitted for review
+   */
+  async notifyDeliverableSubmitted(
+    dmName: string,
+    dmEmail: string,
+    clientName: string,
+    serviceName: string,
+    deliverableTitle: string,
+    submittedBy: string,
+    approvedCount: number,
+    totalCount: number,
+    dealValue?: number,
+    requestId?: number
+  ): Promise<void> {
+    try {
+      const { subject, body } = EmailTemplates.deliverableSubmitted(
+        dmName,
+        clientName,
+        serviceName,
+        deliverableTitle,
+        submittedBy,
+        approvedCount,
+        totalCount,
+        dealValue
+      );
+      await this.sendEmail([dmEmail], subject, body, undefined,
+        requestId ? { requestId, emailType: 'deliverable_submitted' as EmailType, sentBy: 'System' } : undefined
+      );
+    } catch (error) {
+      console.error('[DWxNotificationService] Failed to send deliverable submitted notification:', error);
+    }
+  }
+
+  /**
+   * Notify PM when a deliverable is approved
+   */
+  async notifyDeliverableApproved(
+    pmName: string,
+    pmEmail: string,
+    clientName: string,
+    serviceName: string,
+    deliverableTitle: string,
+    approvedBy: string,
+    approvedCount: number,
+    totalCount: number,
+    notes?: string,
+    dealValue?: number,
+    requestId?: number
+  ): Promise<void> {
+    try {
+      const { subject, body } = EmailTemplates.deliverableApproved(
+        pmName,
+        clientName,
+        serviceName,
+        deliverableTitle,
+        approvedBy,
+        approvedCount,
+        totalCount,
+        notes,
+        dealValue
+      );
+      await this.sendEmail([pmEmail], subject, body, undefined,
+        requestId ? { requestId, emailType: 'deliverable_approved' as EmailType, sentBy: 'System' } : undefined
+      );
+    } catch (error) {
+      console.error('[DWxNotificationService] Failed to send deliverable approved notification:', error);
+    }
+  }
+
+  /**
+   * Notify PM when a deliverable is rejected
+   */
+  async notifyDeliverableRejected(
+    pmName: string,
+    pmEmail: string,
+    clientName: string,
+    serviceName: string,
+    deliverableTitle: string,
+    rejectedBy: string,
+    rejectionReason: string,
+    approvedCount: number,
+    totalCount: number,
+    dealValue?: number,
+    requestId?: number
+  ): Promise<void> {
+    try {
+      const { subject, body } = EmailTemplates.deliverableRejected(
+        pmName,
+        clientName,
+        serviceName,
+        deliverableTitle,
+        rejectedBy,
+        rejectionReason,
+        approvedCount,
+        totalCount,
+        dealValue
+      );
+      await this.sendEmail([pmEmail], subject, body, undefined,
+        requestId ? { requestId, emailType: 'deliverable_rejected' as EmailType, sentBy: 'System' } : undefined
+      );
+    } catch (error) {
+      console.error('[DWxNotificationService] Failed to send deliverable rejected notification:', error);
+    }
+  }
+
+  /**
+   * Notify all stakeholders (AM, PM, DM, managers) when final sign-off is recorded
+   */
+  async notifyFinalSignOffRecorded(
+    amName: string,
+    amEmail: string,
+    pmName: string,
+    pmEmail: string,
+    dmName: string,
+    dmEmail: string | undefined,
+    clientName: string,
+    serviceName: string,
+    clientSignatory: string,
+    dwSignatory: string,
+    overallRating: number,
+    clientFeedback: string,
+    approvedDeliverables: number,
+    dealValue?: number,
+    requestId?: number
+  ): Promise<void> {
+    try {
+      const recipients: { name: string; email: string }[] = [
+        { name: amName, email: amEmail },
+        { name: pmName, email: pmEmail },
+      ];
+
+      if (dmEmail && dmName) {
+        recipients.push({ name: dmName, email: dmEmail });
+      }
+
+      // Also notify managers (deduplicated)
+      const managerEmails = this.getManagerEmails();
+      for (const email of managerEmails) {
+        if (!recipients.find((r) => r.email === email)) {
+          recipients.push({ name: 'Manager', email });
+        }
+      }
+
+      for (const recipient of recipients) {
+        const { subject, body } = EmailTemplates.finalSignOffRecorded(
+          recipient.name,
+          clientName,
+          serviceName,
+          clientSignatory,
+          dwSignatory,
+          overallRating,
+          clientFeedback,
+          approvedDeliverables,
+          dealValue
+        );
+        await this.sendEmail([recipient.email], subject, body, undefined,
+          requestId ? { requestId, emailType: 'final_signoff_recorded' as EmailType, sentBy: 'System' } : undefined
+        );
+      }
+    } catch (error) {
+      console.error('[DWxNotificationService] Failed to send final sign-off recorded notifications:', error);
+    }
+  }
+
+  /**
+   * Notify PM, DM, and managers when a CSAT rating is recorded
+   */
+  async notifyCSATRecorded(
+    _pmName: string,
+    pmEmail: string,
+    _dmName: string,
+    dmEmail: string,
+    clientName: string,
+    serviceName: string,
+    overallScore: number,
+    feedback: string,
+    submittedBy: string,
+    requestId?: number
+  ): Promise<void> {
+    try {
+      const { subject, body } = EmailTemplates.csatRecorded(clientName, serviceName, overallScore, feedback, submittedBy);
+
+      const recipients = [pmEmail];
+      if (dmEmail && dmEmail !== pmEmail) recipients.push(dmEmail);
+
+      // Add managers
+      const managerEmails = this.getManagerEmails();
+      for (const mgr of managerEmails) {
+        if (!recipients.includes(mgr)) recipients.push(mgr);
+      }
+
+      await this.sendEmail(
+        recipients,
+        subject,
+        body,
+        undefined,
+        requestId ? { requestId, emailType: 'csat_recorded' as EmailType, sentBy: 'System' } : undefined
+      );
+    } catch (error) {
+      console.error('[DWxNotificationService] Failed to send CSAT recorded notification:', error);
+    }
+  }
 }
 
 export const dwxNotificationService = new DWxNotificationService();

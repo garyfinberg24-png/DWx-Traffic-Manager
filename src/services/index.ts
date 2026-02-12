@@ -22,6 +22,9 @@ export { winLossAnalysisService } from './WinLossAnalysisService';
 export { emailTrackingService } from './EmailTrackingService';
 export { deliveryHandoverService } from './DeliveryHandoverService';
 export { deliveryResourceService } from './DeliveryResourceService';
+export { resourceCapacityService } from './ResourceCapacityService';
+export { deliveryAnalyticsService } from './DeliveryAnalyticsService';
+export { proposalTemplateService } from './ProposalTemplateService';
 
 // Re-export individual services for direct access when needed
 export { authService as realAuthService } from './AuthService';

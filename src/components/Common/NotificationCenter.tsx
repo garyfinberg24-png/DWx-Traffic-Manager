@@ -55,7 +55,6 @@ const useStyles = makeStyles({
   },
   popover: {
     width: '380px',
-    minWidth: '380px',
     maxHeight: '480px',
     padding: '0',
     overflow: 'hidden',

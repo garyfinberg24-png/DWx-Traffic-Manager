@@ -7,13 +7,18 @@
 
 import React, { useState, useEffect, useMemo, useDeferredValue } from 'react';
 import { makeStyles, Text, Spinner, Button, ProgressBar, shorthands, SearchBox } from '@fluentui/react-components';
-import { ArrowClockwise24Regular, RocketRegular, BoxRegular, CalendarRegular, PersonRegular, MoneyRegular } from '@fluentui/react-icons';
+import { ArrowClockwise24Regular, RocketRegular, BoxRegular, CalendarRegular, PersonRegular, MoneyRegular, People24Regular, ArrowLeft24Regular } from '@fluentui/react-icons';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { deliveryHandoverService } from '../../services/DeliveryHandoverService';
 import { deliveryResourceService } from '../../services/DeliveryResourceService';
 import type { CapacitySummary } from '../../services/DeliveryResourceService';
 import { HANDOVER_STATUS_COLORS, HANDOVER_STATUSES, getHandoverChecklistSummary, getHandoverDaysSinceWon, DELIVERY_ROLE_COLORS } from '../../types/DeliveryHandover';
 import type { DeliveryHandover, HandoverStatus, TeamAssignment } from '../../types/DeliveryHandover';
+import type { ServiceRequest } from '../../types/ServiceRequest';
+import { serviceRequestService } from '../../services/ServiceRequestService';
+import { RequestDetails } from '../MyRequests/RequestDetails';
+import { ResourceCapacityDashboard } from './ResourceCapacityDashboard';
 import { DW_COLORS } from '../../utils/buttonStyles';
 import { formatCurrency, formatDate } from '../../utils/formatters';
 import { useHeroCollapse } from '../../hooks/useHeroCollapse';
@@ -49,26 +54,82 @@ const useStyles = makeStyles({
   heroBanner: {
     ...shorthands.borderRadius('0', '0', '16px', '16px'), ...shorthands.padding('0'),
     position: 'relative', ...shorthands.overflow('hidden'),
-    background: 'linear-gradient(135deg, #0d3a5c 0%, #1e6b7b 100%)',
+    background: 'linear-gradient(135deg, #0d3a5c 0%, #1a5a8a 50%, #1e6b7b 100%)',
   },
-  heroExpanded: { maxHeight: '200px', transitionProperty: 'max-height', transitionDuration: '350ms', transitionTimingFunction: 'ease' },
+  heroExpanded: { maxHeight: '400px', transitionProperty: 'max-height', transitionDuration: '350ms', transitionTimingFunction: 'ease' },
   heroCollapsed: { maxHeight: '56px', transitionProperty: 'max-height', transitionDuration: '350ms', transitionTimingFunction: 'ease' },
   heroDecoration: {
     position: 'absolute', top: '-80px', right: '-40px', width: '300px', height: '300px',
     ...shorthands.borderRadius('50%'), background: 'radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 70%)', pointerEvents: 'none',
   },
-  heroContent: {
-    position: 'relative', zIndex: 1, display: 'flex', alignItems: 'center',
-    justifyContent: 'space-between', ...shorthands.gap('32px'), ...shorthands.padding('24px', '32px'),
+  // Row 1: Page header (matches Products/Services)
+  heroHeaderRow: {
+    display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start',
+    ...shorthands.padding('20px', '32px', '0'), position: 'relative', zIndex: 2,
   },
+  heroHeaderTitle: { fontSize: '28px', fontWeight: '700', color: 'white', letterSpacing: '-0.3px' },
+  heroHeaderSubtitle: { fontSize: '13px', color: 'rgba(255,255,255,0.6)', marginTop: '2px' },
+  backButtonHero: {
+    ...shorthands.padding('6px', '14px'), ...shorthands.borderRadius('8px'),
+    ...shorthands.border('1px', 'solid', 'rgba(255,255,255,0.25)'),
+    backgroundColor: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.85)',
+    fontSize: '13px', fontWeight: '500', cursor: 'pointer',
+    transitionProperty: 'all', transitionDuration: '0.2s',
+    display: 'inline-flex', alignItems: 'center', gap: '6px', flexShrink: 0,
+  },
+  // Row 2: Glassmorphic tab pills (matches Products/Services)
+  tabsRow: {
+    display: 'flex', gap: '6px', ...shorthands.padding('20px', '32px', '0'),
+    position: 'relative', zIndex: 2,
+  },
+  tabBtn: {
+    display: 'inline-flex', alignItems: 'center', gap: '8px',
+    ...shorthands.padding('8px', '20px'), ...shorthands.borderRadius('20px'),
+    ...shorthands.border('1px', 'solid', 'rgba(255,255,255,0.25)'),
+    backgroundColor: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.7)',
+    fontSize: '13px', fontWeight: '600', cursor: 'pointer',
+    transitionProperty: 'all', transitionDuration: '0.2s', backdropFilter: 'blur(8px)',
+  },
+  tabBtnActive: {
+    backgroundColor: 'rgba(255,255,255,0.22)', color: 'white',
+    ...shorthands.borderColor('rgba(255,255,255,0.45)'), boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+  },
+  tabCount: {
+    fontSize: '11px', fontWeight: '700', backgroundColor: 'rgba(255,255,255,0.2)',
+    ...shorthands.padding('1px', '8px'), ...shorthands.borderRadius('10px'), minWidth: '22px',
+  },
+  tabCountActive: { backgroundColor: 'rgba(255,255,255,0.3)' },
+  // Row 3: Content row with icon + title + description (matches Products/Services)
+  heroContentRow: {
+    display: 'flex', alignItems: 'center', gap: '32px',
+    ...shorthands.padding('18px', '32px', '22px'), position: 'relative', zIndex: 2,
+  },
+  heroTop: { display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' },
+  heroIcon: {
+    width: '36px', height: '36px', ...shorthands.borderRadius('10px'),
+    backgroundColor: 'rgba(255,255,255,0.1)', ...shorthands.border('1px', 'solid', 'rgba(255,255,255,0.15)'),
+    display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+  },
+  heroTitle: { fontSize: '20px', fontWeight: '700', color: 'white', letterSpacing: '-0.3px' },
+  heroDesc: { fontSize: '13px', lineHeight: '1.6', color: 'rgba(255,255,255,0.7)', maxWidth: '700px' },
+  // Collapsed strip
   collapsedStrip: {
     display: 'flex', alignItems: 'center', ...shorthands.gap('16px'),
     ...shorthands.padding('0', '32px'), height: '56px', position: 'relative', zIndex: 2,
   },
-  badge: {
-    fontSize: '11px', fontWeight: '600', color: 'rgba(255,255,255,0.9)',
-    backgroundColor: 'rgba(255,255,255,0.15)', ...shorthands.padding('5px', '12px'),
-    ...shorthands.borderRadius('10px'), display: 'flex', alignItems: 'center', ...shorthands.gap('6px'), whiteSpace: 'nowrap',
+  collapsedTabPill: {
+    display: 'inline-flex', alignItems: 'center', ...shorthands.gap('6px'),
+    fontSize: '12px', fontWeight: '600', color: 'white',
+    backgroundColor: 'rgba(255,255,255,0.2)', ...shorthands.padding('4px', '14px'),
+    ...shorthands.borderRadius('14px'), ...shorthands.border('1px', 'solid', 'rgba(255,255,255,0.3)'),
+    cursor: 'pointer',
+  },
+  collapsedTabPillInactive: {
+    display: 'inline-flex', alignItems: 'center', ...shorthands.gap('6px'),
+    fontSize: '12px', fontWeight: '500', color: 'rgba(255,255,255,0.6)',
+    backgroundColor: 'transparent', ...shorthands.padding('4px', '14px'),
+    ...shorthands.borderRadius('14px'), ...shorthands.border('1px', 'solid', 'rgba(255,255,255,0.15)'),
+    cursor: 'pointer',
   },
   badgeSmall: {
     fontSize: '11px', fontWeight: '600', color: 'rgba(255,255,255,0.9)',
@@ -115,7 +176,7 @@ const StatusSummaryCard: React.FC<{ status: HandoverStatus; count: number }> = (
   );
 };
 
-const ProjectCard: React.FC<{ handover: DeliveryHandover }> = ({ handover }) => {
+const ProjectCard: React.FC<{ handover: DeliveryHandover; onViewDetails?: (h: DeliveryHandover) => void }> = ({ handover, onViewDetails }) => {
   const styles = useStyles();
   const statusColors = HANDOVER_STATUS_COLORS[handover.HandoverStatus];
   const contractValue = getContractValue(handover);
@@ -144,7 +205,7 @@ const ProjectCard: React.FC<{ handover: DeliveryHandover }> = ({ handover }) => 
   const dmName = handover.DeliveryManagerName || '';
 
   return (
-    <div className={styles.projectCard}>
+    <div className={styles.projectCard} onClick={() => onViewDetails?.(handover)}>
       {/* Top accent border */}
       <div style={{ height: 4, backgroundColor: statusColors.accent }} />
 
@@ -253,7 +314,10 @@ const ProjectCard: React.FC<{ handover: DeliveryHandover }> = ({ handover }) => 
             </span>
           )}
         </div>
-        <Text style={{ fontSize: '12px', fontWeight: 600, color: DW_COLORS.primary, cursor: 'pointer' }}>
+        <Text
+          style={{ fontSize: '12px', fontWeight: 600, color: DW_COLORS.primary, cursor: 'pointer' }}
+          onClick={(e: React.MouseEvent) => { e.stopPropagation(); onViewDetails?.(handover); }}
+        >
           View Details &rarr;
         </Text>
       </div>
@@ -265,9 +329,11 @@ const ProjectCard: React.FC<{ handover: DeliveryHandover }> = ({ handover }) => 
 
 export const DeliveryCommandCentre: React.FC = () => {
   const styles = useStyles();
+  const navigate = useNavigate();
   const { isCollapsed, toggle } = useHeroCollapse('delivery');
   useAuth(); // Ensure authenticated context is available
 
+  const [activeTab, setActiveTab] = useState<'projects' | 'capacity'>('projects');
   const [handovers, setHandovers] = useState<DeliveryHandover[]>([]);
   const [capacity, setCapacity] = useState<CapacitySummary | null>(null);
   const [loading, setLoading] = useState(true);
@@ -275,6 +341,16 @@ export const DeliveryCommandCentre: React.FC = () => {
   const deferredSearch = useDeferredValue(searchQuery);
   const [statusFilter, setStatusFilter] = useState<HandoverStatus | 'All'>('All');
   const [sortBy, setSortBy] = useState<SortOption>('newest');
+  const [selectedRequest, setSelectedRequest] = useState<ServiceRequest | null>(null);
+
+  const handleViewDetails = async (handover: DeliveryHandover) => {
+    try {
+      const request = await serviceRequestService.getRequestById(handover.ServiceRequestId);
+      if (request) setSelectedRequest(request);
+    } catch (err) {
+      console.error('[DeliveryCommandCentre] Failed to load request:', err);
+    }
+  };
 
   const loadData = async () => {
     setLoading(true);
@@ -340,44 +416,111 @@ export const DeliveryCommandCentre: React.FC = () => {
   // ─── Render ──────────────────────────────────────────────────────
 
   return (
-    <>
-      {/* Hero Banner */}
+    <div className={styles.container}>
+      {/* Hero Banner — 3-row structure matching Services/Products */}
       <div className={styles.heroWrapper}>
         <div className={`${styles.heroBanner} ${isCollapsed ? styles.heroCollapsed : styles.heroExpanded}`}>
           <div className={styles.heroDecoration} />
-          {/* Expanded */}
-          <div className={styles.heroContent} style={{ opacity: isCollapsed ? 0 : 1, transition: 'opacity 250ms ease' }}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-              <Text style={{ fontSize: '22px', fontWeight: 700, color: 'white', display: 'flex', alignItems: 'center', gap: '10px', whiteSpace: 'nowrap', marginBottom: '4px' }}>
-                <RocketRegular style={{ fontSize: 22, color: 'rgba(255,255,255,0.7)' }} />
-                Delivery Command Centre
-              </Text>
-              <Text style={{ fontSize: '13px', color: 'rgba(255,255,255,0.6)' }}>
-                Active project delivery tracking and resource management
-              </Text>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0 }}>
-              <span className={styles.badge}><BoxRegular style={{ fontSize: 14 }} />{heroStats.activeProjects} Active</span>
-              <span className={styles.badge}><MoneyRegular style={{ fontSize: 14 }} />{formatCurrency(heroStats.totalValue)}</span>
-              <span className={styles.badge}><CalendarRegular style={{ fontSize: 14 }} />{heroStats.avgHandoverDays > 0 ? `${heroStats.avgHandoverDays}d avg` : 'No data'}</span>
-              <span className={styles.badge}><PersonRegular style={{ fontSize: 14 }} />{heroStats.utilizationPercent}% utilised</span>
-            </div>
-          </div>
-          {/* Collapsed */}
-          {isCollapsed && (
+          {isCollapsed ? (
             <div className={styles.collapsedStrip}>
               <span style={{ fontSize: '16px', fontWeight: 700, color: 'white' }}>Delivery Command Centre</span>
+              {(['projects', 'capacity'] as const).map((tab) => (
+                <button
+                  key={tab}
+                  className={activeTab === tab ? styles.collapsedTabPill : styles.collapsedTabPillInactive}
+                  onClick={() => setActiveTab(tab)}
+                >
+                  {tab === 'projects' ? 'Projects' : 'Capacity'}
+                </button>
+              ))}
               <span className={styles.badgeSmall}>{heroStats.activeProjects} Active</span>
               <span className={styles.badgeSmall}>{formatCurrency(heroStats.totalValue)}</span>
-              <span className={styles.badgeSmall}>{heroStats.utilizationPercent}% utilised</span>
             </div>
+          ) : (
+            <>
+              {/* Row 1: Page header */}
+              <div className={styles.heroHeaderRow}>
+                <div>
+                  <div className={styles.heroHeaderTitle}>Delivery Command Centre</div>
+                  <div className={styles.heroHeaderSubtitle}>
+                    Track project delivery, resource capacity, and handover progress
+                  </div>
+                </div>
+                <button className={styles.backButtonHero} onClick={() => navigate('/dashboard')}>
+                  <ArrowLeft24Regular style={{ fontSize: '16px' }} />
+                  Back to Dashboard
+                </button>
+              </div>
+
+              {/* Row 2: Glassmorphic tab pills */}
+              <div className={styles.tabsRow}>
+                {([
+                  { key: 'projects' as const, label: 'Projects', count: handovers.length, icon: <BoxRegular /> },
+                  { key: 'capacity' as const, label: 'Resource Capacity', count: capacity?.activeResources ?? 0, icon: <People24Regular /> },
+                ]).map((tab) => (
+                  <button
+                    key={tab.key}
+                    className={`${styles.tabBtn} ${activeTab === tab.key ? styles.tabBtnActive : ''}`}
+                    onClick={() => setActiveTab(tab.key)}
+                  >
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      {tab.icon} {tab.label}
+                    </span>
+                    <span className={`${styles.tabCount} ${activeTab === tab.key ? styles.tabCountActive : ''}`}>
+                      {tab.count}
+                    </span>
+                  </button>
+                ))}
+              </div>
+
+              {/* Row 3: Content — icon + title + description + stats */}
+              <div className={styles.heroContentRow}>
+                <div style={{ flex: 1 }}>
+                  <div className={styles.heroTop}>
+                    <div className={styles.heroIcon}>
+                      <RocketRegular style={{ color: '#7dd3fc', fontSize: '18px' }} />
+                    </div>
+                    <Text className={styles.heroTitle}>
+                      DWx Delivery{' '}
+                      <span style={{ color: '#7dd3fc' }}>Hub</span>
+                    </Text>
+                  </div>
+                  <div className={styles.heroDesc}>
+                    {activeTab === 'projects'
+                      ? 'Monitor active deliveries from Won deal handover through kickoff, execution, and client sign-off. Track milestones, checklists, and team assignments.'
+                      : 'View resource utilisation across all active projects, identify overallocations, and forecast capacity for upcoming weeks.'}
+                  </div>
+                </div>
+                <div style={{ display: 'flex', gap: '16px', flexShrink: 0 }}>
+                  {[
+                    { label: 'Active', value: `${heroStats.activeProjects}`, icon: <BoxRegular style={{ fontSize: 14 }} /> },
+                    { label: 'Pipeline', value: formatCurrency(heroStats.totalValue), icon: <MoneyRegular style={{ fontSize: 14 }} /> },
+                    { label: 'Avg Cycle', value: heroStats.avgHandoverDays > 0 ? `${heroStats.avgHandoverDays}d` : '\u2014', icon: <CalendarRegular style={{ fontSize: 14 }} /> },
+                    { label: 'Utilisation', value: `${heroStats.utilizationPercent}%`, icon: <PersonRegular style={{ fontSize: 14 }} /> },
+                  ].map((stat) => (
+                    <div key={stat.label} style={{
+                      display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px',
+                      padding: '8px 14px', borderRadius: '10px',
+                      backgroundColor: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)',
+                      minWidth: '80px',
+                    }}>
+                      <span style={{ color: 'rgba(255,255,255,0.5)', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px' }}>
+                        {stat.icon} {stat.label}
+                      </span>
+                      <span style={{ fontSize: '16px', fontWeight: 700, color: 'white' }}>{stat.value}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </>
           )}
         </div>
         <HeroCollapseToggle isCollapsed={isCollapsed} onToggle={toggle} />
       </div>
 
-      <div className={styles.container}>
-        {loading ? (
+        {activeTab === 'capacity' ? (
+          <ResourceCapacityDashboard />
+        ) : loading ? (
           <div className={styles.centered}>
             <Spinner size="medium" />
             <Text style={{ color: '#616161', fontSize: '14px' }}>Loading delivery projects...</Text>
@@ -438,13 +581,24 @@ export const DeliveryCommandCentre: React.FC = () => {
               </div>
             ) : (
               <div className={styles.projectGrid}>
-                {filteredHandovers.map((ho) => <ProjectCard key={ho.Id} handover={ho} />)}
+                {filteredHandovers.map((ho) => <ProjectCard key={ho.Id} handover={ho} onViewDetails={() => handleViewDetails(ho)} />)}
               </div>
             )}
           </>
         )}
-      </div>
-    </>
+
+      {/* Service Request Details Modal */}
+      {selectedRequest && (
+        <RequestDetails
+          request={selectedRequest}
+          isOpen={true}
+          onClose={() => setSelectedRequest(null)}
+          onRequestUpdated={(updated) => {
+            setSelectedRequest(updated);
+          }}
+        />
+      )}
+    </div>
   );
 };
 

@@ -23,7 +23,10 @@ import { EmptyState } from '../Common/EmptyState';
 
 // ── Types & Constants ────────────────────────────────────────────────────────
 
-interface HandoverQueueProps { serviceRequests: ServiceRequest[]; }
+interface HandoverQueueProps {
+  serviceRequests: ServiceRequest[];
+  onHandoverClick?: (handover: DeliveryHandover) => void;
+}
 type StatusFilter = 'All' | HandoverStatus;
 type SortOption = 'newest' | 'oldest' | 'highest-value' | 'days-since-won';
 
@@ -91,7 +94,7 @@ const useStyles = makeStyles({
 
 // ── Main Component ───────────────────────────────────────────────────────────
 
-export const HandoverQueue: React.FC<HandoverQueueProps> = ({ serviceRequests: _serviceRequests }) => {
+export const HandoverQueue: React.FC<HandoverQueueProps> = ({ serviceRequests: _serviceRequests, onHandoverClick }) => {
   const styles = useStyles();
   const [handovers, setHandovers] = useState<DeliveryHandover[]>([]);
   const [loading, setLoading] = useState(true);
@@ -250,7 +253,7 @@ export const HandoverQueue: React.FC<HandoverQueueProps> = ({ serviceRequests: _
           description={selectedStatus !== 'All' || searchText ? 'Try adjusting your filters or search terms.' : 'Won deals will appear here once handover is initiated.'} />
       ) : (
         <div className={styles.cardGrid}>
-          {sortedHandovers.map(h => <HandoverCard key={h.Id} handover={h} />)}
+          {sortedHandovers.map(h => <HandoverCard key={h.Id} handover={h} onClick={() => onHandoverClick?.(h)} />)}
         </div>
       )}
     </div>
@@ -259,7 +262,7 @@ export const HandoverQueue: React.FC<HandoverQueueProps> = ({ serviceRequests: _
 
 // ── Handover Card (module-level) ─────────────────────────────────────────────
 
-const HandoverCard: React.FC<{ handover: DeliveryHandover }> = ({ handover }) => {
+const HandoverCard: React.FC<{ handover: DeliveryHandover; onClick?: () => void }> = ({ handover, onClick }) => {
   const styles = useStyles();
   const sc = HANDOVER_STATUS_COLORS[handover.HandoverStatus];
   const value = getContractValue(handover);
@@ -279,7 +282,7 @@ const HandoverCard: React.FC<{ handover: DeliveryHandover }> = ({ handover }) =>
   const wonStr = handover.WonDate ? new Date(handover.WonDate).toLocaleDateString('en-ZA', { day: 'numeric', month: 'short', year: 'numeric' }) : '-';
 
   return (
-    <div className={styles.card} style={{ borderLeft: `4px solid ${sc?.accent || '#9ca3af'}` }}>
+    <div className={styles.card} style={{ borderLeft: `4px solid ${sc?.accent || '#9ca3af'}` }} onClick={onClick}>
       <div className={styles.cardBody}>
         <div className={styles.cardHeader}>
           <div style={{ flex: 1, minWidth: 0 }}>

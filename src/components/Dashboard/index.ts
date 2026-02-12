@@ -17,3 +17,4 @@ export { SLADashboardTab } from './SLADashboardTab';
 export { InsightsTab } from './InsightsTab';
 export { ReportsTab } from './ReportsTab';
 export { HandoverQueue } from './HandoverQueue';
+export { DeliveryAnalyticsTab } from './DeliveryAnalyticsTab';

@@ -524,6 +524,7 @@ export const ProposalBuilder: React.FC<ProposalBuilderProps> = ({
                 serviceName: serviceRequest.ServiceName,
                 accountManagerName: serviceRequest.AccountManagerName || '',
                 proposalType: proposal.ProposalType || 'Standard',
+                templateName: proposal.TemplateName,
               });
             }}
           >
@@ -543,6 +544,7 @@ export const ProposalBuilder: React.FC<ProposalBuilderProps> = ({
                 serviceName: serviceRequest.ServiceName,
                 accountManagerName: serviceRequest.AccountManagerName || '',
                 proposalType: proposal.ProposalType || 'Standard',
+                templateName: proposal.TemplateName,
               });
             }}
           >

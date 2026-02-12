@@ -44,6 +44,9 @@ import type {
   ClientBrief,
   RiskAssumption,
   DeliveryRole,
+  ProjectPlan,
+  ScopeSnapshot,
+  TeamAssignment,
 } from '../types/DeliveryHandover';
 
 /**
@@ -1533,5 +1536,150 @@ Suggest the right mix of roles for a ${context.serviceCategory} project${context
   } catch (error) {
     console.error('[AIPreparationService] Failed to suggest delivery team:', error);
     return [];
+  }
+}
+
+/**
+ * Generate an AI-powered project plan for a delivery handover.
+ * Produces a structured WBS with phases, tasks, resource allocation,
+ * RACI matrix, milestones, and critical path.
+ */
+export async function generateProjectPlan(
+  context: HandoverAIContext & {
+    scopeSnapshot?: ScopeSnapshot | null;
+    deliveryTeam?: TeamAssignment[];
+    successFactors?: string[];
+    risks?: string[];
+  }
+): Promise<ProjectPlan> {
+  try {
+    const systemPrompt = `You are a senior delivery manager at Digital Workplace (DW), a Microsoft consulting firm in South Africa. You create structured project plans for delivery teams taking over won deals.
+
+Return a JSON object with this exact structure:
+{
+  "phases": [
+    {
+      "name": "Phase name (e.g. 'Discovery & Requirements')",
+      "description": "Brief description of what this phase covers",
+      "startWeek": 1,
+      "endWeek": 2,
+      "tasks": [
+        {
+          "id": "T1",
+          "name": "Task name",
+          "phase": "Phase name",
+          "estimatedHours": 8,
+          "assignedRole": "Developer",
+          "dependencies": [],
+          "deliverable": "What this task produces"
+        }
+      ]
+    }
+  ],
+  "resourceAllocation": [
+    {
+      "role": "Project Manager",
+      "name": "",
+      "totalHours": 40,
+      "phases": ["Discovery & Requirements", "Development"]
+    }
+  ],
+  "raci": [
+    {
+      "deliverable": "Requirements Document",
+      "responsible": "Business Analyst",
+      "accountable": "Project Manager",
+      "consulted": ["Client Contact", "Solution Architect"],
+      "informed": ["Account Manager"]
+    }
+  ],
+  "milestones": [
+    {
+      "name": "Requirements Sign-off",
+      "week": 2,
+      "deliverables": ["Requirements Document", "Scope Confirmation"],
+      "dependencies": []
+    }
+  ],
+  "criticalPath": ["Discovery & Requirements", "Development", "UAT"],
+  "totalWeeks": 12,
+  "totalHours": 480,
+  "riskBuffer": 15,
+  "assumptions": ["Client provides timely feedback within 3 business days", "Access to environments granted by Week 1"]
+}
+
+Guidelines:
+- Generate 4-7 phases with realistic durations for the service category
+- Each phase should have 3-8 specific tasks with hour estimates
+- Resource allocation should map to roles available in a Microsoft consulting firm (Project Manager, Delivery Manager, Developer, Senior Developer, Business Analyst, UX Designer, QA Engineer, DevOps Engineer)
+- RACI matrix should cover all key deliverables
+- Include 4-8 milestones at natural checkpoints (sign-offs, demos, go-live)
+- Critical path should list the phases that determine the minimum project duration
+- Risk buffer is a percentage to add to estimated duration (10-20% typical)
+- Assumptions should be practical and specific to the project
+- All hour estimates should be realistic for a South African consulting context
+- Use ZAR context for any cost references`;
+
+    // Build context with additional scope/team info
+    let contextSummary = formatHandoverContext(context);
+
+    if (context.scopeSnapshot) {
+      const scope = context.scopeSnapshot;
+      contextSummary += '\n\nScope Details:';
+      if (scope.deliverables.length > 0) {
+        contextSummary += '\nDeliverables:';
+        scope.deliverables.forEach((d) => {
+          contextSummary += `\n  - ${d.title}: ${d.description} (${d.hours} hrs)`;
+        });
+      }
+      if (scope.timeline.length > 0) {
+        contextSummary += '\nTimeline Phases:';
+        scope.timeline.forEach((t) => {
+          contextSummary += `\n  - ${t.name}: Week ${t.startWeek}-${t.endWeek}`;
+        });
+      }
+      if (scope.technologies.length > 0) {
+        contextSummary += '\nTechnologies: ' + scope.technologies.map((t) => t.name).join(', ');
+      }
+      contextSummary += `\nTotal Hours: ${scope.totalHours}, Total Weeks: ${scope.totalWeeks}`;
+      contextSummary += `\nPricing Model: ${scope.pricingModel}`;
+    }
+
+    if (context.deliveryTeam && context.deliveryTeam.length > 0) {
+      contextSummary += '\n\nAssigned Delivery Team:';
+      context.deliveryTeam.forEach((t) => {
+        contextSummary += `\n  - ${t.resourceName} (${t.role}, ${t.allocationPercent}% allocation)`;
+      });
+    }
+
+    if (context.successFactors && context.successFactors.length > 0) {
+      contextSummary += '\n\nCritical Success Factors:\n' + context.successFactors.map((f) => `  - ${f}`).join('\n');
+    }
+
+    if (context.risks && context.risks.length > 0) {
+      contextSummary += '\n\nIdentified Risks:\n' + context.risks.map((r) => `  - ${r}`).join('\n');
+    }
+
+    const userPrompt = `Generate a detailed project plan for this delivery engagement:
+
+${contextSummary}
+
+Create a realistic, actionable project plan with clear phases, tasks, resource needs, RACI responsibilities, and milestones. The plan should be specific to this ${context.serviceCategory} project, not generic. Account for the actual team members and scope where provided.`;
+
+    const response = await callAzureOpenAI(systemPrompt, userPrompt, 0.4);
+    return parseAIJson<ProjectPlan>(response);
+  } catch (error) {
+    console.error('[AIPreparationService] Failed to generate project plan:', error);
+    return {
+      phases: [],
+      resourceAllocation: [],
+      raci: [],
+      milestones: [],
+      criticalPath: [],
+      totalWeeks: 0,
+      totalHours: 0,
+      riskBuffer: 15,
+      assumptions: [],
+    };
   }
 }

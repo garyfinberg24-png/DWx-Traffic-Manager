@@ -27,6 +27,12 @@ export type EmailType =
   | 'handover_complete'
   | 'handover_at_risk'
   | 'delivery_kickoff_reminder'
+  | 'milestone_overdue'
+  | 'deliverable_submitted'
+  | 'deliverable_approved'
+  | 'deliverable_rejected'
+  | 'final_signoff_recorded'
+  | 'csat_recorded'
   | 'other';
 
 export interface EmailRecord {
@@ -63,6 +69,12 @@ export const EMAIL_TYPE_LABELS: Record<EmailType, string> = {
   handover_complete: 'Handover Complete',
   handover_at_risk: 'Handover At Risk',
   delivery_kickoff_reminder: 'Kickoff Reminder',
+  milestone_overdue: 'Milestone Overdue',
+  deliverable_submitted: 'Deliverable Submitted',
+  deliverable_approved: 'Deliverable Approved',
+  deliverable_rejected: 'Deliverable Rejected',
+  final_signoff_recorded: 'Final Sign-Off Recorded',
+  csat_recorded: 'CSAT Recorded',
   other: 'Other',
 };
 
@@ -91,5 +103,11 @@ export const EMAIL_TYPE_COLORS: Record<EmailType, { bg: string; text: string }> 
   handover_complete: { bg: 'rgba(16, 185, 129, 0.15)', text: '#059669' },
   handover_at_risk: { bg: 'rgba(247, 99, 12, 0.1)', text: '#f7630c' },
   delivery_kickoff_reminder: { bg: 'rgba(245, 158, 11, 0.1)', text: '#D97706' },
+  milestone_overdue: { bg: 'rgba(239, 68, 68, 0.1)', text: '#EF4444' },
+  deliverable_submitted: { bg: 'rgba(139, 92, 246, 0.1)', text: '#8B5CF6' },
+  deliverable_approved: { bg: 'rgba(16, 185, 129, 0.15)', text: '#059669' },
+  deliverable_rejected: { bg: 'rgba(239, 68, 68, 0.1)', text: '#EF4444' },
+  final_signoff_recorded: { bg: 'rgba(16, 185, 129, 0.2)', text: '#047857' },
+  csat_recorded: { bg: 'rgba(245, 158, 11, 0.15)', text: '#D97706' },
   other: { bg: 'rgba(107, 114, 128, 0.1)', text: '#6B7280' },
 };

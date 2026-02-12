@@ -924,6 +924,15 @@ class DWxSharePointProvisioningService {
         { internalName: 'RisksAndAssumptions_JSON', displayName: 'Risks & Assumptions (JSON)', type: 'Note' },
         { internalName: 'ClientBrief_JSON', displayName: 'Client Brief (JSON)', type: 'Note' },
         { internalName: 'EnvironmentSetup_JSON', displayName: 'Environment Setup (JSON)', type: 'Note' },
+        { internalName: 'ProjectPlan_JSON', displayName: 'Project Plan (JSON)', type: 'Note' },
+        // Milestone & Progress Tracking (v2.17.0)
+        { internalName: 'MilestoneCompletions_JSON', displayName: 'Milestone Completions (JSON)', type: 'Note' },
+        { internalName: 'ProjectHealth_JSON', displayName: 'Project Health (JSON)', type: 'Note' },
+        // Client Sign-Off & Acceptance (v2.17.0)
+        { internalName: 'DeliverableSignOffs_JSON', displayName: 'Deliverable Sign-Offs (JSON)', type: 'Note' },
+        { internalName: 'FinalHandoverSignOff_JSON', displayName: 'Final Handover Sign-Off (JSON)', type: 'Note' },
+        // Delivery KPIs & Analytics (v2.17.0)
+        { internalName: 'CSAT_JSON', displayName: 'CSAT Rating (JSON)', type: 'Note' },
         // Notes
         { internalName: 'PreSalesNotes', displayName: 'Pre-Sales Notes', type: 'Note' },
         { internalName: 'DeliveryNotes', displayName: 'Delivery Notes', type: 'Note' },
@@ -956,6 +965,8 @@ class DWxSharePointProvisioningService {
         { internalName: 'AvailableFrom', displayName: 'Available From', type: 'DateTime' },
         { internalName: 'Skills_JSON', displayName: 'Skills (JSON)', type: 'Note' },
         { internalName: 'IsActive', displayName: 'Is Active', type: 'Boolean' },
+        // Resource Capacity Planning (v2.17.0)
+        { internalName: 'AllocationHistory_JSON', displayName: 'Allocation History (JSON)', type: 'Note' },
       ],
     };
   }

@@ -7,6 +7,7 @@
 
 import type { ServiceCategory } from './ServiceRequest';
 import type { Deliverable, TimelinePhase, TechnologyItem } from './Proposal';
+import type { CSATEntry } from './DeliveryAnalytics';
 
 // ============================================================================
 // Handover Status Workflow
@@ -189,6 +190,110 @@ export interface EnvironmentSetup {
 }
 
 // ============================================================================
+// AI-Generated Project Plan
+// ============================================================================
+
+export interface ProjectTask {
+  id: string;
+  name: string;
+  phase: string;
+  estimatedHours: number;
+  assignedRole: string;
+  dependencies: string[];
+  deliverable: string;
+}
+
+export interface ProjectPhase {
+  name: string;
+  description: string;
+  startWeek: number;
+  endWeek: number;
+  tasks: ProjectTask[];
+}
+
+export interface ResourceAllocation {
+  role: string;
+  name: string;
+  totalHours: number;
+  phases: string[];
+}
+
+export interface RACIEntry {
+  deliverable: string;
+  responsible: string;
+  accountable: string;
+  consulted: string[];
+  informed: string[];
+}
+
+export interface MilestoneEntry {
+  name: string;
+  week: number;
+  deliverables: string[];
+  dependencies: string[];
+}
+
+export interface ProjectPlan {
+  phases: ProjectPhase[];
+  resourceAllocation: ResourceAllocation[];
+  raci: RACIEntry[];
+  milestones: MilestoneEntry[];
+  criticalPath: string[];
+  totalWeeks: number;
+  totalHours: number;
+  riskBuffer: number;
+  assumptions: string[];
+}
+
+// ============================================================================
+// Milestone & Progress Tracking (v2.17.0)
+// ============================================================================
+
+export type MilestoneStatus = 'Not Started' | 'In Progress' | 'Completed' | 'Overdue';
+
+export const MILESTONE_STATUSES: MilestoneStatus[] = [
+  'Not Started',
+  'In Progress',
+  'Completed',
+  'Overdue',
+];
+
+export const MILESTONE_STATUS_COLORS: Record<MilestoneStatus, { bg: string; text: string; accent: string }> = {
+  'Not Started': { bg: '#e5e7eb', text: '#4b5563', accent: '#9ca3af' },
+  'In Progress': { bg: '#dbeafe', text: '#1e40af', accent: '#3b82f6' },
+  'Completed': { bg: '#d1fae5', text: '#065f46', accent: '#10b981' },
+  'Overdue': { bg: '#fee2e2', text: '#991b1b', accent: '#ef4444' },
+};
+
+export interface MilestoneCompletion {
+  milestoneIndex: number;
+  name: string;
+  plannedWeek: number;
+  status: MilestoneStatus;
+  actualCompletionDate: string | null;
+  daysVariance: number | null;   // negative = early, positive = late
+  completedBy: string;
+  notes: string;
+}
+
+export type ProjectHealthStatus = 'On Track' | 'At Risk' | 'Off Track';
+
+export const PROJECT_HEALTH_STATUS_COLORS: Record<ProjectHealthStatus, { bg: string; text: string; accent: string }> = {
+  'On Track': { bg: '#d1fae5', text: '#065f46', accent: '#10b981' },
+  'At Risk': { bg: '#fef3c7', text: '#92400e', accent: '#f59e0b' },
+  'Off Track': { bg: '#fee2e2', text: '#991b1b', accent: '#ef4444' },
+};
+
+export interface ProjectHealth {
+  overallScore: number;           // 0-100
+  status: ProjectHealthStatus;
+  milestoneProgress: number;      // % completed
+  checklistProgress: number;      // % from existing handover checklist
+  overdueCount: number;
+  lastUpdated: string;
+}
+
+// ============================================================================
 // Handover Checklist
 // ============================================================================
 
@@ -228,6 +333,62 @@ export interface HandoverChecklistSummary {
   isComplete: boolean;
   percentage: number;
   byCategory: Record<HandoverChecklistCategory, { total: number; completed: number }>;
+}
+
+// ============================================================================
+// Client Sign-Off & Acceptance (v2.17.0)
+// ============================================================================
+
+export type SignOffStatus = 'Pending' | 'Submitted' | 'Approved' | 'Rejected' | 'Resubmitted';
+
+export const SIGN_OFF_STATUSES: SignOffStatus[] = [
+  'Pending',
+  'Submitted',
+  'Approved',
+  'Rejected',
+  'Resubmitted',
+];
+
+export const SIGN_OFF_STATUS_TRANSITIONS: Record<SignOffStatus, SignOffStatus[]> = {
+  'Pending': ['Submitted'],
+  'Submitted': ['Approved', 'Rejected'],
+  'Approved': [],
+  'Rejected': ['Resubmitted'],
+  'Resubmitted': ['Approved', 'Rejected'],
+};
+
+export const SIGN_OFF_STATUS_COLORS: Record<SignOffStatus, { bg: string; text: string; accent: string }> = {
+  'Pending': { bg: '#e5e7eb', text: '#4b5563', accent: '#9ca3af' },
+  'Submitted': { bg: '#dbeafe', text: '#1e40af', accent: '#3b82f6' },
+  'Approved': { bg: '#d1fae5', text: '#065f46', accent: '#10b981' },
+  'Rejected': { bg: '#fee2e2', text: '#991b1b', accent: '#ef4444' },
+  'Resubmitted': { bg: '#fef3c7', text: '#92400e', accent: '#f59e0b' },
+};
+
+export interface DeliverableSignOff {
+  deliverableIndex: number;
+  title: string;
+  status: SignOffStatus;
+  acceptanceCriteria: string[];
+  criteriaCompleted: boolean[];
+  submittedDate: string | null;
+  submittedBy: string;
+  approvedDate: string | null;
+  approvedBy: string;
+  rejectionReason: string;
+  resubmittedDate: string | null;
+  notes: string;
+}
+
+export interface FinalHandoverSignOff {
+  clientSignatory: string;
+  clientTitle: string;
+  dwSignatory: string;
+  dwTitle: string;
+  signedDate: string | null;
+  clientFeedback: string;
+  overallRating: number; // 1-5
+  isComplete: boolean;
 }
 
 // ============================================================================
@@ -319,6 +480,18 @@ export interface DeliveryHandover {
   RisksAndAssumptions: RiskAssumption[];
   ClientBrief: ClientBrief | null;
   EnvironmentSetup: EnvironmentSetup | null;
+  ProjectPlan: ProjectPlan | null;
+
+  // Milestone & Progress Tracking (v2.17.0)
+  MilestoneCompletions: MilestoneCompletion[];
+  ProjectHealth: ProjectHealth | null;
+
+  // Client Sign-Off & Acceptance (v2.17.0)
+  DeliverableSignOffs: DeliverableSignOff[];
+  FinalSignOff: FinalHandoverSignOff | null;
+
+  // Delivery KPIs & Analytics (v2.17.0)
+  CSAT: CSATEntry | null;
 
   // Free-text notes
   PreSalesNotes?: string;
@@ -373,6 +546,12 @@ export interface UpdateHandoverInput {
   RisksAndAssumptions?: RiskAssumption[];
   ClientBrief?: ClientBrief;
   EnvironmentSetup?: EnvironmentSetup;
+  ProjectPlan?: ProjectPlan;
+  MilestoneCompletions?: MilestoneCompletion[];
+  ProjectHealth?: ProjectHealth;
+  DeliverableSignOffs?: DeliverableSignOff[];
+  FinalSignOff?: FinalHandoverSignOff;
+  CSAT?: CSATEntry;
   PreSalesNotes?: string;
   DeliveryNotes?: string;
   ClientExpectations?: string;
@@ -416,6 +595,29 @@ export const deserializeClientBrief = (json: string | null | undefined): ClientB
 export const serializeEnvironmentSetup = (data: EnvironmentSetup): string => JSON.stringify(data);
 export const deserializeEnvironmentSetup = (json: string | null | undefined): EnvironmentSetup | null =>
   safeParseJSON<EnvironmentSetup>(json);
+
+export const serializeProjectPlan = (data: ProjectPlan): string => JSON.stringify(data);
+export const deserializeProjectPlan = (json: string | null | undefined): ProjectPlan | null =>
+  safeParseJSON<ProjectPlan>(json);
+
+export const serializeMilestoneCompletions = (data: MilestoneCompletion[]): string => JSON.stringify(data);
+export const deserializeMilestoneCompletions = (json: string | null | undefined): MilestoneCompletion[] =>
+  safeParseJSON<MilestoneCompletion[]>(json) || [];
+
+export const serializeProjectHealth = (data: ProjectHealth): string => JSON.stringify(data);
+export const deserializeProjectHealth = (json: string | null | undefined): ProjectHealth | null =>
+  safeParseJSON<ProjectHealth>(json);
+
+export const serializeDeliverableSignOffs = (data: DeliverableSignOff[]): string => JSON.stringify(data);
+export const deserializeDeliverableSignOffs = (json: string | null | undefined): DeliverableSignOff[] =>
+  safeParseJSON<DeliverableSignOff[]>(json) || [];
+
+export const serializeFinalSignOff = (data: FinalHandoverSignOff): string => JSON.stringify(data);
+export const deserializeFinalSignOff = (json: string | null | undefined): FinalHandoverSignOff | null =>
+  safeParseJSON<FinalHandoverSignOff>(json);
+
+// Re-export CSAT serialization from DeliveryAnalytics for convenience
+export { serializeCSAT, deserializeCSAT } from './DeliveryAnalytics';
 
 export const generateHandoverId = (): string =>
   `ho_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`;

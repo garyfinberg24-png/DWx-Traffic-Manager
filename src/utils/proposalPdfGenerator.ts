@@ -1,11 +1,12 @@
 /**
  * DWx Traffic Manager - Proposal PDF Generator
- * Generates a polished DW-branded PDF from proposal data using jsPDF + jspdf-autotable.
+ * Generates a polished template-themed PDF from proposal data using jsPDF + jspdf-autotable.
+ * Theme colours change based on the selected template (Standard/Enterprise/Custom).
  */
 
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
-import { Proposal, ProposalType } from '../types/Proposal';
+import { Proposal, ProposalType, getTemplateTheme } from '../types/Proposal';
 
 // ============================================================================
 // Types
@@ -17,24 +18,39 @@ export interface ProposalPdfContext {
   serviceName: string;
   accountManagerName: string;
   proposalType: ProposalType;
+  templateName?: string;
 }
 
 // ============================================================================
-// Brand Colors
+// Colour Helpers
 // ============================================================================
 
-const DWX_BLUE = [26, 90, 138] as const;      // #1a5a8a
-const DWX_TEAL = [30, 107, 123] as const;     // #1e6b7b
-const DWX_DARK = [36, 36, 36] as const;       // #242424
-const DWX_GREY = [97, 97, 97] as const;       // #616161
-const DWX_GREEN = [16, 124, 16] as const;     // #107c10
+/** Convert hex colour (e.g. '1A5A8A') to RGB tuple */
+function hexToRgb(hex: string): [number, number, number] {
+  const h = hex.replace('#', '');
+  return [
+    parseInt(h.substring(0, 2), 16),
+    parseInt(h.substring(2, 4), 16),
+    parseInt(h.substring(4, 6), 16),
+  ];
+}
 
 // ============================================================================
 // Main Export
 // ============================================================================
 
 export async function generateProposalPdf(context: ProposalPdfContext): Promise<void> {
-  const { proposal, clientName, serviceName, accountManagerName, proposalType } = context;
+  const { proposal, clientName, serviceName, accountManagerName, proposalType, templateName } = context;
+  const theme = getTemplateTheme(templateName);
+
+  // Resolve theme hex colours to RGB tuples for jsPDF
+  const PRIMARY = hexToRgb(theme.primary);
+  const ACCENT = hexToRgb(theme.accent);
+  const DARK = hexToRgb(theme.dark);
+  const GREY = hexToRgb(theme.grey);
+  const SUCCESS = hexToRgb(theme.success);
+  const DANGER = hexToRgb(theme.danger);
+
   const doc = new jsPDF('p', 'mm', 'a4');
   const pageWidth = doc.internal.pageSize.getWidth();   // 210
   const pageHeight = doc.internal.pageSize.getHeight(); // 297
@@ -57,12 +73,12 @@ export async function generateProposalPdf(context: ProposalPdfContext): Promise<
     sectionNumber++;
     addNewPageIfNeeded(20);
     doc.setFontSize(16);
-    doc.setTextColor(...DWX_BLUE);
+    doc.setTextColor(...PRIMARY);
     doc.setFont('helvetica', 'bold');
     doc.text(`${sectionNumber}. ${title}`, margin, currentY);
     currentY += 3;
     // Underline
-    doc.setDrawColor(...DWX_BLUE);
+    doc.setDrawColor(...PRIMARY);
     doc.setLineWidth(0.5);
     doc.line(margin, currentY, margin + contentWidth, currentY);
     currentY += 8;
@@ -70,7 +86,7 @@ export async function generateProposalPdf(context: ProposalPdfContext): Promise<
 
   function addParagraph(text: string): void {
     doc.setFontSize(10);
-    doc.setTextColor(...DWX_DARK);
+    doc.setTextColor(...DARK);
     doc.setFont('helvetica', 'normal');
     const lines = doc.splitTextToSize(text, contentWidth);
     addNewPageIfNeeded(lines.length * 5 + 4);
@@ -80,7 +96,7 @@ export async function generateProposalPdf(context: ProposalPdfContext): Promise<
 
   function addBulletList(items: string[]): void {
     doc.setFontSize(10);
-    doc.setTextColor(...DWX_DARK);
+    doc.setTextColor(...DARK);
     doc.setFont('helvetica', 'normal');
     for (const item of items) {
       const lines = doc.splitTextToSize(item, contentWidth - 8);
@@ -95,7 +111,7 @@ export async function generateProposalPdf(context: ProposalPdfContext): Promise<
   function addSubheading(text: string): void {
     addNewPageIfNeeded(12);
     doc.setFontSize(12);
-    doc.setTextColor(...DWX_TEAL);
+    doc.setTextColor(...ACCENT);
     doc.setFont('helvetica', 'bold');
     doc.text(text, margin, currentY);
     currentY += 7;
@@ -112,52 +128,52 @@ export async function generateProposalPdf(context: ProposalPdfContext): Promise<
 
   // ---- Cover Page ----
 
-  // Top blue stripe
-  doc.setFillColor(...DWX_BLUE);
+  // Top primary colour stripe
+  doc.setFillColor(...PRIMARY);
   doc.rect(0, 0, pageWidth, 80, 'F');
 
-  // "CONFIDENTIAL" watermark for Enterprise proposals
-  if (proposalType === 'Enterprise') {
+  // CONFIDENTIAL watermark (driven by theme, not proposalType)
+  if (theme.confidentialWatermark) {
     doc.setFontSize(60);
     doc.setTextColor(200, 200, 200);
     doc.setFont('helvetica', 'bold');
     doc.text('CONFIDENTIAL', pageWidth / 2, pageHeight / 2, { angle: 45, align: 'center' });
   }
 
-  // Company name in white on blue stripe
+  // Company name in white on stripe
   doc.setFontSize(28);
   doc.setTextColor(255, 255, 255);
   doc.setFont('helvetica', 'bold');
-  doc.text('Digital Workplace', margin, 35);
+  doc.text(theme.companyName, margin, 35);
 
   doc.setFontSize(14);
   doc.setFont('helvetica', 'normal');
-  doc.text('Proposal Document', margin, 48);
+  doc.text(theme.coverSubtitle, margin, 48);
 
-  // Teal accent line
-  doc.setFillColor(...DWX_TEAL);
+  // Accent line
+  doc.setFillColor(...ACCENT);
   doc.rect(0, 80, pageWidth, 3, 'F');
 
   // Client name (large)
   doc.setFontSize(24);
-  doc.setTextColor(...DWX_DARK);
+  doc.setTextColor(...DARK);
   doc.setFont('helvetica', 'bold');
   doc.text(clientName, margin, 110);
 
   // Service name
   doc.setFontSize(16);
-  doc.setTextColor(...DWX_GREY);
+  doc.setTextColor(...GREY);
   doc.setFont('helvetica', 'normal');
   doc.text(serviceName, margin, 122);
 
   // Metadata block
   doc.setFontSize(11);
-  doc.setTextColor(...DWX_DARK);
+  doc.setTextColor(...DARK);
   currentY = 150;
   const metadata: [string, string][] = [
     ['Version', `v${proposal.Version || 1}`],
     ['Date', new Date().toLocaleDateString('en-ZA', { year: 'numeric', month: 'long', day: 'numeric' })],
-    ['Prepared by', accountManagerName || 'Digital Workplace'],
+    ['Prepared by', accountManagerName || theme.companyName],
     ['Type', proposalType || 'Standard'],
   ];
   if (proposal.ValidUntil) {
@@ -173,14 +189,14 @@ export async function generateProposalPdf(context: ProposalPdfContext): Promise<
 
   // Footer on cover
   doc.setFontSize(9);
-  doc.setTextColor(...DWX_GREY);
-  doc.text('Prepared by Digital Workplace | Confidential', margin, pageHeight - 15);
+  doc.setTextColor(...GREY);
+  doc.text(theme.footerText, margin, pageHeight - 15);
 
   // ---- Table of Contents ----
   doc.addPage();
   currentY = margin;
   doc.setFontSize(20);
-  doc.setTextColor(...DWX_BLUE);
+  doc.setTextColor(...PRIMARY);
   doc.setFont('helvetica', 'bold');
   doc.text('Table of Contents', margin, currentY);
   currentY += 12;
@@ -200,7 +216,7 @@ export async function generateProposalPdf(context: ProposalPdfContext): Promise<
   if (proposal.SigningPage) tocEntries.push('Signing Page');
 
   doc.setFontSize(12);
-  doc.setTextColor(...DWX_DARK);
+  doc.setTextColor(...DARK);
   doc.setFont('helvetica', 'normal');
   tocEntries.forEach((entry, i) => {
     doc.text(`${i + 1}. ${entry}`, margin + 4, currentY);
@@ -251,7 +267,7 @@ export async function generateProposalPdf(context: ProposalPdfContext): Promise<
       margin: { left: margin, right: margin },
       head: [['Technology', 'Role', 'Justification']],
       body: proposal.TechnologyStack.technologies.map(t => [t.name, t.role, t.justification]),
-      headStyles: { fillColor: [...DWX_BLUE], fontSize: 10 },
+      headStyles: { fillColor: [...PRIMARY], fontSize: 10 },
       bodyStyles: { fontSize: 9 },
       alternateRowStyles: { fillColor: [248, 248, 248] },
     });
@@ -270,7 +286,7 @@ export async function generateProposalPdf(context: ProposalPdfContext): Promise<
         margin: { left: margin, right: margin },
         head: [['Deliverable', 'Description', 'Est. Hours']],
         body: sow.deliverables.map(d => [d.title, d.description, String(d.hours || '-')]),
-        headStyles: { fillColor: [...DWX_BLUE], fontSize: 10 },
+        headStyles: { fillColor: [...PRIMARY], fontSize: 10 },
         bodyStyles: { fontSize: 9 },
         columnStyles: { 0: { cellWidth: 45 }, 2: { cellWidth: 25, halign: 'center' } },
       });
@@ -306,7 +322,7 @@ export async function generateProposalPdf(context: ProposalPdfContext): Promise<
         margin: { left: margin, right: margin },
         head: [['Description', 'Qty', 'Unit Price', 'Total']],
         body: tableBody,
-        headStyles: { fillColor: [...DWX_GREEN], fontSize: 10 },
+        headStyles: { fillColor: [...SUCCESS], fontSize: 10 },
         bodyStyles: { fontSize: 9 },
         columnStyles: {
           1: { cellWidth: 20, halign: 'center' },
@@ -338,7 +354,7 @@ export async function generateProposalPdf(context: ProposalPdfContext): Promise<
         `Week ${p.endWeek}`,
         p.milestones?.join(', ') || '-',
       ]),
-      headStyles: { fillColor: [...DWX_BLUE], fontSize: 10 },
+      headStyles: { fillColor: [...PRIMARY], fontSize: 10 },
       bodyStyles: { fontSize: 9 },
     });
     currentY = (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 6;
@@ -356,7 +372,7 @@ export async function generateProposalPdf(context: ProposalPdfContext): Promise<
       margin: { left: margin, right: margin },
       head: [['Role', 'Name', 'Responsibility']],
       body: proposal.TeamComposition.members.map(m => [m.role, m.name || '-', m.responsibility]),
-      headStyles: { fillColor: [...DWX_TEAL], fontSize: 10 },
+      headStyles: { fillColor: [...ACCENT], fontSize: 10 },
       bodyStyles: { fontSize: 9 },
     });
     currentY = (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 10;
@@ -395,7 +411,7 @@ export async function generateProposalPdf(context: ProposalPdfContext): Promise<
     }
   }
 
-  // 10. Risks & Mitigations (Assumptions is string[], Risks is ProposalRisk[])
+  // 10. Risks & Mitigations
   if (proposal.Risks?.length || proposal.Assumptions?.length) {
     addSectionHeading('Risks & Mitigations');
     if (proposal.Assumptions?.length) {
@@ -410,7 +426,7 @@ export async function generateProposalPdf(context: ProposalPdfContext): Promise<
         margin: { left: margin, right: margin },
         head: [['Risk', 'Impact', 'Likelihood', 'Mitigation']],
         body: proposal.Risks.map(r => [r.risk, r.impact, r.likelihood || '-', r.mitigation]),
-        headStyles: { fillColor: [209, 52, 56], fontSize: 10 },
+        headStyles: { fillColor: [...DANGER], fontSize: 10 },
         bodyStyles: { fontSize: 9 },
         columnStyles: { 1: { cellWidth: 22 }, 2: { cellWidth: 25 } },
       });
@@ -435,7 +451,7 @@ export async function generateProposalPdf(context: ProposalPdfContext): Promise<
 
     // Client side
     doc.setFontSize(12);
-    doc.setTextColor(...DWX_DARK);
+    doc.setTextColor(...DARK);
     doc.setFont('helvetica', 'bold');
     doc.text('Client', margin, sigBlockY);
     doc.setFont('helvetica', 'normal');
@@ -449,7 +465,7 @@ export async function generateProposalPdf(context: ProposalPdfContext): Promise<
     const dwX = margin + halfWidth + 20;
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(12);
-    doc.text('Digital Workplace', dwX, sigBlockY);
+    doc.text(theme.companyName, dwX, sigBlockY);
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(10);
     if (sp.dwSignatory) doc.text(`Name: ${sp.dwSignatory}`, dwX, sigBlockY + 8);
@@ -463,9 +479,9 @@ export async function generateProposalPdf(context: ProposalPdfContext): Promise<
   for (let i = 2; i <= pageCount; i++) {
     doc.setPage(i);
     doc.setFontSize(8);
-    doc.setTextColor(...DWX_GREY);
+    doc.setTextColor(...GREY);
     doc.text(`Page ${i - 1} of ${pageCount - 1}`, pageWidth - margin, pageHeight - 10, { align: 'right' });
-    doc.text(`${clientName} \u2014 ${serviceName} Proposal`, margin, pageHeight - 10);
+    doc.text(`${clientName} \u2014 ${serviceName} ${theme.headerSuffix}`, margin, pageHeight - 10);
   }
 
   // ---- Save ----

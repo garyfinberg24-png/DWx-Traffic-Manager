@@ -195,13 +195,106 @@ export interface SigningPage {
 }
 
 // ============================================================================
+// Template Themes — visual styling per template
+// ============================================================================
+
+/** Colour scheme for a proposal template (hex values without #) */
+export interface TemplateTheme {
+  id: string;
+  /** Primary colour — cover page stripe, section headings, table headers */
+  primary: string;
+  /** Accent colour — subheadings, teal-like accents, secondary tables */
+  accent: string;
+  /** Dark text colour */
+  dark: string;
+  /** Grey/muted text */
+  grey: string;
+  /** Success / pricing table header colour */
+  success: string;
+  /** Danger / risk table header colour */
+  danger: string;
+  /** Cover page subtitle text (e.g. "Proposal Document") */
+  coverSubtitle: string;
+  /** Whether to show CONFIDENTIAL watermark */
+  confidentialWatermark: boolean;
+  /** Header text on content pages */
+  headerSuffix: string;
+  /** Footer text on content pages */
+  footerText: string;
+  /** Company display name on cover page */
+  companyName: string;
+}
+
+/** Standard: DWx brand blue/teal — clean professional layout */
+const STANDARD_THEME: TemplateTheme = {
+  id: 'standard',
+  primary: '1A5A8A',
+  accent: '1E6B7B',
+  dark: '242424',
+  grey: '616161',
+  success: '107C10',
+  danger: 'D13438',
+  coverSubtitle: 'Proposal Document',
+  confidentialWatermark: false,
+  headerSuffix: 'Proposal',
+  footerText: 'Prepared by Digital Workplace | Confidential',
+  companyName: 'Digital Workplace',
+};
+
+/** Enterprise: Deep navy/gold — executive boardroom feel with CONFIDENTIAL watermark */
+const ENTERPRISE_THEME: TemplateTheme = {
+  id: 'enterprise',
+  primary: '1B2A4A',
+  accent: 'B8860B',
+  dark: '1A1A2E',
+  grey: '555555',
+  success: '2E7D32',
+  danger: 'B71C1C',
+  coverSubtitle: 'Enterprise Proposal',
+  confidentialWatermark: true,
+  headerSuffix: 'Enterprise Proposal',
+  footerText: 'Digital Workplace | Strictly Confidential',
+  companyName: 'Digital Workplace',
+};
+
+/** Custom: Teal/coral — modern and distinctive for bespoke engagements */
+const CUSTOM_THEME: TemplateTheme = {
+  id: 'custom',
+  primary: '0D7377',
+  accent: 'E85D3A',
+  dark: '2D2D2D',
+  grey: '6B7280',
+  success: '059669',
+  danger: 'DC2626',
+  coverSubtitle: 'Bespoke Proposal',
+  confidentialWatermark: false,
+  headerSuffix: 'Custom Proposal',
+  footerText: 'Prepared by Digital Workplace | Bespoke Engagement',
+  companyName: 'Digital Workplace',
+};
+
+export const TEMPLATE_THEMES: Record<string, TemplateTheme> = {
+  standard: STANDARD_THEME,
+  enterprise: ENTERPRISE_THEME,
+  custom: CUSTOM_THEME,
+};
+
+/** Resolve a template theme from template name. Falls back to standard. */
+export function getTemplateTheme(templateName?: string): TemplateTheme {
+  if (!templateName) return STANDARD_THEME;
+  const lower = templateName.toLowerCase();
+  if (lower.includes('enterprise')) return ENTERPRISE_THEME;
+  if (lower.includes('custom')) return CUSTOM_THEME;
+  return STANDARD_THEME;
+}
+
+// ============================================================================
 // Word Template Selection
 // ============================================================================
 
 export interface ProposalTemplate {
   id: string;
   name: string;
-  filename: string;
   description: string;
   suitableFor: ProposalType[];
 }
@@ -210,22 +303,19 @@ export const PROPOSAL_TEMPLATES: ProposalTemplate[] = [
   {
     id: 'standard',
     name: 'DW Standard Proposal',
-    filename: 'DW-Proposal-Standard.docx',
-    description: 'Clean, professional layout for typical engagements',
+    description: 'Clean, professional layout — DWx blue/teal colour scheme',
     suitableFor: ['Standard'],
   },
   {
     id: 'enterprise',
     name: 'DW Enterprise Proposal',
-    filename: 'DW-Proposal-Enterprise.docx',
-    description: 'Executive-focused layout with detailed governance sections',
+    description: 'Executive-focused layout — navy/gold colour scheme with CONFIDENTIAL watermark',
     suitableFor: ['Enterprise'],
   },
   {
     id: 'custom',
     name: 'DW Custom Proposal',
-    filename: 'DW-Proposal-Custom.docx',
-    description: 'Flexible template for bespoke engagements',
+    description: 'Modern, distinctive layout — teal/coral colour scheme for bespoke engagements',
     suitableFor: ['Standard', 'Custom', 'Enterprise'],
   },
 ];

@@ -21,6 +21,19 @@ import {
   deserializeClientBrief,
   serializeEnvironmentSetup,
   deserializeEnvironmentSetup,
+  serializeProjectPlan,
+  deserializeProjectPlan,
+  serializeMilestoneCompletions,
+  deserializeMilestoneCompletions,
+  serializeProjectHealth,
+  deserializeProjectHealth,
+  serializeDeliverableSignOffs,
+  deserializeDeliverableSignOffs,
+  serializeFinalSignOff,
+  deserializeFinalSignOff,
+  serializeCSAT,
+  deserializeCSAT,
+  SIGN_OFF_STATUS_TRANSITIONS,
   createDefaultHandoverChecklist,
 } from '../types/DeliveryHandover';
 import type {
@@ -34,7 +47,16 @@ import type {
   ClientBrief,
   EnvironmentSetup,
   RiskAssumption,
+  ProjectPlan,
+  MilestoneCompletion,
+  MilestoneStatus,
+  ProjectHealth,
+  ProjectHealthStatus,
+  DeliverableSignOff,
+  SignOffStatus,
+  FinalHandoverSignOff,
 } from '../types/DeliveryHandover';
+// CSATEntry type used via DeliveryHandover.CSAT field (imported via DeliveryHandover.ts re-export)
 import type { Proposal } from '../types/Proposal';
 import type { PostMortem } from '../types/PostMortem';
 import type { ServiceCategory } from '../types/ServiceRequest';
@@ -100,6 +122,12 @@ class DeliveryHandoverService {
         RisksAndAssumptions_JSON: JSON.stringify([]),
         ClientBrief_JSON: JSON.stringify(null),
         EnvironmentSetup_JSON: JSON.stringify(null),
+        ProjectPlan_JSON: JSON.stringify(null),
+        MilestoneCompletions_JSON: JSON.stringify([]),
+        ProjectHealth_JSON: JSON.stringify(null),
+        DeliverableSignOffs_JSON: JSON.stringify([]),
+        FinalHandoverSignOff_JSON: JSON.stringify(null),
+        CSAT_JSON: JSON.stringify(null),
         PreSalesNotes: input.PreSalesNotes || '',
         ClientExpectations: input.ClientExpectations || '',
       };
@@ -150,7 +178,7 @@ class DeliveryHandoverService {
       const items = await graphService.getListItems(LIST_NAME) as Record<string, unknown>[];
 
       const mapped = items.map((item) => this.mapToHandover(item));
-      const match = mapped.find((h) => h.ServiceRequestId === requestId);
+      const match = mapped.find((h) => Number(h.ServiceRequestId) === Number(requestId));
       return match || null;
     } catch (error) {
       console.error('[DeliveryHandoverService] Failed to get handover by request ID:', error);
@@ -254,6 +282,14 @@ class DeliveryHandoverService {
           success: false,
           error: `Cannot transition from '${current.HandoverStatus}' to '${newStatus}'. Allowed: ${(allowedTransitions || []).join(', ')}`,
         };
+      }
+
+      // Gate: Closing requires all deliverables approved + final sign-off
+      if (newStatus === 'Closed') {
+        const closeCheck = this.canCloseHandover(current);
+        if (!closeCheck.canClose) {
+          return { success: false, error: closeCheck.reason };
+        }
       }
 
       // Build update payload
@@ -647,6 +683,39 @@ class DeliveryHandoverService {
   }
 
   /**
+   * Save AI-generated project plan
+   */
+  async saveProjectPlan(id: number, plan: ProjectPlan): Promise<void> {
+    try {
+      const graphService = getGraphService();
+
+      const current = await this.getHandoverById(id);
+      if (!current) throw new Error('Delivery handover not found');
+
+      await graphService.updateListItem(LIST_NAME, id, {
+        ProjectPlan_JSON: serializeProjectPlan(plan),
+        AIGeneratedAt: new Date().toISOString(),
+      });
+
+      await auditService.logUpdate(
+        'DeliveryHandover' as never,
+        id,
+        current.Title,
+        { projectPlanExists: !!current.ProjectPlan },
+        {
+          projectPlanExists: true,
+          aiGeneratedAt: new Date().toISOString(),
+          phaseCount: plan.phases?.length || 0,
+          totalHours: plan.totalHours || 0,
+        }
+      );
+    } catch (error) {
+      console.error('[DeliveryHandoverService] Failed to save project plan:', error);
+      throw error;
+    }
+  }
+
+  /**
    * Save or update the environment setup section
    */
   async saveEnvironmentSetup(id: number, setup: EnvironmentSetup): Promise<void> {
@@ -679,6 +748,448 @@ class DeliveryHandoverService {
       console.error('[DeliveryHandoverService] Failed to save environment setup:', error);
       throw error;
     }
+  }
+
+  // ─── Milestone & Progress Tracking (v2.17.0) ───────────────────
+
+  /**
+   * Initialize milestone tracking from an existing ProjectPlan.
+   * Copies milestones into MilestoneCompletion[] with "Not Started" status.
+   * Only runs if MilestoneCompletions is empty and ProjectPlan exists.
+   */
+  async initializeMilestoneTracking(handoverId: number): Promise<{ success: boolean; error?: string }> {
+    try {
+      const handover = await this.getHandoverById(handoverId);
+      if (!handover) return { success: false, error: 'Delivery handover not found' };
+
+      if (!handover.ProjectPlan || !handover.ProjectPlan.milestones?.length) {
+        return { success: false, error: 'No project plan milestones to initialize from' };
+      }
+
+      if (handover.MilestoneCompletions.length > 0) {
+        return { success: false, error: 'Milestone tracking already initialized' };
+      }
+
+      const completions: MilestoneCompletion[] = handover.ProjectPlan.milestones.map(
+        (milestone, index) => ({
+          milestoneIndex: index,
+          name: milestone.name,
+          plannedWeek: milestone.week,
+          status: 'Not Started' as MilestoneStatus,
+          actualCompletionDate: null,
+          daysVariance: null,
+          completedBy: '',
+          notes: '',
+        })
+      );
+
+      const graphService = getGraphService();
+      await graphService.updateListItem(LIST_NAME, handoverId, {
+        MilestoneCompletions_JSON: serializeMilestoneCompletions(completions),
+      });
+
+      // Recalculate health after initialization
+      await this.recalculateProjectHealth(handoverId);
+
+      await auditService.logUpdate(
+        'DeliveryHandover' as never,
+        handoverId,
+        handover.Title,
+        { milestoneTrackingInitialized: false },
+        { milestoneTrackingInitialized: true, milestoneCount: completions.length }
+      );
+
+      return { success: true };
+    } catch (error) {
+      console.error('[DeliveryHandoverService] Failed to initialize milestone tracking:', error);
+      return { success: false, error: error instanceof Error ? error.message : 'Failed to initialize' };
+    }
+  }
+
+  /**
+   * Update a single milestone's status.
+   * Auto-computes daysVariance when marking as Completed.
+   */
+  async updateMilestoneStatus(
+    handoverId: number,
+    milestoneIndex: number,
+    newStatus: MilestoneStatus,
+    completedBy?: string,
+    notes?: string
+  ): Promise<{ success: boolean; error?: string }> {
+    try {
+      const handover = await this.getHandoverById(handoverId);
+      if (!handover) return { success: false, error: 'Delivery handover not found' };
+
+      const completions = [...handover.MilestoneCompletions];
+      const milestone = completions.find((m) => m.milestoneIndex === milestoneIndex);
+      if (!milestone) return { success: false, error: `Milestone index ${milestoneIndex} not found` };
+
+      const oldStatus = milestone.status;
+      milestone.status = newStatus;
+
+      if (notes !== undefined) milestone.notes = notes;
+
+      if (newStatus === 'Completed') {
+        milestone.actualCompletionDate = new Date().toISOString();
+        milestone.completedBy = completedBy || '';
+
+        // Compute variance: compare actual completion to planned date
+        // Planned date = WonDate + (plannedWeek * 7 business days)
+        if (handover.WonDate) {
+          const wonDate = new Date(handover.WonDate);
+          const plannedDate = new Date(wonDate);
+          plannedDate.setDate(plannedDate.getDate() + milestone.plannedWeek * 7);
+
+          const actualDate = new Date();
+          const diffMs = actualDate.getTime() - plannedDate.getTime();
+          milestone.daysVariance = Math.round(diffMs / (1000 * 60 * 60 * 24));
+        }
+      } else if (newStatus === 'In Progress') {
+        // Clear completion data if reverting
+        milestone.actualCompletionDate = null;
+        milestone.daysVariance = null;
+        milestone.completedBy = '';
+      }
+
+      const graphService = getGraphService();
+      await graphService.updateListItem(LIST_NAME, handoverId, {
+        MilestoneCompletions_JSON: serializeMilestoneCompletions(completions),
+      });
+
+      // Recalculate project health
+      await this.recalculateProjectHealth(handoverId);
+
+      await auditService.logUpdate(
+        'DeliveryHandover' as never,
+        handoverId,
+        handover.Title,
+        { milestone: milestone.name, oldStatus },
+        { milestone: milestone.name, newStatus, completedBy: completedBy || '', daysVariance: milestone.daysVariance }
+      );
+
+      return { success: true };
+    } catch (error) {
+      console.error('[DeliveryHandoverService] Failed to update milestone status:', error);
+      return { success: false, error: error instanceof Error ? error.message : 'Failed to update milestone' };
+    }
+  }
+
+  /**
+   * Recalculate and persist project health score.
+   * Weighted: 50% milestone progress + 30% checklist progress + 20% overdue penalty.
+   */
+  async recalculateProjectHealth(handoverId: number): Promise<ProjectHealth | null> {
+    try {
+      const handover = await this.getHandoverById(handoverId);
+      if (!handover) return null;
+
+      const milestones = handover.MilestoneCompletions;
+      const checklist = handover.HandoverChecklist;
+
+      // Milestone progress (% completed)
+      const totalMilestones = milestones.length;
+      const completedMilestones = milestones.filter((m) => m.status === 'Completed').length;
+      const milestoneProgress = totalMilestones > 0
+        ? Math.round((completedMilestones / totalMilestones) * 100)
+        : 0;
+
+      // Checklist progress (% completed)
+      const totalChecklist = checklist.length;
+      const completedChecklist = checklist.filter((c) => c.isCompleted).length;
+      const checklistProgress = totalChecklist > 0
+        ? Math.round((completedChecklist / totalChecklist) * 100)
+        : 0;
+
+      // Overdue count
+      const overdueCount = milestones.filter((m) => m.status === 'Overdue').length;
+
+      // Overdue penalty: 10 points per overdue milestone
+      const overduePenalty = Math.min(overdueCount * 10, 20); // Cap at 20
+
+      // Weighted score: 50% milestone + 30% checklist - overdue penalty
+      const rawScore = (milestoneProgress * 0.5) + (checklistProgress * 0.3) + (20 - overduePenalty);
+      const overallScore = Math.max(0, Math.min(100, Math.round(rawScore)));
+
+      // Determine health status
+      let status: ProjectHealthStatus = 'On Track';
+      if (overallScore < 40 || overdueCount >= 3) {
+        status = 'Off Track';
+      } else if (overallScore < 70 || overdueCount >= 1) {
+        status = 'At Risk';
+      }
+
+      const health: ProjectHealth = {
+        overallScore,
+        status,
+        milestoneProgress,
+        checklistProgress,
+        overdueCount,
+        lastUpdated: new Date().toISOString(),
+      };
+
+      const graphService = getGraphService();
+      await graphService.updateListItem(LIST_NAME, handoverId, {
+        ProjectHealth_JSON: serializeProjectHealth(health),
+      });
+
+      return health;
+    } catch (error) {
+      console.error('[DeliveryHandoverService] Failed to recalculate project health:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Get milestones that are past their planned week but not completed.
+   * Uses WonDate + plannedWeek to determine if a milestone is overdue.
+   */
+  getOverdueMilestones(handover: DeliveryHandover): MilestoneCompletion[] {
+    if (!handover.WonDate || !handover.MilestoneCompletions.length) return [];
+
+    const wonDate = new Date(handover.WonDate);
+    const now = new Date();
+
+    return handover.MilestoneCompletions.filter((m) => {
+      if (m.status === 'Completed') return false;
+
+      const plannedDate = new Date(wonDate);
+      plannedDate.setDate(plannedDate.getDate() + m.plannedWeek * 7);
+
+      return now > plannedDate;
+    });
+  }
+
+  /**
+   * Mark overdue milestones — scans all active handovers and updates status.
+   * Returns list of handover IDs with newly overdue milestones.
+   */
+  async markOverdueMilestones(): Promise<number[]> {
+    try {
+      const allHandovers = await this.getAllHandovers();
+      const activeHandovers = allHandovers.filter(
+        (h) => h.HandoverStatus !== 'Closed' && h.HandoverStatus !== 'On Hold'
+      );
+
+      const updatedIds: number[] = [];
+
+      for (const handover of activeHandovers) {
+        if (!handover.MilestoneCompletions.length || !handover.WonDate) continue;
+
+        const overdue = this.getOverdueMilestones(handover);
+        const needsUpdate = overdue.some((m) => m.status !== 'Overdue');
+
+        if (needsUpdate) {
+          const completions = handover.MilestoneCompletions.map((m) => {
+            const isOverdue = overdue.find((o) => o.milestoneIndex === m.milestoneIndex);
+            if (isOverdue && m.status !== 'Overdue' && m.status !== 'Completed') {
+              return { ...m, status: 'Overdue' as MilestoneStatus };
+            }
+            return m;
+          });
+
+          const graphService = getGraphService();
+          await graphService.updateListItem(LIST_NAME, handover.Id, {
+            MilestoneCompletions_JSON: serializeMilestoneCompletions(completions),
+          });
+
+          await this.recalculateProjectHealth(handover.Id);
+          updatedIds.push(handover.Id);
+        }
+      }
+
+      return updatedIds;
+    } catch (error) {
+      console.error('[DeliveryHandoverService] Failed to mark overdue milestones:', error);
+      return [];
+    }
+  }
+
+  // ─── Client Sign-Off & Acceptance (v2.17.0) ────────────────────
+
+  /**
+   * Initialize deliverable sign-offs from ScopeSnapshot.deliverables.
+   * Each deliverable gets a Pending sign-off record.
+   */
+  async initializeDeliverableSignOffs(handoverId: number): Promise<{ success: boolean; error?: string }> {
+    try {
+      const handover = await this.getHandoverById(handoverId);
+      if (!handover) return { success: false, error: 'Delivery handover not found' };
+
+      if (!handover.ScopeSnapshot || !handover.ScopeSnapshot.deliverables?.length) {
+        return { success: false, error: 'No deliverables in scope snapshot to initialize from' };
+      }
+
+      if (handover.DeliverableSignOffs.length > 0) {
+        return { success: false, error: 'Deliverable sign-offs already initialized' };
+      }
+
+      const signOffs: DeliverableSignOff[] = handover.ScopeSnapshot.deliverables.map(
+        (deliverable, index) => ({
+          deliverableIndex: index,
+          title: deliverable.title,
+          status: 'Pending' as SignOffStatus,
+          acceptanceCriteria: [],
+          criteriaCompleted: [],
+          submittedDate: null,
+          submittedBy: '',
+          approvedDate: null,
+          approvedBy: '',
+          rejectionReason: '',
+          resubmittedDate: null,
+          notes: '',
+        })
+      );
+
+      const graphService = getGraphService();
+      await graphService.updateListItem(LIST_NAME, handoverId, {
+        DeliverableSignOffs_JSON: serializeDeliverableSignOffs(signOffs),
+      });
+
+      await auditService.logUpdate(
+        'DeliveryHandover' as never,
+        handoverId,
+        handover.Title,
+        { signOffsInitialized: false },
+        { signOffsInitialized: true, deliverableCount: signOffs.length }
+      );
+
+      return { success: true };
+    } catch (error) {
+      console.error('[DeliveryHandoverService] Failed to initialize deliverable sign-offs:', error);
+      return { success: false, error: error instanceof Error ? error.message : 'Failed to initialize' };
+    }
+  }
+
+  /**
+   * Update a deliverable sign-off status with transition validation.
+   */
+  async updateDeliverableSignOff(
+    handoverId: number,
+    deliverableIndex: number,
+    newStatus: SignOffStatus,
+    userName: string,
+    extra?: { rejectionReason?: string; notes?: string }
+  ): Promise<{ success: boolean; error?: string }> {
+    try {
+      const handover = await this.getHandoverById(handoverId);
+      if (!handover) return { success: false, error: 'Delivery handover not found' };
+
+      const signOffs = [...handover.DeliverableSignOffs];
+      const signOff = signOffs.find((s) => s.deliverableIndex === deliverableIndex);
+      if (!signOff) return { success: false, error: `Deliverable sign-off index ${deliverableIndex} not found` };
+
+      // Validate transition
+      const allowed = SIGN_OFF_STATUS_TRANSITIONS[signOff.status];
+      if (!allowed.includes(newStatus)) {
+        return { success: false, error: `Cannot transition from '${signOff.status}' to '${newStatus}'` };
+      }
+
+      const oldStatus = signOff.status;
+      signOff.status = newStatus;
+
+      if (extra?.notes !== undefined) signOff.notes = extra.notes;
+
+      switch (newStatus) {
+        case 'Submitted':
+          signOff.submittedDate = new Date().toISOString();
+          signOff.submittedBy = userName;
+          break;
+        case 'Approved':
+          signOff.approvedDate = new Date().toISOString();
+          signOff.approvedBy = userName;
+          signOff.rejectionReason = '';
+          break;
+        case 'Rejected':
+          signOff.rejectionReason = extra?.rejectionReason || '';
+          signOff.approvedDate = null;
+          signOff.approvedBy = '';
+          break;
+        case 'Resubmitted':
+          signOff.resubmittedDate = new Date().toISOString();
+          signOff.submittedBy = userName;
+          break;
+      }
+
+      const graphService = getGraphService();
+      await graphService.updateListItem(LIST_NAME, handoverId, {
+        DeliverableSignOffs_JSON: serializeDeliverableSignOffs(signOffs),
+      });
+
+      await auditService.logUpdate(
+        'DeliveryHandover' as never,
+        handoverId,
+        handover.Title,
+        { deliverable: signOff.title, oldStatus },
+        { deliverable: signOff.title, newStatus, updatedBy: userName }
+      );
+
+      return { success: true };
+    } catch (error) {
+      console.error('[DeliveryHandoverService] Failed to update deliverable sign-off:', error);
+      return { success: false, error: error instanceof Error ? error.message : 'Failed to update' };
+    }
+  }
+
+  /**
+   * Record the final handover sign-off.
+   * Validates all deliverables are approved before allowing.
+   */
+  async recordFinalSignOff(
+    handoverId: number,
+    signOff: FinalHandoverSignOff
+  ): Promise<{ success: boolean; error?: string }> {
+    try {
+      const handover = await this.getHandoverById(handoverId);
+      if (!handover) return { success: false, error: 'Delivery handover not found' };
+
+      // Validate all deliverables approved
+      const canClose = this.canCloseHandover(handover);
+      if (!canClose.canClose) {
+        return { success: false, error: canClose.reason || 'Not all deliverables have been approved' };
+      }
+
+      const graphService = getGraphService();
+      await graphService.updateListItem(LIST_NAME, handoverId, {
+        FinalHandoverSignOff_JSON: serializeFinalSignOff({ ...signOff, isComplete: true }),
+      });
+
+      await auditService.logUpdate(
+        'DeliveryHandover' as never,
+        handoverId,
+        handover.Title,
+        { finalSignOff: false },
+        {
+          finalSignOff: true,
+          clientSignatory: signOff.clientSignatory,
+          dwSignatory: signOff.dwSignatory,
+          overallRating: signOff.overallRating,
+        }
+      );
+
+      return { success: true };
+    } catch (error) {
+      console.error('[DeliveryHandoverService] Failed to record final sign-off:', error);
+      return { success: false, error: error instanceof Error ? error.message : 'Failed to record' };
+    }
+  }
+
+  /**
+   * Check if a handover can be closed.
+   * Requires: all deliverable sign-offs approved + final sign-off recorded.
+   */
+  canCloseHandover(handover: DeliveryHandover): { canClose: boolean; reason?: string } {
+    if (handover.DeliverableSignOffs.length > 0) {
+      const unapproved = handover.DeliverableSignOffs.filter((s) => s.status !== 'Approved');
+      if (unapproved.length > 0) {
+        return {
+          canClose: false,
+          reason: `${unapproved.length} deliverable${unapproved.length !== 1 ? 's' : ''} not yet approved: ${unapproved.map((s) => s.title).join(', ')}`,
+        };
+      }
+    }
+
+    return { canClose: true };
   }
 
   // ─── Analytics ──────────────────────────────────────────────────
@@ -821,6 +1332,12 @@ class DeliveryHandoverService {
       RisksAndAssumptions: deserializeRisksAndAssumptions(fields.RisksAndAssumptions_JSON as string),
       ClientBrief: deserializeClientBrief(fields.ClientBrief_JSON as string),
       EnvironmentSetup: deserializeEnvironmentSetup(fields.EnvironmentSetup_JSON as string),
+      ProjectPlan: deserializeProjectPlan(fields.ProjectPlan_JSON as string),
+      MilestoneCompletions: deserializeMilestoneCompletions(fields.MilestoneCompletions_JSON as string),
+      ProjectHealth: deserializeProjectHealth(fields.ProjectHealth_JSON as string),
+      DeliverableSignOffs: deserializeDeliverableSignOffs(fields.DeliverableSignOffs_JSON as string),
+      FinalSignOff: deserializeFinalSignOff(fields.FinalHandoverSignOff_JSON as string),
+      CSAT: deserializeCSAT(fields.CSAT_JSON as string),
 
       // Free-text notes
       PreSalesNotes: (fields.PreSalesNotes as string) || undefined,
@@ -890,6 +1407,32 @@ class DeliveryHandoverService {
     if (updates.EnvironmentSetup !== undefined) {
       data.EnvironmentSetup_JSON = updates.EnvironmentSetup
         ? serializeEnvironmentSetup(updates.EnvironmentSetup)
+        : JSON.stringify(null);
+    }
+    if (updates.ProjectPlan !== undefined) {
+      data.ProjectPlan_JSON = updates.ProjectPlan
+        ? serializeProjectPlan(updates.ProjectPlan)
+        : JSON.stringify(null);
+    }
+    if (updates.MilestoneCompletions !== undefined) {
+      data.MilestoneCompletions_JSON = serializeMilestoneCompletions(updates.MilestoneCompletions);
+    }
+    if (updates.ProjectHealth !== undefined) {
+      data.ProjectHealth_JSON = updates.ProjectHealth
+        ? serializeProjectHealth(updates.ProjectHealth)
+        : JSON.stringify(null);
+    }
+    if (updates.DeliverableSignOffs !== undefined) {
+      data.DeliverableSignOffs_JSON = serializeDeliverableSignOffs(updates.DeliverableSignOffs);
+    }
+    if (updates.FinalSignOff !== undefined) {
+      data.FinalHandoverSignOff_JSON = updates.FinalSignOff
+        ? serializeFinalSignOff(updates.FinalSignOff)
+        : JSON.stringify(null);
+    }
+    if (updates.CSAT !== undefined) {
+      data.CSAT_JSON = updates.CSAT
+        ? serializeCSAT(updates.CSAT)
         : JSON.stringify(null);
     }
 

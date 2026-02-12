@@ -1066,6 +1066,7 @@ export const RequestDetails: React.FC<RequestDetailsProps> = ({
       <DetailModalShell
         isOpen={isOpen}
         onClose={onClose}
+        maxWidth="1100px"
         icon={<DocumentRegular style={{ width: '24px', height: '24px', color: 'white' }} />}
         title={request.ClientName}
         subtitle={request.ServiceName}
