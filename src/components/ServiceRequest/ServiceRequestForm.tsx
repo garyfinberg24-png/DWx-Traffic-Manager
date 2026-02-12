@@ -59,6 +59,7 @@ import {
 } from '@fluentui/react-icons';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
+import { useNotifications } from '../../contexts/NotificationContext';
 import {
   DWService,
   CreateServiceRequestInput,
@@ -638,6 +639,7 @@ export const ServiceRequestForm: React.FC<ServiceRequestFormProps> = ({
   const navigate = useNavigate();
   const { user } = useAuth();
   const { showToast } = useToast();
+  const { addNotification } = useNotifications();
 
   // Get pre-selected service from props OR from navigation state
   const preSelectedService = propPreSelectedService || (location.state?.preSelectedService as DWService | undefined);
@@ -968,6 +970,13 @@ export const ServiceRequestForm: React.FC<ServiceRequestFormProps> = ({
       if (result.success) {
         localStorage.removeItem(DRAFT_KEY);
         showToast('Service request created successfully!', 'success');
+        addNotification({
+          type: 'success',
+          category: 'deal',
+          title: 'Service Request Created',
+          message: `${input.ClientName || 'New client'} - ${input.ServiceName || 'Service'} submitted successfully.`,
+          actionUrl: '/requests',
+        });
         if (onSuccess) {
           onSuccess();
         } else {

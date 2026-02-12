@@ -26,6 +26,7 @@ import {
 import { AddRegular, DismissRegular, FlashRegular } from '@fluentui/react-icons';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
+import { useNotifications } from '../../contexts/NotificationContext';
 import { serviceRequestService } from '../../services/ServiceRequestService';
 import { serviceCatalogService } from '../../services/ServiceCatalogService';
 import { productRequestService } from '../../services/ProductRequestService';
@@ -233,6 +234,7 @@ const QuickCreateDialog: React.FC<QuickCreateDialogProps> = ({
   const styles = useStyles();
   const { user } = useAuth();
   const { showSuccess, showError } = useToast();
+  const { addNotification } = useNotifications();
 
   // Data loading state
   const [clients, setClients] = useState<Client[]>([]);
@@ -499,6 +501,13 @@ const QuickCreateDialog: React.FC<QuickCreateDialogProps> = ({
 
         if (result.success && result.request) {
           showSuccess('Deal Created', `${clientName} - ${selectedService.Title} added to Service Queue.`);
+          addNotification({
+            type: 'success',
+            category: 'deal',
+            title: 'New Deal Created',
+            message: `${clientName} - ${selectedService.Title} added to pipeline.`,
+            actionUrl: '/requests',
+          });
           onDealCreated(result.request);
           onClose();
         } else {
@@ -540,6 +549,13 @@ const QuickCreateDialog: React.FC<QuickCreateDialogProps> = ({
 
         if (result.success && result.request) {
           showSuccess('Product Request Created', `${clientName} - ${selectedProduct.name} added to Product Queue.`);
+          addNotification({
+            type: 'success',
+            category: 'product',
+            title: 'Product Request Created',
+            message: `${clientName} - ${selectedProduct.name} added to Product Queue.`,
+            actionUrl: '/requests',
+          });
           onProductCreated?.(result.request);
           onClose();
         } else {

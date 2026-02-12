@@ -17,6 +17,7 @@ import {
 import { serviceRequestService } from '../../services/ServiceRequestService';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
+import { useNotifications } from '../../contexts/NotificationContext';
 import KanbanColumn from './KanbanColumn';
 
 // ============================================================================
@@ -64,6 +65,7 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ requests, onRequestUpdated, o
   const styles = useStyles();
   const { user } = useAuth();
   const { showError, showSuccess } = useToast();
+  const { addNotification } = useNotifications();
 
   // Group requests by stage, excluding Won and Lost
   const groupedByStage = useMemo(() => {
@@ -150,6 +152,13 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ requests, onRequestUpdated, o
           'Stage updated',
           `${movedRequest.ClientName} moved to ${destStage}`
         );
+        addNotification({
+          type: 'info',
+          category: 'pipeline',
+          title: `Stage: ${sourceStage} → ${destStage}`,
+          message: `${movedRequest.ClientName} - ${movedRequest.ServiceName || 'Service'}`,
+          actionUrl: '/requests',
+        });
       } catch (err) {
         // Revert on exception
         onRequestUpdated({ ...movedRequest, FunnelStage: sourceStage });
@@ -159,7 +168,7 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ requests, onRequestUpdated, o
         );
       }
     },
-    [requests, onRequestUpdated, user, showError, showSuccess]
+    [requests, onRequestUpdated, user, showError, showSuccess, addNotification]
   );
 
   // Handle Mark Won via context menu (not drag)
@@ -197,6 +206,13 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ requests, onRequestUpdated, o
         }
 
         showSuccess('Deal Won', `${request.ClientName} marked as Won`);
+        addNotification({
+          type: 'success',
+          category: 'deal',
+          title: 'Deal Won!',
+          message: `${request.ClientName} - ${request.ServiceName || 'Service'}${request.DealValue ? ` (R${(request.DealValue / 1000).toFixed(0)}K)` : ''}`,
+          actionUrl: '/requests',
+        });
       } catch (err) {
         onRequestUpdated(request); // revert
         showError(
@@ -205,7 +221,7 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ requests, onRequestUpdated, o
         );
       }
     },
-    [onRequestUpdated, user, showError, showSuccess]
+    [onRequestUpdated, user, showError, showSuccess, addNotification]
   );
 
   // Handle Mark Lost via context menu (not drag)
@@ -243,6 +259,13 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ requests, onRequestUpdated, o
         }
 
         showSuccess('Deal Lost', `${request.ClientName} marked as Lost`);
+        addNotification({
+          type: 'error',
+          category: 'pipeline',
+          title: 'Deal Lost',
+          message: `${request.ClientName} - ${request.ServiceName || 'Service'} marked as Lost.`,
+          actionUrl: '/requests',
+        });
       } catch (err) {
         onRequestUpdated(request); // revert
         showError(
@@ -251,7 +274,7 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ requests, onRequestUpdated, o
         );
       }
     },
-    [onRequestUpdated, user, showError, showSuccess]
+    [onRequestUpdated, user, showError, showSuccess, addNotification]
   );
 
   const handleCardClick = useCallback((request: ServiceRequest) => {

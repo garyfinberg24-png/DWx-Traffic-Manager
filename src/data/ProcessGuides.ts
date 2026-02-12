@@ -42,6 +42,11 @@ const amWelcome: ProcessGuide = {
         'Stats update in real-time as new requests and deals flow through the system.',
       ],
       actionButton: { label: 'Go to Landing Page', route: '/' },
+      screenshot: {
+        src: '/screenshots/landing-page.png',
+        alt: 'DWx Traffic Manager Landing Page showing masthead with stats, quick-action cards, team panel, and branded footer',
+        caption: 'The Landing Page — your home base with quick actions, team profiles, and live stats.',
+      },
     },
     {
       id: 'am-welcome-2',
@@ -133,6 +138,11 @@ const amCreateServiceRequest: ProcessGuide = {
         'The form auto-saves your progress if you navigate away accidentally.',
       ],
       actionButton: { label: 'Start New Request', route: '/request' },
+      screenshot: {
+        src: '/screenshots/new-request-wizard.png',
+        alt: 'New Service Request form showing hero banner and 6-step wizard stepper dots',
+        caption: 'The Service Request wizard — a guided 6-step form for capturing all deal information.',
+      },
     },
     {
       id: 'am-csr-2',
@@ -154,6 +164,11 @@ const amCreateServiceRequest: ProcessGuide = {
         '- Strategic Advisory\n\n' +
         'Select the service that best matches your client\'s needs. You\'ll also set the **Interest Level** (Hot, Warm, or Cold).',
       iconName: 'Apps24Regular',
+      screenshot: {
+        src: '/screenshots/service-catalog.png',
+        alt: 'Service Catalogue page with gradient hero banner, search bar, category pill filters, and service cards',
+        caption: 'The Service Catalogue — browse all 12 categories with pill filters and search.',
+      },
       tips: [
         'If unsure which service fits, browse the Service Catalogue first to read full descriptions.',
         'Hot = client ready to proceed, Warm = interested but exploring, Cold = early-stage enquiry.',
@@ -271,6 +286,11 @@ const amCreateProductRequest: ProcessGuide = {
         'Product details include features, ideal use cases, and deployment information.',
       ],
       actionButton: { label: 'Browse Products', route: '/products' },
+      screenshot: {
+        src: '/screenshots/product-catalog.png',
+        alt: 'Product Catalogue showing 4 tabs (Apps, HyperParts, Cards, Agents) with category pills and product cards',
+        caption: 'The Product Catalogue — 49 products across Apps, HyperParts, Cards, and Agents.',
+      },
     },
     {
       id: 'am-cpr-2',
@@ -363,6 +383,11 @@ const amManageRequests: ProcessGuide = {
         'Toggle between grid view (cards) and list view (table) using the icons in the toolbar.',
       ],
       actionButton: { label: 'Open My Requests', route: '/requests' },
+      screenshot: {
+        src: '/screenshots/my-requests.png',
+        alt: 'My Requests page with hero stats (Active Deals, Pipeline Value, Win Rate), tabs, search, and deal cards with stage badges',
+        caption: 'My Requests — track all your deals with hero stats, stage filters, and detailed cards.',
+      },
     },
     {
       id: 'am-mr-2',
@@ -479,6 +504,11 @@ const amKnowledgeBase: ProcessGuide = {
         'The Knowledge Base is managed by managers - if you need something added, let them know.',
       ],
       actionButton: { label: 'Open Knowledge Base', route: '/knowledge-base' },
+      screenshot: {
+        src: '/screenshots/knowledge-base.png',
+        alt: 'Knowledge Base page with hero banner, search bar, and Featured Articles and Popular Questions sections',
+        caption: 'The Knowledge Base — search FAQs, glossary terms, and in-depth articles.',
+      },
     },
     {
       id: 'am-kb-2',
@@ -571,6 +601,11 @@ const mgrPipelineOverview: ProcessGuide = {
         'The Attention Required card highlights overdue, critical, and warning-level deals.',
       ],
       actionButton: { label: 'Open Pipeline', route: '/pipeline' },
+      screenshot: {
+        src: '/screenshots/sales-pipeline.png',
+        alt: 'Sales Pipeline dashboard with hero stats, 6 KPI cards, Attention Required card, Sales Funnel chart, and Conversion Rates',
+        caption: 'The Sales Pipeline — real-time KPIs, funnel visualisation, and deal urgency tracking.',
+      },
     },
     {
       id: 'mgr-po-2',
@@ -614,6 +649,11 @@ const mgrPipelineOverview: ProcessGuide = {
         'Invalid transitions (e.g. Lead directly to Proposal) are automatically rejected.',
       ],
       warningText: 'Moving a deal to Won or Lost is a significant action - it triggers post-mortem creation and client LTV updates.',
+      screenshot: {
+        src: '/screenshots/kanban-board.png',
+        alt: 'Kanban Board with 5 drag-and-drop columns (Lead, Qualified, Discovery, Proposal, Negotiation) showing deal cards with values and interest badges',
+        caption: 'The Kanban Board — drag deals between stages, with per-column value totals and deal cards.',
+      },
     },
     {
       id: 'mgr-po-4',
@@ -633,6 +673,11 @@ const mgrPipelineOverview: ProcessGuide = {
         'Export the queue to Excel for offline analysis or reporting.',
       ],
       actionButton: { label: 'Open Dashboard', route: '/dashboard' },
+      screenshot: {
+        src: '/screenshots/manager-dashboard.png',
+        alt: 'Manager Dashboard with grouped sidebar navigation, KPI cards, Booking Status pie chart, and Bookings by Type bar chart',
+        caption: 'The Manager Dashboard — grouped sidebar with Pipeline, Schedule, Analytics, and Operations.',
+      },
     },
     {
       id: 'mgr-po-5',
@@ -1150,6 +1195,11 @@ const mgrAdminOverview: ProcessGuide = {
         'Changes to admin data are audit-logged automatically.',
       ],
       actionButton: { label: 'Open Admin Panel', route: '/admin' },
+      screenshot: {
+        src: '/screenshots/admin-panel.png',
+        alt: 'Admin Panel with grouped sidebar (People, Catalog, Data, System) and Team Members table with search and pagination',
+        caption: 'The Admin Panel — 13 tabs organised into 6 groups for managing all system data.',
+      },
     },
     {
       id: 'mgr-ao-2',

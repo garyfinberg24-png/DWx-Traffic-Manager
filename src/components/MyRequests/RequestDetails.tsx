@@ -30,6 +30,7 @@ import {
 import { makeStyles } from '@fluentui/react-components';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
+import { useNotifications } from '../../contexts/NotificationContext';
 import {
   ServiceRequest,
   FunnelStage,
@@ -265,6 +266,7 @@ export const RequestDetails: React.FC<RequestDetailsProps> = ({
   const styles = useStyles();
   const { user } = useAuth();
   const { showToast } = useToast();
+  const { addNotification } = useNotifications();
 
   const [activeTab, setActiveTab] = useState('overview');
   const [updating, setUpdating] = useState(false);
@@ -415,6 +417,13 @@ export const RequestDetails: React.FC<RequestDetailsProps> = ({
 
       if (result.success && result.request) {
         showToast(`Request moved to ${newStage}`, 'success');
+        addNotification({
+          type: newStage === 'Won' ? 'success' : newStage === 'Lost' ? 'error' : 'info',
+          category: newStage === 'Won' || newStage === 'Lost' ? 'deal' : 'pipeline',
+          title: newStage === 'Won' ? 'Deal Won!' : newStage === 'Lost' ? 'Deal Lost' : `Stage: ${request.FunnelStage} → ${newStage}`,
+          message: `${request.ClientName} - ${request.ServiceName || 'Service'}`,
+          actionUrl: '/requests',
+        });
         onRequestUpdated?.(result.request);
       } else {
         throw new Error(result.error || 'Failed to update stage');

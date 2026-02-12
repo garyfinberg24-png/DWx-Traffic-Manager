@@ -1,5 +1,14 @@
 export type NotificationType = 'info' | 'success' | 'warning' | 'error';
-export type NotificationCategory = 'booking' | 'approval' | 'checklist' | 'system';
+export type NotificationCategory =
+  | 'booking'
+  | 'approval'
+  | 'checklist'
+  | 'system'
+  | 'deal'
+  | 'pipeline'
+  | 'proposal'
+  | 'product'
+  | 'admin';
 
 export interface AppNotification {
   id: string;
