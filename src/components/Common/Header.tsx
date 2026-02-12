@@ -28,12 +28,14 @@ import {
   ChatBubblesQuestion24Regular,
   ChatBubblesQuestion24Filled,
   Rocket24Regular,
+  QuestionCircle24Regular,
 } from '@fluentui/react-icons';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { NotificationCenter } from './NotificationCenter';
 import { RecentActivity } from './RecentActivity';
 import { AIChatPanel } from './AIChatPanel';
+import { ProcessGuideDialog } from '../ProcessGuide/ProcessGuideDialog';
 import { ChatContext } from '../../types/AIChat';
 import { serviceRequestService } from '../../services/ServiceRequestService';
 import { productRequestService } from '../../services/ProductRequestService';
@@ -148,6 +150,7 @@ export const Header: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [isChatOpen, setIsChatOpen] = useState(false);
+  const [isGuideOpen, setIsGuideOpen] = useState(false);
   const [pendingCount, setPendingCount] = useState(0);
 
   // Fetch pending request counts for manager badge
@@ -302,6 +305,14 @@ export const Header: React.FC = () => {
                 {isChatOpen ? <ChatBubblesQuestion24Filled /> : <ChatBubblesQuestion24Regular />}
               </span>
             </Tooltip>
+            <Tooltip content="Process Guides & Help" relationship="label">
+              <span
+                className={styles.chatTrigger}
+                onClick={() => setIsGuideOpen(true)}
+              >
+                <QuestionCircle24Regular />
+              </span>
+            </Tooltip>
             <Text className={styles.userName}>
               {user.displayName}
             </Text>
@@ -328,6 +339,13 @@ export const Header: React.FC = () => {
           </>
         )}
       </div>
+
+      {/* Process Guide Wizard */}
+      <ProcessGuideDialog
+        isOpen={isGuideOpen}
+        onClose={() => setIsGuideOpen(false)}
+        userRole={isManager ? 'manager' : 'account_manager'}
+      />
 
       {/* AI Chat Side Panel */}
       <AIChatPanel
