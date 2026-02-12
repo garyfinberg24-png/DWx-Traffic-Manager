@@ -35,6 +35,17 @@ export interface ProcessStep {
     label: string;
     route: string;
   };
+  /** Embed a visual process stepper diagram in this step */
+  visualStepper?: {
+    dataKey: string;             // lookup key for getStepperData()
+    style?: import('./ProcessStepper').StepperStyle;
+  };
+  /** Screenshot image path (relative to public/) to display as visual reference */
+  screenshot?: {
+    src: string;
+    alt: string;
+    caption?: string;
+  };
 }
 
 /**

@@ -9,6 +9,8 @@ import { Text, makeStyles, shorthands } from '@fluentui/react-components';
 import { Lightbulb24Regular, Warning24Regular, CheckmarkCircle24Regular } from '@fluentui/react-icons';
 import type { ProcessStep } from '../../types/ProcessGuide';
 import { DW_COLORS } from '../../utils/buttonStyles';
+import { ProcessStepper } from '../ProcessStepper';
+import { getStepperData } from '../../data/ProcessSteppers';
 
 interface StepContentProps {
   step: ProcessStep;
@@ -127,6 +129,28 @@ const useStyles = makeStyles({
     color: '#065f46',
     lineHeight: '1.6',
   },
+  stepperEmbed: {
+    marginTop: '20px',
+    marginBottom: '8px',
+  },
+  screenshotContainer: {
+    marginTop: '20px',
+    ...shorthands.borderRadius('10px'),
+    ...shorthands.border('1px', 'solid', '#e5e7eb'),
+    overflow: 'hidden',
+    backgroundColor: '#f9fafb',
+  },
+  screenshotImg: {
+    width: '100%',
+    display: 'block',
+  },
+  screenshotCaption: {
+    fontSize: '12px',
+    color: '#6b7280',
+    ...shorthands.padding('8px', '12px'),
+    textAlign: 'center' as const,
+    backgroundColor: '#f3f4f6',
+  },
 });
 
 /**
@@ -215,6 +239,36 @@ export const StepContent: React.FC<StepContentProps> = ({
       <div className={classes.descriptionBlock}>
         {renderDescription(step.description)}
       </div>
+
+      {/* Screenshot */}
+      {step.screenshot && (
+        <div className={classes.screenshotContainer}>
+          <img
+            src={step.screenshot.src}
+            alt={step.screenshot.alt}
+            className={classes.screenshotImg}
+          />
+          {step.screenshot.caption && (
+            <div className={classes.screenshotCaption}>{step.screenshot.caption}</div>
+          )}
+        </div>
+      )}
+
+      {/* Embedded visual stepper */}
+      {step.visualStepper && (() => {
+        const stepperData = getStepperData(step.visualStepper!.dataKey);
+        return stepperData ? (
+          <div className={classes.stepperEmbed}>
+            <ProcessStepper
+              data={stepperData}
+              style={step.visualStepper!.style}
+              compact
+              interactive
+              showLegend={false}
+            />
+          </div>
+        ) : null;
+      })()}
 
       {/* Tips box */}
       {step.tips.length > 0 && (

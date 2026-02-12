@@ -104,6 +104,7 @@ const amWelcome: ProcessGuide = {
       ],
       successCriteria: 'You understand the app layout, your role, and the sales funnel stages.',
       actionButton: { label: 'View My Requests', route: '/requests' },
+      visualStepper: { dataKey: 'sales-funnel', style: 'funnel' },
     },
   ],
 };
@@ -326,6 +327,7 @@ const amCreateProductRequest: ProcessGuide = {
       ],
       successCriteria: 'Your product demo request is submitted and visible in My Requests > Product Requests tab.',
       actionButton: { label: 'View My Requests', route: '/requests' },
+      visualStepper: { dataKey: 'product-request', style: 'linear' },
     },
   ],
 };
@@ -688,6 +690,7 @@ const mgrPipelineOverview: ProcessGuide = {
         'Lost deals can be reopened as leads if circumstances change.',
       ],
       successCriteria: 'You can navigate the pipeline, use the Kanban board, manage queues, and understand stage transitions.',
+      visualStepper: { dataKey: 'sales-funnel', style: 'flowchart' },
     },
   ],
 };
@@ -763,6 +766,7 @@ const mgrSpecialistAssignment: ProcessGuide = {
         'Session Prep records include AI-generated client profiles and talking points.',
         'A reminder email is sent 24 hours before the meeting if prep is not complete.',
       ],
+      visualStepper: { dataKey: 'session-prep', style: 'cards' },
     },
     {
       id: 'mgr-sa-4',
@@ -904,6 +908,7 @@ const mgrProposalWorkflow: ProcessGuide = {
         '7. **Declined** - Client declined the proposal\n\n' +
         'Status transitions are enforced - you can\'t skip steps.',
       iconName: 'ArrowFlow24Regular',
+      visualStepper: { dataKey: 'proposal-workflow', style: 'flowchart' },
       tips: [
         'Use "Internal Review" to flag a proposal for another manager\'s review.',
         'Adding internal notes helps reviewers understand your approach.',
@@ -1006,6 +1011,7 @@ const mgrDeliveryHandover: ProcessGuide = {
         'Delivery handover should start as soon as possible after winning to maintain momentum.',
       ],
       actionButton: { label: 'Open Delivery Hub', route: '/delivery' },
+      visualStepper: { dataKey: 'delivery-handover', style: 'linear' },
     },
     {
       id: 'mgr-dh-2',

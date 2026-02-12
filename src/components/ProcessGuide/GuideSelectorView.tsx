@@ -17,6 +17,7 @@ import {
 import type { ProcessGuide, GuideProgress } from '../../types/ProcessGuide';
 import { GUIDE_CATEGORIES, DIFFICULTY_COLORS } from '../../types/ProcessGuide';
 import { getGuidesByRole, getRecommendedGuides } from '../../data/ProcessGuides';
+import { ProcessMapGallery } from '../ProcessStepper';
 
 // ============================================================================
 // Props
@@ -381,6 +382,9 @@ export const GuideSelectorView: React.FC<GuideSelectorViewProps> = ({
             </div>
           );
         })}
+
+        {/* Process Maps Gallery */}
+        <ProcessMapGallery />
       </div>
     </div>
   );
